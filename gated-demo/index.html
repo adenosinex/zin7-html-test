@@ -1,323 +1,106 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh">
 <head>
-    <meta name="robots" content="noindex,nofollow">
-<meta charset="UTF-8">
-    <title>分类验证演示 · Docker / Compose 互转工具</title>
-    <!-- 引入 js-yaml 用于解析和生成 YAML -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/4.1.0/js-yaml.min.js"></script>
-    <style>
-        body {
-            font-family: system-ui, -apple-system, sans-serif;
-            margin: 0;
-            padding: 20px;
-            background-color: #f8f9fa;
-            color: #333;
-        }
-        .header {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        .container {
-            display: flex;
-            gap: 20px;
-            height: calc(100vh - 120px);
-        }
-        .panel {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            background: #fff;
-            padding: 15px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        .panel h3 {
-            margin-top: 0;
-            margin-bottom: 10px;
-            font-size: 16px;
-            color: #495057;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        textarea {
-            flex: 1;
-            width: 100%;
-            padding: 15px;
-            font-family: 'Consolas', 'Monaco', monospace;
-            font-size: 14px;
-            background-color: #1e1e1e;
-            color: #d4d4d4;
-            border: 1px solid #ced4da;
-            border-radius: 4px;
-            resize: none;
-            box-sizing: border-box;
-            line-height: 1.5;
-        }
-        textarea:focus {
-            outline: none;
-            border-color: #0d6efd;
-        }
-        .actions {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            margin-top: 15px;
-        }
-        button {
-            padding: 10px 20px;
-            font-size: 14px;
-            font-weight: bold;
-            color: #fff;
-            background-color: #0d6efd;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: background-color 0.2s;
-        }
-        button:hover {
-            background-color: #0b5ed7;
-        }
-        .btn-clear {
-            background-color: #6c757d;
-            padding: 4px 8px;
-            font-size: 12px;
-        }
-        .btn-clear:hover {
-            background-color: #5c636a;
-        }
-    </style>
-
-<style id="zgate-hide">body>*:not(#zgate){display:none!important}</style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>需要验证</title>
 <style>
-#zgate{position:fixed;inset:0;background:#f5f6f8;z-index:99999;display:flex;align-items:flex-start;justify-content:center;padding:48px 16px;font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;color:#1c2333}
-#zgate .zc{background:#fff;border-radius:14px;padding:22px 20px;max-width:400px;width:100%;box-shadow:0 2px 10px rgba(16,24,40,.08)}
-#zgate h1{font-size:18px;margin:0 0 8px}
-#zgate p{font-size:13px;color:#68707f;line-height:1.6;margin:0 0 14px}
-#zgate form{display:flex;gap:8px}
-#zgate input{flex:1;font-size:17px;padding:11px 12px;border:1px solid #d4d9e1;border-radius:10px;letter-spacing:.15em;min-width:0}
-#zgate button{font-size:15px;padding:11px 16px;border:0;border-radius:10px;background:#1c2333;color:#fff}
-#zgate .err{color:#c0392b;font-size:13px;min-height:18px;margin-top:10px}
-#zgate .tag{display:inline-block;font-size:11px;color:#68707f;border:1px solid #d4d9e1;border-radius:20px;padding:2px 9px;margin-bottom:12px}
+body{margin:0;background:#f5f6f8;font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;color:#1c2333}
+.zc{background:#fff;border-radius:14px;padding:22px 20px;max-width:400px;margin:48px auto 0;box-shadow:0 2px 10px rgba(16,24,40,.08)}
+.zc h1{font-size:18px;margin:0 0 8px}
+.zc p{font-size:13px;color:#68707f;line-height:1.6;margin:0 0 14px}
+.zc .tag{display:inline-block;font-size:11px;color:#68707f;border:1px solid #d4d9e1;border-radius:20px;padding:2px 9px;margin-bottom:12px}
+.zc form{display:flex;gap:8px}
+.zc input{flex:1;font-size:16px;padding:11px 12px;border:1px solid #d4d9e1;border-radius:10px;min-width:0}
+.zc button{font-size:15px;padding:11px 16px;border:0;border-radius:10px;background:#1c2333;color:#fff;cursor:pointer}
+.zc .big{width:100%;margin-bottom:10px}
+.zc .err{color:#c0392b;font-size:13px;min-height:18px;margin-top:10px}
+.zc .meta{margin-top:12px;font-size:12px}
+.zc .meta a{color:#68707f}
 </style>
 </head>
 <body>
-<div id="zgate">
-  <div class="zc">
-    <span class="tag">分类验证 · 档二演示</span>
-    <h1>此页需要验证</h1>
-    <p>输入统一码进入。本会话内只需输一次；关掉浏览器标签会话后，下次会再问。演示样本为「Docker / Compose 互转工具」，内容本身无敏感，仅演示这道门。</p>
-    <form id="zgate-form"><input id="zgate-input" inputmode="numeric" autocomplete="off" placeholder="输入统一码"><button type="submit">进入</button></form>
-    <div class="err" id="zgate-err"></div>
+<div class="zc">
+  <span class="tag">分类验证 · 档二（加密）</span>
+  <h1>此页内容已加密</h1>
+  <p>本页正文经 AES-256-GCM 加密，托管处只有密文。输入密码在本机解密；解密成功后可记住本机，之后点按钮即可打开（不会自动呈现）。</p>
+  <button class="big" id="openbtn" hidden>点击加载内容</button>
+  <button class="big" id="pwbtn">输入密码解锁</button>
+  <div id="pwzone" hidden>
+    <form id="pwform"><input id="pw" type="password" autocomplete="off" placeholder="输入密码"><button type="submit">解密</button></form>
   </div>
+  <div class="err" id="err"></div>
+  <div class="meta"><a href="#" id="forget" hidden>忘记本机密钥</a></div>
 </div>
-
-
-    <div class="header">
-        <h2>🐳 Docker Run ⇌ Docker Compose</h2>
-    </div>
-
-    <div class="container">
-        <!-- 左侧：Docker Run -->
-        <div class="panel">
-            <h3>
-                Docker Run Command
-                <button class="btn-clear" onclick="document.getElementById('dockerRun').value=''">清空</button>
-            </h3>
-            <textarea id="dockerRun" placeholder="在此粘贴 docker run 命令...&#10;例如:&#10;docker run -d \&#10;  --name my-app \&#10;  -p 8080:80 \&#10;  -v /host/data:/app/data \&#10;  -e ENV=prod \&#10;  nginx:latest"></textarea>
-            <div class="actions">
-                <button onclick="runToCompose()">转换至 Compose &gt;&gt;</button>
-            </div>
-        </div>
-
-        <!-- 右侧：Docker Compose -->
-        <div class="panel">
-            <h3>
-                docker-compose.yml
-                <button class="btn-clear" onclick="document.getElementById('dockerCompose').value=''">清空</button>
-            </h3>
-            <textarea id="dockerCompose" placeholder="在此粘贴 docker-compose.yml 内容..."></textarea>
-            <div class="actions">
-                <button onclick="composeToRun()">&lt;&lt; 转换至 Docker Run</button>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        // 去除包裹的引号
-        function stripQuotes(str) {
-            return str.replace(/^["'](.*)["']$/, '$1');
-        }
-
-        // Docker Run -> Docker Compose
-        function runToCompose() {
-            let cmdStr = document.getElementById('dockerRun').value;
-            if (!cmdStr.trim()) return;
-
-            // 处理换行符和多余空格，保持引号内的内容完整
-            cmdStr = cmdStr.replace(/\\\n/g, ' ').replace(/\s+/g, ' ').trim();
-            if (!cmdStr.startsWith('docker run')) {
-                alert('命令必须以 docker run 开头');
-                return;
-            }
-
-            // 正则分割，保留引号内的空格
-            const argsRegex = /(?:[^\s"']+|"[^"]*"|'[^']*')+/g;
-            const args = cmdStr.match(argsRegex).slice(2);
-
-            let serviceName = 'app';
-            let service = {};
-            let ports = [], volumes = [], environment = [];
-
-            for (let i = 0; i < args.length; i++) {
-                let arg = args[i];
-
-                if (arg === '-p' || arg === '--publish') {
-                    ports.push(stripQuotes(args[++i]));
-                } else if (arg === '-v' || arg === '--volume') {
-                    volumes.push(stripQuotes(args[++i]));
-                } else if (arg === '-e' || arg === '--env') {
-                    environment.push(stripQuotes(args[++i]));
-                } else if (arg === '--name') {
-                    service.container_name = stripQuotes(args[++i]);
-                    serviceName = service.container_name.replace(/[^a-zA-Z0-9_-]/g, '') || 'app';
-                } else if (arg === '--restart') {
-                    service.restart = stripQuotes(args[++i]);
-                } else if (arg === '--network') {
-                    service.network_mode = stripQuotes(args[++i]);
-                } else if (arg === '-d' || arg === '--detach' || arg === '-it' || arg === '--rm') {
-                    // 忽略或不需要在 compose 中严格映射的基础标志
-                    continue;
-                } else if (!arg.startsWith('-') && !service.image) {
-                    service.image = stripQuotes(arg);
-                } else if (service.image && !arg.startsWith('-')) {
-                    if (!service.command) service.command = [];
-                    service.command.push(stripQuotes(arg));
-                }
-            }
-
-            if (ports.length) service.ports = ports;
-            if (volumes.length) service.volumes = volumes;
-            if (environment.length) service.environment = environment;
-            if (service.command) service.command = service.command.join(' ');
-
-            let config = {
-                version: '3.8',
-                services: {
-                    [serviceName]: service
-                }
-            };
-
-            try {
-                document.getElementById('dockerCompose').value = jsyaml.dump(config, { lineWidth: -1 });
-            } catch (e) {
-                alert('生成 YAML 失败: ' + e.message);
-            }
-        }
-
-        // Docker Compose -> Docker Run
-        function composeToRun() {
-            let yamlText = document.getElementById('dockerCompose').value;
-            if (!yamlText.trim()) return;
-
-            try {
-                let doc = jsyaml.load(yamlText);
-                if (!doc || !doc.services) {
-                    alert('无效的 docker-compose 结构，缺少 services 节点');
-                    return;
-                }
-
-                let commands = [];
-
-                for (let sName in doc.services) {
-                    let s = doc.services[sName];
-                    let cmd = ['docker run -d'];
-
-                    if (s.container_name) {
-                        cmd.push(`--name ${s.container_name}`);
-                    } else {
-                        cmd.push(`--name ${sName}`);
-                    }
-
-                    if (s.restart) cmd.push(`--restart ${s.restart}`);
-                    if (s.network_mode) cmd.push(`--network ${s.network_mode}`);
-                    
-                    if (s.ports) {
-                        s.ports.forEach(p => cmd.push(`-p ${p}`));
-                    }
-                    if (s.volumes) {
-                        s.volumes.forEach(v => {
-                            if (typeof v === 'string') cmd.push(`-v ${v}`);
-                            else if (v.source && v.target) cmd.push(`-v ${v.source}:${v.target}`);
-                        });
-                    }
-                    if (s.environment) {
-                        if (Array.isArray(s.environment)) {
-                            s.environment.forEach(e => cmd.push(`-e "${e}"`));
-                        } else {
-                            Object.keys(s.environment).forEach(k => {
-                                let val = s.environment[k];
-                                // 处理包含空格的变量值
-                                if (typeof val === 'string' && val.includes(' ')) {
-                                    cmd.push(`-e ${k}="${val}"`);
-                                } else {
-                                    cmd.push(`-e ${k}=${val}`);
-                                }
-                            });
-                        }
-                    }
-
-                    cmd.push(s.image || 'missing-image');
-
-                    if (s.command) {
-                        if (Array.isArray(s.command)) {
-                            cmd.push(s.command.join(' '));
-                        } else {
-                            cmd.push(s.command);
-                        }
-                    }
-
-                    // 使用 \ 换行格式化输出
-                    commands.push(cmd.join(' \\\n  '));
-                }
-
-                document.getElementById('dockerRun').value = commands.join('\n\n');
-            } catch (e) {
-                alert('解析 YAML 失败: ' + e.message);
-            }
-        }
-    </script>
-
+<script id="zgblob" type="application/json">{"v": 1, "iter": 600000, "salt": "OdsBC2KyCIwIrR72MH5g0A==", "iv": "ufUL8TMBbFRoVC48", "ct": "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"}</script>
 <script>
 (function(){
-  var HASH = "520b619703d396230ca6fa57c511d9fd11c1ad618ed9d06f41bfa8e984a62514";
-  var KEY = "zin7_gate_ok";
-  function unlock(){
-    var g = document.getElementById('zgate'); if (g) g.remove();
-    var s = document.getElementById('zgate-hide'); if (s) s.remove();
+  var BLOB = JSON.parse(document.getElementById('zgblob').textContent);
+  var LSKEY = 'zin7_gate_key_v1';
+  var err = document.getElementById('err');
+  var openbtn = document.getElementById('openbtn');
+  var pwbtn = document.getElementById('pwbtn');
+  var pwzone = document.getElementById('pwzone');
+  var forget = document.getElementById('forget');
+  function b64dec(s){ var bin = atob(s); var u = new Uint8Array(bin.length); for (var i=0;i<bin.length;i++) u[i]=bin.charCodeAt(i); return u; }
+  function b64enc(u){ var s=''; for (var i=0;i<u.length;i++) s+=String.fromCharCode(u[i]); return btoa(s); }
+  function render(buf){
+    var text = new TextDecoder('utf-8').decode(buf);
+    document.open(); document.write(text); document.close();
   }
-  try { if (sessionStorage.getItem(KEY) === '1') { unlock(); return; } } catch (e) {}
-  var form = document.getElementById('zgate-form');
-  var input = document.getElementById('zgate-input');
-  var err = document.getElementById('zgate-err');
-  form.addEventListener('submit', function(ev){
-    ev.preventDefault();
-    var v = (input.value || '').trim();
-    if (!v) { err.textContent = '先输入统一码'; return; }
-    crypto.subtle.digest('SHA-256', new TextEncoder().encode(v)).then(function(buf){
-      var hex = Array.prototype.map.call(new Uint8Array(buf), function(b){ return ('0' + b.toString(16)).slice(-2); }).join('');
-      if (hex === HASH) {
-        try { sessionStorage.setItem(KEY, '1'); } catch (e) {}
-        unlock();
-      } else {
-        err.textContent = '码不对，再试一次';
-        input.value = '';
-        input.focus();
-      }
+  function tryDecrypt(key){
+    return crypto.subtle.decrypt({name:'AES-GCM', iv: b64dec(BLOB.iv)}, key, b64dec(BLOB.ct));
+  }
+  function hasStored(){ try { return !!localStorage.getItem(LSKEY); } catch(e){ return false; } }
+  function refresh(){
+    var st = hasStored();
+    openbtn.hidden = !st; forget.hidden = !st;
+  }
+  openbtn.addEventListener('click', function(){
+    err.textContent = '';
+    var raw = b64dec(localStorage.getItem(LSKEY));
+    crypto.subtle.importKey('raw', raw, {name:'AES-GCM'}, false, ['decrypt']).then(function(key){
+      return tryDecrypt(key);
+    }).then(render).catch(function(){
+      try { localStorage.removeItem(LSKEY); } catch(e){}
+      refresh();
+      err.textContent = '本机密钥已失效，请输入密码';
+      pwzone.hidden = false;
     });
   });
-  input.focus();
+  pwbtn.addEventListener('click', function(){
+    pwzone.hidden = false;
+    document.getElementById('pw').focus();
+  });
+  document.getElementById('pwform').addEventListener('submit', function(ev){
+    ev.preventDefault();
+    err.textContent = '';
+    var pw = document.getElementById('pw').value;
+    if (!pw) { err.textContent = '先输入密码'; return; }
+    var enc = new TextEncoder();
+    crypto.subtle.importKey('raw', enc.encode(pw), 'PBKDF2', false, ['deriveKey']).then(function(base){
+      return crypto.subtle.deriveKey(
+        {name:'PBKDF2', salt: b64dec(BLOB.salt), iterations: BLOB.iter, hash:'SHA-256'},
+        base, {name:'AES-GCM', length:256}, true, ['decrypt']);
+    }).then(function(key){
+      return tryDecrypt(key).then(function(buf){
+        return crypto.subtle.exportKey('raw', key).then(function(raw){
+          try { localStorage.setItem(LSKEY, b64enc(new Uint8Array(raw))); } catch(e){}
+          render(buf);
+        });
+      });
+    }).catch(function(){
+      err.textContent = '密码不对，再试一次';
+    });
+  });
+  forget.addEventListener('click', function(ev){
+    ev.preventDefault();
+    try { localStorage.removeItem(LSKEY); } catch(e){}
+    refresh();
+    err.textContent = '已忘记本机密钥';
+  });
+  refresh();
 })();
 </script>
 </body>
