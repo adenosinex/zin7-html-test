@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta name="robots" content="noindex,nofollow">
+<meta charset="UTF-8">
+    <title>分类验证演示 · Docker / Compose 互转工具</title>
+    <!-- 引入 js-yaml 用于解析和生成 YAML -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/4.1.0/js-yaml.min.js"></script>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f8f9fa;
+            color: #333;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .container {
+            display: flex;
+            gap: 20px;
+            height: calc(100vh - 120px);
+        }
+        .panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: #fff;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .panel h3 {
+            margin-top: 0;
+            margin-bottom: 10px;
+            font-size: 16px;
+            color: #495057;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        textarea {
+            flex: 1;
+            width: 100%;
+            padding: 15px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 14px;
+            background-color: #1e1e1e;
+            color: #d4d4d4;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            resize: none;
+            box-sizing: border-box;
+            line-height: 1.5;
+        }
+        textarea:focus {
+            outline: none;
+            border-color: #0d6efd;
+        }
+        .actions {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: bold;
+            color: #fff;
+            background-color: #0d6efd;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        button:hover {
+            background-color: #0b5ed7;
+        }
+        .btn-clear {
+            background-color: #6c757d;
+            padding: 4px 8px;
+            font-size: 12px;
+        }
+        .btn-clear:hover {
+            background-color: #5c636a;
+        }
+    </style>
+
+<style id="zgate-hide">body>*:not(#zgate){display:none!important}</style>
+<style>
+#zgate{position:fixed;inset:0;background:#f5f6f8;z-index:99999;display:flex;align-items:flex-start;justify-content:center;padding:48px 16px;font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;color:#1c2333}
+#zgate .zc{background:#fff;border-radius:14px;padding:22px 20px;max-width:400px;width:100%;box-shadow:0 2px 10px rgba(16,24,40,.08)}
+#zgate h1{font-size:18px;margin:0 0 8px}
+#zgate p{font-size:13px;color:#68707f;line-height:1.6;margin:0 0 14px}
+#zgate form{display:flex;gap:8px}
+#zgate input{flex:1;font-size:17px;padding:11px 12px;border:1px solid #d4d9e1;border-radius:10px;letter-spacing:.15em;min-width:0}
+#zgate button{font-size:15px;padding:11px 16px;border:0;border-radius:10px;background:#1c2333;color:#fff}
+#zgate .err{color:#c0392b;font-size:13px;min-height:18px;margin-top:10px}
+#zgate .tag{display:inline-block;font-size:11px;color:#68707f;border:1px solid #d4d9e1;border-radius:20px;padding:2px 9px;margin-bottom:12px}
+</style>
+</head>
+<body>
+<div id="zgate">
+  <div class="zc">
+    <span class="tag">分类验证 · 档二演示</span>
+    <h1>此页需要验证</h1>
+    <p>输入统一码进入。本会话内只需输一次；关掉浏览器标签会话后，下次会再问。演示样本为「Docker / Compose 互转工具」，内容本身无敏感，仅演示这道门。</p>
+    <form id="zgate-form"><input id="zgate-input" inputmode="numeric" autocomplete="off" placeholder="输入统一码"><button type="submit">进入</button></form>
+    <div class="err" id="zgate-err"></div>
+  </div>
+</div>
+
+
+    <div class="header">
+        <h2>🐳 Docker Run ⇌ Docker Compose</h2>
+    </div>
+
+    <div class="container">
+        <!-- 左侧：Docker Run -->
+        <div class="panel">
+            <h3>
+                Docker Run Command
+                <button class="btn-clear" onclick="document.getElementById('dockerRun').value=''">清空</button>
+            </h3>
+            <textarea id="dockerRun" placeholder="在此粘贴 docker run 命令...&#10;例如:&#10;docker run -d \&#10;  --name my-app \&#10;  -p 8080:80 \&#10;  -v /host/data:/app/data \&#10;  -e ENV=prod \&#10;  nginx:latest"></textarea>
+            <div class="actions">
+                <button onclick="runToCompose()">转换至 Compose &gt;&gt;</button>
+            </div>
+        </div>
+
+        <!-- 右侧：Docker Compose -->
+        <div class="panel">
+            <h3>
+                docker-compose.yml
+                <button class="btn-clear" onclick="document.getElementById('dockerCompose').value=''">清空</button>
+            </h3>
+            <textarea id="dockerCompose" placeholder="在此粘贴 docker-compose.yml 内容..."></textarea>
+            <div class="actions">
+                <button onclick="composeToRun()">&lt;&lt; 转换至 Docker Run</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 去除包裹的引号
+        function stripQuotes(str) {
+            return str.replace(/^["'](.*)["']$/, '$1');
+        }
+
+        // Docker Run -> Docker Compose
+        function runToCompose() {
+            let cmdStr = document.getElementById('dockerRun').value;
+            if (!cmdStr.trim()) return;
+
+            // 处理换行符和多余空格，保持引号内的内容完整
+            cmdStr = cmdStr.replace(/\\\n/g, ' ').replace(/\s+/g, ' ').trim();
+            if (!cmdStr.startsWith('docker run')) {
+                alert('命令必须以 docker run 开头');
+                return;
+            }
+
+            // 正则分割，保留引号内的空格
+            const argsRegex = /(?:[^\s"']+|"[^"]*"|'[^']*')+/g;
+            const args = cmdStr.match(argsRegex).slice(2);
+
+            let serviceName = 'app';
+            let service = {};
+            let ports = [], volumes = [], environment = [];
+
+            for (let i = 0; i < args.length; i++) {
+                let arg = args[i];
+
+                if (arg === '-p' || arg === '--publish') {
+                    ports.push(stripQuotes(args[++i]));
+                } else if (arg === '-v' || arg === '--volume') {
+                    volumes.push(stripQuotes(args[++i]));
+                } else if (arg === '-e' || arg === '--env') {
+                    environment.push(stripQuotes(args[++i]));
+                } else if (arg === '--name') {
+                    service.container_name = stripQuotes(args[++i]);
+                    serviceName = service.container_name.replace(/[^a-zA-Z0-9_-]/g, '') || 'app';
+                } else if (arg === '--restart') {
+                    service.restart = stripQuotes(args[++i]);
+                } else if (arg === '--network') {
+                    service.network_mode = stripQuotes(args[++i]);
+                } else if (arg === '-d' || arg === '--detach' || arg === '-it' || arg === '--rm') {
+                    // 忽略或不需要在 compose 中严格映射的基础标志
+                    continue;
+                } else if (!arg.startsWith('-') && !service.image) {
+                    service.image = stripQuotes(arg);
+                } else if (service.image && !arg.startsWith('-')) {
+                    if (!service.command) service.command = [];
+                    service.command.push(stripQuotes(arg));
+                }
+            }
+
+            if (ports.length) service.ports = ports;
+            if (volumes.length) service.volumes = volumes;
+            if (environment.length) service.environment = environment;
+            if (service.command) service.command = service.command.join(' ');
+
+            let config = {
+                version: '3.8',
+                services: {
+                    [serviceName]: service
+                }
+            };
+
+            try {
+                document.getElementById('dockerCompose').value = jsyaml.dump(config, { lineWidth: -1 });
+            } catch (e) {
+                alert('生成 YAML 失败: ' + e.message);
+            }
+        }
+
+        // Docker Compose -> Docker Run
+        function composeToRun() {
+            let yamlText = document.getElementById('dockerCompose').value;
+            if (!yamlText.trim()) return;
+
+            try {
+                let doc = jsyaml.load(yamlText);
+                if (!doc || !doc.services) {
+                    alert('无效的 docker-compose 结构，缺少 services 节点');
+                    return;
+                }
+
+                let commands = [];
+
+                for (let sName in doc.services) {
+                    let s = doc.services[sName];
+                    let cmd = ['docker run -d'];
+
+                    if (s.container_name) {
+                        cmd.push(`--name ${s.container_name}`);
+                    } else {
+                        cmd.push(`--name ${sName}`);
+                    }
+
+                    if (s.restart) cmd.push(`--restart ${s.restart}`);
+                    if (s.network_mode) cmd.push(`--network ${s.network_mode}`);
+                    
+                    if (s.ports) {
+                        s.ports.forEach(p => cmd.push(`-p ${p}`));
+                    }
+                    if (s.volumes) {
+                        s.volumes.forEach(v => {
+                            if (typeof v === 'string') cmd.push(`-v ${v}`);
+                            else if (v.source && v.target) cmd.push(`-v ${v.source}:${v.target}`);
+                        });
+                    }
+                    if (s.environment) {
+                        if (Array.isArray(s.environment)) {
+                            s.environment.forEach(e => cmd.push(`-e "${e}"`));
+                        } else {
+                            Object.keys(s.environment).forEach(k => {
+                                let val = s.environment[k];
+                                // 处理包含空格的变量值
+                                if (typeof val === 'string' && val.includes(' ')) {
+                                    cmd.push(`-e ${k}="${val}"`);
+                                } else {
+                                    cmd.push(`-e ${k}=${val}`);
+                                }
+                            });
+                        }
+                    }
+
+                    cmd.push(s.image || 'missing-image');
+
+                    if (s.command) {
+                        if (Array.isArray(s.command)) {
+                            cmd.push(s.command.join(' '));
+                        } else {
+                            cmd.push(s.command);
+                        }
+                    }
+
+                    // 使用 \ 换行格式化输出
+                    commands.push(cmd.join(' \\\n  '));
+                }
+
+                document.getElementById('dockerRun').value = commands.join('\n\n');
+            } catch (e) {
+                alert('解析 YAML 失败: ' + e.message);
+            }
+        }
+    </script>
+
+<script>
+(function(){
+  var HASH = "520b619703d396230ca6fa57c511d9fd11c1ad618ed9d06f41bfa8e984a62514";
+  var KEY = "zin7_gate_ok";
+  function unlock(){
+    var g = document.getElementById('zgate'); if (g) g.remove();
+    var s = document.getElementById('zgate-hide'); if (s) s.remove();
+  }
+  try { if (sessionStorage.getItem(KEY) === '1') { unlock(); return; } } catch (e) {}
+  var form = document.getElementById('zgate-form');
+  var input = document.getElementById('zgate-input');
+  var err = document.getElementById('zgate-err');
+  form.addEventListener('submit', function(ev){
+    ev.preventDefault();
+    var v = (input.value || '').trim();
+    if (!v) { err.textContent = '先输入统一码'; return; }
+    crypto.subtle.digest('SHA-256', new TextEncoder().encode(v)).then(function(buf){
+      var hex = Array.prototype.map.call(new Uint8Array(buf), function(b){ return ('0' + b.toString(16)).slice(-2); }).join('');
+      if (hex === HASH) {
+        try { sessionStorage.setItem(KEY, '1'); } catch (e) {}
+        unlock();
+      } else {
+        err.textContent = '码不对，再试一次';
+        input.value = '';
+        input.focus();
+      }
+    });
+  });
+  input.focus();
+})();
+</script>
+</body>
+</html>
