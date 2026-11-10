@@ -14,7 +14,7 @@ body{margin:0;background:#f5f6f8;font-family:-apple-system,"PingFang SC","Micros
 .zc input{width:100%;font-size:16px;padding:11px 12px;border:1px solid #d4d9e1;border-radius:10px;min-width:0;box-sizing:border-box}
 .zc button{font-size:15px;padding:11px 16px;border:0;border-radius:10px;background:#1c2333;color:#fff;cursor:pointer}
 .zc .big{width:100%;margin-bottom:10px}
-.zc .hintrow{font-size:14px;margin:2px 0 10px}
+.zc .hintrow{font-size:14px;margin:2px 0 10px}.zc .note{font-size:13px;color:#68707f;line-height:1.65;margin:0 0 10px}
 .zc .hintrow strong{font-size:16px}
 .zc .btns{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
 .zc .btns button{flex:1 1 30%;background:#eef1f6;color:#1c2333;border:1px solid #d4d9e1}
@@ -31,6 +31,7 @@ body{margin:0;background:#f5f6f8;font-family:-apple-system,"PingFang SC","Micros
   <button class="big" id="openbtn" hidden>点击加载内容</button>
   <button class="big" id="pwbtn">输入口令解锁</button>
   <div id="pwzone" hidden>
+    <p class="note">弱服务口令解密：与平台弱服务同一套词库，不区分大小写。输入提示词对应的词，再点中正确的按钮词即可；本机记住后，之后点按钮即开。</p>
     <div class="hintrow">提示词：<strong id="hint"></strong></div>
     <form id="pwform"><input id="typed" type="text" autocomplete="off" placeholder="输入提示词对应的词"></form>
     <div class="btns" id="btns"></div>
@@ -50,6 +51,7 @@ body{margin:0;background:#f5f6f8;font-family:-apple-system,"PingFang SC","Micros
   var forget = document.getElementById('forget');
   function b64dec(s){ var bin = atob(s); var u = new Uint8Array(bin.length); for (var i=0;i<bin.length;i++) u[i]=bin.charCodeAt(i); return u; }
   function b64enc(u){ var s=''; for (var i=0;i<u.length;i++) s+=String.fromCharCode(u[i]); return btoa(s); }
+  function norm(s){ return (s || '').replace(/^\s+|\s+$/g, '').toLowerCase(); }
   function render(buf){
     var text = new TextDecoder('utf-8').decode(buf);
     document.open(); document.write(text); document.close();
@@ -86,9 +88,9 @@ body{margin:0;background:#f5f6f8;font-family:-apple-system,"PingFang SC","Micros
   var btns = document.getElementById('btns');
   function unlock(label){
     err.textContent = '';
-    var typed = document.getElementById('typed').value.replace(/^\s+|\s+$/g, '');
+    var typed = norm(document.getElementById('typed').value);
     if (!typed) { err.textContent = '先输入提示词对应的词'; return; }
-    var pw = BLOB.hint + ' ' + typed + ' ' + label;
+    var pw = norm(BLOB.hint) + ' ' + typed + ' ' + norm(label);
     var enc = new TextEncoder();
     crypto.subtle.importKey('raw', enc.encode(pw), 'PBKDF2', false, ['deriveKey']).then(function(base){
       return crypto.subtle.deriveKey(
