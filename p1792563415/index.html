@@ -1,0 +1,886 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>社保负担率 vs 工资水平</title>
+
+<style>
+body{
+  margin:0;
+  padding:12px;
+  background:#fff;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
+  color:#1a1a2e
+}
+h2{
+  font-size:15px;
+  margin:0 0 2px;
+  text-align:center
+}
+.sub{
+  font-size:10.5px;
+  color:#666;
+  text-align:center;
+  margin-bottom:8px
+}
+svg{
+  display:block;
+  width:100%;
+  height:auto;
+  max-width:100%
+}
+.note{
+  font-size:10px;
+  color:#666;
+  line-height:1.55;
+  margin-top:8px;
+  padding:8px;
+  background:#fafafa;
+  border-radius:6px
+}
+table{
+  width:100%;
+  border-collapse:collapse;
+  font-size:10.5px;
+  margin-top:8px
+}
+th,td{
+  border:1px solid #e5e5e5;
+  padding:4px 3px;
+  text-align:center
+}
+th{
+  background:#f5f5f5;
+  font-weight:600
+}
+.red{color:#c0392b;font-weight:600}
+.blue{color:#2471a3;font-weight:600}
+.green{color:#1e8449;font-weight:600}
+
+/* 新增地区图表样式 */
+.area-section{
+  margin-top:26px;
+  padding-top:16px;
+  border-top:1px solid #e5e5e5;
+}
+.area-case{
+  max-width:620px;
+  margin:22px auto 30px;
+}
+.area-case h3{
+  text-align:center;
+  font-size:14px;
+  margin:0 0 5px;
+}
+.area-desc{
+  text-align:center;
+  font-size:10px;
+  color:#666;
+  line-height:1.7;
+  margin-bottom:6px;
+}
+.area-info{
+  font-size:10px;
+  line-height:1.7;
+  color:#555;
+  padding:9px;
+  margin-top:6px;
+  background:#fafafa;
+  border-radius:6px;
+}
+.area-tip{
+  font-size:10px;
+  line-height:1.65;
+  color:#777;
+  margin:10px 0;
+}
+.area-source{
+  font-size:10px;
+  line-height:1.7;
+  color:#666;
+  background:#fafafa;
+  padding:9px;
+  overflow-wrap:anywhere;
+}
+.area-source a{
+  color:#2471a3;
+}
+</style>
+</head>
+
+<body>
+
+<!-- ============================= -->
+<!-- 原始图表：完整保留 -->
+<!-- ============================= -->
+
+<h2>社保支出 / 公司总人员支出</h2>
+
+<div class="sub">
+横轴：员工工资占社平工资比例　｜
+纵轴：社保总支出 ÷ (工资+单位社保)
+</div>
+
+<svg viewBox="0 0 360 340"
+width="100%"
+height="auto"
+role="img"
+aria-label="社保负担率随工资水平变化折线图">
+
+<rect width="360" height="340" fill="#fff"/>
+
+<!-- 图例 -->
+
+<line x1="18" y1="20"
+x2="34" y2="20"
+stroke="#c0392b"
+stroke-width="2.4"/>
+
+<text x="38" y="23"
+font-size="9"
+fill="#c0392b">2015 高费率</text>
+
+<line x1="118" y1="20"
+x2="134" y2="20"
+stroke="#2471a3"
+stroke-width="2.4"/>
+
+<text x="138" y="23"
+font-size="9"
+fill="#2471a3">2019 降费后</text>
+
+<line x1="218" y1="20"
+x2="234" y2="20"
+stroke="#1e8449"
+stroke-width="2.4"
+stroke-dasharray="4,3"/>
+
+<text x="238" y="23"
+font-size="9"
+fill="#1e8449">2025 现行</text>
+
+<!-- 水平网格 + Y轴刻度 -->
+
+<line x1="42" y1="55"
+x2="342" y2="55"
+stroke="#eee" stroke-width="0.7"/>
+
+<line x1="42" y1="93.3"
+x2="342" y2="93.3"
+stroke="#eee" stroke-width="0.7"/>
+
+<line x1="42" y1="131.7"
+x2="342" y2="131.7"
+stroke="#eee" stroke-width="0.7"/>
+
+<line x1="42" y1="170"
+x2="342" y2="170"
+stroke="#eee" stroke-width="0.7"/>
+
+<line x1="42" y1="208.3"
+x2="342" y2="208.3"
+stroke="#eee" stroke-width="0.7"/>
+
+<line x1="42" y1="246.7"
+x2="342" y2="246.7"
+stroke="#eee" stroke-width="0.7"/>
+
+<line x1="42" y1="285"
+x2="342" y2="285"
+stroke="#ccc" stroke-width="0.9"/>
+
+<line x1="42" y1="55"
+x2="42" y2="285"
+stroke="#333" stroke-width="1"/>
+
+<text x="38" y="58"
+text-anchor="end" font-size="8" fill="#555">60%</text>
+
+<text x="38" y="96"
+text-anchor="end" font-size="8" fill="#555">50%</text>
+
+<text x="38" y="135"
+text-anchor="end" font-size="8" fill="#555">40%</text>
+
+<text x="38" y="173"
+text-anchor="end" font-size="8" fill="#555">30%</text>
+
+<text x="38" y="211"
+text-anchor="end" font-size="8" fill="#555">20%</text>
+
+<text x="38" y="250"
+text-anchor="end" font-size="8" fill="#555">10%</text>
+
+<text x="38" y="288"
+text-anchor="end" font-size="8" fill="#555">0</text>
+
+<!-- 垂直网格 + X轴刻度 -->
+
+<line x1="42" y1="285"
+x2="342" y2="285"
+stroke="#333" stroke-width="1"/>
+
+<text x="42" y="299"
+text-anchor="middle" font-size="8" fill="#555">30%</text>
+
+<text x="84.9" y="299"
+text-anchor="middle" font-size="8" fill="#555">40%</text>
+
+<text x="127.7" y="299"
+text-anchor="middle" font-size="8" fill="#555">50%</text>
+
+<text x="170.6" y="299"
+text-anchor="middle" font-size="8" fill="#555">60%</text>
+
+<text x="213.4" y="299"
+text-anchor="middle" font-size="8" fill="#555">80%</text>
+
+<text x="256.3" y="299"
+text-anchor="middle" font-size="8" fill="#555">100%</text>
+
+<text x="299.1" y="299"
+text-anchor="middle" font-size="8" fill="#555">150%</text>
+
+<text x="342" y="299"
+text-anchor="middle" font-size="8" fill="#555">200%</text>
+
+<!-- 下限垂直线 -->
+
+<line x1="170.6" y1="55"
+x2="170.6" y2="285"
+stroke="#e67e22"
+stroke-width="1.2"
+stroke-dasharray="3,3"/>
+
+<text x="174" y="66"
+font-size="8"
+fill="#e67e22"
+font-weight="bold">缴费基数下限</text>
+
+<text x="174" y="76"
+font-size="7.5"
+fill="#e67e22">（社平工资60%）</text>
+
+<!-- 2015 红折线 -->
+
+<polyline
+points="42,88.3 84.9,122.5 127.7,146.2 170.6,164.2 213.4,164.2 256.3,164.2 299.1,164.2 342,164.2"
+fill="none"
+stroke="#c0392b"
+stroke-width="2.4"
+stroke-linejoin="round"
+stroke-linecap="round"/>
+
+<circle cx="42" cy="88.3" r="2.8" fill="#c0392b"/>
+<circle cx="84.9" cy="122.5" r="2.8" fill="#c0392b"/>
+<circle cx="127.7" cy="146.2" r="2.8" fill="#c0392b"/>
+<circle cx="170.6" cy="164.2" r="2.8" fill="#c0392b"/>
+<circle cx="213.4" cy="164.2" r="2.8" fill="#c0392b"/>
+<circle cx="256.3" cy="164.2" r="2.8" fill="#c0392b"/>
+<circle cx="299.1" cy="164.2" r="2.8" fill="#c0392b"/>
+<circle cx="342" cy="164.2" r="2.8" fill="#c0392b"/>
+
+<!-- 2019 蓝折线 -->
+
+<polyline
+points="42,98.3 84.9,131.7 127.7,154.7 170.6,171.9 213.4,171.9 256.3,171.9 299.1,171.9 342,171.9"
+fill="none"
+stroke="#2471a3"
+stroke-width="2.4"
+stroke-linejoin="round"
+stroke-linecap="round"/>
+
+<circle cx="42" cy="98.3" r="2.8" fill="#2471a3"/>
+<circle cx="84.9" cy="131.7" r="2.8" fill="#2471a3"/>
+<circle cx="127.7" cy="154.7" r="2.8" fill="#2471a3"/>
+<circle cx="170.6" cy="171.9" r="2.8" fill="#2471a3"/>
+<circle cx="213.4" cy="171.9" r="2.8" fill="#2471a3"/>
+<circle cx="256.3" cy="171.9" r="2.8" fill="#2471a3"/>
+<circle cx="299.1" cy="171.9" r="2.8" fill="#2471a3"/>
+<circle cx="342" cy="171.9" r="2.8" fill="#2471a3"/>
+
+<!-- 2025 绿虚线（费率同2019，基数下限绝对值更高） -->
+
+<polyline
+points="42,94.5 84.9,128.5 127.7,151.8 170.6,171.9 213.4,171.9 256.3,171.9 299.1,171.9 342,171.9"
+fill="none"
+stroke="#1e8449"
+stroke-width="2"
+stroke-dasharray="5,4"
+stroke-linejoin="round"
+stroke-linecap="round"/>
+
+<!-- 关键数值标注 -->
+
+<text x="348" y="161"
+text-anchor="end"
+font-size="8"
+fill="#c0392b"
+font-weight="bold">31.5%</text>
+
+<text x="348" y="185"
+text-anchor="end"
+font-size="8"
+fill="#2471a3"
+font-weight="bold">29.5%</text>
+
+<text x="48" y="82"
+font-size="8"
+fill="#c0392b"
+font-weight="bold">51.3%</text>
+
+<text x="48" y="108"
+font-size="8"
+fill="#2471a3"
+font-weight="bold">48.7%</text>
+
+<!-- 趋势箭头 -->
+
+<text x="60" y="200"
+font-size="8.5"
+fill="#e67e22"
+font-weight="bold">← 工资低于下限</text>
+
+<text x="60" y="212"
+font-size="8.5"
+fill="#e67e22">按下限缴费，负担率急剧上升</text>
+
+<text x="180" y="318"
+text-anchor="middle"
+font-size="9"
+fill="#333">员工工资 / 社平工资</text>
+
+<text x="10" y="170"
+text-anchor="middle"
+font-size="8"
+fill="#333"
+transform="rotate(-90,10,170)">社保支出 / 公司总人员支出</text>
+
+</svg>
+
+<!-- 原始表格保留不变 -->
+
+<table>
+<tr>
+<th>工资/社平</th>
+<th class="red">2015</th>
+<th class="blue">2019后</th>
+<th class="green">2025</th>
+</tr>
+<tr>
+<td>30%</td><td>51.3%</td><td>48.7%</td><td>49.5%</td>
+</tr>
+<tr>
+<td>40%</td><td>42.4%</td><td>40.0%</td><td>40.7%</td>
+</tr>
+<tr>
+<td>50%</td><td>36.2%</td><td>34.0%</td><td>34.5%</td>
+</tr>
+<tr>
+<td>60%（下限）</td><td>31.5%</td><td>29.5%</td><td>29.5%</td>
+</tr>
+<tr>
+<td>80%～200%</td><td>31.5%</td><td>29.5%</td><td>29.5%</td>
+</tr>
+</table>
+
+<!-- 原始说明保留不变 -->
+
+<div class="note">
+<b>核心逻辑：</b>工资≥基数下限（社平60%）时，按实际工资缴费，负担率固定为理论最低——2015年约 <b class="red">31.5%</b>，2019年降费后约 <b class="blue">29.5%</b>。工资＜下限时，企业必须按下限缴费，分母（实际工资）变小、分子（按高标准基数缴费）不变，负担率因此急剧上升，30%工资组可达 <b>48%～51%</b>。<br>
+<b>关于“35%”：</b>若以“社保支出/工资”为口径，2015年名义合计费率约 <b>41%</b>，2019年后约 <b>37.5%</b>（养老24%+医疗11.5%+失业1%+工伤生育约1%），核心两险（养老+医疗）合计约 <b>35.5%</b>。以公司总人员支出为分母时，因分母多了单位社保，比例会下移至图中的 29.5%～31.5%。<br>
+<b>2025年：</b>费率与2019年相同，但基数下限绝对值随社平工资上涨，且社保入税后合规趋严，低工资端的实际负担更接近图中的理论曲线。
+</div>
+
+<!-- ============================= -->
+<!-- 以下全部为新增地区案例 -->
+<!-- ============================= -->
+
+<div class="area-section">
+<h2>不同地区实际社保负担率</h2>
+<div class="sub">
+2025年度企业职工五险
+｜实际月工资与社保负担率
+</div>
+
+<div class="note">
+<b>统一口径：</b>
+社保总负担率＝
+（单位实缴社保＋个人实缴社保）
+÷（员工税前工资＋单位实缴社保）。
+<br>
+横轴：员工实际月工资（元）。
+纵轴：社保支出占公司总用人成本比例。
+采用企业职工养老、医疗（含生育）、失业、工伤保险计算。
+工伤使用一类行业基准费率0.2%，不包含公积金和个人所得税。
+</div>
+</div>
+
+<div id="actualAreaCharts"></div>
+
+<script>
+(function(){
+
+// 政策参数：2025年度。
+// 对于工资低于基数下限的情况，按下限缴纳。
+// 对于工资超过上限的情况，按上限缴纳。
+// 县级市案例与郑州同口径，不能推广为所有农村地区。
+
+const areas = [
+  {
+    name:"上海｜超大城市",
+    period:"2025年7月起",
+    min:7460,
+    max:37302,
+    color:"#c0392b",
+    employer:{
+      pension:0.16,
+      medical:0.09,
+      unemployment:0.005,
+      injury:0.002
+    },
+    employee:{
+      pension:0.08,
+      medical:0.02,
+      unemployment:0.005
+    },
+    wages:[
+      3000,4000,5000,6000,
+      7460,9000,12000,
+      16000,22000,30000,
+      37302,45000
+    ]
+  },
+  {
+    name:"郑州｜省会城市",
+    period:"2025年7月起",
+    min:3831,
+    max:19155,
+    color:"#2471a3",
+    employer:{
+      pension:0.16,
+      medical:0.09,
+      unemployment:0.007,
+      injury:0.002
+    },
+    employee:{
+      pension:0.08,
+      medical:0.02,
+      unemployment:0.003
+    },
+    wages:[
+      1500,2000,2500,3000,
+      3831,4500,5000,6000,
+      8000,10000,15000,
+      19155,25000
+    ]
+  },
+  {
+    name:"新郑｜县级市企业职工案例",
+    period:"2025年7月起，郑州辖区政策口径",
+    min:3831,
+    max:19155,
+    color:"#1e8449",
+    employer:{
+      pension:0.16,
+      medical:0.09,
+      unemployment:0.007,
+      injury:0.002
+    },
+    employee:{
+      pension:0.08,
+      medical:0.02,
+      unemployment:0.003
+    },
+    wages:[
+      1200,1500,1800,2200,
+      2800,3200,3831,
+      4500,5000,6000,
+      8000,12000,19155
+    ]
+  }
+];
+
+function sum(obj){
+  return Object.values(obj).reduce((a,b)=>a+b,0);
+}
+
+function money(n){
+  return Math.round(n).toLocaleString("zh-CN");
+}
+
+function percent(n){
+  return n.toFixed(1)+"%";
+}
+
+// 与原图相同的统一公式
+function calculate(wage,area){
+
+  const base=Math.max(
+    area.min,
+    Math.min(area.max,wage)
+  );
+
+  const unitRate=sum(area.employer);
+  const personalRate=sum(area.employee);
+
+  // 单位实际缴纳
+  const unitSocial=base*unitRate;
+
+  // 个人实际缴纳
+  const personalSocial=base*personalRate;
+
+  // 向社保系统缴纳的总金额
+  const totalSocial=unitSocial+personalSocial;
+
+  // 公司总用人成本
+  const companyCost=wage+unitSocial;
+
+  // 社保占公司总用人成本比例
+  const burden=totalSocial/companyCost*100;
+
+  return {
+    wage,
+    base,
+    unitSocial,
+    personalSocial,
+    totalSocial,
+    companyCost,
+    burden
+  };
+}
+
+// 每个地区生成一张独立SVG折线图
+function makeChart(area){
+
+  const W=360;
+  const H=315;
+
+  const L=44;
+  const R=342;
+  const T=32;
+  const B=242;
+
+  const wages=[
+    ...area.wages,
+    area.min,
+    area.max
+  ]
+  .sort((a,b)=>a-b)
+  .filter((v,i,a)=>i===0||v!==a[i-1]);
+
+  const minW=area.wages[0];
+  const maxW=area.wages[area.wages.length-1];
+
+  const data=wages.map(w=>calculate(w,area));
+
+  const maxBurden=Math.max(
+    ...data.map(v=>v.burden)
+  );
+
+  const yMax=Math.max(
+    60,
+    Math.ceil(maxBurden/10)*10
+  );
+
+  const X=w=>
+    L+(w-minW)/(maxW-minW)*(R-L);
+
+  const Y=v=>
+    B-v/yMax*(B-T);
+
+  let svg=`
+  <svg viewBox="0 0 ${W} ${H}"
+    role="img"
+    aria-label="${area.name}社保总负担率">
+    <rect width="${W}" height="${H}" fill="#fff"/>`;
+
+  // Y轴水平网格及百分比刻度
+  for(let v=0;v<=yMax;v+=10){
+
+    const y=Y(v);
+
+    svg+=`
+    <line x1="${L}" y1="${y}"
+      x2="${R}" y2="${y}"
+      stroke="#eee"
+      stroke-width=".8"/>
+
+    <text x="${L-7}" y="${y+3}"
+      text-anchor="end"
+      font-size="8"
+      fill="#555">${v}%</text>`;
+  }
+
+  // X轴及Y轴
+  svg+=`
+  <line x1="${L}" y1="${T}"
+    x2="${L}" y2="${B}"
+    stroke="#333"
+    stroke-width="1"/>
+
+  <line x1="${L}" y1="${B}"
+    x2="${R}" y2="${B}"
+    stroke="#333"
+    stroke-width="1"/>`;
+
+  // X轴真实工资金额刻度
+  const tickCount=5;
+
+  for(let i=0;i<=tickCount;i++){
+
+    const wage=minW+
+      (maxW-minW)*i/tickCount;
+
+    const x=X(wage);
+
+    svg+=`
+    <line x1="${x}" y1="${B}"
+      x2="${x}" y2="${B+4}"
+      stroke="#777"/>
+
+    <text x="${x}" y="${B+16}"
+      text-anchor="middle"
+      font-size="8"
+      fill="#555">${money(wage)}</text>`;
+  }
+
+  // 缴费基数下限
+  const xMin=X(area.min);
+
+  svg+=`
+  <line x1="${xMin}" y1="${T}"
+    x2="${xMin}" y2="${B}"
+    stroke="#e67e22"
+    stroke-width="1.2"
+    stroke-dasharray="4,3"/>
+
+  <text x="${Math.min(xMin+4,R-90)}"
+    y="${T+12}"
+    font-size="8"
+    fill="#e67e22"
+    font-weight="bold">
+    基数下限${money(area.min)}元
+  </text>`;
+
+  // 缴费基数上限
+  const xMax=X(area.max);
+
+  if(xMax>=L && xMax<=R){
+
+    svg+=`
+    <line x1="${xMax}" y1="${T}"
+      x2="${xMax}" y2="${B}"
+      stroke="#aaa"
+      stroke-dasharray="3,4"/>`;
+  }
+
+  // 以实际负担率绘制折线
+  const points=data.map(v=>
+    X(v.wage).toFixed(2)+","+
+    Y(v.burden).toFixed(2)
+  ).join(" ");
+
+  svg+=`
+  <polyline
+    points="${points}"
+    fill="none"
+    stroke="${area.color}"
+    stroke-width="2.5"
+    stroke-linejoin="round"
+    stroke-linecap="round"/>`;
+
+  // 关键工资数据点
+  data.forEach(v=>{
+
+    svg+=`
+    <circle
+      cx="${X(v.wage)}"
+      cy="${Y(v.burden)}"
+      r="2.9"
+      fill="${area.color}">
+      <title>实际工资：${money(v.wage)}元
+缴费基数：${money(v.base)}元
+单位社保：${v.unitSocial.toFixed(2)}元
+个人社保：${v.personalSocial.toFixed(2)}元
+社保总支出：${v.totalSocial.toFixed(2)}元
+公司总用人成本：${v.companyCost.toFixed(2)}元
+负担率：${v.burden.toFixed(2)}%</title>
+    </circle>`;
+  });
+
+  // 首个工资点标注
+  const first=calculate(minW,area);
+
+  svg+=`
+  <text
+    x="${X(minW)+5}"
+    y="${Math.max(T+8,Y(first.burden)-9)}"
+    font-size="9"
+    font-weight="bold"
+    fill="${area.color}">
+    ${percent(first.burden)}
+  </text>`;
+
+  // 达到缴费下限后的负担率标注
+  const lower=calculate(area.min,area);
+
+  svg+=`
+  <text
+    x="${Math.min(xMin+5,R-37)}"
+    y="${Y(lower.burden)-10}"
+    font-size="9"
+    font-weight="bold"
+    fill="${area.color}">
+    ${percent(lower.burden)}
+  </text>`;
+
+  // X轴标题
+  svg+=`
+  <text
+    x="${(L+R)/2}"
+    y="289"
+    font-size="9"
+    text-anchor="middle"
+    fill="#333">
+    员工实际月工资（元）
+  </text>`;
+
+  // Y轴标题
+  svg+=`
+  <text
+    x="11" y="142"
+    font-size="8"
+    text-anchor="middle"
+    fill="#333"
+    transform="rotate(-90,11,142)">
+    社保总支出 / 公司总用人成本
+  </text>
+  </svg>`;
+
+  return svg;
+}
+
+// 新增地区：每个地区只显示一张图，不生成数据表格
+function renderArea(area){
+
+  const low=calculate(
+    area.wages[0],
+    area
+  );
+
+  const standard=calculate(
+    area.min,
+    area
+  );
+
+  const unitRate=
+    sum(area.employer)*100;
+
+  const personalRate=
+    sum(area.employee)*100;
+
+  return `
+  <section class="area-case">
+
+    <h3>${area.name}</h3>
+
+    <div class="area-desc">
+      ${area.period}<br>
+      社保缴费基数：
+      ${money(area.min)}～
+      ${money(area.max)}元/月
+    </div>
+
+    ${makeChart(area)}
+
+    <div class="area-info">
+
+      <b>不同工资对应负担：</b><br>
+
+      工资${money(low.wage)}元时，
+      社保总实缴
+      <b>${money(low.totalSocial)}元</b>，
+      公司用人成本
+      <b>${money(low.companyCost)}元</b>，
+      社保负担率为
+      <b style="color:${area.color}">
+      ${percent(low.burden)}
+      </b>。
+
+      <br>
+
+      工资达到缴费基数下限
+      ${money(area.min)}元时，
+      社保总实缴
+      ${money(standard.totalSocial)}元，
+      公司用人成本
+      ${money(standard.companyCost)}元，
+      负担率降至
+      <b style="color:${area.color}">
+      ${percent(standard.burden)}
+      </b>。
+
+      <br>
+
+      单位社保合计费率
+      ${percent(unitRate)}，
+      个人社保合计费率
+      ${percent(personalRate)}。
+
+    </div>
+
+  </section>`;
+}
+
+// 渲染所有地区图表
+document.getElementById(
+  "actualAreaCharts"
+).innerHTML=areas.map(renderArea).join("");
+
+})();
+</script>
+
+<div class="area-tip">
+<b>地区案例说明：</b>
+新增图表使用2025年度企业职工社保政策参数，
+其中工伤保险按一类行业0.2%基准费率测算。
+新郑为郑州辖区县级市企业职工案例，
+不是城乡居民社保，也不能代表所有农村地区。
+实际企业缴费可能受工伤浮动费率、
+基数申报、医保具体政策等影响。
+</div>
+
+<div class="area-source">
+<b>主要官方数据来源：</b><br>
+<a href="https://rsj.sh.gov.cn/tgsgg_17341/20250918/t0035_1435637.html"
+target="_blank" rel="noopener">
+上海市2025年度社保缴费基数上下限
+</a><br>
+
+<a href="https://rsj.sh.gov.cn/tdjjf_17554/20250120/t0035_1430072.html"
+target="_blank" rel="noopener">
+上海市单位社会保险缴费比例
+</a><br>
+
+<a href="https://public.zzgx.gov.cn/D280901X/9691790.jhtml"
+target="_blank" rel="noopener">
+河南省2025年度社会保险缴费基数
+</a><br>
+
+<a href="https://www.zhengzhou.gov.cn/interview/10191846.jhtml"
+target="_blank" rel="noopener">
+郑州市职工基本医疗保险政策
+</a><br>
+
+<a href="https://public.zhengzhou.gov.cn/D280904X/9395535.jhtml"
+target="_blank" rel="noopener">
+郑州市失业保险缴费政策
+</a>
+</div>
+
+</body>
+</html>
+
+<!--sandbox-meta:v1:eyJmb3JtYXQiOiJodG1sIiwicmVsYXRpb25zIjpbXSwiY3JlYXRlZEF0IjoiMjAyNi0xMC0yMVQwNjoxNjo1NS42NTdaIiwidXBkYXRlZEF0IjoiMjAyNi0xMC0yMVQwNjo0NTo1MC4xNjBaIn0=-->

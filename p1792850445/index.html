@@ -1,0 +1,416 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>轨迹实验室 · GPX / KML / KMZ 分析</title>
+<style>
+:root{color-scheme:dark;--bg:#09121f;--panel:#101e30;--panel2:#16283d;--line:#273a51;--txt:#e9f2fb;--muted:#91a8bf;--cyan:#36d6d0;--orange:#ffb65e;--red:#ff7896;--blue:#6da7ff}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 73% -20%,#183b4a 0,transparent 48%),var(--bg);color:var(--txt);font:14px/1.5 system-ui,-apple-system,"Microsoft YaHei",sans-serif}
+button,input{font:inherit}button{cursor:pointer;border:1px solid var(--line);border-radius:10px;padding:9px 12px;color:var(--txt);background:#21354b}button:hover{border-color:#54a6bb}button:disabled{opacity:.45;cursor:not-allowed}
+.primary{background:linear-gradient(135deg,#13b8ae,#087f9f);border-color:transparent;color:#fff;font-weight:650}.ghost{background:#15263a}.small{padding:5px 9px;font-size:12px}.active{border-color:var(--cyan)!important;color:var(--cyan)!important}
+input:not([type=range]):not([type=checkbox]){width:100%;min-width:0;background:#0c1929;border:1px solid var(--line);border-radius:9px;color:var(--txt);padding:9px 10px;outline:none}input:focus{border-color:#45b7c2!important}input[type=range]{width:100%;accent-color:var(--cyan)}input[type=checkbox]{accent-color:var(--cyan)}
+header{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:20px 26px;border-bottom:1px solid var(--line)}h1{margin:0;font-size:23px;letter-spacing:.3px}h1 span{color:var(--cyan)}.sub{font-size:12px;color:var(--muted);margin-top:4px}.badge{border:1px solid #286b68;background:#123b42;color:#88e7df;border-radius:100px;padding:5px 10px;font-size:12px}
+.layout{display:grid;grid-template-columns:290px minmax(0,1fr);gap:16px;padding:16px;max-width:1700px;margin:auto}.sidebar{display:flex;flex-direction:column;gap:15px}.panel{background:var(--panel);border:1px solid var(--line);border-radius:15px;padding:16px;min-width:0}.panel h2,.panel h3{font-size:14px;letter-spacing:.2px;margin:0 0 13px}.row{display:flex;align-items:center;gap:8px}.row>*{min-width:0}.space{justify-content:space-between}.stack{display:grid;gap:9px}.field{display:grid;gap:5px;color:var(--muted);font-size:12px}.hint{font-size:12px;color:var(--muted)}.status{min-height:18px;font-size:12px;color:var(--muted);overflow-wrap:anywhere}.status.ok{color:#6bd7ad}.status.err{color:var(--red)}.sep{height:1px;background:var(--line);margin:12px 0}
+.workspace{min-width:0;display:flex;flex-direction:column;gap:15px}.toolbar{display:flex;align-items:center;gap:9px;flex-wrap:wrap}.filetag{margin-left:auto;max-width:270px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--muted);font-size:12px}.stats{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px}.stat{padding:14px;background:linear-gradient(145deg,#172b3f,#102033);border:1px solid var(--line);border-radius:13px}.stat .v{font-weight:750;font-size:23px;white-space:nowrap}.stat .k{font-size:11px;color:var(--muted);margin-bottom:4px}.stat .unit{font-size:12px;color:var(--muted);margin-left:3px}
+.mapbox{height:440px;position:relative;border:1px solid var(--line);border-radius:13px;overflow:hidden;background:linear-gradient(0deg,transparent 24px,#163044 25px),linear-gradient(90deg,transparent 24px,#163044 25px),#13263a;background-size:25px 25px}.tiles,.mapcanvas{position:absolute;inset:0;width:100%;height:100%}.tiles{overflow:hidden}.tiles img{position:absolute;user-select:none;pointer-events:none}.mapcanvas{touch-action:none;cursor:grab}.mapcanvas:active{cursor:grabbing}.maptools{position:absolute;right:10px;top:10px;display:flex;flex-direction:column;gap:6px}.maptools button{background:#102035d9;padding:6px 10px}.attribution{position:absolute;right:5px;bottom:3px;font-size:10px;background:#0a1a27c9;padding:1px 5px}.attribution a{color:#b6d9ea}.mapnotice{position:absolute;left:12px;top:12px;background:#071724c9;border-radius:8px;padding:7px 10px;font-size:12px;color:#d8e8f7;max-width:65%;pointer-events:none}
+.elevationLegend{position:absolute;bottom:12px;left:12px;background:#071724e8;border:1px solid #35516a;border-radius:10px;padding:8px 10px;min-width:165px;font-size:11px}.legendGradient{height:8px;border-radius:10px;margin:5px 0;background:linear-gradient(90deg,#3a9bed,#33dfb2,#f8c758,#f27158)}.rangeNumbers{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:12px 0}.rangeNumbers .row{gap:6px}.rangeNumbers input{max-width:110px}.rangeNumbers label{flex:1}.danger{border-color:#78424f;color:#ff9eb2;background:#3b2431}.danger:hover{border-color:#f57995}.fileActions{display:flex;justify-content:space-between;gap:6px}.fileitem .delete{color:#ff9eb2}
+.rangebox{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:13px 0}.rangebox strong{color:var(--cyan);font-size:13px}.rangebtns{display:flex;gap:8px;flex-wrap:wrap}.chartgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.chartcard{padding:12px 12px 8px;border:1px solid var(--line);background:#102033;border-radius:12px;min-width:0}.charthead{display:flex;justify-content:space-between;align-items:center;margin-bottom:7px}.charthead span{font-weight:650}.charthead em{font-style:normal;color:var(--muted);font-size:11px}.chartcard canvas{width:100%;height:180px;display:block}.list{display:grid;gap:6px;max-height:290px;overflow:auto}.fileitem{display:grid;gap:4px;border:1px solid var(--line);border-radius:9px;padding:10px;background:#142438}.fileitem .name{font-size:12px;overflow-wrap:anywhere}.fileitem .meta{font-size:11px;color:var(--muted)}.fileitem button{justify-self:start}
+.analysisgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.analysiscard{min-width:0}.analysismetrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:12px 0}.analysismetric{background:#16283d;padding:10px;border-radius:9px}.analysismetric .value{font-weight:750;font-size:19px;overflow-wrap:anywhere}.analysismetric .key{color:var(--muted);font-size:11px}.zoneRow{display:grid;grid-template-columns:66px minmax(0,1fr) 52px;align-items:center;gap:8px;margin:7px 0;font-size:12px}.zoneRow .track{height:11px;background:#1f3449;border-radius:100px;overflow:hidden}.zoneRow .fill{height:100%;border-radius:100px}.zoneRow .pct{text-align:right;font-variant-numeric:tabular-nums}.insight{margin-top:10px;color:#cbdceb;font-size:12px;line-height:1.65}.quality{color:#ffcb86}.metricNote{font-size:11px;color:var(--muted);line-height:1.65;margin-top:8px}
+table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums;font-size:12px}th,td{padding:10px 9px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}th:first-child,td:first-child{text-align:left}th{color:var(--muted);font-weight:500}.tablewrap{overflow:auto;max-height:280px}.empty{color:var(--muted);font-size:12px;padding:10px 0}.pill{font-size:11px;color:#8de5d7;background:#163a43;border-radius:7px;padding:3px 6px}
+@media(max-width:1150px){.stats{grid-template-columns:repeat(3,1fr)}.analysisgrid{grid-template-columns:1fr}}@media(max-width:790px){header{padding:15px}.layout{grid-template-columns:1fr;padding:10px}.sidebar{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.sidebar .panel:last-child{grid-column:1/-1}.chartgrid{grid-template-columns:1fr}.mapbox{height:340px}}@media(max-width:500px){.sidebar{display:flex}.stats{grid-template-columns:repeat(2,1fr)}.rangebox{grid-template-columns:1fr}.filetag{margin-left:0;width:100%}.stat .v{font-size:19px}.analysismetrics{grid-template-columns:repeat(2,minmax(0,1fr))}h1{font-size:19px}}
+</style>
+</head>
+<body>
+<header><div><h1>◉ 轨迹<span>实验室</span></h1><div class="sub">GPX · KML · KMZ · GeoJSON　/　纯原生 JavaScript · 无第三方库</div></div><span class="badge">LOCAL-FIRST · 选段同步分析</span></header>
+<div class="layout">
+ <aside class="sidebar">
+  <section class="panel stack"><h2>01 / 本地轨迹</h2><input id="fileInput" type="file" accept=".gpx,.kml,.kmz,.geojson,.json" hidden><button id="pickFile" class="primary">＋ 选择轨迹文件</button><div class="hint">新导入文件自动上传（需已登录）。原文件与选段自动暂存，刷新不丢。</div><button id="upload" disabled>☁ 手动重新上传当前文件</button><button id="clearCurrent" class="small ghost">清空当前轨迹</button><div id="fileStatus" class="status">尚未载入轨迹</div></section>
+  <section class="panel stack"><h2>02 / PocketBase 账号</h2><label class="field">服务地址<input id="base" value="http://192.168.31.197:8790"></label><div class="row"><label class="field" style="flex:1">认证集合<input id="authCollection" value="users"></label><label class="field" style="flex:1">文件集合<input id="collection" value="gpx"></label></div><label class="field">文件字段<input id="fileField" value="file"></label><label class="field">邮箱 / 用户名<input id="email" autocomplete="username" placeholder="普通用户账号"></label><label class="field">密码<input id="password" type="password" autocomplete="current-password" placeholder="只用于登录，不保存"></label><div class="row"><button id="login" class="primary" style="flex:1">登录</button><button id="logout">退出</button></div><div class="hint"><label><input id="remember" type="checkbox" checked> 保存普通用户 Token（localStorage）</label></div><div id="authStatus" class="status">未登录</div></section>
+  <section class="panel stack"><div class="row space"><h2 style="margin:0">03 / 云端轨迹</h2><button id="refresh" class="small">↻ 刷新</button></div><div id="cloudList" class="list"><div class="empty">登录后读取文件列表</div></div><button id="clearCloud" class="small danger">清空云端当前集合可删除记录…</button></section>
+  <section class="panel stack"><h2>04 / 分析设置</h2><label class="field">最高心率（次/分）<input id="maxHr" type="number" min="100" max="250" step="1" value="200"></label><label class="field">累计爬升过滤阈值（米）<input id="elevThreshold" type="number" min="0" max="50" step="0.5" value="2"></label><label class="hint"><input id="showTiles" type="checkbox" checked> 显示在线 OSM 地图底图</label><div class="hint">心率区间按最高心率百分比划分；流畅性是轨迹步速的连续性，并非真实步态测量。</div><div class="hint">只上传原文件，不上传分析结果；区间位置和设置自动本地保存。地图底图需要网络连接。</div><button id="clearLocal" class="small ghost">清除本地缓存文件与区间</button></section>
+ </aside>
+ <main class="workspace">
+  <div class="toolbar"><button id="fit" class="ghost">⊞ 适配全部轨迹</button><button id="fullRange" class="ghost">⟲ 全程分析</button><button id="download" class="ghost" disabled>↓ 下载原文件</button><span id="fileTitle" class="filetag">未选择轨迹</span></div>
+  <section class="stats" id="stats"></section>
+  <section class="analysisgrid" aria-label="徒步心率与运动流畅性分析">
+   <div class="panel analysiscard"><div class="row space"><h2 style="margin:0">心率强度 · 最高心率 <span id="hrMaxLabel">200</span></h2><span class="pill" id="hrBasis">等待数据</span></div><div id="hrSummary" class="analysismetrics"></div><div id="hrZones"><div class="empty">导入包含心率的数据后显示分区</div></div><div id="hrInsight" class="insight"></div><div class="metricNote">按最高心率的 50% / 60% / 70% / 80% / 90% / 100% 分区。仅作运动负荷参考，不能代替个人阈值测试。</div></div>
+   <div class="panel analysiscard"><div class="row space"><h2 style="margin:0">运动流畅性 · 步速节奏</h2><span class="pill" id="flowBasis">等待数据</span></div><div id="flowSummary" class="analysismetrics"></div><div id="flowInsight" class="insight">需要带时间戳的连续轨迹，才能估计速度变化与低速停顿。</div><div class="metricNote">以 30 秒窗口平滑 GPS 速度：流畅指数 = 70% 步速稳定性 + 30% 连续前进比例；小于 0.8 km/h 计为低速。它反映轨迹上的节奏，不代表动作协调性；陡坡、路况和定位误差会影响数值。</div></div>
+  </section>
+  <section class="panel"><div class="row space"><h2 style="margin:0">地图与局部轨迹</h2><span id="rangeLabel" class="pill">全程</span></div><div class="mapbox" id="mapBox"><div id="tiles" class="tiles"></div><canvas id="mapCanvas" class="mapcanvas"></canvas><div id="mapNotice" class="mapnotice">导入后直接点击轨迹：首次选起点，再次选终点。</div><div id="elevationLegend" class="elevationLegend" hidden>海拔高度<div class="legendGradient"></div><div class="row space"><span id="elevMin">—</span><span id="elevMax">—</span></div></div><div class="maptools"><button id="zoomIn" title="放大">＋</button><button id="zoomOut" title="缩小">－</button></div><div id="attr" class="attribution"><a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">© OpenStreetMap contributors</a></div></div>
+   <div class="rangebox"><label class="field">区间起点 <strong id="startInfo">—</strong><input id="startRange" type="range" min="0" max="1" value="0"></label><label class="field">区间终点 <strong id="endInfo">—</strong><input id="endRange" type="range" min="0" max="1" value="1"></label></div>
+   <div class="rangeNumbers"><label class="field">起点按里程（km）<input id="startKm" type="number" step="0.01" min="0" placeholder="0.00"></label><label class="field">终点按里程（km）<input id="endKm" type="number" step="0.01" min="0" placeholder="0.00"></label><label class="field">起点按时间（分钟）<input id="startMinute" type="number" step="0.1" min="0" placeholder="需要时间数据"></label><label class="field">终点按时间（分钟）<input id="endMinute" type="number" step="0.1" min="0" placeholder="需要时间数据"></label></div>
+   <div class="row space" style="flex-wrap:wrap"><div class="rangebtns"><button id="selectReset" class="small">◎ 下一次点击选起点</button><span id="clickHint" class="hint">点击地图或曲线，自动轮流设置起点和终点</span></div><span class="hint">按里程、时间、滑块、地图/曲线选点会同步更新。</span></div>
+  </section>
+  <section class="panel"><div class="row space"><h2 style="margin:0">局部数据曲线</h2><span class="hint">横轴为选段距离；鼠标悬停显示采样信息</span></div><div class="chartgrid" style="margin-top:12px"><div class="chartcard"><div class="charthead"><span style="color:var(--cyan)">海拔</span><em>m</em></div><canvas id="elevChart"></canvas></div><div class="chartcard"><div class="charthead"><span style="color:var(--red)">心率</span><em>bpm · 文件含数据时可见</em></div><canvas id="hrChart"></canvas></div><div class="chartcard"><div class="charthead"><span style="color:var(--blue)">速度</span><em>km/h</em></div><canvas id="speedChart"></canvas></div><div class="chartcard"><div class="charthead"><span style="color:var(--orange)">坡度</span><em>%</em></div><canvas id="slopeChart"></canvas></div></div></section>
+  <section class="panel"><div class="row space"><h2 style="margin:0">区间分段明细</h2><span class="hint">按所选起点，每 1 km 分段</span></div><div class="tablewrap"><table><thead><tr><th>区段</th><th>距离</th><th>用时</th><th>均速</th><th>爬升</th><th>平均心率</th></tr></thead><tbody id="splits"><tr><td colspan="6" class="empty">加载轨迹后显示</td></tr></tbody></table></div></section>
+ </main>
+</div>
+<script>
+(() => {
+ 'use strict';
+ const $ = id => document.getElementById(id);
+ const K = 'trajectoryLabPrefsV1', A = 'trajectoryLabAuthV1';
+ const maxFileBytes = 55 * 1024 * 1024;
+ const S = {file:null,fileKey:'',points:[],name:'',start:0,end:0,token:'',user:null,centerX:128,centerY:128,zoom:3,clickNext:'start',drag:null,hover:-1,inspected:-1,pendingAuto:false,uploading:false,tileFailures:0};
+ const pref = (() => {try{return JSON.parse(localStorage.getItem(K))||{}}catch{return {}}})();
+ for (const [id,v] of Object.entries(pref)) if ($(id) && id !== 'startRange' && id !== 'endRange') {
+   if ($(id).type === 'checkbox') $(id).checked = !!v; else if (typeof v==='string'||typeof v==='number') $(id).value=v;
+ }
+ try {const a=JSON.parse(localStorage.getItem(A)); if(a?.token && a?.collection=== $('authCollection').value){S.token=a.token;S.user=a.user}}catch{}
+ function status(id,msg,bad=false){$(id).textContent=msg;$(id).className='status '+(bad?'err':'ok')}
+ function clamp(n,a,b){return Math.max(a,Math.min(b,n))}
+ function fmt(n,d=1){return Number.isFinite(n)?n.toFixed(d):'—'}
+ function duration(ms){if(!Number.isFinite(ms)||ms<0)return '—'; const s=Math.round(ms/1000);return `${Math.floor(s/3600)}:${String(Math.floor(s%3600/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`}
+ function savestate(){const o={};for(const id of ['base','authCollection','collection','fileField','elevThreshold','maxHr','showTiles','remember'])o[id]=$(id).type==='checkbox'?$(id).checked:$(id).value;o.rangeKey=S.fileKey;o.start=S.start;o.end=S.end;localStorage.setItem(K,JSON.stringify(o))}
+ function saveAuth(){if(S.token && $('remember').checked)localStorage.setItem(A,JSON.stringify({token:S.token,user:S.user,collection:$('authCollection').value}));else localStorage.removeItem(A);status('authStatus',S.token?`已登录：${S.user?.email||S.user?.id||'普通用户'}`:'未登录');$('login').textContent=S.token?'重新登录':'登录'}
+ function base(){return $('base').value.trim().replace(/\/+$/,'')}
+ async function api(path,{method='GET',body,token=S.token}={}){
+   const h={};if(token)h.Authorization=token;if(body && !(body instanceof FormData))h['Content-Type']='application/json';
+   const r=await fetch(base()+path,{method,headers:h,body:body?(body instanceof FormData?body:JSON.stringify(body)):undefined});
+   const data=await r.json().catch(()=>({}));if(!r.ok)throw new Error(`${r.status}: ${data.message||'请求失败'} ${Object.keys(data.data||{}).length?JSON.stringify(data.data):''}`);return data;
+ }
+ async function login(){try{
+   const identity=$('email').value.trim(),password=$('password').value;if(!identity||!password)throw new Error('请输入普通用户账号和密码');
+   const x=await api(`/api/collections/${encodeURIComponent($('authCollection').value)}/auth-with-password`,{method:'POST',body:{identity,password},token:''});
+   if(x.record?.collectionName==='_superusers')throw new Error('请使用普通用户集合，前端不保存超级管理员 Token');
+   S.token=x.token;S.user=x.record;$('password').value='';saveAuth();status('authStatus','登录成功：'+(S.user.email||S.user.id));await listCloud();if(S.pendingAuto)await upload();
+ }catch(e){status('authStatus','登录失败：'+e.message,true)}}
+ function logout(){S.token='';S.user=null;saveAuth();$('cloudList').replaceChildren();status('authStatus','已退出登录')}
+ async function refreshAuth(){if(!S.token)return;try{const x=await api(`/api/collections/${encodeURIComponent($('authCollection').value)}/auth-refresh`,{method:'POST'});if(x.record?.collectionName==='_superusers')throw new Error('拒绝在前端保存超级管理员会话');S.token=x.token;S.user=x.record;saveAuth();await listCloud()}catch(e){logout();status('authStatus','保存的登录已过期，请重新登录',true)}}
+ async function listCloud(){const wrap=$('cloudList');wrap.textContent='读取中…';try{
+   if(!S.token){wrap.textContent='请先登录';return}
+   const c=encodeURIComponent($('collection').value);const x=await api(`/api/collections/${c}/records?page=1&perPage=50&sort=-created`);wrap.replaceChildren();
+   if(!x.items.length){wrap.textContent='暂无记录';return}
+   for(const item of x.items){let names=item[$('fileField').value];if(!Array.isArray(names))names=names?[names]:[];
+     for(const filename of names){const div=document.createElement('div');div.className='fileitem';const n=document.createElement('div');n.className='name';n.textContent=filename;const meta=document.createElement('div');meta.className='meta';meta.textContent=`${item.created||''} · ${item.id}`;const actions=document.createElement('div');actions.className='fileActions';const btn=document.createElement('button');btn.textContent='打开分析';btn.className='small';btn.onclick=()=>loadCloud(item,filename);const del=document.createElement('button');del.textContent='删除';del.className='small delete';del.onclick=()=>deleteCloud(item,filename);actions.append(btn,del);div.append(n,meta,actions);wrap.append(div)}
+   }
+ }catch(e){wrap.textContent='无法读取：'+e.message}}
+ async function upload(force=false){if(S.uploading)return;try{
+   if(!S.file)throw new Error('请先选一个本地轨迹文件');if(!S.token){S.pendingAuto=true;throw new Error('尚未登录；登录后可自动上传')}
+   S.uploading=true;const file=S.file,owner=S.user?.id||'',collection=$('collection').value;
+   const digest=crypto.subtle?Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',await file.arrayBuffer()))).map(x=>x.toString(16).padStart(2,'0')).join(''):`${file.name}:${file.size}:${file.lastModified}`;
+   const identity=`${base()}:${collection}:${owner}:${digest}`;let known={};try{known=JSON.parse(localStorage.getItem('trajectoryUploadedV1'))||{}}catch{}
+   if(!force&&known[identity]){S.pendingAuto=false;status('fileStatus','已在本设备上传过该文件；记录 ID：'+known[identity]);return}
+   const form=new FormData();form.append($('fileField').value,file);status('fileStatus','正在上传原文件…');
+   const x=await api(`/api/collections/${encodeURIComponent(collection)}/records`,{method:'POST',body:form});
+   known[identity]=x.id;localStorage.setItem('trajectoryUploadedV1',JSON.stringify(known));S.pendingAuto=false;
+   status('fileStatus','上传成功，记录 ID：'+x.id);await listCloud();
+ }catch(e){status('fileStatus','上传：'+e.message,true)}finally{S.uploading=false}}
+ async function deleteCloud(item,filename){if(!confirm(`确认永久删除云端记录？\n${filename}\nID: ${item.id}\n此操作可能无法恢复。`))return;try{
+   await api(`/api/collections/${encodeURIComponent($('collection').value)}/records/${encodeURIComponent(item.id)}`,{method:'DELETE'});
+   forgetUploaded([item.id]);status('fileStatus','已删除云端记录 '+item.id);await listCloud();
+ }catch(e){status('fileStatus','删除失败：'+e.message,true)}}
+ function forgetUploaded(ids){try{const known=JSON.parse(localStorage.getItem('trajectoryUploadedV1'))||{};for(const [k,v] of Object.entries(known))if(ids.includes(v))delete known[k];localStorage.setItem('trajectoryUploadedV1',JSON.stringify(known))}catch{}}
+ async function clearCloud(){if(!S.token){status('fileStatus','请先登录',true);return}try{
+   const c=encodeURIComponent($('collection').value);const first=await api(`/api/collections/${c}/records?page=1&perPage=1`);const count=first.totalItems||0;if(!count){status('fileStatus','云端集合已为空');return}
+   const answer=prompt(`此操作将尝试永久删除当前用户有权限删除的 ${count} 条记录。\n输入“清空 ${count}”以确认：`);if(answer!==`清空 ${count}`)return;
+   let deleted=0;const ids=[];for(let pass=0;pass<100;pass++){const page=await api(`/api/collections/${c}/records?page=1&perPage=100`);if(!page.items.length)break;
+     for(const rec of page.items){await api(`/api/collections/${c}/records/${encodeURIComponent(rec.id)}`,{method:'DELETE'});deleted++;ids.push(rec.id)}
+   }
+   forgetUploaded(ids);status('fileStatus',`清空操作完成，删除 ${deleted} 条记录`);await listCloud();
+ }catch(e){status('fileStatus','清空中断：'+e.message,true);await listCloud()}}
+ async function loadCloud(rec,name){try{
+   status('fileStatus','正在下载云端文件…');let url=`${base()}/api/files/${encodeURIComponent($('collection').value)}/${encodeURIComponent(rec.id)}/${encodeURIComponent(name)}`;
+   // 受保护的 PocketBase 文件需要短期 file-token。
+   if(S.token){try{const t=await api('/api/files/token',{method:'POST'});url+='?token='+encodeURIComponent(t.token)}catch{}}
+   const r=await fetch(url);if(!r.ok)throw new Error('下载失败 HTTP '+r.status);
+   const blob=await r.blob();const ok=await loadFile(new File([blob],name,{type:blob.type}),true,'cloud');if(ok)status('fileStatus',`已载入云端文件：${name}`);
+ }catch(e){status('fileStatus','云端载入失败：'+e.message,true)}}
+ function localName(e){return (e?.localName||'').toLowerCase()}
+ function direct(e,name){return Array.from(e?.children||[]).filter(x=>localName(x)===name.toLowerCase())}
+ function descendants(e,name){return Array.from(e?.getElementsByTagName('*')||[]).filter(x=>localName(x)===name.toLowerCase())}
+ function childText(e,name){return direct(e,name)[0]?.textContent?.trim()||''}
+ function deepValue(e,names){for(const n of names){const a=descendants(e,n);if(a.length){const v=a[0].textContent.trim();if(v)return v}}return ''}
+ function num(v){const x=Number(v);return v===undefined||v===null||v===''||!Number.isFinite(x)?null:x}
+ function dt(v){if(!v)return null;const x=Date.parse(v);return Number.isFinite(x)?x:null}
+ function point(lat,lon,ele,time,hr=null,speed=null,cad=null,seg=0){lat=num(lat);lon=num(lon);if(lat===null||lon===null||Math.abs(lat)>90||Math.abs(lon)>180)return null;return {lat,lon,ele:num(ele),time:dt(time),hr:num(hr),speed:num(speed),cad:num(cad),seg,cum:0,slope:null}}
+ function fromGpx(doc){const out=[];let seg=0;
+   for(const trk of descendants(doc.documentElement,'trk'))for(const part of direct(trk,'trkseg')){for(const e of direct(part,'trkpt')){const p=point(e.getAttribute('lat'),e.getAttribute('lon'),childText(e,'ele'),childText(e,'time'),deepValue(e,['hr','heartrate','heartratebpm']),deepValue(e,['speed']),deepValue(e,['cad','cadence']),seg);if(p)out.push(p)}seg++}
+   if(out.length)return out;
+   for(const rte of descendants(doc.documentElement,'rte')){for(const e of direct(rte,'rtept')){const p=point(e.getAttribute('lat'),e.getAttribute('lon'),childText(e,'ele'),childText(e,'time'),deepValue(e,['hr','heartrate']),null,null,seg);if(p)out.push(p)}seg++}
+   return out;
+ }
+ function coordKml(s){return s.trim().split(/\s+/).map(s=>s.split(',').map(Number)).filter(v=>v.length>=2&&Number.isFinite(v[0])&&Number.isFinite(v[1]))}
+ function fromKml(doc){const out=[];let seg=0;
+   for(const pm of descendants(doc.documentElement,'placemark')){
+     for(const tr of descendants(pm,'track')){
+       const coords=direct(tr,'coord').map(e=>e.textContent.trim().split(/\s+/).map(Number));const times=direct(tr,'when').map(e=>e.textContent.trim());
+       const arrays={};for(const a of descendants(tr,'simplearraydata')){const key=(a.getAttribute('name')||'').toLowerCase();arrays[key]=direct(a,'value').map(v=>v.textContent.trim())}
+       const lookup=(i,keys)=>{for(const k of Object.keys(arrays))if(keys.some(x=>k.includes(x)))return arrays[k][i];return null};
+       coords.forEach((v,i)=>{const p=point(v[1],v[0],v[2],times[i],lookup(i,['heart','hr','bpm']),lookup(i,['speed']),lookup(i,['cadence','cad']),seg);if(p)out.push(p)});seg++;
+     }
+     for(const ls of descendants(pm,'linestring')){
+       const raw=childText(ls,'coordinates');for(const v of coordKml(raw)){const p=point(v[1],v[0],v[2],null,null,null,null,seg);if(p)out.push(p)}seg++;
+     }
+   }
+   return out;
+ }
+ function fromGeojson(obj){const out=[];let seg=0;const feats=obj.type==='FeatureCollection'?obj.features:[obj.type==='Feature'?obj:{type:'Feature',geometry:obj,properties:{}}];
+   for(const feat of feats){const g=feat.geometry||{},arr=g.type==='LineString'?[g.coordinates]:g.type==='MultiLineString'?g.coordinates:[];
+     for(const coords of arr){coords.forEach((v,i)=>{const p=point(v[1],v[0],v[2],feat.properties?.coordinateProperties?.times?.[i]||null,null,null,null,seg);if(p)out.push(p)});seg++}
+   }return out;
+ }
+ // ZIP 中央目录解析：支持普通 ZIP/KMZ 的 Store 和 Deflate 压缩项，不支持 ZIP64/加密。
+ async function unpackKmz(file){const bytes=new Uint8Array(await file.arrayBuffer());const d=new DataView(bytes.buffer);let e=-1;
+   for(let i=bytes.length-22;i>=Math.max(0,bytes.length-65557);i--)if(d.getUint32(i,true)===0x06054b50){e=i;break}
+   if(e<0)throw new Error('KMZ 不是有效的 ZIP 文件');const count=d.getUint16(e+10,true),offset=d.getUint32(e+16,true);if(count>2000)throw new Error('ZIP 文件项过多');
+   let at=offset,chosen=null;
+   for(let i=0;i<count;i++){
+     if(at+46>bytes.length||d.getUint32(at,true)!==0x02014b50)throw new Error('ZIP 中央目录损坏');
+     const method=d.getUint16(at+10,true),compressed=d.getUint32(at+20,true),rawsize=d.getUint32(at+24,true);
+     const namelen=d.getUint16(at+28,true),extra=d.getUint16(at+30,true),comment=d.getUint16(at+32,true),local=d.getUint32(at+42,true);
+     const name=new TextDecoder().decode(bytes.subarray(at+46,at+46+namelen));
+     if(name.toLowerCase().endsWith('.kml') && !name.endsWith('/') && (!chosen||name.toLowerCase()==='doc.kml'))chosen={name,method,compressed,rawsize,local};
+     at+=46+namelen+extra+comment;
+   }
+   if(!chosen)throw new Error('KMZ 内没有 KML 文档');
+   if(chosen.rawsize>70*1024*1024||chosen.compressed>maxFileBytes)throw new Error('KMZ 中 KML 体积超出安全上限');
+   const p=chosen.local;if(p+30>bytes.length||d.getUint32(p,true)!==0x04034b50)throw new Error('ZIP 文件头损坏');
+   const start=p+30+d.getUint16(p+26,true)+d.getUint16(p+28,true),end=start+chosen.compressed;if(end>bytes.length)throw new Error('ZIP 数据长度错误');
+   const data=bytes.subarray(start,end);let out;
+   if(chosen.method===0)out=data;
+   else if(chosen.method===8){if(typeof DecompressionStream==='undefined')throw new Error('浏览器不支持原生 ZIP 解压');try{const stream=new Blob([data]).stream().pipeThrough(new DecompressionStream('deflate-raw'));out=new Uint8Array(await new Response(stream).arrayBuffer())}catch{throw new Error('浏览器无法解压此 KMZ（需要支持 deflate-raw）')}}
+   else throw new Error('不支持此 KMZ 的压缩算法：'+chosen.method);
+   if(out.byteLength>70*1024*1024)throw new Error('解压内容过大');return new TextDecoder('utf-8').decode(out);
+ }
+ function readXml(text){const doc=new DOMParser().parseFromString(text,'application/xml');if(descendants(doc,'parsererror').length)throw new Error('XML 文件格式错误');return doc}
+ function hav(a,b){const R=6371000,r=Math.PI/180,dlat=(b.lat-a.lat)*r,dlon=(b.lon-a.lon)*r,aa=Math.sin(dlat/2)**2+Math.cos(a.lat*r)*Math.cos(b.lat*r)*Math.sin(dlon/2)**2;return 2*R*Math.asin(Math.sqrt(aa))}
+ function enrich(pts){for(let i=0;i<pts.length;i++){const p=pts[i],prev=pts[i-1];if(!prev){p.cum=0;continue}const dist=prev.seg===p.seg?hav(prev,p):0;p.cum=prev.cum+dist;
+     const sec=p.time!==null&&prev.time!==null?(p.time-prev.time)/1000:null;
+     if(p.speed===null && sec>0 && dist/sec<70)p.speed=dist/sec;
+     if(p.ele!==null&&prev.ele!==null&&dist>=3)p.slope=clamp((p.ele-prev.ele)/dist*100,-100,100);
+   }return pts;
+ }
+ async function loadFile(file,keep=true,source='local'){try{
+   if(file.size>maxFileBytes)throw new Error('文件超过 55 MB 限制');const ext=file.name.split('.').pop().toLowerCase();let points=[];
+   if(ext==='gpx')points=fromGpx(readXml(await file.text()));
+   else if(ext==='kml')points=fromKml(readXml(await file.text()));
+   else if(ext==='kmz')points=fromKml(readXml(await unpackKmz(file)));
+   else if(ext==='geojson'||ext==='json')points=fromGeojson(JSON.parse(await file.text()));
+   else throw new Error('支持 GPX、KML、KMZ、GeoJSON');
+   if(points.length<2)throw new Error('没有找到至少 2 个有效轨迹点');
+   S.file=file;S.name=file.name;S.fileKey=`${file.name}:${file.size}`;S.points=enrich(points);S.start=0;S.end=points.length-1;S.clickNext='start';S.hover=-1;S.inspected=-1;S.pendingAuto=source==='local';
+   if(pref.rangeKey===S.fileKey){S.start=clamp(+pref.start||0,0,points.length-2);S.end=clamp(+pref.end||points.length-1,S.start+1,points.length-1)}
+   $('fileTitle').textContent=`${S.name} · ${points.length.toLocaleString()} 点`;$('upload').disabled=false;$('download').disabled=false;
+   $('startRange').max=points.length-1;$('endRange').max=points.length-1;
+   fitMap();updateAll();status('fileStatus',`已解析 ${points.length} 个轨迹点`);
+   if(keep)await saveLocalFile(file);savestate();if(source==='local'){if(S.token)await upload();else status('fileStatus','已加载，等待登录后自动上传')}return true;
+ }catch(e){status('fileStatus','解析失败：'+e.message,true);return false}}
+ function selected(){return S.points.slice(S.start,S.end+1)}
+ function metric(p,key){if(key==='speed')return p.speed===null?null:p.speed*3.6;return p[key]}
+ function climbRange(pts){let gain=0,loss=0,last=null,seg=null;const th=clamp(Number($('elevThreshold').value)||0,0,50);
+   for(const p of pts){if(p.seg!==seg){last=null;seg=p.seg}if(p.ele===null)continue;if(last===null){last=p.ele;continue}const delta=p.ele-last;if(Math.abs(delta)>=th){if(delta>0)gain+=delta;else loss-=delta;last=p.ele}}
+   return {gain,loss};
+ }
+ function calc(pts){if(!pts.length)return null;const dist=pts.at(-1).cum-pts[0].cum;const validTimes=pts.filter(p=>p.time!==null);const time=validTimes.length>1?validTimes.at(-1).time-validTimes[0].time:null;
+   let hrTotal=0,hrCount=0,maxHr=null,minEle=null,maxEle=null;for(const p of pts){if(p.hr!==null&&p.hr>=30&&p.hr<=250){hrTotal+=p.hr;hrCount++;maxHr=maxHr===null?p.hr:Math.max(maxHr,p.hr)}if(p.ele!==null){minEle=minEle===null?p.ele:Math.min(minEle,p.ele);maxEle=maxEle===null?p.ele:Math.max(maxEle,p.ele)}}const {gain,loss}=climbRange(pts);
+   return {dist,time,gain,loss,avgSpeed:time>0?dist/(time/1000)*3.6:null,avgHr:hrCount?hrTotal/hrCount:null,maxHr,minEle,maxEle};
+ }
+ function heartZone(hr,maximum){if(hr<maximum*.5)return 0;if(hr<maximum*.6)return 1;if(hr<maximum*.7)return 2;if(hr<maximum*.8)return 3;if(hr<maximum*.9)return 4;if(hr<=maximum)return 5;return 6}
+ function validHr(hr){return hr!==null&&Number.isFinite(hr)&&hr>=30&&hr<=250}
+ function heartAnalysis(pts,maximum){
+   const samples=pts.filter(p=>validHr(p.hr)),zones=new Array(7).fill(0);if(!samples.length)return null;
+   let timed=0,covered=0,weighted=0;
+   for(let i=1;i<pts.length;i++){
+     const a=pts[i-1],b=pts[i];if(a.seg!==b.seg||a.time===null||b.time===null)continue;
+     const seconds=(b.time-a.time)/1000;if(seconds<=0||seconds>60)continue;
+     timed+=seconds;if(!validHr(a.hr)||!validHr(b.hr))continue;
+     const hr=(a.hr+b.hr)/2;covered+=seconds;weighted+=hr*seconds;zones[heartZone(hr,maximum)]+=seconds;
+   }
+   const timeBased=covered>0;
+   if(!timeBased)for(const p of samples)zones[heartZone(p.hr,maximum)]++;
+   const total=timeBased?covered:samples.length;
+   let peak=0;for(const p of samples)peak=Math.max(peak,p.hr);
+   return {zones,total,timeBased,coverage:timed>0?covered/timed:null,mean:timeBased?weighted/covered:samples.reduce((s,p)=>s+p.hr,0)/samples.length,
+     peak,samples:samples.length,high:(zones[4]+zones[5]+zones[6])/total};
+ }
+ // 将各个有效 GPS 位移按真实时间均分到 30 秒窗口，降低点频率与瞬时抖动的影响。
+ function movementAnalysis(pts){
+   const timed=pts.filter(p=>p.time!==null);if(timed.length<2)return null;
+   const origin=timed[0].time,map=new Map();let accepted=0,discarded=0;
+   for(let i=1;i<pts.length;i++){
+     const a=pts[i-1],b=pts[i];if(a.seg!==b.seg||a.time===null||b.time===null)continue;
+     const dt=b.time-a.time;if(dt<=0||dt>60000){discarded++;continue}
+     const distance=hav(a,b),speed=distance/(dt/1000);
+     if(!Number.isFinite(speed)||speed>8){discarded++;continue}
+     accepted+=dt/1000;let pos=a.time-origin,end=b.time-origin;
+     while(pos<end){const idx=Math.floor(pos/30000),next=Math.min(end,(idx+1)*30000),piece=next-pos;
+       const key=`${a.seg}:${idx}`;let bin=map.get(key);if(!bin){bin={seg:a.seg,idx,time:0,dist:0};map.set(key,bin)}
+       bin.time+=piece/1000;bin.dist+=distance*piece/dt;pos=next;
+     }
+   }
+   const bins=[...map.values()].filter(x=>x.time>=15).sort((a,b)=>a.idx-b.idx||a.seg-b.seg);
+   if(!bins.length)return null;
+   for(const b of bins)b.speed=b.dist/b.time*3.6;
+   const total=bins.reduce((s,b)=>s+b.time,0),moving=bins.filter(b=>b.speed>=.8),movingTime=moving.reduce((s,b)=>s+b.time,0);
+   let changes=0,changeWeight=0,slowBouts=0,slowDuration=0,run=0,prior=null;
+   const flush=()=>{if(run>=60)slowBouts++;run=0};
+   for(const b of bins){const consecutive=prior&&b.seg===prior.seg&&b.idx===prior.idx+1;
+     if(!consecutive)flush();
+     if(b.speed<.8){run+=b.time;slowDuration+=b.time}else flush();
+     if(consecutive&&b.speed>=.8&&prior.speed>=.8){
+       const weight=Math.min(b.time,prior.time),relative=Math.abs(b.speed-prior.speed)/Math.max(1.2,(b.speed+prior.speed)/2);
+       changes+=relative*weight;changeWeight+=weight;
+     }
+     prior=b;
+   }
+   flush();
+   const variation=changeWeight?changes/changeWeight:null;
+   const stability=variation===null?null:clamp(100*(1-variation/.7),0,100);
+   const continuity=movingTime/total*100;
+   const flow=stability===null?null:Math.round(.7*stability+.3*continuity);
+   const span=(timed.at(-1).time-timed[0].time)/1000;
+   return {flow,stability,continuity,slowBouts,slowDuration,variation,binCount:bins.length,
+     coverage:span>0?Math.min(1,accepted/span):null,discarded,observed:total};
+ }
+ function renderAnalysisMetrics(id,rows){const node=$(id);node.replaceChildren();for(const [label,value] of rows){const div=document.createElement('div');div.className='analysismetric';const k=document.createElement('div');k.className='key';k.textContent=label;const v=document.createElement('div');v.className='value';v.textContent=value;div.append(k,v);node.append(div)}}
+ function updateHikingAnalysis(pts){
+   const maximum=clamp(Number($('maxHr').value)||200,100,250);$('hrMaxLabel').textContent=maximum;
+   const hr=heartAnalysis(pts,maximum);$('hrZones').replaceChildren();
+   if(!hr){$('hrBasis').textContent='无心率数据';$('hrSummary').replaceChildren();$('hrZones').textContent='轨迹中未读取到心率。请导入包含心率记录的 GPX / KML。';$('hrInsight').textContent='';}
+   else{
+     $('hrBasis').textContent=hr.timeBased?'按有效时间统计':'按采样点统计';
+     renderAnalysisMetrics('hrSummary',[['平均心率',`${Math.round(hr.mean)} bpm`],['峰值心率',`${Math.round(hr.peak)} bpm`],['≥80% 最大心率',`${fmt(hr.high*100,1)}%`]]);
+     const colors=['#62748e','#3a9bed','#33dfb2','#b9db5c','#f5b856','#f07855','#ff5d8a'];
+     for(let i=0;i<7;i++){
+       const first=Math.ceil(maximum*([0,.5,.6,.7,.8,.9,1][i])),next=i<5?Math.ceil(maximum*([.5,.6,.7,.8,.9,1][i]))-1:maximum;
+       const label=i===0?`< ${Math.ceil(maximum*.5)}`:i===6?`> ${maximum}`:`Z${i} ${first}-${next}`;
+       const ratio=hr.zones[i]/hr.total*100,row=document.createElement('div');row.className='zoneRow';
+       const name=document.createElement('span');name.textContent=label;const track=document.createElement('div');track.className='track';
+       const fill=document.createElement('div');fill.className='fill';fill.style.width=ratio+'%';fill.style.background=colors[i];
+       const pct=document.createElement('span');pct.className='pct';pct.textContent=fmt(ratio,1)+'%';
+       row.title=hr.timeBased?`约 ${duration(hr.zones[i]*1000)}`:`${Math.round(hr.zones[i])} 个心率采样点`;
+       track.append(fill);row.append(name,track,pct);$('hrZones').append(row);
+     }
+     const note=[];if(hr.peak>maximum)note.push(`记录峰值超过设定最高心率 ${maximum}，请核实设备误差或调整设置。`);
+     if(hr.timeBased&&hr.coverage!==null&&hr.coverage<.75)note.push(`心率有效时间覆盖 ${fmt(hr.coverage*100,0)}%，分区可能偏差较大。`);
+     if(!hr.timeBased)note.push('缺少连续有效时间戳，分区按采样点占比计算，并非时间占比。');
+     if(hr.samples<10)note.push('有效心率点较少，结论仅供参考。');
+     $('hrInsight').textContent=note.length?note.join(' '):`Z4–Z5（以及超出设定上限部分）占有效心率时间的 ${fmt(hr.high*100,1)}%。`;
+   }
+   const flow=movementAnalysis(pts);
+   if(!flow){$('flowBasis').textContent='无有效时间轨迹';$('flowSummary').replaceChildren();$('flowInsight').textContent='需要连续 GPS 坐标与时间戳；仅有线路坐标无法估计步速流畅性。';return}
+   $('flowBasis').textContent='30 秒 GPS 时间窗';
+   renderAnalysisMetrics('flowSummary',[
+     ['流畅指数',flow.flow===null?'样本不足':`${flow.flow} / 100`],
+     ['步速稳定性',flow.stability===null?'—':`${Math.round(flow.stability)} / 100`],
+     ['连续前进比例',`${fmt(flow.continuity,1)}%`],
+     ['低速累计',duration(flow.slowDuration*1000)],
+     ['≥1分钟低速段',`${flow.slowBouts} 次`],
+     ['有效分析时间',duration(flow.observed*1000)]
+   ]);
+   const notes=[];
+   if(flow.binCount<6)notes.push('有效时间窗不足 3 分钟，流畅指数代表性较低。');
+   if(flow.coverage!==null&&flow.coverage<.7)notes.push(`可分析 GPS 时间约占全程 ${fmt(flow.coverage*100,0)}%，存在较多缺失或异常记录。`);
+   if(flow.discarded)notes.push(`已排除 ${flow.discarded} 个时间异常或速度过高的区间。`);
+   if(!notes.length)notes.push('指数越高，代表选段在 GPS 可用时段内速度起伏越小、低速时间越少。');
+   $('flowInsight').textContent=notes.join(' ');
+ }
+ function updateAll(){if(!S.points.length)return;S.start=clamp(S.start,0,S.points.length-2);S.end=clamp(S.end,S.start+1,S.points.length-1);
+   $('startRange').value=S.start;$('endRange').value=S.end;const pts=selected(),r=calc(pts);$('startInfo').textContent=`第 ${S.start+1} 点 · ${(S.points[S.start].cum/1000).toFixed(2)} km`;$('endInfo').textContent=`第 ${S.end+1} 点 · ${(S.points[S.end].cum/1000).toFixed(2)} km`;
+   $('rangeLabel').textContent=`选中 ${pts.length} / ${S.points.length} 点`;
+   $('startKm').value=fmt(S.points[S.start].cum/1000,3);$('endKm').value=fmt(S.points[S.end].cum/1000,3);
+   const firstTimed=S.points.find(p=>p.time!==null);for(const [id,i] of [['startMinute',S.start],['endMinute',S.end]]){const p=S.points[i];$(id).disabled=!firstTimed;$(id).value=firstTimed&&p.time!==null?fmt((p.time-firstTimed.time)/60000,2):''}
+   const items=[['局部距离',fmt(r.dist/1000,2),'km'],['区间耗时',duration(r.time),''],['平均速度',fmt(r.avgSpeed,1),'km/h'],['累计爬升',fmt(r.gain,0),'m'],['累计下降',fmt(r.loss,0),'m'],['平均心率',fmt(r.avgHr,0),'bpm']];
+   $('stats').replaceChildren();for(const [label,value,unit] of items){const el=document.createElement('div');el.className='stat';const a=document.createElement('div');a.className='k';a.textContent=label;const b=document.createElement('div');b.className='v';b.textContent=value;const u=document.createElement('span');u.className='unit';u.textContent=unit;b.append(u);el.append(a,b);$('stats').append(el)}
+   const inspect=S.points[S.inspected];$('mapNotice').textContent=inspect?`选点 #${S.inspected+1} · 海拔 ${fmt(inspect.ele,1)}m · 心率 ${fmt(inspect.hr,0)}bpm · 全程里程 ${fmt(inspect.cum/1000,2)}km`:`选段 ${fmt(r.dist/1000,2)} km · ${duration(r.time)} · 海拔 ${fmt(r.minEle,0)}～${fmt(r.maxEle,0)} m`;
+   let emn=Infinity,emx=-Infinity;for(const p of S.points)if(p.ele!==null){emn=Math.min(emn,p.ele);emx=Math.max(emx,p.ele)}if(Number.isFinite(emn)){$('elevationLegend').hidden=false;$('elevMin').textContent=fmt(emn,0)+'m';$('elevMax').textContent=fmt(emx,0)+'m'}else $('elevationLegend').hidden=true;
+   drawMap();drawAllCharts();drawSplits(pts);updateHikingAnalysis(pts);savestate();
+ }
+ function changeRange(which,val){if(!S.points.length)return;if(which==='start')S.start=clamp(val,0,S.end-1);else S.end=clamp(val,S.start+1,S.points.length-1);updateAll()}
+ function nearestByDistance(km){let lo=0,hi=S.points.length-1,target=km*1000;while(lo<hi){const m=(lo+hi)>>1;if(S.points[m].cum<target)lo=m+1;else hi=m}return lo>0&&Math.abs(S.points[lo-1].cum-target)<Math.abs(S.points[lo].cum-target)?lo-1:lo}
+ function nearestByMinute(minutes){const first=S.points.find(p=>p.time!==null);if(!first)return null;let best=-1,d=Infinity,target=first.time+minutes*60000;for(let i=0;i<S.points.length;i++){const t=S.points[i].time;if(t!==null&&Math.abs(t-target)<d){d=Math.abs(t-target);best=i}}return best}
+ function applyNumber(which,kind,value){if(!S.points.length||value===''||!Number.isFinite(Number(value)))return;const v=Math.max(0,Number(value));const index=kind==='km'?nearestByDistance(v):nearestByMinute(v);if(index===null)return;
+   // 数字输入独立选择对应边界；交叉时调整另一端，保持有效选段。
+   if(which==='start'){S.start=clamp(index,0,S.points.length-2);if(S.start>=S.end)S.end=clamp(S.start+1,1,S.points.length-1)}
+   else{S.end=clamp(index,1,S.points.length-1);if(S.end<=S.start)S.start=S.end-1}S.inspected=index;updateAll()}
+ function autoPick(index){if(index<0||!S.points.length)return;S.inspected=index;
+   if(S.clickNext==='start'){S.start=clamp(index,0,S.points.length-2);if(S.start>=S.end)S.end=S.points.length-1;S.clickNext='end'}
+   else{if(index<=S.start){S.start=clamp(index,0,S.points.length-2);S.clickNext='end'}else{S.end=index;S.clickNext='start'}}
+   $('selectReset').textContent=S.clickNext==='start'?'◎ 下一次点击选起点':'◎ 下一次点击选终点';$('clickHint').textContent=`已定位第 ${index+1} 点，下次选择${S.clickNext==='start'?'起点':'终点'}`;updateAll();
+ }
+ // Web Mercator：不依赖任何地图 JS 库。
+ function project(lon,lat){const sin=Math.sin(clamp(lat,-85.0511,85.0511)*Math.PI/180);return {x:(lon+180)/360*256,y:(.5-Math.log((1+sin)/(1-sin))/(4*Math.PI))*256}}
+ function unproject(x,y){return {lon:x/256*360-180,lat:(2*Math.atan(Math.exp((.5-y/256)*2*Math.PI))-Math.PI/2)*180/Math.PI}}
+ function screen(p){const q=project(p.lon,p.lat),sc=2**S.zoom,r=$('mapBox').getBoundingClientRect();return {x:(q.x-S.centerX)*sc+r.width/2,y:(q.y-S.centerY)*sc+r.height/2}}
+ function fitMap(){if(!S.points.length)return;let mnx=Infinity,mxx=-Infinity,mny=Infinity,mxy=-Infinity;for(const p of S.points){const q=project(p.lon,p.lat);mnx=Math.min(mnx,q.x);mxx=Math.max(mxx,q.x);mny=Math.min(mny,q.y);mxy=Math.max(mxy,q.y)}const r=$('mapBox').getBoundingClientRect();S.centerX=(mnx+mxx)/2;S.centerY=(mny+mxy)/2;S.zoom=clamp(Math.log2(Math.min((r.width-100)/Math.max(.000001,mxx-mnx),(r.height-110)/Math.max(.000001,mxy-mny))),2,17);drawTiles();drawMap()}
+ function moveZoom(z){const old=2**S.zoom,newz=clamp(S.zoom+z,2,18);S.zoom=newz;drawTiles();drawMap()}
+ function drawTiles(){const layer=$('tiles');layer.replaceChildren();const visible=$('showTiles').checked;layer.style.display=visible?'block':'none';$('attr').style.display=visible?'block':'none';if(!visible)return;
+   const r=$('mapBox').getBoundingClientRect(),zi=Math.floor(S.zoom),f=2**(S.zoom-zi),sz=256*f,world=2**zi;
+   const cx=S.centerX*2**S.zoom,cy=S.centerY*2**S.zoom;const txMin=Math.floor((cx-r.width/2)/sz),txMax=Math.ceil((cx+r.width/2)/sz),tyMin=Math.floor((cy-r.height/2)/sz),tyMax=Math.ceil((cy+r.height/2)/sz);
+   let count=0;for(let y=tyMin;y<=tyMax;y++)for(let x=txMin;x<=txMax;x++){if(y<0||y>=world||count++>90)continue;
+     const img=document.createElement('img');img.alt='';img.draggable=false;img.loading='eager';img.onerror=()=>{if(!$('showTiles').checked)return;if(++S.tileFailures>=5){$('showTiles').checked=false;drawTiles();savestate();status('fileStatus','在线地图瓦片连接失败，已切换为离线网格图；轨迹与海拔分析不受影响',true)}};img.src=`https://tile.openstreetmap.org/${zi}/${((x%world)+world)%world}/${y}.png`;
+     img.style.left=(x*sz-cx+r.width/2)+'px';img.style.top=(y*sz-cy+r.height/2)+'px';img.style.width=sz+'px';img.style.height=sz+'px';layer.append(img);
+   }
+ }
+ function canvas2d(c){const r=c.getBoundingClientRect(),d=Math.min(devicePixelRatio||1,2);c.width=Math.round(r.width*d);c.height=Math.round(r.height*d);const ctx=c.getContext('2d');ctx.setTransform(d,0,0,d,0,0);return {ctx,w:r.width,h:r.height}}
+ function dot(ctx,p,color,rad){ctx.beginPath();ctx.arc(p.x,p.y,rad,0,Math.PI*2);ctx.fillStyle=color;ctx.fill();ctx.lineWidth=2;ctx.strokeStyle='#09121f';ctx.stroke()}
+ function drawMap(){const {ctx,w,h}=canvas2d($('mapCanvas'));ctx.clearRect(0,0,w,h);if(!S.points.length)return;
+   function line(start,end,color,width){ctx.beginPath();let lastSeg=null;for(let i=start;i<=end;i++){const p=S.points[i],v=screen(p);if(v.x < -w*2||v.x > w*3||v.y < -h*2||v.y > h*3){lastSeg=null;continue}if(lastSeg!==p.seg)ctx.moveTo(v.x,v.y);else ctx.lineTo(v.x,v.y);lastSeg=p.seg}ctx.strokeStyle=color;ctx.lineWidth=width;ctx.lineJoin='round';ctx.lineCap='round';ctx.stroke()}
+   line(0,S.points.length-1,'#748ba289',4);
+   let low=Infinity,high=-Infinity;for(const p of S.points)if(p.ele!==null){low=Math.min(low,p.ele);high=Math.max(high,p.ele)}
+   // 选段每小段按海拔着色（低蓝→青绿→黄色→高红）。无海拔时沿用青色。
+   const step=Math.max(1,Math.floor((S.end-S.start)/12000));for(let i=S.start+step;i<=S.end;i+=step){const a=S.points[i-step],b=S.points[i];if(a.seg!==b.seg)continue;const aa=screen(a),bb=screen(b),ele=b.ele??a.ele;
+     const t=ele===null||!Number.isFinite(low)?null:clamp((ele-low)/Math.max(1,high-low),0,1);ctx.strokeStyle=t===null?'#36d6d0':`hsl(${210-t*198} 85% 58%)`;ctx.lineWidth=5.5;ctx.beginPath();ctx.moveTo(aa.x,aa.y);ctx.lineTo(bb.x,bb.y);ctx.stroke()}
+   if((S.end-S.start)%step!==0){const a=S.points[S.end-((S.end-S.start)%step)],b=S.points[S.end];if(a.seg===b.seg){ctx.strokeStyle='#36d6d0';ctx.lineWidth=5.5;const aa=screen(a),bb=screen(b);ctx.beginPath();ctx.moveTo(aa.x,aa.y);ctx.lineTo(bb.x,bb.y);ctx.stroke()}}
+   dot(ctx,screen(S.points[0]),'#9bb6d1',4);dot(ctx,screen(S.points.at(-1)),'#9bb6d1',4);dot(ctx,screen(S.points[S.start]),'#4dedab',7);dot(ctx,screen(S.points[S.end]),'#ffb65e',7);
+   if(S.hover>=S.start&&S.hover<=S.end)dot(ctx,screen(S.points[S.hover]),'#fff',5);
+   if(S.inspected>=0){const p=S.points[S.inspected],v=screen(p);dot(ctx,v,'#fff',6);const text=`海拔 ${fmt(p.ele,1)}m  ·  ${fmt(p.cum/1000,2)}km  ·  心率 ${fmt(p.hr,0)}`;ctx.font='12px system-ui';const tw=ctx.measureText(text).width+20,tx=clamp(v.x-tw/2,5,Math.max(5,w-tw-5)),ty=clamp(v.y-40,6,Math.max(6,h-34));ctx.fillStyle='#071724ec';ctx.fillRect(tx,ty,tw,28);ctx.fillStyle='#fff';ctx.fillText(text,tx+10,ty+18)}
+ }
+ const chartSpec=[['elevChart','ele','#36d6d0'],['hrChart','hr','#ff7896'],['speedChart','speed','#6da7ff'],['slopeChart','slope','#ffb65e']];
+ function drawChart(id,key,color){const c=$(id),{ctx,w,h}=canvas2d(c),pts=selected(),left=40,right=10,top=10,bottom=23,W=w-left-right,H=h-top-bottom;ctx.clearRect(0,0,w,h);
+   const all=pts.map(p=>({p,v:metric(p,key)})),valid=all.filter(x=>x.v!==null&&Number.isFinite(x.v));ctx.font='11px system-ui';
+   if(!valid.length){ctx.fillStyle='#91a8bf';ctx.textAlign='center';ctx.fillText('该轨迹不包含此项数据',w/2,h/2);return}
+   let mn=Infinity,mx=-Infinity;for(const a of valid){mn=Math.min(mn,a.v);mx=Math.max(mx,a.v)}const pad=Math.max((mx-mn)*.12,key==='hr'?5:1);mn-=pad;mx+=pad;
+   const minD=pts[0].cum,maxD=pts.at(-1).cum,span=Math.max(1,maxD-minD);const x=p=>left+(p.cum-minD)/span*W,y=v=>top+(mx-v)/(mx-mn)*H;
+   ctx.strokeStyle='#2a4255';ctx.fillStyle='#91a8bf';ctx.textAlign='right';ctx.lineWidth=1;
+   for(let i=0;i<=3;i++){const yy=top+H*i/3;ctx.beginPath();ctx.moveTo(left,yy);ctx.lineTo(w-right,yy);ctx.stroke();ctx.fillText(fmt(mx-(mx-mn)*i/3,0),left-6,yy+3)}
+   ctx.textAlign='center';for(let i=0;i<=4;i++)ctx.fillText(fmt(span*i/4/1000,1),left+W*i/4,h-5);
+   ctx.beginPath();let started=false,lastSeg=null;for(const {p,v} of all){if(v===null||!Number.isFinite(v)){started=false;continue}if(!started||p.seg!==lastSeg)ctx.moveTo(x(p),y(v));else ctx.lineTo(x(p),y(v));lastSeg=p.seg;started=true}ctx.strokeStyle=color;ctx.lineWidth=2;ctx.stroke();
+   if(S.hover>=S.start&&S.hover<=S.end){const p=S.points[S.hover],v=metric(p,key),xx=x(p);ctx.strokeStyle='#cce3f07a';ctx.beginPath();ctx.moveTo(xx,top);ctx.lineTo(xx,top+H);ctx.stroke();if(v!==null){dot(ctx,{x:xx,y:y(v)},color,4);ctx.fillStyle='#fff';ctx.textAlign='right';ctx.fillText(fmt(v,1),w-12,16)}}
+ }
+ function drawAllCharts(){for(const [id,key,color] of chartSpec)drawChart(id,key,color)}
+ function drawSplits(pts){const tbody=$('splits');tbody.replaceChildren();if(pts.length<2)return;
+   const baseD=pts[0].cum,total=pts.at(-1).cum-baseD;let start=0,part=1;
+   while(start<pts.length-1){const upper=baseD+part*1000;let end=start+1;while(end<pts.length-1&&pts[end].cum<upper)end++;
+     const a=pts.slice(start,end+1),r=calc(a),row=document.createElement('tr');const cells=[`${part} 段`,fmt(r.dist/1000,2)+' km',duration(r.time),fmt(r.avgSpeed,1)+' km/h',fmt(r.gain,0)+' m',fmt(r.avgHr,0)+' bpm'];
+     for(const t of cells){const cell=document.createElement('td');cell.textContent=t;row.append(cell)}tbody.append(row);start=end;part++;if(part>300)break;
+   }
+ }
+ function nearestMapPoint(x,y){let best=-1,dist=Infinity;for(let i=0;i<S.points.length;i++){const p=screen(S.points[i]),d=(p.x-x)**2+(p.y-y)**2;if(d<dist){dist=d;best=i}}return Math.sqrt(dist)<35?best:-1}
+ async function db(){return new Promise((res,rej)=>{const r=indexedDB.open('trajectoryLabLocal',1);r.onupgradeneeded=()=>r.result.createObjectStore('files');r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)})}
+ async function saveLocalFile(file){try{const d=await db();await new Promise((res,rej)=>{const t=d.transaction('files','readwrite');t.objectStore('files').put(file,'last');t.oncomplete=res;t.onerror=()=>rej(t.error)});d.close()}catch(e){status('fileStatus','轨迹已加载，但浏览器本地文件缓存失败：'+e.message,true)}}
+ async function restoreLocal(){try{const d=await db();const file=await new Promise((res,rej)=>{const t=d.transaction('files','readonly');const r=t.objectStore('files').get('last');r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)});d.close();if(file)await loadFile(file,false)}catch{}}
+ async function clearLocal(){try{const d=await db();await new Promise((res,rej)=>{const t=d.transaction('files','readwrite');t.objectStore('files').delete('last');t.oncomplete=res;t.onerror=()=>rej(t.error)});d.close();localStorage.removeItem(K);status('fileStatus','已清除本地缓存；当前页面中的轨迹仍可分析')}catch(e){status('fileStatus',e.message,true)}}
+ async function clearCurrent(){S.file=null;S.fileKey='';S.points=[];S.start=0;S.end=0;S.inspected=-1;S.hover=-1;S.pendingAuto=false;$('upload').disabled=true;$('download').disabled=true;$('fileTitle').textContent='未选择轨迹';$('rangeLabel').textContent='全程';$('mapNotice').textContent='已清空当前轨迹';$('elevationLegend').hidden=true;
+   $('hrBasis').textContent='等待数据';$('flowBasis').textContent='等待数据';$('hrSummary').replaceChildren();$('flowSummary').replaceChildren();$('hrZones').textContent='导入轨迹后显示分区';$('hrInsight').textContent='';$('flowInsight').textContent='需要带时间戳的连续轨迹，才能估计速度变化与低速停顿。';
+   for(const c of ['elevChart','hrChart','speedChart','slopeChart']){const {ctx,w,h}=canvas2d($(c));ctx.clearRect(0,0,w,h)}$('splits').replaceChildren();$('stats').replaceChildren();drawMap();await clearLocal();status('fileStatus','当前轨迹与浏览器文件缓存已清空，云端文件未删除')}
+ // 交互绑定
+ $('pickFile').onclick=()=>$('fileInput').click();$('fileInput').onchange=e=>{if(e.target.files?.[0])loadFile(e.target.files[0]);e.target.value=''};
+ document.addEventListener('dragover',e=>e.preventDefault());document.addEventListener('drop',e=>{e.preventDefault();if(e.dataTransfer?.files?.[0])loadFile(e.dataTransfer.files[0])});
+ $('upload').onclick=()=>upload(true);$('login').onclick=login;$('logout').onclick=logout;$('refresh').onclick=listCloud;$('clearCloud').onclick=clearCloud;$('clearCurrent').onclick=clearCurrent;
+ $('fit').onclick=fitMap;$('fullRange').onclick=()=>{if(!S.points.length)return;S.start=0;S.end=S.points.length-1;updateAll()};
+ $('download').onclick=()=>{if(!S.file)return;const url=URL.createObjectURL(S.file);const a=document.createElement('a');a.href=url;a.download=S.file.name;a.click();setTimeout(()=>URL.revokeObjectURL(url),3000)};
+ $('selectReset').onclick=()=>{S.clickNext='start';$('selectReset').textContent='◎ 下一次点击选起点';$('clickHint').textContent='下一次地图/曲线点击设置起点'};
+ for(const [id,which,kind] of [['startKm','start','km'],['endKm','end','km'],['startMinute','start','time'],['endMinute','end','time']])$(id).addEventListener('change',e=>applyNumber(which,kind,e.target.value));
+ $('startRange').oninput=e=>changeRange('start',Number(e.target.value));$('endRange').oninput=e=>changeRange('end',Number(e.target.value));
+ $('zoomIn').onclick=()=>moveZoom(1);$('zoomOut').onclick=()=>moveZoom(-1);
+ $('showTiles').onchange=()=>{if($('showTiles').checked)S.tileFailures=0;drawTiles();savestate()};$('elevThreshold').onchange=()=>{updateAll();savestate()};$('maxHr').onchange=()=>{$('maxHr').value=clamp(Number($('maxHr').value)||200,100,250);$('hrMaxLabel').textContent=$('maxHr').value;if(S.points.length)updateAll();else savestate()};$('clearLocal').onclick=clearLocal;
+ for(const id of ['base','authCollection','collection','fileField','remember'])$(id).addEventListener('change',()=>{savestate();if(id==='remember')saveAuth()});
+ const mc=$('mapCanvas');mc.addEventListener('pointerdown',e=>{mc.setPointerCapture(e.pointerId);S.drag={x:e.offsetX,y:e.offsetY,cx:S.centerX,cy:S.centerY,moved:false}});
+ mc.addEventListener('pointermove',e=>{if(!S.drag)return;const dx=e.offsetX-S.drag.x,dy=e.offsetY-S.drag.y;if(Math.abs(dx)+Math.abs(dy)>4)S.drag.moved=true;if(S.drag.moved){S.centerX=S.drag.cx-dx/2**S.zoom;S.centerY=S.drag.cy-dy/2**S.zoom;drawTiles();drawMap()}});
+ mc.addEventListener('pointerup',e=>{if(!S.drag)return;const moved=S.drag.moved;S.drag=null;if(!moved){const i=nearestMapPoint(e.offsetX,e.offsetY);if(i>=0)autoPick(i);else if(S.points.length)status('fileStatus','请点击轨迹线附近（35px 内）')}});
+ mc.addEventListener('wheel',e=>{e.preventDefault();moveZoom(e.deltaY<0?.5:-.5)},{passive:false});
+ for(const [id] of chartSpec){$(id).addEventListener('mousemove',e=>{if(!S.points.length)return;const r=e.currentTarget.getBoundingClientRect(),t=clamp((e.clientX-r.left-40)/Math.max(1,r.width-50),0,1),pts=selected(),target=pts[0].cum+t*(pts.at(-1).cum-pts[0].cum);let lo=S.start,hi=S.end;while(lo<hi){const m=(lo+hi)>>1;if(S.points[m].cum<target)lo=m+1;else hi=m}S.hover=lo;drawAllCharts();drawMap()});$(id).addEventListener('click',()=>{if(S.hover>=0)autoPick(S.hover)});$(id).addEventListener('mouseleave',()=>{S.hover=-1;drawAllCharts();drawMap()})}
+ new ResizeObserver(()=>{drawTiles();drawMap();drawAllCharts()}).observe($('mapBox'));
+ window.addEventListener('resize',()=>{drawTiles();drawMap();drawAllCharts()});
+ // 初始面板
+ $('stats').replaceChildren();for(const label of ['局部距离','区间耗时','平均速度','累计爬升','累计下降','平均心率']){const el=document.createElement('div');el.className='stat';el.textContent=label+'　—';$('stats').append(el)}
+ $('hrMaxLabel').textContent=clamp(Number($('maxHr').value)||200,100,250);saveAuth();drawTiles();restoreLocal();refreshAuth();
+})();
+</script>
+</body>
+</html>
+
+<!--sandbox-meta:v1:eyJmb3JtYXQiOiJodG1sIiwicmVsYXRpb25zIjpbXSwiY3JlYXRlZEF0IjoiMjAyNi0xMC0yNFQxNDowMDo0My44NzFaIiwidXBkYXRlZEF0IjoiMjAyNi0xMC0yNFQxNDozMzoyNi41ODFaIn0=-->

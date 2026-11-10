@@ -1,0 +1,1232 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>音乐标签分类体系：原理与规则</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Mono:wght@300;400;500&family=Noto+Serif+SC:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #07080c;
+    --bg-panel: #0d0f14;
+    --surface: #12151c;
+    --surface-raised: #1a1e28;
+    --accent: #e8a838;
+    --accent-dim: rgba(232,168,56,0.12);
+    --accent-glow: rgba(232,168,56,0.06);
+    --teal: #3ecfb0;
+    --teal-dim: rgba(62,207,176,0.12);
+    --blue: #5b9cf5;
+    --blue-dim: rgba(91,156,245,0.1);
+    --violet: #a78bfa;
+    --violet-dim: rgba(167,139,250,0.1);
+    --rose: #f472b6;
+    --rose-dim: rgba(244,114,182,0.1);
+    --text: #eee8dc;
+    --text-2: #c4bdb0;
+    --text-3: #7a756c;
+    --border: rgba(255,255,255,0.05);
+    --border-accent: rgba(232,168,56,0.15);
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Noto Serif SC', serif;
+    font-size: 16px;
+    line-height: 1.85;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content:'';
+    position:fixed; inset:0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+    opacity: 0.02;
+    pointer-events:none; z-index:0;
+  }
+
+  ::-webkit-scrollbar { width:5px; }
+  ::-webkit-scrollbar-track { background:var(--bg); }
+  ::-webkit-scrollbar-thumb { background:var(--surface-raised); border-radius:3px; }
+
+  .wrap { max-width:1060px; margin:0 auto; padding:0 2rem; position:relative; z-index:1; }
+
+  /* ===== HERO ===== */
+  .hero {
+    min-height:100vh;
+    display:flex; flex-direction:column; justify-content:center; align-items:center;
+    text-align:center; position:relative; padding:4rem 2rem;
+  }
+
+  .hero::before {
+    content:''; position:absolute; top:15%; left:50%; transform:translateX(-50%);
+    width:700px; height:700px; border-radius:50%;
+    background: radial-gradient(circle, var(--accent-glow), transparent 65%);
+    pointer-events:none; animation: pulse 10s ease infinite;
+  }
+
+  .hero::after {
+    content:''; position:absolute; bottom:0; left:0; right:0; height:40%;
+    background: linear-gradient(to top, var(--bg), transparent);
+    pointer-events:none;
+  }
+
+  .hero-badge {
+    display:inline-flex; align-items:center; gap:0.5rem;
+    background: var(--accent-dim); border:1px solid var(--border-accent);
+    color:var(--accent); padding:0.35rem 1.1rem; border-radius:100px;
+    font-family:'DM Mono',monospace; font-size:0.72rem; letter-spacing:0.12em;
+    text-transform:uppercase; margin-bottom:2.5rem;
+    opacity:0; animation: fadeDown 0.8s 0.1s ease forwards;
+  }
+
+  .hero h1 {
+    font-size:clamp(2.6rem,6.5vw,4.6rem); font-weight:900;
+    line-height:1.12; margin-bottom:1.5rem;
+    opacity:0; animation: fadeUp 1s 0.25s ease forwards;
+  }
+
+  .hero h1 .thin { font-weight:300; color:var(--text-2); }
+
+  .hero h1 .accent-text {
+    background: linear-gradient(135deg, var(--accent), #f0c060);
+    -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+  }
+
+  .hero-sub {
+    font-size:1.1rem; color:var(--text-3); max-width:560px; font-weight:300;
+    opacity:0; animation: fadeUp 1s 0.45s ease forwards;
+  }
+
+  .hero-formula {
+    margin-top:2.5rem; padding:1.2rem 2.5rem;
+    background:var(--surface); border:1px solid var(--border);
+    border-radius:12px; font-family:'DM Mono',monospace; font-size:0.95rem;
+    color:var(--accent); letter-spacing:0.02em;
+    opacity:0; animation: fadeUp 1s 0.6s ease forwards;
+  }
+
+  .hero-scroll {
+    position:absolute; bottom:2.5rem; left:50%; transform:translateX(-50%); z-index:2;
+    font-family:'DM Mono',monospace; font-size:0.65rem; color:var(--text-3);
+    letter-spacing:0.12em; text-transform:uppercase;
+    opacity:0; animation: fadeUp 1s 0.8s ease forwards;
+  }
+  .hero-scroll::after {
+    content:''; display:block; width:1px; height:28px;
+    background:linear-gradient(to bottom, var(--text-3), transparent);
+    margin:0.4rem auto 0;
+  }
+
+  /* ===== SECTION STYLING ===== */
+  section { padding:5rem 0; position:relative; }
+
+  .sec-num {
+    font-family:'DM Mono',monospace; font-size:0.68rem;
+    letter-spacing:0.18em; color:var(--accent); opacity:0.5;
+    margin-bottom:0.6rem; display:block;
+  }
+
+  .sec-title {
+    font-size:clamp(1.6rem,3.5vw,2.4rem); font-weight:700;
+    line-height:1.35; margin-bottom:0.6rem;
+  }
+
+  .sec-desc {
+    color:var(--text-3); font-size:0.92rem; font-weight:300;
+    max-width:600px; margin-bottom:2.5rem;
+  }
+
+  /* ===== PIPELINE VISUAL ===== */
+  .pipeline {
+    margin:3rem 0; border-radius:16px; overflow:hidden;
+    border:1px solid var(--border); background:var(--surface);
+  }
+
+  .pipeline svg { width:100%; display:block; }
+
+  /* ===== THAYER MODEL ===== */
+  .thayer-wrap {
+    margin:3rem 0; border-radius:16px; overflow:hidden;
+    border:1px solid var(--border); background:var(--surface);
+  }
+
+  .thayer-wrap svg { width:100%; display:block; }
+
+  /* ===== TAG TABLE ===== */
+  .tag-table-wrap {
+    overflow-x:auto; margin:2rem 0; border-radius:12px;
+    border:1px solid var(--border); background:var(--surface);
+  }
+
+  .tag-table {
+    width:100%; border-collapse:collapse; font-size:0.88rem;
+  }
+
+  .tag-table thead th {
+    font-family:'DM Mono',monospace; font-size:0.68rem;
+    letter-spacing:0.1em; text-transform:uppercase;
+    color:var(--text-3); padding:1rem 1.2rem; text-align:left;
+    border-bottom:2px solid var(--border); font-weight:400;
+    background:rgba(0,0,0,0.2);
+  }
+
+  .tag-table tbody td {
+    padding:0.85rem 1.2rem; border-bottom:1px solid var(--border);
+    color:var(--text-2); vertical-align:top;
+  }
+
+  .tag-table tbody tr:last-child td { border-bottom:none; }
+
+  .tag-table tbody tr:hover { background:rgba(232,168,56,0.02); }
+
+  .tag-table .tag-name {
+    font-weight:700; font-size:0.95rem; color:var(--text); white-space:nowrap;
+  }
+
+  .tag-table .dim-label {
+    display:inline-block; padding:0.1rem 0.5rem; border-radius:4px;
+    font-family:'DM Mono',monospace; font-size:0.68rem; letter-spacing:0.04em;
+  }
+
+  .dim-a { background:var(--rose-dim); color:var(--rose); }
+  .dim-b { background:var(--blue-dim); color:var(--blue); }
+  .dim-c { background:var(--teal-dim); color:var(--teal); }
+  .dim-d { background:var(--violet-dim); color:var(--violet); }
+
+  /* ===== STYLE GRID ===== */
+  .style-grid {
+    display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr));
+    gap:0.8rem; margin:2rem 0;
+  }
+
+  .style-card {
+    background:var(--surface); border:1px solid var(--border);
+    border-radius:10px; padding:1.2rem 1.4rem;
+    opacity:0; animation:fadeUp 0.5s ease forwards;
+    transition: border-color 0.3s, transform 0.3s;
+  }
+
+  .style-card:hover { border-color:var(--border-accent); transform:translateY(-2px); }
+
+  .style-card:nth-child(1) { animation-delay:0.02s; }
+  .style-card:nth-child(2) { animation-delay:0.06s; }
+  .style-card:nth-child(3) { animation-delay:0.10s; }
+  .style-card:nth-child(4) { animation-delay:0.14s; }
+  .style-card:nth-child(5) { animation-delay:0.18s; }
+  .style-card:nth-child(6) { animation-delay:0.22s; }
+  .style-card:nth-child(7) { animation-delay:0.26s; }
+  .style-card:nth-child(8) { animation-delay:0.30s; }
+  .style-card:nth-child(9) { animation-delay:0.34s; }
+  .style-card:nth-child(10) { animation-delay:0.38s; }
+  .style-card:nth-child(11) { animation-delay:0.42s; }
+  .style-card:nth-child(12) { animation-delay:0.46s; }
+  .style-card:nth-child(13) { animation-delay:0.50s; }
+  .style-card:nth-child(14) { animation-delay:0.54s; }
+  .style-card:nth-child(15) { animation-delay:0.58s; }
+
+  .style-card .sc-name {
+    font-weight:700; font-size:1rem; margin-bottom:0.3rem;
+  }
+
+  .style-card .sc-desc {
+    font-size:0.78rem; color:var(--text-3); font-weight:300; line-height:1.5;
+  }
+
+  .style-card .sc-icon {
+    width:28px; height:28px; border-radius:6px;
+    display:flex; align-items:center; justify-content:center;
+    margin-bottom:0.7rem; font-size:0.85rem;
+  }
+
+  /* ===== COMPOSITE RULES TABLE ===== */
+  .rules-table-wrap {
+    overflow-x:auto; margin:2.5rem 0; border-radius:12px;
+    border:1px solid var(--border); background:var(--surface);
+  }
+
+  .rules-table {
+    width:100%; border-collapse:collapse; font-size:0.82rem;
+    min-width:900px;
+  }
+
+  .rules-table thead th {
+    font-family:'DM Mono',monospace; font-size:0.65rem;
+    letter-spacing:0.1em; text-transform:uppercase;
+    color:var(--text-3); padding:0.9rem 1rem; text-align:left;
+    border-bottom:2px solid var(--border); font-weight:400;
+    background:rgba(0,0,0,0.3);
+  }
+
+  .rules-table tbody td {
+    padding:0.75rem 1rem; border-bottom:1px solid var(--border);
+    color:var(--text-2); vertical-align:top; line-height:1.55;
+  }
+
+  .rules-table tbody tr:last-child td { border-bottom:none; }
+
+  .rules-table tbody tr:hover { background:rgba(232,168,56,0.015); }
+
+  .rules-table .rn { font-weight:700; color:var(--accent); font-size:0.95rem; white-space:nowrap; }
+  .rules-table .rc { font-family:'DM Mono',monospace; font-size:0.72rem; color:var(--text-3); }
+
+  /* ===== MATH SECTION ===== */
+  .math-card {
+    background:var(--surface); border:1px solid var(--border);
+    border-radius:14px; padding:2.5rem; margin:2rem 0;
+    position:relative; overflow:hidden;
+  }
+
+  .math-card::before {
+    content:''; position:absolute; top:-50%; right:-20%;
+    width:300px; height:300px; border-radius:50%;
+    background:radial-gradient(circle, var(--accent-glow), transparent 70%);
+    pointer-events:none;
+  }
+
+  .math-card .formula-block {
+    background:var(--bg-panel); border:1px solid var(--border);
+    border-radius:10px; padding:1.5rem 2rem; margin:1.5rem 0;
+    font-family:'DM Mono',monospace; font-size:0.9rem;
+    color:var(--accent); line-height:2; overflow-x:auto;
+  }
+
+  .math-card h3 {
+    font-size:1.2rem; font-weight:700; margin-bottom:0.8rem;
+    display:flex; align-items:center; gap:0.6rem;
+  }
+
+  .math-card h3 .icon-dot {
+    width:8px; height:8px; border-radius:50%; background:var(--accent);
+  }
+
+  .math-card p { color:var(--text-2); font-weight:300; font-size:0.92rem; }
+
+  .key-props { list-style:none; padding:0; margin:1.5rem 0; }
+  .key-props li {
+    padding:0.7rem 0; padding-left:1.6rem; position:relative;
+    color:var(--text-2); font-size:0.9rem; border-bottom:1px solid var(--border);
+  }
+  .key-props li:last-child { border-bottom:none; }
+  .key-props li::before {
+    content:''; position:absolute; left:0; top:0.95em;
+    width:6px; height:6px; border-radius:50%; background:var(--accent); opacity:0.5;
+  }
+  .key-props li strong { color:var(--text); font-weight:600; }
+
+  /* ===== VALIDATION TABLE ===== */
+  .val-grid {
+    display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+    gap:1rem; margin:2rem 0;
+  }
+
+  .val-card {
+    background:var(--surface); border:1px solid var(--border);
+    border-radius:12px; padding:1.5rem; position:relative; overflow:hidden;
+    opacity:0; animation:fadeUp 0.5s ease forwards;
+  }
+
+  .val-card:nth-child(1){ animation-delay:0.05s; }
+  .val-card:nth-child(2){ animation-delay:0.12s; }
+  .val-card:nth-child(3){ animation-delay:0.19s; }
+  .val-card:nth-child(4){ animation-delay:0.26s; }
+  .val-card:nth-child(5){ animation-delay:0.33s; }
+
+  .val-card::before {
+    content:''; position:absolute; top:0; left:0; right:0; height:3px;
+    border-radius:12px 12px 0 0;
+    background:linear-gradient(90deg, var(--teal), transparent 70%);
+  }
+
+  .val-card .vc-label {
+    font-family:'DM Mono',monospace; font-size:0.65rem;
+    letter-spacing:0.1em; color:var(--teal); text-transform:uppercase;
+    margin-bottom:0.5rem;
+  }
+
+  .val-card .vc-test { font-weight:600; font-size:0.92rem; margin-bottom:0.3rem; }
+  .val-card .vc-expect { font-size:0.82rem; color:var(--text-3); }
+
+  /* ===== QUOTE ===== */
+  .quote-block {
+    border-left:3px solid var(--accent); padding:1.5rem 2rem;
+    margin:2.5rem 0; background:var(--accent-glow);
+    border-radius:0 10px 10px 0;
+  }
+
+  .quote-block p { font-size:1.15rem; font-weight:600; line-height:1.6; }
+  .quote-block .attr {
+    font-family:'DM Mono',monospace; font-size:0.72rem;
+    color:var(--text-3); margin-top:0.6rem; letter-spacing:0.04em;
+  }
+
+  /* ===== FEATURE TABLE ===== */
+  .feat-table-wrap {
+    overflow-x:auto; margin:2rem 0; border-radius:12px;
+    border:1px solid var(--border); background:var(--surface);
+  }
+
+  .feat-table {
+    width:100%; border-collapse:collapse; font-size:0.85rem;
+  }
+
+  .feat-table thead th {
+    font-family:'DM Mono',monospace; font-size:0.68rem;
+    letter-spacing:0.1em; text-transform:uppercase;
+    color:var(--text-3); padding:0.9rem 1.2rem; text-align:left;
+    border-bottom:2px solid var(--border); font-weight:400;
+    background:rgba(0,0,0,0.2);
+  }
+
+  .feat-table tbody td {
+    padding:0.8rem 1.2rem; border-bottom:1px solid var(--border);
+    color:var(--text-2); vertical-align:top;
+  }
+
+  .feat-table tbody tr:last-child td { border-bottom:none; }
+
+  .feat-table .feat-name { font-weight:600; color:var(--text); }
+  .feat-table .feat-range {
+    font-family:'DM Mono',monospace; font-size:0.8rem; color:var(--accent);
+  }
+
+  /* ===== BAR VIZ ===== */
+  .bar-row { display:flex; align-items:center; gap:0.6rem; margin:0.15rem 0; }
+  .bar-label { font-size:0.72rem; color:var(--text-3); width:40px; text-align:right; font-family:'DM Mono',monospace; }
+  .bar-track { flex:1; height:6px; background:var(--surface-raised); border-radius:3px; overflow:hidden; }
+  .bar-fill { height:100%; border-radius:3px; }
+
+  /* ===== SCENE CARDS ===== */
+  .scene-grid {
+    display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr));
+    gap:0.8rem; margin:2rem 0;
+  }
+
+  .scene-card {
+    background:var(--surface); border:1px solid var(--border);
+    border-radius:10px; padding:1.2rem 1.4rem;
+    opacity:0; animation:fadeUp 0.5s ease forwards;
+    transition: border-color 0.3s;
+  }
+  .scene-card:hover { border-color:var(--border-accent); }
+
+  .scene-card:nth-child(1){ animation-delay:0.02s; }
+  .scene-card:nth-child(2){ animation-delay:0.06s; }
+  .scene-card:nth-child(3){ animation-delay:0.10s; }
+  .scene-card:nth-child(4){ animation-delay:0.14s; }
+  .scene-card:nth-child(5){ animation-delay:0.18s; }
+  .scene-card:nth-child(6){ animation-delay:0.22s; }
+  .scene-card:nth-child(7){ animation-delay:0.26s; }
+  .scene-card:nth-child(8){ animation-delay:0.30s; }
+  .scene-card:nth-child(9){ animation-delay:0.34s; }
+  .scene-card:nth-child(10){ animation-delay:0.38s; }
+
+  .scene-card .sc-emoji { font-size:1.3rem; margin-bottom:0.5rem; }
+  .scene-card .sc-title { font-weight:700; font-size:0.95rem; margin-bottom:0.3rem; }
+  .scene-card .sc-feat { font-size:0.78rem; color:var(--text-3); font-weight:300; line-height:1.5; }
+
+  /* ===== FOOTER ===== */
+  footer {
+    border-top:1px solid var(--border); padding:3rem 0; text-align:center;
+    color:var(--text-3); font-size:0.78rem;
+    font-family:'DM Mono',monospace; letter-spacing:0.04em;
+  }
+
+  /* ===== ANIMATIONS ===== */
+  @keyframes fadeUp { from{opacity:0;transform:translateY(22px)} to{opacity:1;transform:translateY(0)} }
+  @keyframes fadeDown { from{opacity:0;transform:translateY(-10px)} to{opacity:1;transform:translateY(0)} }
+  @keyframes pulse { 0%,100%{opacity:0.25} 50%{opacity:0.55} }
+
+  /* ===== RESPONSIVE ===== */
+  @media(max-width:768px){
+    .wrap{padding:0 1.2rem}
+    section{padding:3.5rem 0}
+    .math-card{padding:1.8rem}
+    .hero-formula{font-size:0.78rem;padding:1rem 1.5rem}
+    .style-grid{grid-template-columns:repeat(auto-fill,minmax(160px,1fr))}
+  }
+</style>
+</head>
+<body>
+
+<!-- ============================== HERO ============================== -->
+<section class="hero">
+  <div class="hero-badge">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+    音乐标签分类体系
+  </div>
+  <h1>
+    <span class="thin">从</span><span class="accent-text">信号</span><span class="thin">到</span><span class="accent-text">歌单</span><br>
+    <span class="thin">四维坐标如何压缩一切</span>
+  </h1>
+  <p class="hero-sub">
+    音乐标签分类的本质是降维映射——把高维音频信号压缩成人类可用的离散标签。核心只有一句话：四个独立维度交叉产生所有标签。
+  </p>
+  <div class="hero-formula">
+    复合标签 = 情绪 ∩ 风格 ∩ 场景 ∩ 音频特征约束
+  </div>
+  <div class="hero-scroll">scroll</div>
+</section>
+
+<!-- ============================== PIPELINE ============================== -->
+<section>
+  <div class="wrap">
+    <span class="sec-num">01 — 底层原理</span>
+    <h2 class="sec-title">为什么标签能组合</h2>
+    <p class="sec-desc">每一层都是上一层的信息压缩——从连续信号到离散标签，最终变成「打开就能听」的产品。</p>
+
+    <div class="pipeline">
+      <svg viewBox="0 0 1060 340">
+        <defs>
+          <linearGradient id="pGrad" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stop-color="#e8a838" stop-opacity="0.6"/>
+            <stop offset="100%" stop-color="#3ecfb0" stop-opacity="0.6"/>
+          </linearGradient>
+          <marker id="pArrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+            <path d="M0,0 L8,3 L0,6" fill="none" stroke="#e8a838" stroke-width="1.2"/>
+          </marker>
+        </defs>
+
+        <text x="50" y="35" fill="#7a756c" font-family="DM Mono" font-size="9" letter-spacing="2">INFORMATION COMPRESSION PIPELINE</text>
+
+        <!-- Layer 1: Audio Signal -->
+        <rect x="50" y="60" width="200" height="70" rx="10" fill="rgba(91,156,245,0.06)" stroke="rgba(91,156,245,0.2)"/>
+        <text x="150" y="90" text-anchor="middle" fill="#5b9cf5" font-family="DM Mono" font-size="10" letter-spacing="1">LAYER 1</text>
+        <text x="150" y="112" text-anchor="middle" fill="#eee8dc" font-family="Noto Serif SC" font-size="14" font-weight="700">音频特征层</text>
+        <text x="150" y="126" text-anchor="middle" fill="#7a756c" font-family="DM Mono" font-size="8">连续值 · 机器计算</text>
+
+        <!-- Layer 2: Basic Tags -->
+        <rect x="310" y="60" width="200" height="70" rx="10" fill="rgba(167,139,250,0.06)" stroke="rgba(167,139,250,0.2)"/>
+        <text x="410" y="90" text-anchor="middle" fill="#a78bfa" font-family="DM Mono" font-size="10" letter-spacing="1">LAYER 2</text>
+        <text x="410" y="112" text-anchor="middle" fill="#eee8dc" font-family="Noto Serif SC" font-size="14" font-weight="700">基础标签层</text>
+        <text x="410" y="126" text-anchor="middle" fill="#7a756c" font-family="DM Mono" font-size="8">离散值 · 人工/模型标注</text>
+
+        <!-- Layer 3: Composite -->
+        <rect x="570" y="60" width="200" height="70" rx="10" fill="rgba(232,168,56,0.06)" stroke="rgba(232,168,56,0.2)"/>
+        <text x="670" y="90" text-anchor="middle" fill="#e8a838" font-family="DM Mono" font-size="10" letter-spacing="1">LAYER 3</text>
+        <text x="670" y="112" text-anchor="middle" fill="#eee8dc" font-family="Noto Serif SC" font-size="14" font-weight="700">复合标签层</text>
+        <text x="670" y="126" text-anchor="middle" fill="#7a756c" font-family="DM Mono" font-size="8">规则推断 · 用户直觉</text>
+
+        <!-- Layer 4: Playlists -->
+        <rect x="830" y="60" width="180" height="70" rx="10" fill="rgba(62,207,176,0.06)" stroke="rgba(62,207,176,0.2)"/>
+        <text x="920" y="90" text-anchor="middle" fill="#3ecfb0" font-family="DM Mono" font-size="10" letter-spacing="1">LAYER 4</text>
+        <text x="920" y="112" text-anchor="middle" fill="#eee8dc" font-family="Noto Serif SC" font-size="14" font-weight="700">场景歌单层</text>
+        <text x="920" y="126" text-anchor="middle" fill="#7a756c" font-family="DM Mono" font-size="8">面向用户 · 打开即听</text>
+
+        <!-- Arrows -->
+        <line x1="255" y1="95" x2="305" y2="95" stroke="#e8a838" stroke-width="1.2" marker-end="url(#pArrow)"/>
+        <line x1="515" y1="95" x2="565" y2="95" stroke="#e8a838" stroke-width="1.2" marker-end="url(#pArrow)"/>
+        <line x1="775" y1="95" x2="825" y2="95" stroke="#e8a838" stroke-width="1.2" marker-end="url(#pArrow)"/>
+
+        <!-- Compression labels -->
+        <text x="280" y="82" text-anchor="middle" fill="#7a756c" font-family="DM Mono" font-size="7">降维</text>
+        <text x="540" y="82" text-anchor="middle" fill="#7a756c" font-family="DM Mono" font-size="7">聚合</text>
+        <text x="800" y="82" text-anchor="middle" fill="#7a756c" font-family="DM Mono" font-size="7">包装</text>
+
+        <!-- Detail area -->
+        <text x="50" y="175" fill="#7a756c" font-family="DM Mono" font-size="9" letter-spacing="1">WHAT HAPPENS AT EACH LAYER</text>
+
+        <!-- Layer details -->
+        <line x1="50" y1="195" x2="250" y2="195" stroke="rgba(91,156,245,0.2)" stroke-width="1"/>
+        <text x="50" y="215" fill="#5b9cf5" font-family="DM Mono" font-size="9">频谱 · 节奏 · 调性 · 配器</text>
+        <text x="50" y="232" fill="#7a756c" font-family="Noto Serif SC" font-size="11" font-weight="300">保留物理事实，不丢信息</text>
+
+        <line x1="310" y1="195" x2="510" y2="195" stroke="rgba(167,139,250,0.2)" stroke-width="1"/>
+        <text x="310" y="215" fill="#a78bfa" font-family="DM Mono" font-size="9">情绪 · 风格 · 场景 · 特征值</text>
+        <text x="310" y="232" fill="#7a756c" font-family="Noto Serif SC" font-size="11" font-weight="300">压缩到人类可理解的类别</text>
+
+        <line x1="570" y1="195" x2="770" y2="195" stroke="rgba(232,168,56,0.2)" stroke-width="1"/>
+        <text x="570" y="215" fill="#e8a838" font-family="DM Mono" font-size="9">深夜emo · 燃 · 治愈 · 蹦迪</text>
+        <text x="570" y="232" fill="#7a756c" font-family="Noto Serif SC" font-size="11" font-weight="300">进一步压缩到直觉能懂的概念</text>
+
+        <line x1="830" y1="195" x2="1010" y2="195" stroke="rgba(62,207,176,0.2)" stroke-width="1"/>
+        <text x="830" y="215" fill="#3ecfb0" font-family="DM Mono" font-size="9">深夜独处 · 通勤路上 · 跑步</text>
+        <text x="830" y="232" fill="#7a756c" font-family="Noto Serif SC" font-size="11" font-weight="300">最终产品形态</text>
+
+        <!-- Core principle -->
+        <rect x="50" y="265" width="960" height="55" rx="10" fill="rgba(232,168,56,0.03)" stroke="rgba(232,168,56,0.08)"/>
+        <text x="530" y="288" text-anchor="middle" fill="#e8a838" font-family="Noto Serif SC" font-size="13" font-weight="600">离散标签的致命问题：标签数量爆炸 → 解决方案是分层</text>
+        <text x="530" y="308" text-anchor="middle" fill="#7a756c" font-family="DM Mono" font-size="9">如果每个维度独立设标签，排列组合会产生数千个类别，不可维护</text>
+      </svg>
+    </div>
+  </div>
+</section>
+
+<!-- ============================== THAYER MODEL ============================== -->
+<section>
+  <div class="wrap">
+    <span class="sec-num">02 — 维度 A：情绪</span>
+    <h2 class="sec-title">能量 × 效价：二维情绪平面</h2>
+    <p class="sec-desc">情绪不是一维的「开心/难过」，而是基于 Thayer 情感模型的二维平面——能量轴与效价轴的交叉。</p>
+
+    <div class="thayer-wrap">
+      <svg viewBox="0 0 880 520">
+        <defs>
+          <radialGradient id="q1" cx="80%" cy="20%" r="40%"><stop offset="0%" stop-color="#e8a838" stop-opacity="0.06"/><stop offset="100%" stop-color="transparent"/></radialGradient>
+          <radialGradient id="q2" cx="20%" cy="20%" r="40%"><stop offset="0%" stop-color="#f472b6" stop-opacity="0.05"/><stop offset="100%" stop-color="transparent"/></radialGradient>
+          <radialGradient id="q3" cx="20%" cy="80%" r="40%"><stop offset="0%" stop-color="#5b9cf5" stop-opacity="0.05"/><stop offset="100%" stop-color="transparent"/></radialGradient>
+          <radialGradient id="q4" cx="80%" cy="80%" r="40%"><stop offset="0%" stop-color="#3ecfb0" stop-opacity="0.05"/><stop offset="100%" stop-color="transparent"/></radialGradient>
+        </defs>
+
+        <!-- Quadrant backgrounds -->
+        <rect x="140" y="40" width="300" height="200" fill="url(#q2)"/>
+        <rect x="440" y="40" width="300" height="200" fill="url(#q1)"/>
+        <rect x="140" y="240" width="300" height="200" fill="url(#q3)"/>
+        <rect x="440" y="240" width="300" height="200" fill="url(#q4)"/>
+
+        <!-- Axes -->
+        <line x1="440" y1="30" x2="440" y2="455" stroke="rgba(255,255,255,0.12)" stroke-width="1"/>
+        <line x1="130" y1="240" x2="750" y2="240" stroke="rgba(255,255,255,0.12)" stroke-width="1"/>
+
+        <!-- Axis labels -->
+        <text x="440" y="475" text-anchor="middle" fill="#7a756c" font-family="DM Mono" font-size="10" letter-spacing="1">低效价 ← 效 价 → 高效价</text>
+        <text x="85" y="240" text-anchor="middle" fill="#7a756c" font-family="DM Mono" font-size="10" letter-spacing="1" transform="rotate(-90,85,240)">低能量 ← 能 量 → 高能量</text>
+
+        <!-- Quadrant labels -->
+        <text x="290" y="65" text-anchor="middle" fill="rgba(244,114,182,0.3)" font-family="DM Mono" font-size="9" letter-spacing="2">高能量 × 低效价</text>
+        <text x="590" y="65" text-anchor="middle" fill="rgba(232,168,56,0.3)" font-family="DM Mono" font-size="9" letter-spacing="2">高能量 × 高效价</text>
+        <text x="290" y="430" text-anchor="middle" fill="rgba(91,156,245,0.3)" font-family="DM Mono" font-size="9" letter-spacing="2">低能量 × 低效价</text>
+        <text x="590" y="430" text-anchor="middle" fill="rgba(62,207,176,0.3)" font-family="DM Mono" font-size="9" letter-spacing="2">低能量 × 高效价</text>
+
+        <!-- Q1: 高能+低效 (焦虑/激昂) -->
+        <g>
+          <circle cx="230" cy="110" r="6" fill="#f472b6" opacity="0.7"/>
+          <text x="250" y="115" fill="#f472b6" font-family="Noto Serif SC" font-size="14" font-weight="700">焦虑</text>
+          <circle cx="350" cy="130" r="6" fill="#f472b6" opacity="0.7"/>
+          <text x="370" y="135" fill="#f472b6" font-family="Noto Serif SC" font-size="14" font-weight="700">激昂</text>
+        </g>
+
+        <!-- Q2: 高能+高效 (狂欢/活力/欢快/自信/热血) -->
+        <g>
+          <circle cx="490" cy="80" r="6" fill="#e8a838" opacity="0.7"/>
+          <text x="508" y="85" fill="#e8a838" font-family="Noto Serif SC" font-size="13" font-weight="700">狂欢</text>
+          <circle cx="600" cy="100" r="6" fill="#e8a838" opacity="0.7"/>
+          <text x="618" y="105" fill="#e8a838" font-family="Noto Serif SC" font-size="13" font-weight="700">活力</text>
+          <circle cx="540" cy="150" r="6" fill="#e8a838" opacity="0.7"/>
+          <text x="558" y="155" fill="#e8a838" font-family="Noto Serif SC" font-size="13" font-weight="700">欢快</text>
+          <circle cx="680" cy="140" r="6" fill="#e8a838" opacity="0.6"/>
+          <text x="698" y="145" fill="#e8a838" font-family="Noto Serif SC" font-size="13" font-weight="700">自信</text>
+          <circle cx="620" cy="180" r="6" fill="#e8a838" opacity="0.6"/>
+          <text x="638" y="185" fill="#e8a838" font-family="Noto Serif SC" font-size="13" font-weight="700">热血励志</text>
+        </g>
+
+        <!-- Q3: 低能+高效 (甜蜜/浪漫/治愈/放松/平静) -->
+        <g>
+          <circle cx="490" cy="280" r="6" fill="#3ecfb0" opacity="0.7"/>
+          <text x="508" y="285" fill="#3ecfb0" font-family="Noto Serif SC" font-size="13" font-weight="700">甜蜜</text>
+          <circle cx="600" cy="300" r="6" fill="#3ecfb0" opacity="0.7"/>
+          <text x="618" y="305" fill="#3ecfb0" font-family="Noto Serif SC" font-size="13" font-weight="700">浪漫</text>
+          <circle cx="540" cy="340" r="6" fill="#3ecfb0" opacity="0.7"/>
+          <text x="558" y="345" fill="#3ecfb0" font-family="Noto Serif SC" font-size="13" font-weight="700">治愈</text>
+          <circle cx="650" cy="350" r="6" fill="#3ecfb0" opacity="0.6"/>
+          <text x="668" y="355" fill="#3ecfb0" font-family="Noto Serif SC" font-size="13" font-weight="700">放松</text>
+          <circle cx="700" cy="390" r="6" fill="#3ecfb0" opacity="0.5"/>
+          <text x="718" y="395" fill="#3ecfb0" font-family="Noto Serif SC" font-size="13" font-weight="700">平静</text>
+        </g>
+
+        <!-- Q4: 低能+低效 (孤独/悲伤/苦情/抑郁/思念) -->
+        <g>
+          <circle cx="200" cy="280" r="6" fill="#5b9cf5" opacity="0.7"/>
+          <text x="218" y="285" fill="#5b9cf5" font-family="Noto Serif SC" font-size="13" font-weight="700">孤独</text>
+          <circle cx="310" cy="310" r="6" fill="#5b9cf5" opacity="0.7"/>
+          <text x="328" y="315" fill="#5b9cf5" font-family="Noto Serif SC" font-size="13" font-weight="700">悲伤</text>
+          <circle cx="250" cy="350" r="6" fill="#5b9cf5" opacity="0.6"/>
+          <text x="268" y="355" fill="#5b9cf5" font-family="Noto Serif SC" font-size="13" font-weight="700">苦情</text>
+          <circle cx="370" cy="360" r="6" fill="#5b9cf5" opacity="0.5"/>
+          <text x="388" y="365" fill="#5b9cf5" font-family="Noto Serif SC" font-size="13" font-weight="700">抑郁</text>
+          <circle cx="200" cy="390" r="6" fill="#5b9cf5" opacity="0.5"/>
+          <text x="218" y="395" fill="#5b9cf5" font-family="Noto Serif SC" font-size="13" font-weight="700">思念</text>
+        </g>
+
+        <!-- Center point -->
+        <circle cx="440" cy="240" r="3" fill="rgba(255,255,255,0.2)"/>
+
+        <!-- Total count -->
+        <text x="770" y="490" fill="#7a756c" font-family="DM Mono" font-size="9">16 CORE EMOTION TAGS</text>
+      </svg>
+    </div>
+  </div>
+</section>
+
+<!-- ============================== STYLE DIMENSION ============================== -->
+<section>
+  <div class="wrap">
+    <span class="sec-num">03 — 维度 B：风格</span>
+    <h2 class="sec-title">曲风：描述的是「怎么编的」</h2>
+    <p class="sec-desc">风格是音乐的结构特征，不是感觉——它描述的是编曲方式、乐器选择和节奏框架。</p>
+
+    <div class="style-grid">
+      <div class="style-card">
+        <div class="sc-icon" style="background:var(--accent-dim)">🎤</div>
+        <div class="sc-name">流行</div>
+        <div class="sc-desc">主歌-副歌结构 · 4/4拍 · 中等BPM</div>
+      </div>
+      <div class="style-card">
+        <div class="sc-icon" style="background:var(--rose-dim)">🎸</div>
+        <div class="sc-name">摇滚</div>
+        <div class="sc-desc">失真吉他 · 强鼓点 · 高能量</div>
+      </div>
+      <div class="style-card">
+        <div class="sc-icon" style="background:var(--teal-dim)">🪕</div>
+        <div class="sc-name">民谣</div>
+        <div class="sc-desc">原声吉他/口琴 · 叙事歌词 · 中低BPM</div>
+      </div>
+      <div class="style-card">
+        <div class="sc-icon" style="background:var(--violet-dim)">🎹</div>
+        <div class="sc-name">电子</div>
+        <div class="sc-desc">合成器主导 · 四拍底鼓 · 高BPM</div>
+      </div>
+      <div class="style-card">
+        <div class="sc-icon" style="background:var(--accent-dim)">🎙️</div>
+        <div class="sc-name">说唱/嘻哈</div>
+        <div class="sc-desc">切分节奏 · 人声密集 · 节奏驱动</div>
+      </div>
+      <div class="style-card">
+        <div class="sc-icon" style="background:var(--rose-dim)">🎵</div>
+        <div class="sc-name">R&B</div>
+        <div class="sc-desc">切分旋律 · 转音 · 中低BPM</div>
+      </div>
+      <div class="style-card">
+        <div class="sc-icon" style="background:var(--teal-dim)">🎷</div>
+        <div class="sc-name">爵士</div>
+        <div class="sc-desc">即兴演奏 · 复杂和声 · 摇摆节奏</div>
+      </div>
+      <div class="style-card">
+        <div class="sc-icon" style="background:var(--blue-dim)">🎻</div>
+        <div class="sc-name">古典</div>
+        <div class="sc-desc">管弦配器 · 无歌词为主 · 动态范围大</div>
+      </div>
+      <div class="style-card">
+        <div class="sc-icon" style="background:var(--accent-dim)">🏮</div>
+        <div class="sc-name">古风/国风</div>
+        <div class="sc-desc">中国传统乐器 · 五声音阶</div>
+      </div>
+      <div class="style-card">
+        <div class="sc-icon" style="background:var(--blue-dim)">🎺</div>
+        <div class="sc-name">蓝调</div>
+        <div class="sc-desc">12小节进行 · 蓝音 · 滑音吉他</div>
+      </div>
+      <div class="style-card">
+        <div class="sc-icon" style="background:var(--rose-dim)">🤘</div>
+        <div class="sc-name">金属</div>
+        <div class="sc-desc">极高增益 · 双踩鼓 · 快速riff</div>
+      </div>
+      <div class="style-card">
+        <div class="sc-icon" style="background:var(--teal-dim)">🌴</div>
+        <div class="sc-name">雷鬼</div>
+        <div class="sc-desc">offbeat吉他 · 重低音 · 慢摇</div>
+      </div>
+      <div class="style-card">
+        <div class="sc-icon" style="background:var(--violet-dim)">🌊</div>
+        <div class="sc-name">新世纪</div>
+        <div class="sc-desc">环境音效 · 长pad · 无结构感</div>
+      </div>
+      <div class="style-card">
+        <div class="sc-icon" style="background:var(--accent-dim)">🤠</div>
+        <div class="sc-name">乡村</div>
+        <div class="sc-desc">班卓琴/小提琴 · 简单和弦 · 叙事</div>
+      </div>
+      <div class="style-card">
+        <div class="sc-icon" style="background:var(--rose-dim)">✨</div>
+        <div class="sc-name">二次元/ACG</div>
+        <div class="sc-desc">动画配乐风格 · 高能量居多</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================== SCENE DIMENSION ============================== -->
+<section>
+  <div class="wrap">
+    <span class="sec-num">04 — 维度 C：场景</span>
+    <h2 class="sec-title">使用情境：什么时候听</h2>
+    <p class="sec-desc">场景维度回答的是「什么时候听」，本质上是对音频特征的一种语义化包装。</p>
+
+    <div class="scene-grid">
+      <div class="scene-card">
+        <div class="sc-emoji">🏃</div>
+        <div class="sc-title">运动/健身</div>
+        <div class="sc-feat">高BPM(>125) · 高能量 · 强节拍</div>
+      </div>
+      <div class="scene-card">
+        <div class="sc-emoji">📚</div>
+        <div class="sc-title">学习/工作</div>
+        <div class="sc-feat">中低BPM(70-100) · 低能量 · 无歌词优先</div>
+      </div>
+      <div class="scene-card">
+        <div class="sc-emoji">🚗</div>
+        <div class="sc-title">开车</div>
+        <div class="sc-feat">中高BPM(90-130) · 中高能量 · 节奏稳定</div>
+      </div>
+      <div class="scene-card">
+        <div class="sc-emoji">🎉</div>
+        <div class="sc-title">派对</div>
+        <div class="sc-feat">高BPM(>120) · 高能量 · 电子/说唱</div>
+      </div>
+      <div class="scene-card">
+        <div class="sc-emoji">😴</div>
+        <div class="sc-title">睡眠</div>
+        <div class="sc-feat">低BPM(<70) · 极低能量 · 纯音乐/环境音</div>
+      </div>
+      <div class="scene-card">
+        <div class="sc-emoji">🧘</div>
+        <div class="sc-title">冥想</div>
+        <div class="sc-feat">BPM 50-70 · 极低能量 · 新世纪/纯音乐</div>
+      </div>
+      <div class="scene-card">
+        <div class="sc-emoji">💕</div>
+        <div class="sc-title">约会/婚礼</div>
+        <div class="sc-feat">中BPM(80-110) · 浪漫/甜蜜 · 流行/R&B</div>
+      </div>
+      <div class="scene-card">
+        <div class="sc-emoji">🏃‍♂️</div>
+        <div class="sc-title">跑步</div>
+        <div class="sc-feat">高BPM(140-180) · 高能量 · 节拍精准</div>
+      </div>
+      <div class="scene-card">
+        <div class="sc-emoji">🚇</div>
+        <div class="sc-title">通勤/地铁</div>
+        <div class="sc-feat">中BPM(90-120) · 中能量 · 流行为主</div>
+      </div>
+      <div class="scene-card">
+        <div class="sc-emoji">⛺</div>
+        <div class="sc-title">露营/旅行</div>
+        <div class="sc-feat">中低BPM · 民谣/轻电子 · 放松</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================== AUDIO FEATURES ============================== -->
+<section>
+  <div class="wrap">
+    <span class="sec-num">05 — 维度 D：音频特征</span>
+    <h2 class="sec-title">机器可算的物理属性</h2>
+    <p class="sec-desc">这一层是所有标签的物理锚点。「快乐」实际上对应 valence>0.6 + energy>0.5 + major_key，不是凭空定的。</p>
+
+    <div class="feat-table-wrap">
+      <table class="feat-table">
+        <thead>
+          <tr>
+            <th>特征</th>
+            <th>含义</th>
+            <th>取值范围</th>
+            <th>可视化</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="feat-name">BPM</td>
+            <td>每分钟节拍数</td>
+            <td class="feat-range">40 — 200</td>
+            <td>
+              <div class="bar-row">
+                <div class="bar-label">40</div>
+                <div class="bar-track"><div class="bar-fill" style="width:30%;background:linear-gradient(90deg,var(--teal),var(--accent))"></div></div>
+                <div class="bar-label">200</div>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td class="feat-name">Energy</td>
+            <td>能量强度</td>
+            <td class="feat-range">0.0 — 1.0</td>
+            <td>
+              <div class="bar-row">
+                <div class="bar-label">0</div>
+                <div class="bar-track"><div class="bar-fill" style="width:60%;background:linear-gradient(90deg,var(--teal),var(--accent))"></div></div>
+                <div class="bar-label">1.0</div>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td class="feat-name">Valence</td>
+            <td>效价（积极/消极）</td>
+            <td class="feat-range">0.0 — 1.0</td>
+            <td>
+              <div class="bar-row">
+                <div class="bar-label">0</div>
+                <div class="bar-track"><div class="bar-fill" style="width:50%;background:linear-gradient(90deg,#5b9cf5,#e8a838)"></div></div>
+                <div class="bar-label">1.0</div>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td class="feat-name">Danceability</td>
+            <td>舞曲性</td>
+            <td class="feat-range">0.0 — 1.0</td>
+            <td>
+              <div class="bar-row">
+                <div class="bar-label">0</div>
+                <div class="bar-track"><div class="bar-fill" style="width:55%;background:linear-gradient(90deg,var(--teal),var(--accent))"></div></div>
+                <div class="bar-label">1.0</div>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td class="feat-name">Acousticness</td>
+            <td>原声程度</td>
+            <td class="feat-range">0.0 — 1.0</td>
+            <td>
+              <div class="bar-row">
+                <div class="bar-label">0</div>
+                <div class="bar-track"><div class="bar-fill" style="width:40%;background:linear-gradient(90deg,var(--teal),var(--accent))"></div></div>
+                <div class="bar-label">1.0</div>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td class="feat-name">Instrumentalness</td>
+            <td>纯音乐概率</td>
+            <td class="feat-range">0.0 — 1.0</td>
+            <td>
+              <div class="bar-row">
+                <div class="bar-label">0</div>
+                <div class="bar-track"><div class="bar-fill" style="width:35%;background:linear-gradient(90deg,var(--teal),var(--accent))"></div></div>
+                <div class="bar-label">1.0</div>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td class="feat-name">Loudness</td>
+            <td>响度</td>
+            <td class="feat-range">-60 — 0 dB</td>
+            <td>
+              <div class="bar-row">
+                <div class="bar-label">-60</div>
+                <div class="bar-track"><div class="bar-fill" style="width:70%;background:linear-gradient(90deg,var(--teal),var(--accent))"></div></div>
+                <div class="bar-label">0</div>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td class="feat-name">Key / Mode</td>
+            <td>调性 / 大小调</td>
+            <td class="feat-range">大调=积极 · 小调=消极</td>
+            <td style="color:var(--text-3);font-size:0.78rem">离散值，非连续</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ============================== COMPOSITE RULES ============================== -->
+<section>
+  <div class="wrap">
+    <span class="sec-num">06 — 复合标签规则</span>
+    <h2 class="sec-title">从四维到最终标签：完整规则表</h2>
+    <p class="sec-desc">每个复合标签都是四维空间中的一个子区域，不是树状拼接，不是简单叠加。</p>
+
+    <div class="rules-table-wrap">
+      <table class="rules-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>复合标签</th>
+            <th>情绪约束</th>
+            <th>风格约束</th>
+            <th>场景约束</th>
+            <th>音频约束</th>
+            <th>典型特征</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>1</td>
+            <td class="rn">深夜emo</td>
+            <td><span class="dim-label dim-a">A</span> 孤独/悲伤/抑郁</td>
+            <td><span class="dim-label dim-b">B</span> 流行/民谣/R&B</td>
+            <td><span class="dim-label dim-c">C</span> 深夜独处</td>
+            <td class="rc">BPM&lt;85 energy&lt;0.4 小调</td>
+            <td>慢歌 · 钢琴/吉他 · 伤感歌词</td>
+          </tr>
+          <tr>
+            <td>2</td>
+            <td class="rn">治愈</td>
+            <td><span class="dim-label dim-a">A</span> 治愈/平静/放松</td>
+            <td><span class="dim-label dim-b">B</span> 流行/民谣/新世纪</td>
+            <td><span class="dim-label dim-c">C</span> 通用</td>
+            <td class="rc">BPM 70-100 valence>0.5</td>
+            <td>温暖旋律 · 积极歌词 · 中等编曲</td>
+          </tr>
+          <tr>
+            <td>3</td>
+            <td class="rn">热血</td>
+            <td><span class="dim-label dim-a">A</span> 活力/热血励志/自信</td>
+            <td><span class="dim-label dim-b">B</span> 流行/摇滚</td>
+            <td><span class="dim-label dim-c">C</span> 运动</td>
+            <td class="rc">BPM>120 energy>0.7 大调</td>
+            <td>副歌高能 · 鼓点强烈</td>
+          </tr>
+          <tr>
+            <td>4</td>
+            <td class="rn">燃</td>
+            <td><span class="dim-label dim-a">A</span> 狂欢/热血励志</td>
+            <td><span class="dim-label dim-b">B</span> 摇滚/说唱/电子/金属</td>
+            <td><span class="dim-label dim-c">C</span> 派对/运动</td>
+            <td class="rc">BPM>130 energy>0.8 loud>-8dB</td>
+            <td>失真/合成器 · 嘶吼/快嘴</td>
+          </tr>
+          <tr>
+            <td>5</td>
+            <td class="rn">怀旧</td>
+            <td><span class="dim-label dim-a">A</span> 思念/悲伤</td>
+            <td><span class="dim-label dim-b">B</span> 民谣/流行</td>
+            <td><span class="dim-label dim-c">C</span> 通用</td>
+            <td class="rc">BPM 70-100 acoustic>0.5</td>
+            <td>叙事歌词 · 原声乐器 · 年代感</td>
+          </tr>
+          <tr>
+            <td>6</td>
+            <td class="rn">放松</td>
+            <td><span class="dim-label dim-a">A</span> 放松/平静</td>
+            <td><span class="dim-label dim-b">B</span> 通用(排除重型)</td>
+            <td><span class="dim-label dim-c">C</span> 休息/通勤</td>
+            <td class="rc">BPM 60-95 energy<0.5</td>
+            <td>轻编曲 · 柔和人声</td>
+          </tr>
+          <tr>
+            <td>7</td>
+            <td class="rn">失恋</td>
+            <td><span class="dim-label dim-a">A</span> 悲伤/苦情/孤独</td>
+            <td><span class="dim-label dim-b">B</span> 流行/R&B</td>
+            <td><span class="dim-label dim-c">C</span> 通用</td>
+            <td class="rc">BPM<90 小调 valence<0.3</td>
+            <td>情歌 · 钢琴弦乐为主</td>
+          </tr>
+          <tr>
+            <td>8</td>
+            <td class="rn">励志</td>
+            <td><span class="dim-label dim-a">A</span> 热血励志/活力/自信</td>
+            <td><span class="dim-label dim-b">B</span> 流行/摇滚</td>
+            <td><span class="dim-label dim-c">C</span> 通用</td>
+            <td class="rc">大调 · 能量差>0.2(主→副)</td>
+            <td>主歌低能→副歌爆发</td>
+          </tr>
+          <tr>
+            <td>9</td>
+            <td class="rn">安静</td>
+            <td><span class="dim-label dim-a">A</span> 平静/放松</td>
+            <td><span class="dim-label dim-b">B</span> 古典/民谣/纯音乐/新世纪</td>
+            <td><span class="dim-label dim-c">C</span> 学习/冥想</td>
+            <td class="rc">BPM<75 instru>0.5</td>
+            <td>极简编曲 · 无歌词</td>
+          </tr>
+          <tr>
+            <td>10</td>
+            <td class="rn">vibe/氛围</td>
+            <td><span class="dim-label dim-a">A</span> 放松/平静</td>
+            <td><span class="dim-label dim-b">B</span> 电子/新世纪/纯音乐</td>
+            <td><span class="dim-label dim-c">C</span> 通勤/休息</td>
+            <td class="rc">BPM 80-110 长混响</td>
+            <td>lo-fi/ambient · 循环结构</td>
+          </tr>
+          <tr>
+            <td>11</td>
+            <td class="rn">催眠/助眠</td>
+            <td><span class="dim-label dim-a">A</span> 平静</td>
+            <td><span class="dim-label dim-b">B</span> 纯音乐/新世纪/电子</td>
+            <td><span class="dim-label dim-c">C</span> 睡眠</td>
+            <td class="rc">BPM 50-70 energy<0.2 instru>0.8</td>
+            <td>无节奏感 · 白噪声/自然音</td>
+          </tr>
+          <tr>
+            <td>12</td>
+            <td class="rn">甜歌</td>
+            <td><span class="dim-label dim-a">A</span> 甜蜜/浪漫</td>
+            <td><span class="dim-label dim-b">B</span> 流行/R&B</td>
+            <td><span class="dim-label dim-c">C</span> 约会</td>
+            <td class="rc">BPM 80-110 大调 valence>0.7</td>
+            <td>轻快旋律 · 甜蜜歌词</td>
+          </tr>
+          <tr>
+            <td>13</td>
+            <td class="rn">蹦迪</td>
+            <td><span class="dim-label dim-a">A</span> 狂欢/活力</td>
+            <td><span class="dim-label dim-b">B</span> 电子/说唱</td>
+            <td><span class="dim-label dim-c">C</span> 派对</td>
+            <td class="rc">BPM>125 dance>0.8</td>
+            <td>四拍底鼓 · drop段落</td>
+          </tr>
+          <tr>
+            <td>14</td>
+            <td class="rn">车载</td>
+            <td><span class="dim-label dim-a">A</span> 活力/放松</td>
+            <td><span class="dim-label dim-b">B</span> 流行/电子/说唱</td>
+            <td><span class="dim-label dim-c">C</span> 开车</td>
+            <td class="rc">BPM 90-130 energy 0.4-0.8</td>
+            <td>节奏稳定 · 不突兀</td>
+          </tr>
+          <tr>
+            <td>15</td>
+            <td class="rn">跑步</td>
+            <td><span class="dim-label dim-a">A</span> 活力/自信</td>
+            <td><span class="dim-label dim-b">B</span> 电子/说唱/流行</td>
+            <td><span class="dim-label dim-c">C</span> 跑步</td>
+            <td class="rc">BPM 140-180 dance>0.6</td>
+            <td>节拍精准 · 可踩点</td>
+          </tr>
+          <tr>
+            <td>16</td>
+            <td class="rn">古风/国风</td>
+            <td><span class="dim-label dim-a">A</span> 通用</td>
+            <td><span class="dim-label dim-b">B</span> 古风/国风</td>
+            <td><span class="dim-label dim-c">C</span> 通用</td>
+            <td class="rc">五声音阶 · 传统乐器>30%</td>
+            <td>箫/古筝/琵琶/二胡</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ============================== MATH SECTION ============================== -->
+<section>
+  <div class="wrap">
+    <span class="sec-num">07 — 数学本质</span>
+    <h2 class="sec-title">推断规则不是叠加，是交集运算</h2>
+
+    <div class="math-card">
+      <h3><span class="icon-dot"></span>核心公式</h3>
+      <div class="formula-block">
+        复合标签 = ⋂( 情绪 ∈ S<sub>情绪</sub>, &nbsp;风格 ∈ S<sub>风格</sub>, &nbsp;场景 ∈ S<sub>场景</sub>, &nbsp;音频 ∈ R<sub>音频</sub> )
+      </div>
+      <p style="margin-top:1rem;">
+        其中 <strong style="color:var(--accent)">S</strong> 是允许的标签集合（或关系），<strong style="color:var(--accent)">R</strong> 是音频特征的取值范围（区间约束）。每个复合标签都是四维空间中的一个<strong style="color:var(--text)">子区域</strong>，不是一个点。
+      </p>
+
+      <h3 style="margin-top:2.5rem;"><span class="icon-dot"></span>三条关键性质</h3>
+      <ul class="key-props">
+        <li><strong>不满足任一维度则不成立</strong> — 一首歌 BPM=60 永远不会被归入「燃」，即使歌词再热血</li>
+        <li><strong>同标签内歌曲可以完全不同</strong> — 「治愈」可以是民谣吉他弹唱，也可以是电子 ambient，因为它们共享情绪和音频特征，但风格不同</li>
+        <li><strong>标签间有包含/排斥关系</strong> — 「燃」⊂「热血」（燃是热血的子集），「深夜emo」∩「蹦迪」= ∅（互斥）</li>
+      </ul>
+    </div>
+
+    <!-- Set relationship visual -->
+    <div class="thayer-wrap" style="margin-top:2rem;">
+      <svg viewBox="0 0 880 300">
+        <text x="50" y="35" fill="#7a756c" font-family="DM Mono" font-size="9" letter-spacing="2">SET RELATIONSHIPS BETWEEN COMPOSITE TAGS</text>
+
+        <!-- 热血 (large circle) -->
+        <circle cx="300" cy="170" r="110" fill="rgba(232,168,56,0.04)" stroke="rgba(232,168,56,0.2)" stroke-width="1.5"/>
+        <text x="260" y="95" fill="#e8a838" font-family="Noto Serif SC" font-size="14" font-weight="700">热血</text>
+
+        <!-- 燃 (smaller, inside 热血) -->
+        <circle cx="340" cy="175" r="60" fill="rgba(244,114,182,0.06)" stroke="rgba(244,114,182,0.25)" stroke-width="1.5"/>
+        <text x="325" y="180" fill="#f472b6" font-family="Noto Serif SC" font-size="13" font-weight="700">燃</text>
+        <text x="310" y="200" fill="#7a756c" font-family="DM Mono" font-size="8">⊂ 热血</text>
+
+        <!-- 深夜emo (separate) -->
+        <circle cx="620" cy="170" r="80" fill="rgba(91,156,245,0.04)" stroke="rgba(91,156,245,0.2)" stroke-width="1.5"/>
+        <text x="585" y="175" fill="#5b9cf5" font-family="Noto Serif SC" font-size="13" font-weight="700">深夜emo</text>
+
+        <!-- 蹦迪 (separate from emo) -->
+        <circle cx="750" cy="170" r="55" fill="rgba(167,139,250,0.04)" stroke="rgba(167,139,250,0.2)" stroke-width="1.5"/>
+        <text x="732" y="175" fill="#a78bfa" font-family="Noto Serif SC" font-size="12" font-weight="700">蹦迪</text>
+
+        <!-- Intersection: empty -->
+        <line x1="655" y1="140" x2="715" y2="140" stroke="#ef4444" stroke-width="1.5" stroke-dasharray="4 3" opacity="0.4"/>
+        <text x="685" y="133" text-anchor="middle" fill="#ef4444" font-family="DM Mono" font-size="9">∅</text>
+        <text x="685" y="160" text-anchor="middle" fill="#7a756c" font-family="DM Mono" font-size="7">互斥</text>
+
+        <!-- Legend -->
+        <text x="50" y="275" fill="#7a756c" font-family="DM Mono" font-size="9">⊂ = SUBSET &nbsp;&nbsp; ∩ = ∅ = MUTUALLY EXCLUSIVE</text>
+
+        <!-- 治愈 nearby but not inside -->
+        <circle cx="140" cy="180" r="65" fill="rgba(62,207,176,0.04)" stroke="rgba(62,207,176,0.15)" stroke-width="1"/>
+        <text x="122" y="185" fill="#3ecfb0" font-family="Noto Serif SC" font-size="12" font-weight="700">治愈</text>
+      </svg>
+    </div>
+  </div>
+</section>
+
+<!-- ============================== VALIDATION ============================== -->
+<section>
+  <div class="wrap">
+    <span class="sec-num">08 — 验证方法</span>
+    <h2 class="sec-title">用数据反向检验规则是否成立</h2>
+    <p class="sec-desc">用规则去反推汽水音乐/网易云的实际歌单，检验吻合度。如果不吻合，说明约束边界需要调参。</p>
+
+    <div class="val-grid">
+      <div class="val-card">
+        <div class="vc-label">验证项 1</div>
+        <div class="vc-test">「深夜emo」歌单平均BPM</div>
+        <div class="vc-expect">预期：< 85</div>
+      </div>
+      <div class="val-card">
+        <div class="vc-label">验证项 2</div>
+        <div class="vc-test">「燃」歌单摇滚/说唱占比</div>
+        <div class="vc-expect">预期：> 70%</div>
+      </div>
+      <div class="val-card">
+        <div class="vc-label">验证项 3</div>
+        <div class="vc-test">「学习」歌单有歌词歌曲占比</div>
+        <div class="vc-expect">预期：< 30%</div>
+      </div>
+      <div class="val-card">
+        <div class="vc-label">验证项 4</div>
+        <div class="vc-test">「跑步」歌单BPM分布</div>
+        <div class="vc-expect">预期：集中在 140-180</div>
+      </div>
+      <div class="val-card">
+        <div class="vc-label">验证项 5</div>
+        <div class="vc-test">「失恋」歌单小调歌曲占比</div>
+        <div class="vc-expect">预期：> 80%</div>
+      </div>
+    </div>
+
+    <div class="quote-block">
+      <p>如果以上全部吻合，说明规则成立。如果不吻合，说明某个维度的约束边界需要调参。</p>
+      <div class="attr">—— 验证即校准</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================== SUMMARY ============================== -->
+<section>
+  <div class="wrap">
+    <div class="math-card" style="text-align:center; padding:3.5rem;">
+      <h3 style="justify-content:center; font-size:1.4rem; margin-bottom:1.5rem;">
+        <span class="icon-dot"></span>
+        核心就一句话
+      </h3>
+      <p style="font-size:1.25rem; font-weight:600; color:var(--text); line-height:1.7; max-width:600px; margin:0 auto;">
+        四个独立维度交叉产生所有标签，<br>
+        复合标签是四维空间中的<strong style="color:var(--accent)">子区域</strong>，<br>
+        不是树状拼接。
+      </p>
+      <div style="margin-top:2rem; font-family:'DM Mono',monospace; font-size:0.85rem; color:var(--accent); padding:0.8rem 2rem; display:inline-block; border:1px solid var(--border-accent); border-radius:8px;">
+        COMPOSITE_TAG = EMOTION ∩ GENRE ∩ SCENE ∩ AUDIO_FEATURES
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <p>音乐标签分类体系：原理与规则</p>
+    <p style="opacity:0.4; margin-top:0.4rem;">四维坐标 · 降维映射 · 复合标签</p>
+  </div>
+</footer>
+
+<script>
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) entry.target.style.animationPlayState = 'running';
+  });
+}, { threshold: 0.08 });
+
+document.querySelectorAll('.style-card, .scene-card, .val-card').forEach(el => {
+  el.style.animationPlayState = 'paused';
+  observer.observe(el);
+});
+</script>
+</body>
+</html>

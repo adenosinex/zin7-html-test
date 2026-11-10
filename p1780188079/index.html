@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>登山散热评估</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#FAF8F4;--sfc:#FFF;--bdr:#E5E0D6;--txt:#2B2D2E;--mut:#8B8680;
+  --gn:#2D6A4F;--gnL:#52B788;--tl:#2A9D8F;--wm:#E9A84C;--dg:#E63946;
+  --sf:'Noto Serif SC',Georgia,serif;--mo:'JetBrains Mono',Menlo,monospace;
+}
+body{font-family:var(--sf);background:var(--bg);color:var(--txt);line-height:1.6}
+
+header{
+  background:linear-gradient(135deg,#1B4332,#2D6A4F 40%,#40916C);
+  padding:1.4rem 1.5rem 1.2rem;color:#fff;
+}
+.hdr{max-width:900px;margin:0 auto}
+header h1{font-size:1.3rem;font-weight:700}
+header .sub{font-size:.76rem;opacity:.55;margin:.05rem 0 1.1rem}
+
+.cp{display:flex;gap:2.2rem;align-items:flex-start;flex-wrap:wrap}
+.cg label{display:block;font-size:.72rem;opacity:.6;margin-bottom:.35rem;letter-spacing:.04em}
+.cr{display:flex;align-items:center;gap:5px}
+.bi{
+  width:34px;height:34px;border-radius:8px;
+  border:1.5px solid rgba(255,255,255,.25);
+  background:rgba(255,255,255,.06);color:#fff;
+  font:600 1.15rem/1 var(--mo);cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:background .12s,border-color .12s,transform .1s;
+  user-select:none;-webkit-tap-highlight-color:transparent;
+}
+.bi:hover{background:rgba(255,255,255,.16);border-color:rgba(255,255,255,.45)}
+.bi:active{transform:scale(.88)}
+.cr input{
+  width:56px;height:34px;text-align:center;
+  border:1.5px solid rgba(255,255,255,.25);border-radius:8px;
+  background:rgba(255,255,255,.07);color:#fff;
+  font:500 1.05rem/1 var(--mo);outline:none;
+  transition:border-color .12s;-moz-appearance:textfield;
+}
+.cr input:focus{border-color:rgba(255,255,255,.6)}
+.cr input::-webkit-inner-spin-button,.cr input::-webkit-outer-spin-button{-webkit-appearance:none}
+.un{font:400 .8rem/1 var(--mo);opacity:.55;margin-left:2px}
+.eq{font-size:.7rem;opacity:.45;margin-top:.25rem;font-family:var(--mo)}
+
+.sg{margin-left:auto;text-align:right}
+.qb{font:700 2.1rem/1.1 var(--mo)}
+.qb small{font-size:.82rem;opacity:.5;font-weight:400}
+.ql{font-size:.7rem;opacity:.5;margin-top:.12rem}
+.bdg{
+  display:inline-block;margin-top:.4rem;padding:.25rem .85rem;
+  border-radius:1.2rem;font-size:.78rem;font-weight:600;
+}
+.b-ok{background:rgba(42,157,143,.2);color:#b7e4c7}
+.b-w{background:rgba(233,168,76,.2);color:#fbd38d}
+.b-d{background:rgba(230,57,70,.2);color:#feb2b2}
+
+main{max-width:900px;margin:0 auto;padding:1.2rem 1.5rem 2.5rem}
+
+.dsh{display:grid;grid-template-columns:repeat(4,1fr);gap:.7rem;margin-bottom:1.2rem}
+.dc{
+  background:var(--sfc);border:1px solid var(--bdr);border-radius:10px;
+  padding:.7rem .85rem;transition:border-color .3s;
+}
+.dc .dl{font-size:.68rem;color:var(--mut);margin-bottom:.15rem;white-space:nowrap}
+.dc .dv{font:500 1.1rem/1.2 var(--mo);transition:color .3s}
+.dc .dv small{font-size:.65rem;color:var(--mut);font-weight:400}
+
+.cb{
+  background:var(--sfc);border:1px solid var(--bdr);border-radius:12px;
+  padding:1.2rem 1.3rem;margin-bottom:1.1rem;
+}
+.cb h2{font-size:.95rem;font-weight:600;margin-bottom:.08rem}
+.cb .cd{font-size:.74rem;color:var(--mut);margin-bottom:.85rem;line-height:1.5}
+.cb .cd .hl{font-family:var(--mo);font-weight:500;color:var(--gn)}
+.cw{position:relative;height:330px}
+
+.rf{padding:.8rem 0;font-size:.78rem;color:var(--mut)}
+.rf h3{font-size:.8rem;font-weight:600;margin-bottom:.45rem;color:var(--txt);opacity:.55}
+.rf-row{display:flex;flex-wrap:wrap;gap:.35rem 1.3rem}
+.rf-row em{font-style:normal;font-family:var(--mo);font-weight:500;color:var(--gn);margin-right:.1rem}
+
+@media(max-width:640px){
+  header{padding:1.1rem 1rem 1rem}
+  .cp{flex-direction:column;gap:1rem}
+  .sg{margin-left:0;text-align:left}
+  .dsh{grid-template-columns:repeat(2,1fr);gap:.5rem}
+  .cw{height:260px}
+  .qb{font-size:1.7rem}
+  .dc .dl{font-size:.64rem}
+  .dc .dv{font-size:.95rem}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="hdr">
+    <h1>⛰ 登山散热环境评估</h1>
+    <p class="sub">蒸气压亏缺模型 · 输入天气预报温湿度 · 风扇+全身湿透</p>
+    <div class="cp">
+      <div class="cg">
+        <label>环境温度（天气预报）</label>
+        <div class="cr">
+          <button class="bi" id="bTM">−</button>
+          <input type="number" id="inT" value="30" min="15" max="45">
+          <button class="bi" id="bTP">+</button>
+          <span class="un">°C</span>
+        </div>
+      </div>
+      <div class="cg">
+        <label>相对湿度（天气预报）</label>
+        <div class="cr">
+          <button class="bi" id="bRM">−</button>
+          <input type="number" id="inR" value="49" min="5" max="100">
+          <button class="bi" id="bRP">+</button>
+          <span class="un">%</span>
+        </div>
+        <div class="eq" id="eqA">绝对湿度 15 g/m³</div>
+      </div>
+      <div class="sg">
+        <div class="qb"><span id="qD">—</span><small> W</small></div>
+        <div class="ql">最大散热功率</div>
+        <div id="bdg" class="bdg b-ok">—</div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="dsh">
+    <div class="dc"><div class="dl">蒸气压亏缺 ΔP</div><div class="dv" id="vDP">—</div></div>
+    <div class="dc"><div class="dl">绝对湿度</div><div class="dv" id="vAH">—</div></div>
+    <div class="dc"><div class="dl">湿球温度</div><div class="dv" id="vWB">—</div></div>
+    <div class="dc"><div class="dl">登山余量 (vs 400W)</div><div class="dv" id="vMG">—</div></div>
+  </div>
+
+  <div class="cb">
+    <h2>散热功率 vs 相对湿度</h2>
+    <p class="cd">温度固定 <span class="hl" id="lT">30</span>°C — 绿色粗线为当前温度，灰色为参考温度</p>
+    <div class="cw"><canvas id="ch1"></canvas></div>
+  </div>
+
+  <div class="cb">
+    <h2>散热功率 vs 温度</h2>
+    <p class="cd">相对湿度固定 <span class="hl" id="lR">49</span>% — 绿色粗线为当前湿度，灰色为参考湿度</p>
+    <div class="cw"><canvas id="ch2"></canvas></div>
+  </div>
+
+  <div class="rf">
+    <h3>天气预报体感参考</h3>
+    <div class="rf-row">
+      <span><em>&lt;30%</em>干燥</span>
+      <span><em>30~50%</em>舒适</span>
+      <span><em>50~70%</em>偏闷</span>
+      <span><em>70~85%</em>闷热</span>
+      <span><em>85%+</em>桑拿天</span>
+    </div>
+  </div>
+</main>
+
+<script>
+/* ===== Constants ===== */
+var TSK=35, HIKE=400, K=200, H=28;
+var TREFS=[20,25,30,35,40];
+var RREFS=[20,40,60,80];
+var TCOL=['rgba(120,155,190,.5)','rgba(110,150,165,.5)','rgba(140,150,115,.55)',
+          'rgba(190,150,100,.55)','rgba(195,125,100,.55)'];
+var RCOL=['rgba(210,170,90,.5)','rgba(100,155,140,.5)','rgba(80,130,175,.55)',
+          'rgba(90,100,145,.55)'];
+var GN='#2D6A4F', DG='#E63946';
+var M="'JetBrains Mono',monospace", S="'Noto Serif SC',serif";
+
+/* ===== Physics ===== */
+function svp(t){return .611*Math.exp(17.27*t/(t+237.3))}
+function ahFromRH(t,rh){return rh/100*svp(t)*1e6/(461.9*(t+273.15))}
+function vpFromRH(t,rh){return rh/100*svp(t)}
+function dpFromRH(t,rh){return Math.max(0,vpFromRH(35,100)-vpFromRH(t,rh))}
+function qFromRH(t,rh){return Math.max(0,K*dpFromRH(t,rh)+H*(35-t))}
+function wbt(t,r){
+  r=Math.min(r,100);
+  return t*Math.atan(.151977*Math.sqrt(r+8.313659))
+    +Math.atan(t+r)-Math.atan(r-1.676331)
+    +.00391838*Math.pow(r,1.5)*Math.atan(.023101*r)-4.686035;
+}
+
+/* ===== Data ===== */
+function rng(lo,hi,step){var a=[];for(var i=lo;i<=hi+1e-9;i+=step)a.push(Math.round(i*100)/100);return a}
+var RHx=rng(0,100,1), Tx=rng(15,45,.5);
+
+/* ===== State ===== */
+var TCUR=30, RCUR=49;
+
+/* ===== DOM refs ===== */
+var inT=document.getElementById('inT'), inR=document.getElementById('inR');
+function cl(v,lo,hi){return Math.max(lo,Math.min(hi,v))}
+var raf=null;
+function sched(){if(raf)return;raf=requestAnimationFrame(function(){upd();raf=null})}
+function adjT(d){TCUR=cl(TCUR+d,15,45);inT.value=TCUR;sched()}
+function adjR(d){RCUR=cl(RCUR+d,5,100);inR.value=RCUR;sched()}
+
+/* ===== Buttons ===== */
+document.getElementById('bTM').onclick=function(){adjT(-1)};
+document.getElementById('bTP').onclick=function(){adjT(1)};
+document.getElementById('bRM').onclick=function(){adjR(-1)};
+document.getElementById('bRP').onclick=function(){adjR(1)};
+
+/* Long-press */
+function hold(btn,fn){
+  var t=null,r=null;
+  function s(e){if(e.cancelable)e.preventDefault();fn();t=setTimeout(function(){r=setInterval(fn,80)},400)}
+  function x(){clearTimeout(t);clearInterval(r)}
+  btn.addEventListener('mousedown',s);btn.addEventListener('touchstart',s,{passive:false});
+  window.addEventListener('mouseup',x);window.addEventListener('touchend',x);
+}
+hold(document.getElementById('bTM'),function(){adjT(-1)});
+hold(document.getElementById('bTP'),function(){adjT(1)});
+hold(document.getElementById('bRM'),function(){adjR(-1)});
+hold(document.getElementById('bRP'),function(){adjR(1)});
+
+/* ===== Direct input ===== */
+inT.addEventListener('input',function(){var v=parseInt(this.value);if(!isNaN(v)){TCUR=cl(v,15,45);sched()}});
+inT.addEventListener('change',function(){var v=parseInt(this.value);if(isNaN(v))v=TCUR;TCUR=cl(v,15,45);this.value=TCUR;sched()});
+inR.addEventListener('input',function(){var v=parseInt(this.value);if(!isNaN(v)){RCUR=cl(v,5,100);sched()}});
+inR.addEventListener('change',function(){var v=parseInt(this.value);if(isNaN(v))v=RCUR;RCUR=cl(v,5,100);this.value=RCUR;sched()});
+
+/* ===== Charts ===== */
+var C1, C2, NI=TREFS.length, NR=RREFS.length;
+
+function initCharts(){
+  var gc='rgba(0,0,0,.04)', tf={family:M,size:10.5}, tlf={family:S,size:11.5};
+
+  /* Chart 1: Q vs RH, fixed T */
+  var ds1=[];
+  TREFS.forEach(function(T,i){
+    ds1.push({
+      label:T+'°C',data:RHx.map(function(rh){return{x:rh,y:qFromRH(T,rh)}}),
+      borderColor:TCOL[i],borderWidth:1.5,pointRadius:0,tension:.35,fill:false
+    });
+  });
+  ds1.push({
+    label:'当前 '+TCUR+'°C',data:RHx.map(function(rh){return{x:rh,y:qFromRH(TCUR,rh)}}),
+    borderColor:GN,borderWidth:3.5,pointRadius:0,tension:.35,fill:{target:'origin',above:'rgba(45,106,79,.05)'}
+  });
+  ds1.push({
+    label:'产热基准',data:[{x:0,y:HIKE},{x:100,y:HIKE}],
+    borderColor:'rgba(230,57,70,.25)',borderWidth:1.5,borderDash:[8,5],pointRadius:0,fill:false
+  });
+  ds1.push({
+    label:'·',data:[{x:RCUR,y:qFromRH(TCUR,RCUR)}],
+    pointRadius:9,pointBackgroundColor:DG,pointBorderColor:'#fff',pointBorderWidth:3,showLine:false
+  });
+
+  C1=new Chart(document.getElementById('ch1'),{
+    type:'line',data:{datasets:ds1},
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      animation:{duration:220,easing:'easeOutCubic'},
+      interaction:{mode:'index',intersect:false},
+      plugins:{
+        legend:{position:'top',labels:{
+          usePointStyle:true,padding:12,pointStyleWidth:7,font:{family:S,size:11},
+          filter:function(it){return it.datasetIndex<NI}
+        }},
+        tooltip:{
+          backgroundColor:'rgba(43,45,46,.9)',cornerRadius:8,
+          titleFont:{family:S},bodyFont:{family:M,size:12},
+          filter:function(it){return it.datasetIndex<NI},
+          callbacks:{
+            title:function(its){return its[0]?'RH = '+its[0].parsed.x+'%':''},
+            label:function(c){return c.dataset.label+': '+Math.round(c.parsed.y)+' W'}
+          }
+        }
+      },
+      scales:{
+        x:{type:'linear',min:0,max:100,
+          title:{display:true,text:'相对湿度 (%)',font:tlf},grid:{color:gc},
+          ticks:Object.assign({},tf,{stepSize:10,callback:function(v){return v+'%'}})},
+        y:{min:0,suggestedMax:1300,
+          title:{display:true,text:'散热功率 (W)',font:tlf},grid:{color:gc},ticks:tf}
+      }
+    }
+  });
+
+  /* Chart 2: Q vs T, fixed RH */
+  var ds2=[];
+  RREFS.forEach(function(R,i){
+    ds2.push({
+      label:R+'% RH',data:Tx.map(function(t){return{x:t,y:qFromRH(t,R)}}),
+      borderColor:RCOL[i],borderWidth:1.5,pointRadius:0,tension:.35,fill:false
+    });
+  });
+  ds2.push({
+    label:'当前 '+RCUR+'% RH',data:Tx.map(function(t){return{x:t,y:qFromRH(t,RCUR)}}),
+    borderColor:GN,borderWidth:3.5,pointRadius:0,tension:.35,fill:{target:'origin',above:'rgba(45,106,79,.05)'}
+  });
+  ds2.push({
+    label:'产热基准',data:[{x:15,y:HIKE},{x:45,y:HIKE}],
+    borderColor:'rgba(230,57,70,.25)',borderWidth:1.5,borderDash:[8,5],pointRadius:0,fill:false
+  });
+  ds2.push({
+    label:'·',data:[{x:TCUR,y:qFromRH(TCUR,RCUR)}],
+    pointRadius:9,pointBackgroundColor:DG,pointBorderColor:'#fff',pointBorderWidth:3,showLine:false
+  });
+
+  C2=new Chart(document.getElementById('ch2'),{
+    type:'line',data:{datasets:ds2},
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      animation:{duration:220,easing:'easeOutCubic'},
+      interaction:{mode:'index',intersect:false},
+      plugins:{
+        legend:{position:'top',labels:{
+          usePointStyle:true,padding:12,pointStyleWidth:7,font:{family:S,size:11},
+          filter:function(it){return it.datasetIndex<NR}
+        }},
+        tooltip:{
+          backgroundColor:'rgba(43,45,46,.9)',cornerRadius:8,
+          titleFont:{family:S},bodyFont:{family:M,size:12},
+          filter:function(it){return it.datasetIndex<NR},
+          callbacks:{
+            title:function(its){return its[0]?'T = '+its[0].parsed.x+'°C':''},
+            label:function(c){return c.dataset.label+': '+Math.round(c.parsed.y)+' W'}
+          }
+        }
+      },
+      scales:{
+        x:{type:'linear',min:15,max:45,
+          title:{display:true,text:'环境温度 (°C)',font:tlf},grid:{color:gc},
+          ticks:Object.assign({},tf,{callback:function(v){return v+'°'}})},
+        y:{min:0,suggestedMax:1300,
+          title:{display:true,text:'散热功率 (W)',font:tlf},grid:{color:gc},ticks:tf}
+      }
+    }
+  });
+}
+
+/* ===== Update ===== */
+function upd(){
+  var ah=ahFromRH(TCUR,RCUR);
+  var dp=dpFromRH(TCUR,RCUR);
+  var q=qFromRH(TCUR,RCUR);
+  var wb=wbt(TCUR,RCUR);
+  var mg=q-HIKE;
+
+  /* Header */
+  document.getElementById('qD').textContent=Math.round(q);
+  document.getElementById('eqA').textContent='绝对湿度 '+ah.toFixed(1)+' g/m³';
+
+  /* Dashboard */
+  document.getElementById('vDP').innerHTML='<span>'+dp.toFixed(2)+'</span><small> kPa</small>';
+  document.getElementById('vAH').innerHTML='<span>'+ah.toFixed(1)+'</span><small> g/m³</small>';
+  document.getElementById('vWB').innerHTML='<span>'+wb.toFixed(1)+'</span><small> °C</small>';
+  document.getElementById('vMG').innerHTML='<span>'+Math.round(mg)+'</span><small> W</small>';
+  document.getElementById('lT').textContent=TCUR;
+  document.getElementById('lR').textContent=RCUR;
+
+  document.getElementById('vMG').style.color=mg>100?'var(--tl)':mg>0?'var(--wm)':'var(--dg)';
+
+  /* Badge */
+  var b=document.getElementById('bdg');
+  if(mg>300){b.className='bdg b-ok';b.textContent='✓ 散热充裕'}
+  else if(mg>100){b.className='bdg b-ok';b.textContent='✓ 适宜登山'}
+  else if(mg>0){b.className='bdg b-w';b.textContent='⚠ 注意防暑洒水'}
+  else{b.className='bdg b-d';b.textContent='✗ 有中暑风险'}
+
+  /* Chart 1: current T curve + dot */
+  var d1=C1.data.datasets;
+  d1[NI].label='当前 '+TCUR+'°C';
+  d1[NI].data=RHx.map(function(rh){return{x:rh,y:qFromRH(TCUR,rh)}});
+  d1[NI+2].data=[{x:RCUR,y:q}];
+  C1.update();
+
+  /* Chart 2: current RH curve + dot */
+  var d2=C2.data.datasets;
+  d2[NR].label='当前 '+RCUR+'% RH';
+  d2[NR].data=Tx.map(function(t){return{x:t,y:qFromRH(t,RCUR)}});
+  d2[NR+2].data=[{x:TCUR,y:q}];
+  C2.update();
+}
+
+/* ===== Init ===== */
+initCharts();
+upd();
+</script>
+</body>
+</html>

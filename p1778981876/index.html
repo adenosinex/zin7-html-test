@@ -1,0 +1,1844 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>重庆东北部溯溪路线指南</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Crimson+Pro:wght@300;400;600;700&family=Noto+Serif+SC:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a1628;
+    --bg-deep: #060f1e;
+    --surface: #132035;
+    --surface-raised: #1a2a45;
+    --accent-amber: #e8a838;
+    --accent-teal: #3ecfb0;
+    --accent-blue: #4a8fe7;
+    --danger: #e85d4a;
+    --warning: #e8a838;
+    --safe: #3ecfb0;
+    --text-primary: #f0ece4;
+    --text-secondary: #c8c0b4;
+    --text-muted: #6a7a8e;
+    --border: rgba(255,255,255,0.06);
+    --glow-teal: rgba(62,207,176,0.15);
+    --glow-amber: rgba(232,168,56,0.15);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text-primary);
+    font-family: 'Crimson Pro', 'Noto Serif SC', serif;
+    font-size: 17px;
+    line-height: 1.75;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+    opacity: 0.03;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ===== SCROLLBAR ===== */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg-deep); }
+  ::-webkit-scrollbar-thumb { background: var(--surface-raised); border-radius: 3px; }
+
+  /* ===== HERO ===== */
+  .hero {
+    position: relative;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    overflow: hidden;
+  }
+
+  .hero-landscape {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 60%;
+    z-index: 0;
+    opacity: 0.4;
+  }
+
+  .hero-mist {
+    position: absolute;
+    bottom: 20%;
+    left: 0;
+    width: 100%;
+    height: 30%;
+    background: linear-gradient(to top, var(--bg), transparent);
+    z-index: 1;
+  }
+
+  .hero-content {
+    position: relative;
+    z-index: 2;
+    max-width: 800px;
+    padding: 0 2rem;
+  }
+
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: rgba(62,207,176,0.1);
+    border: 1px solid rgba(62,207,176,0.25);
+    color: var(--accent-teal);
+    padding: 0.4rem 1.2rem;
+    border-radius: 100px;
+    font-size: 0.85rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 2rem;
+    font-family: 'Crimson Pro', serif;
+    font-weight: 600;
+    animation: fadeDown 0.8s ease forwards;
+    opacity: 0;
+  }
+
+  .hero h1 {
+    font-family: 'Noto Serif SC', 'Instrument Serif', serif;
+    font-size: clamp(2.4rem, 6vw, 4.2rem);
+    font-weight: 700;
+    line-height: 1.2;
+    margin-bottom: 1.5rem;
+    animation: fadeUp 1s ease forwards;
+    animation-delay: 0.2s;
+    opacity: 0;
+  }
+
+  .hero h1 .highlight {
+    background: linear-gradient(135deg, var(--accent-teal), var(--accent-blue));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .hero-subtitle {
+    font-size: 1.15rem;
+    color: var(--text-secondary);
+    max-width: 600px;
+    margin: 0 auto 2.5rem;
+    animation: fadeUp 1s ease forwards;
+    animation-delay: 0.4s;
+    opacity: 0;
+  }
+
+  .hero-tags {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.8rem;
+    animation: fadeUp 1s ease forwards;
+    animation-delay: 0.6s;
+    opacity: 0;
+  }
+
+  .hero-tag {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 0.35rem 1rem;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+  }
+
+  .hero-scroll {
+    position: absolute;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 2;
+    animation: bounce 2s ease infinite, fadeUp 1s ease forwards;
+    animation-delay: 0.8s, 0.8s;
+    opacity: 0;
+    color: var(--text-muted);
+  }
+
+  .hero-scroll svg { width: 24px; height: 24px; stroke: var(--text-muted); }
+
+  /* ===== LAYOUT ===== */
+  .container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 2rem;
+    position: relative;
+    z-index: 1;
+  }
+
+  section {
+    padding: 5rem 0;
+    position: relative;
+  }
+
+  /* ===== SECTION DIVIDER ===== */
+  .wave-divider {
+    width: 100%;
+    height: 80px;
+    opacity: 0.3;
+    display: block;
+  }
+
+  /* ===== SECTION HEADERS ===== */
+  .section-header {
+    margin-bottom: 3rem;
+    position: relative;
+  }
+
+  .section-region {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.8rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent-teal);
+    margin-bottom: 0.8rem;
+    font-weight: 600;
+  }
+
+  .section-region::before {
+    content: '';
+    width: 32px;
+    height: 2px;
+    background: var(--accent-teal);
+    display: inline-block;
+  }
+
+  .section-title {
+    font-family: 'Noto Serif SC', serif;
+    font-size: clamp(1.8rem, 4vw, 2.6rem);
+    font-weight: 700;
+    line-height: 1.3;
+    margin-bottom: 0.6rem;
+  }
+
+  .section-desc {
+    color: var(--text-muted);
+    font-size: 1rem;
+    max-width: 600px;
+  }
+
+  /* ===== ROUTE CARDS ===== */
+  .route-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 2.5rem;
+    margin-bottom: 2rem;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.4s ease, border-color 0.4s ease;
+    opacity: 0;
+    animation: fadeUp 0.7s ease forwards;
+  }
+
+  .route-card:nth-child(1) { animation-delay: 0.1s; }
+  .route-card:nth-child(2) { animation-delay: 0.2s; }
+  .route-card:nth-child(3) { animation-delay: 0.3s; }
+
+  .route-card:hover {
+    transform: translateY(-3px);
+    border-color: rgba(62,207,176,0.2);
+  }
+
+  .route-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    border-radius: 16px 16px 0 0;
+  }
+
+  .route-card.level-green::before { background: linear-gradient(90deg, var(--safe), transparent 70%); }
+  .route-card.level-yellow::before { background: linear-gradient(90deg, var(--warning), transparent 70%); }
+  .route-card.level-red::before { background: linear-gradient(90deg, var(--danger), transparent 70%); }
+
+  .card-illustration {
+    float: right;
+    width: 180px;
+    height: 140px;
+    margin: 0 0 1rem 2rem;
+    border-radius: 12px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .card-illustration svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  .route-card::after {
+    content: '';
+    display: table;
+    clear: both;
+  }
+
+  .card-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 1.2rem;
+    flex-wrap: wrap;
+  }
+
+  .card-number {
+    font-family: 'Instrument Serif', serif;
+    font-size: 2.4rem;
+    font-weight: 400;
+    color: var(--text-muted);
+    opacity: 0.4;
+    line-height: 1;
+    min-width: 2rem;
+  }
+
+  .card-title-group {
+    flex: 1;
+    min-width: 200px;
+  }
+
+  .card-title {
+    font-family: 'Noto Serif SC', serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 0.3rem;
+  }
+
+  .card-type {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+  }
+
+  .card-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.25rem 0.75rem;
+    border-radius: 6px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+  }
+
+  .badge svg { width: 14px; height: 14px; }
+
+  .badge-green { background: rgba(62,207,176,0.12); color: var(--safe); border: 1px solid rgba(62,207,176,0.2); }
+  .badge-yellow { background: rgba(232,168,56,0.12); color: var(--warning); border: 1px solid rgba(232,168,56,0.2); }
+  .badge-red { background: rgba(232,93,74,0.12); color: var(--danger); border: 1px solid rgba(232,93,74,0.2); }
+  .badge-blue { background: rgba(74,143,231,0.12); color: var(--accent-blue); border: 1px solid rgba(74,143,231,0.2); }
+
+  .card-body h4 {
+    font-size: 0.9rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--accent-teal);
+    margin: 1.5rem 0 0.6rem;
+    font-weight: 600;
+  }
+
+  .card-body p {
+    color: var(--text-secondary);
+    margin-bottom: 0.5rem;
+  }
+
+  .card-body ul {
+    list-style: none;
+    padding: 0;
+  }
+
+  .card-body ul li {
+    position: relative;
+    padding-left: 1.4rem;
+    margin-bottom: 0.4rem;
+    color: var(--text-secondary);
+  }
+
+  .card-body ul li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.65em;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent-teal);
+    opacity: 0.5;
+  }
+
+  .risk-list li::before { background: var(--danger); }
+
+  .verdict {
+    margin-top: 1.5rem;
+    padding: 1.2rem 1.5rem;
+    background: rgba(62,207,176,0.06);
+    border-left: 3px solid var(--accent-teal);
+    border-radius: 0 10px 10px 0;
+    color: var(--text-primary);
+    font-weight: 600;
+    font-size: 0.95rem;
+  }
+
+  .verdict.warn {
+    background: rgba(232,168,56,0.06);
+    border-left-color: var(--warning);
+  }
+
+  .verdict.danger {
+    background: rgba(232,93,74,0.06);
+    border-left-color: var(--danger);
+  }
+
+  /* ===== RANKING SECTION ===== */
+  .ranking-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin-top: 2rem;
+  }
+
+  .rank-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 2rem;
+    position: relative;
+    overflow: hidden;
+    opacity: 0;
+    animation: fadeUp 0.7s ease forwards;
+  }
+
+  .rank-card:nth-child(1) { animation-delay: 0.1s; }
+  .rank-card:nth-child(2) { animation-delay: 0.25s; }
+  .rank-card:nth-child(3) { animation-delay: 0.4s; }
+
+  .rank-level {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+    padding: 0.3rem 0.8rem;
+    border-radius: 6px;
+  }
+
+  .rank-level.green { background: rgba(62,207,176,0.12); color: var(--safe); }
+  .rank-level.yellow { background: rgba(232,168,56,0.12); color: var(--warning); }
+  .rank-level.red { background: rgba(232,93,74,0.12); color: var(--danger); }
+
+  .rank-card h3 {
+    font-family: 'Noto Serif SC', serif;
+    font-size: 1.15rem;
+    font-weight: 700;
+    margin-bottom: 0.8rem;
+  }
+
+  .rank-card ul {
+    list-style: none;
+    padding: 0;
+  }
+
+  .rank-card ul li {
+    padding: 0.4rem 0;
+    padding-left: 1.2rem;
+    position: relative;
+    color: var(--text-secondary);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .rank-card ul li:last-child { border-bottom: none; }
+
+  .rank-card ul li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.85em;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+  }
+
+  .rank-card.green ul li::before { background: var(--safe); }
+  .rank-card.yellow ul li::before { background: var(--warning); }
+  .rank-card.red ul li::before { background: var(--danger); }
+
+  /* ===== INSIGHT BOXES ===== */
+  .insight-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 2.5rem;
+    margin: 2rem 0;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .insight-box::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -20%;
+    width: 300px;
+    height: 300px;
+    border-radius: 50%;
+    background: radial-gradient(circle, var(--glow-teal), transparent 70%);
+    opacity: 0.5;
+    pointer-events: none;
+  }
+
+  .insight-box h3 {
+    font-family: 'Noto Serif SC', serif;
+    font-size: 1.4rem;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+
+  .insight-box h3 .icon-circle {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: rgba(232,168,56,0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .insight-box h3 .icon-circle svg {
+    width: 18px;
+    height: 18px;
+    stroke: var(--warning);
+  }
+
+  .insight-item {
+    display: flex;
+    gap: 1.2rem;
+    margin-bottom: 1.5rem;
+    align-items: flex-start;
+  }
+
+  .insight-item:last-child { margin-bottom: 0; }
+
+  .insight-num {
+    font-family: 'Instrument Serif', serif;
+    font-size: 1.8rem;
+    color: var(--accent-teal);
+    opacity: 0.6;
+    line-height: 1;
+    min-width: 2rem;
+    text-align: center;
+  }
+
+  .insight-item h4 {
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: 0.3rem;
+    color: var(--text-primary);
+  }
+
+  .insight-item p {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+  }
+
+  /* ===== RULE BOX ===== */
+  .rule-box {
+    background: linear-gradient(135deg, rgba(62,207,176,0.08), rgba(74,143,231,0.05));
+    border: 1px solid rgba(62,207,176,0.15);
+    border-radius: 16px;
+    padding: 2.5rem;
+    margin: 2rem 0;
+    text-align: center;
+  }
+
+  .rule-box .rule-quote {
+    font-family: 'Noto Serif SC', serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--accent-teal);
+    margin-bottom: 1rem;
+    line-height: 1.5;
+  }
+
+  .rule-columns {
+    display: flex;
+    justify-content: center;
+    gap: 3rem;
+    margin-top: 2rem;
+    flex-wrap: wrap;
+  }
+
+  .rule-col {
+    text-align: center;
+    min-width: 160px;
+  }
+
+  .rule-col h4 {
+    font-size: 0.85rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 0.8rem;
+    font-weight: 700;
+  }
+
+  .rule-col.can h4 { color: var(--safe); }
+  .rule-col.cant h4 { color: var(--danger); }
+
+  .rule-col ul {
+    list-style: none;
+    padding: 0;
+  }
+
+  .rule-col ul li {
+    color: var(--text-secondary);
+    padding: 0.3rem 0;
+    font-size: 0.95rem;
+  }
+
+  /* ===== FINAL CTA ===== */
+  .final-box {
+    background: linear-gradient(135deg, var(--surface-raised), var(--surface));
+    border: 1px solid rgba(232,168,56,0.15);
+    border-radius: 20px;
+    padding: 3rem;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    margin: 3rem 0;
+  }
+
+  .final-box::before {
+    content: '';
+    position: absolute;
+    top: -40%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 400px;
+    height: 400px;
+    border-radius: 50%;
+    background: radial-gradient(circle, var(--glow-amber), transparent 70%);
+    opacity: 0.4;
+    pointer-events: none;
+  }
+
+  .final-box h3 {
+    font-family: 'Noto Serif SC', serif;
+    font-size: 1.6rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    position: relative;
+  }
+
+  .final-box .recommend {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    background: rgba(62,207,176,0.1);
+    border: 1px solid rgba(62,207,176,0.25);
+    color: var(--accent-teal);
+    padding: 0.8rem 2rem;
+    border-radius: 12px;
+    font-size: 1.2rem;
+    font-weight: 700;
+    font-family: 'Noto Serif SC', serif;
+    margin: 1.5rem 0;
+    position: relative;
+  }
+
+  .final-box .reasons {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    flex-wrap: wrap;
+    margin-top: 1.5rem;
+    position: relative;
+  }
+
+  .final-box .reason {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+  }
+
+  .final-box .reason svg {
+    width: 18px;
+    height: 18px;
+    stroke: var(--accent-teal);
+  }
+
+  /* ===== TIP BOX ===== */
+  .tip-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin: 2rem 0;
+  }
+
+  .tip-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.8rem;
+    opacity: 0;
+    animation: fadeUp 0.6s ease forwards;
+  }
+
+  .tip-card:nth-child(1) { animation-delay: 0.1s; }
+  .tip-card:nth-child(2) { animation-delay: 0.2s; }
+  .tip-card:nth-child(3) { animation-delay: 0.3s; }
+
+  .tip-card .tip-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1rem;
+  }
+
+  .tip-card .tip-icon svg {
+    width: 22px;
+    height: 22px;
+  }
+
+  .tip-card .tip-icon.red { background: rgba(232,93,74,0.12); }
+  .tip-card .tip-icon.red svg { stroke: var(--danger); }
+
+  .tip-card .tip-icon.amber { background: rgba(232,168,56,0.12); }
+  .tip-card .tip-icon.amber svg { stroke: var(--warning); }
+
+  .tip-card .tip-icon.teal { background: rgba(62,207,176,0.12); }
+  .tip-card .tip-icon.teal svg { stroke: var(--safe); }
+
+  .tip-card h4 {
+    font-size: 1.05rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+  }
+
+  .tip-card p {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+  }
+
+  /* ===== FOOTER ===== */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 3rem 0;
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+  }
+
+  footer .footer-line {
+    margin-bottom: 0.5rem;
+  }
+
+  /* ===== MAP SECTION ===== */
+  .map-wrapper {
+    margin: 3rem 0;
+    border-radius: 16px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    position: relative;
+  }
+
+  .map-wrapper svg {
+    width: 100%;
+    display: block;
+  }
+
+  /* ===== ANIMATIONS ===== */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes fadeDown {
+    from { opacity: 0; transform: translateY(-12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes bounce {
+    0%, 100% { transform: translateX(-50%) translateY(0); }
+    50% { transform: translateX(-50%) translateY(8px); }
+  }
+
+  @keyframes shimmer {
+    0% { background-position: -200% center; }
+    100% { background-position: 200% center; }
+  }
+
+  @keyframes flow {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+
+  @keyframes pulse-glow {
+    0%, 100% { opacity: 0.3; }
+    50% { opacity: 0.7; }
+  }
+
+  .flow-line {
+    animation: flow 8s linear infinite;
+  }
+
+  /* ===== WATER EFFECT ===== */
+  .water-surface {
+    position: relative;
+    height: 60px;
+    overflow: hidden;
+    margin: 2rem 0;
+  }
+
+  .water-surface svg {
+    position: absolute;
+    bottom: 0;
+    width: 200%;
+    height: 100%;
+  }
+
+  /* ===== RESPONSIVE ===== */
+  @media (max-width: 768px) {
+    .card-illustration {
+      float: none;
+      width: 100%;
+      height: 160px;
+      margin: 0 0 1.5rem 0;
+    }
+
+    .route-card { padding: 1.8rem; }
+    .rule-columns { gap: 2rem; }
+    .final-box { padding: 2rem 1.5rem; }
+    .container { padding: 0 1.2rem; }
+    section { padding: 3.5rem 0; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ============================== HERO ============================== -->
+<section class="hero">
+  <svg class="hero-landscape" viewBox="0 0 1440 500" preserveAspectRatio="xMidYMax slice">
+    <defs>
+      <linearGradient id="mg1" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#1a3a5c" stop-opacity="0.6"/>
+        <stop offset="100%" stop-color="#0a1628" stop-opacity="0"/>
+      </linearGradient>
+      <linearGradient id="mg2" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#132840"/>
+        <stop offset="100%" stop-color="#0a1628"/>
+      </linearGradient>
+      <linearGradient id="water" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#3ecfb0" stop-opacity="0.15"/>
+        <stop offset="100%" stop-color="#0a1628" stop-opacity="0"/>
+      </linearGradient>
+    </defs>
+    <!-- Far mountains -->
+    <path d="M0 300 L80 180 L160 250 L280 120 L380 200 L500 80 L620 190 L750 100 L880 220 L1000 140 L1120 200 L1240 110 L1360 230 L1440 160 L1440 500 L0 500Z" fill="url(#mg1)" opacity="0.5"/>
+    <!-- Mid mountains -->
+    <path d="M0 380 L100 280 L200 320 L350 200 L480 300 L600 240 L720 310 L850 180 L980 280 L1100 220 L1200 300 L1350 240 L1440 290 L1440 500 L0 500Z" fill="url(#mg2)" opacity="0.7"/>
+    <!-- Near mountains -->
+    <path d="M0 420 L120 340 L250 380 L400 300 L520 370 L680 310 L800 360 L950 280 L1080 350 L1200 310 L1350 370 L1440 340 L1440 500 L0 500Z" fill="#0e1e35"/>
+    <!-- Water reflection -->
+    <path d="M0 460 Q180 445 360 460 Q540 475 720 460 Q900 445 1080 460 Q1260 475 1440 460 L1440 500 L0 500Z" fill="url(#water)"/>
+    <!-- Water ripple lines -->
+    <path d="M0 470 Q360 460 720 470 Q1080 480 1440 470" stroke="#3ecfb0" stroke-opacity="0.08" stroke-width="1" fill="none"/>
+    <path d="M0 480 Q360 475 720 480 Q1080 485 1440 480" stroke="#3ecfb0" stroke-opacity="0.05" stroke-width="1" fill="none"/>
+    <!-- Floating particles -->
+    <circle cx="300" cy="200" r="2" fill="#3ecfb0" opacity="0.2">
+      <animate attributeName="opacity" values="0.1;0.4;0.1" dur="4s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="700" cy="150" r="1.5" fill="#e8a838" opacity="0.15">
+      <animate attributeName="opacity" values="0.1;0.3;0.1" dur="5s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="1100" cy="180" r="2" fill="#3ecfb0" opacity="0.2">
+      <animate attributeName="opacity" values="0.15;0.35;0.15" dur="3.5s" repeatCount="indefinite"/>
+    </circle>
+  </svg>
+  <div class="hero-mist"></div>
+
+  <div class="hero-content">
+    <div class="hero-badge">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+      重庆东北部 · 溯溪路线完全指南
+    </div>
+    <h1>峡谷深潭之间<br><span class="highlight">寻找隐秘水线</span></h1>
+    <p class="hero-subtitle">万州—云阳—奉节—巫溪—城口—巫山一线，长江三峡东延与大巴山峡谷体系的交汇处，水系发达、落差显著，需要分"可控玩水"与"野性溯溪"两条思路来选择路线。</p>
+    <div class="hero-tags">
+      <span class="hero-tag">7条核心路线</span>
+      <span class="hero-tag">3级风险分级</span>
+      <span class="hero-tag">支流才是核心</span>
+      <span class="hero-tag">峡谷 · 深潭 · 溶洞水系</span>
+    </div>
+  </div>
+
+  <div class="hero-scroll">
+    <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round">
+      <path d="M12 5v14M5 12l7 7 7-7"/>
+    </svg>
+  </div>
+</section>
+
+<!-- ============================== MAP OVERVIEW ============================== -->
+<section>
+  <div class="container">
+    <div class="section-header">
+      <div class="section-region">路线总览</div>
+      <h2 class="section-title">重庆东北部水系分布</h2>
+      <p class="section-desc">长江三峡东延 + 大巴山峡谷体系，核心玩点集中在支流而非主河</p>
+    </div>
+
+    <div class="map-wrapper">
+      <svg viewBox="0 0 1000 550" style="background: #0b1a2e;">
+        <defs>
+          <filter id="glow">
+            <feGaussianBlur stdDeviation="3" result="blur"/>
+            <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+          <radialGradient id="locGlow" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#3ecfb0" stop-opacity="0.4"/>
+            <stop offset="100%" stop-color="#3ecfb0" stop-opacity="0"/>
+          </radialGradient>
+        </defs>
+
+        <!-- Terrain contour lines -->
+        <path d="M0 100 Q200 80 400 120 Q600 60 800 100 Q900 90 1000 110" stroke="#1a3050" stroke-width="0.5" fill="none"/>
+        <path d="M0 160 Q150 140 350 180 Q550 130 750 170 Q900 150 1000 165" stroke="#1a3050" stroke-width="0.5" fill="none"/>
+        <path d="M0 230 Q250 200 450 240 Q650 190 850 220 Q950 210 1000 225" stroke="#1a3050" stroke-width="0.5" fill="none"/>
+        <path d="M0 310 Q200 290 400 320 Q600 280 800 310 Q900 300 1000 305" stroke="#1a3050" stroke-width="0.5" fill="none"/>
+        <path d="M0 390 Q300 370 500 400 Q700 360 900 385 Q950 380 1000 390" stroke="#1a3050" stroke-width="0.5" fill="none"/>
+        <path d="M0 450 Q250 440 450 460 Q650 430 850 450 Q950 445 1000 450" stroke="#1a3050" stroke-width="0.5" fill="none"/>
+
+        <!-- Yangtze River (main, dashed to indicate "do not enter") -->
+        <path d="M680 520 Q650 480 600 430 Q540 370 480 340 Q420 310 350 320 Q280 330 200 360 Q120 390 50 420 Q20 435 0 450" stroke="#2a4a70" stroke-width="4" fill="none" stroke-dasharray="8 4" opacity="0.5"/>
+        <text x="100" y="400" fill="#2a5a80" font-size="11" font-family="Crimson Pro" opacity="0.6">长 江 主 干 （ 不 可 溯 ）</text>
+
+        <!-- Daning River -->
+        <path d="M350 320 Q380 270 400 220 Q420 170 450 120" stroke="#3ecfb0" stroke-width="2.5" fill="none" opacity="0.7"/>
+        <path d="M400 220 Q430 200 460 190" stroke="#3ecfb0" stroke-width="1.5" fill="none" opacity="0.4" stroke-dasharray="4 3"/>
+        <path d="M410 250 Q440 230 470 225" stroke="#3ecfb0" stroke-width="1" fill="none" opacity="0.3" stroke-dasharray="3 3"/>
+
+        <!-- Qutang area -->
+        <path d="M480 340 Q510 300 530 260" stroke="#4a8fe7" stroke-width="1.5" fill="none" opacity="0.5" stroke-dasharray="5 3"/>
+
+        <!-- Qinglong River (Yunyang) -->
+        <path d="M620 400 Q640 360 660 320 Q680 280 700 240" stroke="#3ecfb0" stroke-width="2" fill="none" opacity="0.6"/>
+        <path d="M660 320 Q690 310 720 300" stroke="#3ecfb0" stroke-width="1" fill="none" opacity="0.3" stroke-dasharray="3 3"/>
+
+        <!-- Chengkou streams -->
+        <path d="M820 150 Q800 190 780 230" stroke="#e8a838" stroke-width="1.5" fill="none" opacity="0.5" stroke-dasharray="4 3"/>
+        <path d="M780 230 Q760 250 750 270" stroke="#e8a838" stroke-width="1" fill="none" opacity="0.3" stroke-dasharray="3 3"/>
+
+        <!-- Location dots -->
+        <!-- Wuxi -->
+        <circle cx="440" cy="135" r="20" fill="url(#locGlow)" filter="url(#glow)"/>
+        <circle cx="440" cy="135" r="5" fill="#3ecfb0"/>
+        <text x="455" y="130" fill="#f0ece4" font-size="14" font-weight="700" font-family="Noto Serif SC">巫溪</text>
+        <text x="455" y="148" fill="#6a7a8e" font-size="10" font-family="Crimson Pro">大宁河体系</text>
+
+        <!-- Wushan -->
+        <circle cx="340" cy="280" r="20" fill="url(#locGlow)" filter="url(#glow)"/>
+        <circle cx="340" cy="280" r="5" fill="#3ecfb0"/>
+        <text x="280" y="275" fill="#f0ece4" font-size="14" font-weight="700" font-family="Noto Serif SC">巫山</text>
+        <text x="260" y="293" fill="#6a7a8e" font-size="10" font-family="Crimson Pro">小三峡体系</text>
+
+        <!-- Fengjie -->
+        <circle cx="510" cy="310" r="16" fill="url(#locGlow)"/>
+        <circle cx="510" cy="310" r="4" fill="#4a8fe7"/>
+        <text x="525" y="305" fill="#f0ece4" font-size="13" font-weight="700" font-family="Noto Serif SC">奉节</text>
+        <text x="525" y="321" fill="#6a7a8e" font-size="9" font-family="Crimson Pro">瞿塘峡</text>
+
+        <!-- Yunyang -->
+        <circle cx="660" cy="310" r="20" fill="url(#locGlow)" filter="url(#glow)"/>
+        <circle cx="660" cy="310" r="5" fill="#3ecfb0"/>
+        <text x="675" y="305" fill="#f0ece4" font-size="14" font-weight="700" font-family="Noto Serif SC">云阳</text>
+        <text x="675" y="323" fill="#6a7a8e" font-size="10" font-family="Crimson Pro">龙缸 · 清水河</text>
+
+        <!-- Chengkou -->
+        <circle cx="800" cy="150" r="16" fill="url(#locGlow)"/>
+        <circle cx="800" cy="150" r="4" fill="#e8a838"/>
+        <text x="815" y="145" fill="#f0ece4" font-size="13" font-weight="700" font-family="Noto Serif SC">城口</text>
+        <text x="815" y="161" fill="#6a7a8e" font-size="9" font-family="Crimson Pro">大巴山溪谷</text>
+
+        <!-- Wanzhou -->
+        <circle cx="750" cy="430" r="14" fill="url(#locGlow)"/>
+        <circle cx="750" cy="430" r="4" fill="#4a8fe7"/>
+        <text x="765" y="425" fill="#f0ece4" font-size="13" font-weight="700" font-family="Noto Serif SC">万州</text>
+        <text x="765" y="441" fill="#6a7a8e" font-size="9" font-family="Crimson Pro">小江支流</text>
+
+        <!-- Legend -->
+        <rect x="30" y="480" width="260" height="55" rx="8" fill="rgba(19,32,53,0.9)" stroke="rgba(255,255,255,0.06)"/>
+        <line x1="50" y1="500" x2="80" y2="500" stroke="#3ecfb0" stroke-width="2.5"/>
+        <text x="88" y="504" fill="#c8c0b4" font-size="10" font-family="Crimson Pro">推荐溯溪水系</text>
+        <line x1="50" y1="520" x2="80" y2="520" stroke="#e8a838" stroke-width="1.5" stroke-dasharray="4 3"/>
+        <text x="88" y="524" fill="#c8c0b4" font-size="10" font-family="Crimson Pro">探索级水系</text>
+        <line x1="180" y1="500" x2="210" y2="500" stroke="#2a4a70" stroke-width="3" stroke-dasharray="8 4"/>
+        <text x="218" y="504" fill="#c8c0b4" font-size="10" font-family="Crimson Pro">主河（禁入）</text>
+      </svg>
+    </div>
+  </div>
+</section>
+
+<!-- ============================== SECTION 1: WUXI ============================== -->
+<section>
+  <div class="container">
+    <div class="section-header">
+      <div class="section-region">核心主线 · 巫溪</div>
+      <h2 class="section-title">大宁河体系</h2>
+      <p class="section-desc">重庆东北部溯溪的"脊梁"，峡谷最连续、水质最清、溯溪结构最完整的区域</p>
+    </div>
+
+    <!-- Route 1 -->
+    <div class="route-card level-yellow">
+      <div class="card-illustration">
+        <svg viewBox="0 0 200 140">
+          <defs>
+            <linearGradient id="c1bg" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#142838"/>
+              <stop offset="100%" stop-color="#0a1628"/>
+            </linearGradient>
+            <linearGradient id="c1water" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stop-color="#3ecfb0" stop-opacity="0.05"/>
+              <stop offset="50%" stop-color="#3ecfb0" stop-opacity="0.15"/>
+              <stop offset="100%" stop-color="#3ecfb0" stop-opacity="0.05"/>
+            </linearGradient>
+          </defs>
+          <rect width="200" height="140" fill="url(#c1bg)"/>
+          <!-- Canyon walls -->
+          <path d="M0 0 L20 0 L30 40 L25 80 L15 120 L0 140Z" fill="#1a3045" opacity="0.8"/>
+          <path d="M200 0 L180 0 L170 35 L175 75 L185 115 L200 140Z" fill="#1a3045" opacity="0.8"/>
+          <path d="M10 0 L35 0 L40 30 L35 70 L25 110 L10 140Z" fill="#1e3850" opacity="0.6"/>
+          <path d="M190 0 L165 0 L160 30 L165 65 L175 105 L190 140Z" fill="#1e3850" opacity="0.6"/>
+          <!-- Deep pool -->
+          <ellipse cx="100" cy="125" rx="60" ry="12" fill="url(#c1water)"/>
+          <path d="M40 125 Q70 118 100 125 Q130 132 160 125" stroke="#3ecfb0" stroke-width="0.8" fill="none" opacity="0.3"/>
+          <path d="M50 130 Q75 124 100 130 Q125 136 150 130" stroke="#3ecfb0" stroke-width="0.5" fill="none" opacity="0.2"/>
+          <!-- Waterfall -->
+          <path d="M95 55 L95 100" stroke="#3ecfb0" stroke-width="1.5" opacity="0.3"/>
+          <path d="M105 50 L103 95" stroke="#3ecfb0" stroke-width="1" opacity="0.2"/>
+          <path d="M100 45 Q100 70 98 100" stroke="#3ecfb0" stroke-width="2" opacity="0.15" stroke-linecap="round"/>
+          <!-- Stalactites -->
+          <path d="M40 0 L42 20 L38 20Z" fill="#243a50" opacity="0.5"/>
+          <path d="M55 0 L58 28 L53 28Z" fill="#243a50" opacity="0.4"/>
+          <path d="M145 0 L148 22 L143 22Z" fill="#243a50" opacity="0.5"/>
+          <path d="M160 0 L162 18 L158 18Z" fill="#243a50" opacity="0.4"/>
+          <!-- Mist -->
+          <ellipse cx="100" cy="105" rx="40" ry="8" fill="#3ecfb0" opacity="0.04"/>
+          <text x="100" y="18" fill="#3ecfb0" font-size="8" text-anchor="middle" font-family="Crimson Pro" opacity="0.6">CANYON · DEEP POOL</text>
+        </svg>
+      </div>
+      <div class="card-header">
+        <div class="card-number">01</div>
+        <div class="card-title-group">
+          <h3 class="card-title">大宁河（主干上游段）</h3>
+          <div class="card-type">峡谷型河流 · 深潭 · 溶洞水系</div>
+        </div>
+      </div>
+      <div class="card-badges">
+        <span class="badge badge-yellow">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v4m0 4h.01M12 2l10 18H2z"/></svg>
+          水位波动大
+        </span>
+        <span class="badge badge-blue">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M2 12h20"/><circle cx="12" cy="12" r="10"/></svg>
+          优先级最高
+        </span>
+        <span class="badge badge-green">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          视觉冲击强
+        </span>
+      </div>
+      <div class="card-body">
+        <h4>可玩段</h4>
+        <ul>
+          <li>宁厂古镇 → 上游峡谷段（部分支流汇入点）</li>
+          <li>峡谷深潭 + 绿水河段</li>
+        </ul>
+
+        <h4>核心特点</h4>
+        <ul>
+          <li>峡谷极深，视觉冲击强烈</li>
+          <li>上游水质较清，连续峡谷结构是溯溪核心条件</li>
+        </ul>
+
+        <h4>风险点</h4>
+        <ul class="risk-list">
+          <li>上游降雨导致水位快速波动</li>
+          <li>部分区域存在强回流</li>
+          <li>有落石区，需注意头顶安全</li>
+        </ul>
+
+        <div class="verdict warn">
+          适合"轻技术溯溪 + 深潭游泳"，不适合完全自由探路
+        </div>
+      </div>
+    </div>
+
+    <!-- Route 2 -->
+    <div class="route-card level-red">
+      <div class="card-illustration">
+        <svg viewBox="0 0 200 140">
+          <rect width="200" height="140" fill="#0e1a28"/>
+          <!-- Dense forest canopy -->
+          <ellipse cx="50" cy="30" rx="35" ry="25" fill="#1a3520" opacity="0.6"/>
+          <ellipse cx="90" cy="25" rx="40" ry="30" fill="#153020" opacity="0.5"/>
+          <ellipse cx="140" cy="35" rx="35" ry="22" fill="#1a3520" opacity="0.6"/>
+          <ellipse cx="170" cy="28" rx="25" ry="20" fill="#153020" opacity="0.4"/>
+          <!-- Tree trunks -->
+          <line x1="50" y1="50" x2="50" y2="140" stroke="#1a3520" stroke-width="3" opacity="0.4"/>
+          <line x1="90" y1="48" x2="90" y2="140" stroke="#1a3520" stroke-width="4" opacity="0.4"/>
+          <line x1="140" y1="52" x2="140" y2="140" stroke="#1a3520" stroke-width="3" opacity="0.4"/>
+          <!-- Rocky stream bed -->
+          <path d="M20 100 Q60 90 100 100 Q140 110 180 95" stroke="#4a6a5a" stroke-width="1" fill="none" opacity="0.3"/>
+          <!-- Scattered rocks -->
+          <ellipse cx="60" cy="105" rx="8" ry="5" fill="#2a3a30" opacity="0.6"/>
+          <ellipse cx="100" cy="110" rx="12" ry="6" fill="#2a3a30" opacity="0.5"/>
+          <ellipse cx="145" cy="100" rx="7" ry="4" fill="#2a3a30" opacity="0.6"/>
+          <ellipse cx="80" cy="115" rx="6" ry="4" fill="#2a3a30" opacity="0.4"/>
+          <!-- Thin stream -->
+          <path d="M30 105 Q70 95 110 108 Q150 115 190 100" stroke="#3ecfb0" stroke-width="1.5" fill="none" opacity="0.2" stroke-linecap="round"/>
+          <!-- Question marks / uncertainty -->
+          <text x="100" y="80" fill="#e8a838" font-size="16" text-anchor="middle" font-family="Crimson Pro" opacity="0.3">?</text>
+          <text x="100" y="18" fill="#3ecfb0" font-size="8" text-anchor="middle" font-family="Crimson Pro" opacity="0.6">WILD TRIBUTARY</text>
+        </svg>
+      </div>
+      <div class="card-header">
+        <div class="card-number">02</div>
+        <div class="card-title-group">
+          <h3 class="card-title">白鹿溪 / 支流峡谷</h3>
+          <div class="card-type">巫溪周边 · 更"野"的支线水系</div>
+        </div>
+      </div>
+      <div class="card-badges">
+        <span class="badge badge-red">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v4m0 4h.01M12 2l10 18H2z"/></svg>
+          信息少 · 需现场判断
+        </span>
+        <span class="badge badge-yellow">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+          体能要求高
+        </span>
+      </div>
+      <div class="card-body">
+        <h4>特点</h4>
+        <ul>
+          <li>人少、自然感极强</li>
+          <li>石头多、路线不固定</li>
+          <li>适合体能强的人做探索型徒步溯溪</li>
+        </ul>
+
+        <h4>风险</h4>
+        <ul class="risk-list">
+          <li>网络信息极少，缺乏参考</li>
+          <li>需要现场判断水流和路径</li>
+        </ul>
+
+        <div class="verdict danger">
+          探索型路线，仅推荐有溯溪经验者
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================== SECTION 2: FENGJIE ============================== -->
+<section>
+  <div class="container">
+    <div class="section-header">
+      <div class="section-region">视觉最强 · 奉节</div>
+      <h2 class="section-title">瞿塘峡水系</h2>
+      <p class="section-desc">三峡最窄段，垂直感极强的地形，但主江不可溯——支流才是可玩区域</p>
+    </div>
+
+    <div class="route-card level-yellow">
+      <div class="card-illustration">
+        <svg viewBox="0 0 200 140">
+          <defs>
+            <linearGradient id="fjbg" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#0e1825"/>
+              <stop offset="100%" stop-color="#0a1220"/>
+            </linearGradient>
+          </defs>
+          <rect width="200" height="140" fill="url(#fjbg)"/>
+          <!-- Vertical cliff faces -->
+          <path d="M0 0 L40 0 L35 140 L0 140Z" fill="#1a2840" opacity="0.9"/>
+          <path d="M160 0 L200 0 L200 140 L165 140Z" fill="#1a2840" opacity="0.9"/>
+          <path d="M5 0 L30 0 L28 140 L5 140Z" fill="#1e3050" opacity="0.7"/>
+          <path d="M170 0 L195 0 L195 140 L172 140Z" fill="#1e3050" opacity="0.7"/>
+          <!-- Cliff textures -->
+          <line x1="15" y1="10" x2="18" y2="60" stroke="#2a4060" stroke-width="0.5" opacity="0.5"/>
+          <line x1="25" y1="20" x2="22" y2="80" stroke="#2a4060" stroke-width="0.5" opacity="0.4"/>
+          <line x1="178" y1="15" x2="180" y2="70" stroke="#2a4060" stroke-width="0.5" opacity="0.5"/>
+          <line x1="188" y1="5" x2="186" y2="55" stroke="#2a4060" stroke-width="0.5" opacity="0.4"/>
+          <!-- Narrow river at bottom -->
+          <path d="M45 125 Q100 118 155 125" stroke="#4a8fe7" stroke-width="3" fill="none" opacity="0.15"/>
+          <path d="M42 130 Q100 123 158 130" stroke="#4a8fe7" stroke-width="1.5" fill="none" opacity="0.1"/>
+          <!-- Arrow indicating narrow -->
+          <line x1="40" y1="60" x2="160" y2="60" stroke="#e8a838" stroke-width="0.5" stroke-dasharray="3 2" opacity="0.4"/>
+          <text x="100" y="55" fill="#e8a838" font-size="7" text-anchor="middle" font-family="Crimson Pro" opacity="0.5">NARROW</text>
+          <!-- Small side stream -->
+          <path d="M45 70 Q50 90 48 125" stroke="#3ecfb0" stroke-width="1" fill="none" opacity="0.3" stroke-dasharray="3 2"/>
+          <text x="100" y="105" fill="#4a8fe7" font-size="8" text-anchor="middle" font-family="Crimson Pro" opacity="0.5">MAIN RIVER · TOO STRONG</text>
+          <text x="100" y="18" fill="#3ecfb0" font-size="8" text-anchor="middle" font-family="Crimson Pro" opacity="0.6">QUTANG GORGE</text>
+        </svg>
+      </div>
+      <div class="card-header">
+        <div class="card-number">03</div>
+        <div class="card-title-group">
+          <h3 class="card-title">瞿塘峡支流段</h3>
+          <div class="card-type">长江三峡最窄段之一 · 地形极壮观</div>
+        </div>
+      </div>
+      <div class="card-badges">
+        <span class="badge badge-blue">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          观景级
+        </span>
+        <span class="badge badge-yellow">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v4m0 4h.01M12 2l10 18H2z"/></svg>
+          主江不可溯
+        </span>
+      </div>
+      <div class="card-body">
+        <h4>可玩内容</h4>
+        <ul>
+          <li>支流小溪 + 山谷徒步</li>
+          <li>部分浅水段涉水体验</li>
+        </ul>
+        <h4>核心特点</h4>
+        <ul>
+          <li>地形垂直感极强，视觉震撼</li>
+          <li>主江水流太大，不可进行溯溪</li>
+        </ul>
+
+        <div class="verdict warn">
+          更适合"徒步 + 观峡"，不是纯溯溪目的地
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Water surface divider -->
+<div class="water-surface">
+  <svg viewBox="0 0 2400 60" preserveAspectRatio="none">
+    <path class="flow-line" d="M0 30 Q100 15 200 30 Q300 45 400 30 Q500 15 600 30 Q700 45 800 30 Q900 15 1000 30 Q1100 45 1200 30 Q1300 15 1400 30 Q1500 45 1600 30 Q1700 15 1800 30 Q1900 45 2000 30 Q2100 15 2200 30 Q2300 45 2400 30" stroke="#3ecfb0" stroke-width="1" fill="none" opacity="0.15"/>
+    <path class="flow-line" d="M0 35 Q100 22 200 35 Q300 48 400 35 Q500 22 600 35 Q700 48 800 35 Q900 22 1000 35 Q1100 48 1200 35 Q1300 22 1400 35 Q1500 48 1600 35 Q1700 22 1800 35 Q1900 48 2000 35 Q2100 22 2200 35 Q2300 48 2400 35" stroke="#3ecfb0" stroke-width="0.5" fill="none" opacity="0.1"/>
+  </svg>
+</div>
+
+<!-- ============================== SECTION 3: YUNYANG ============================== -->
+<section>
+  <div class="container">
+    <div class="section-header">
+      <div class="section-region">强烈推荐 · 云阳</div>
+      <h2 class="section-title">龙缸 · 清水河体系</h2>
+      <p class="section-desc">喀斯特地貌 + 峡谷水系，设施与野性兼具，入门溯溪的最佳区域</p>
+    </div>
+
+    <!-- Route 4 -->
+    <div class="route-card level-green">
+      <div class="card-illustration">
+        <svg viewBox="0 0 200 140">
+          <defs>
+            <radialGradient id="sinkhole" cx="50%" cy="40%" r="50%">
+              <stop offset="0%" stop-color="#0a1220"/>
+              <stop offset="100%" stop-color="#142838"/>
+            </radialGradient>
+          </defs>
+          <rect width="200" height="140" fill="#101e30"/>
+          <!-- Sinkhole rim -->
+          <ellipse cx="100" cy="55" rx="70" ry="25" fill="none" stroke="#2a5040" stroke-width="2" opacity="0.5"/>
+          <ellipse cx="100" cy="55" rx="55" ry="18" fill="url(#sinkhole)" opacity="0.8"/>
+          <!-- Depth layers -->
+          <ellipse cx="100" cy="70" rx="45" ry="12" fill="#0a1520" opacity="0.6"/>
+          <ellipse cx="100" cy="85" rx="35" ry="8" fill="#081018" opacity="0.5"/>
+          <!-- Water at bottom -->
+          <ellipse cx="100" cy="100" rx="20" ry="5" fill="#3ecfb0" opacity="0.08"/>
+          <!-- Rim vegetation -->
+          <circle cx="45" cy="45" r="12" fill="#1a3828" opacity="0.5"/>
+          <circle cx="155" cy="48" r="10" fill="#1a3828" opacity="0.4"/>
+          <circle cx="70" cy="38" r="8" fill="#1a3828" opacity="0.3"/>
+          <!-- Walkway hint -->
+          <path d="M20 50 Q35 48 50 52" stroke="#e8a838" stroke-width="1" fill="none" opacity="0.3" stroke-dasharray="3 2"/>
+          <!-- Labels -->
+          <text x="100" y="130" fill="#3ecfb0" font-size="8" text-anchor="middle" font-family="Crimson Pro" opacity="0.6">KARST SINKHOLE</text>
+          <text x="100" y="18" fill="#3ecfb0" font-size="8" text-anchor="middle" font-family="Crimson Pro" opacity="0.6">LONGGANG · YUNYANG</text>
+        </svg>
+      </div>
+      <div class="card-header">
+        <div class="card-number">04</div>
+        <div class="card-title-group">
+          <h3 class="card-title">龙缸景区水系</h3>
+          <div class="card-type">喀斯特地貌 · 深坑 · 下沉式峡谷</div>
+        </div>
+      </div>
+      <div class="card-badges">
+        <span class="badge badge-green">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+          设施较成熟 · 相对安全
+        </span>
+        <span class="badge badge-blue">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          立体感极强
+        </span>
+      </div>
+      <div class="card-body">
+        <h4>可玩内容</h4>
+        <ul>
+          <li>浅溯 + 栈道徒步</li>
+          <li>深坑边缘探索（有安全护栏）</li>
+        </ul>
+        <h4>核心优势</h4>
+        <ul>
+          <li>下沉式峡谷地形，层次分明</li>
+          <li>景区设施完善，安全系数高</li>
+          <li>适合初次体验峡谷水系</li>
+        </ul>
+
+        <div class="verdict">
+          设施成熟的安全探索区域，推荐所有水平的溯溪爱好者
+        </div>
+      </div>
+    </div>
+
+    <!-- Route 5 -->
+    <div class="route-card level-green">
+      <div class="card-illustration">
+        <svg viewBox="0 0 200 140">
+          <rect width="200" height="140" fill="#0e1e2e"/>
+          <!-- Gentle valley -->
+          <path d="M0 40 Q50 30 100 35 Q150 40 200 35 L200 140 L0 140Z" fill="#142838"/>
+          <!-- Shallow stream -->
+          <path d="M30 90 Q60 85 90 90 Q120 95 150 88 Q180 82 200 85" stroke="#3ecfb0" stroke-width="2" fill="none" opacity="0.25"/>
+          <path d="M20 95 Q50 90 80 95 Q110 100 140 93 Q170 87 200 90" stroke="#3ecfb0" stroke-width="1" fill="none" opacity="0.15"/>
+          <!-- Stepping stones -->
+          <ellipse cx="55" cy="92" rx="8" ry="4" fill="#2a4040" opacity="0.6"/>
+          <ellipse cx="85" cy="95" rx="7" ry="3.5" fill="#2a4040" opacity="0.5"/>
+          <ellipse cx="115" cy="90" rx="9" ry="4" fill="#2a4040" opacity="0.6"/>
+          <ellipse cx="145" cy="88" rx="6" ry="3" fill="#2a4040" opacity="0.5"/>
+          <!-- Gentle slopes -->
+          <path d="M0 60 Q50 50 100 55 Q150 60 200 50" stroke="#1a3540" stroke-width="0.5" fill="none" opacity="0.3"/>
+          <!-- Light vegetation -->
+          <circle cx="30" cy="60" r="15" fill="#163025" opacity="0.3"/>
+          <circle cx="170" cy="55" r="12" fill="#163025" opacity="0.25"/>
+          <!-- Sunlight -->
+          <circle cx="160" cy="20" r="15" fill="#e8a838" opacity="0.04"/>
+          <text x="100" y="18" fill="#3ecfb0" font-size="8" text-anchor="middle" font-family="Crimson Pro" opacity="0.6">GENTLE STREAM · STEPPING STONES</text>
+          <text x="100" y="130" fill="#3ecfb0" font-size="8" text-anchor="middle" font-family="Crimson Pro" opacity="0.4">QINGSHUI RIVER · ENTRY LEVEL</text>
+        </svg>
+      </div>
+      <div class="card-header">
+        <div class="card-number">05</div>
+        <div class="card-title-group">
+          <h3 class="card-title">清水河</h3>
+          <div class="card-type">云阳周边支流 · 入门溯溪最佳练习场</div>
+        </div>
+      </div>
+      <div class="card-badges">
+        <span class="badge badge-green">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+          入门首选
+        </span>
+        <span class="badge badge-green">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
+          水流平稳
+        </span>
+      </div>
+      <div class="card-body">
+        <h4>核心特点</h4>
+        <ul>
+          <li>水不算太急，安全性高</li>
+          <li>石头路径较多，路线清晰</li>
+          <li>有连续浅滩，非常适合练习溯溪脚感</li>
+        </ul>
+
+        <div class="verdict">
+          入门溯溪最佳练习场之一，推荐所有新手
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================== SECTION 4: CHENGKOU ============================== -->
+<section>
+  <div class="container">
+    <div class="section-header">
+      <div class="section-region">最原始 · 城口</div>
+      <h2 class="section-title">大巴山溪谷体系</h2>
+      <p class="section-desc">重庆最"野"的水系，森林覆盖率高、河谷原始、支流密集——进阶探索者的乐园</p>
+    </div>
+
+    <div class="route-card level-red">
+      <div class="card-illustration">
+        <svg viewBox="0 0 200 140">
+          <rect width="200" height="140" fill="#0a1418"/>
+          <!-- Dense forest -->
+          <path d="M0 30 L20 10 L40 30 L60 5 L80 28 L100 15 L120 32 L140 8 L160 25 L180 12 L200 30 L200 140 L0 140Z" fill="#0f2818" opacity="0.8"/>
+          <path d="M0 50 L30 35 L55 50 L80 30 L105 48 L130 35 L155 50 L180 38 L200 45 L200 140 L0 140Z" fill="#0a2012" opacity="0.6"/>
+          <!-- Canyon -->
+          <path d="M60 60 L55 140" stroke="#1a3020" stroke-width="30" opacity="0.5"/>
+          <path d="M140 55 L145 140" stroke="#1a3020" stroke-width="25" opacity="0.5"/>
+          <!-- Wild stream -->
+          <path d="M55 80 Q75 75 85 82 Q95 90 80 95 Q65 100 75 108 Q90 115 100 110 Q115 105 130 112 Q145 118 140 125" stroke="#3ecfb0" stroke-width="1.5" fill="none" opacity="0.2" stroke-linecap="round"/>
+          <!-- Wildlife hint -->
+          <circle cx="25" cy="25" r="3" fill="#e8a838" opacity="0.15">
+            <animate attributeName="opacity" values="0.1;0.25;0.1" dur="3s" repeatCount="indefinite"/>
+          </circle>
+          <circle cx="175" cy="20" r="2" fill="#e8a838" opacity="0.12">
+            <animate attributeName="opacity" values="0.08;0.2;0.08" dur="4s" repeatCount="indefinite"/>
+          </circle>
+          <!-- Danger elements -->
+          <text x="100" y="100" fill="#e85d4a" font-size="24" text-anchor="middle" font-family="Crimson Pro" opacity="0.08">⚠</text>
+          <text x="100" y="18" fill="#e8a838" font-size="8" text-anchor="middle" font-family="Crimson Pro" opacity="0.6">DABASHAN · WILDEST</text>
+        </svg>
+      </div>
+      <div class="card-header">
+        <div class="card-number">06</div>
+        <div class="card-title-group">
+          <h3 class="card-title">大巴山溪谷体系</h3>
+          <div class="card-type">重庆最"野"的水系 · 原始山地溪流</div>
+        </div>
+      </div>
+      <div class="card-badges">
+        <span class="badge badge-red">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v4m0 4h.01M12 2l10 18H2z"/></svg>
+          高风险探索级
+        </span>
+        <span class="badge badge-yellow">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+          需要经验
+        </span>
+      </div>
+      <div class="card-body">
+        <h4>核心特点</h4>
+        <ul>
+          <li>森林覆盖率极高，河谷原始未开发</li>
+          <li>支流密集，地形复杂多变</li>
+        </ul>
+        <h4>玩法</h4>
+        <ul>
+          <li>徒步 + 溪流穿越</li>
+          <li>轻溯溪探索</li>
+        </ul>
+        <h4>风险</h4>
+        <ul class="risk-list">
+          <li>野生动物出没</li>
+          <li>落石风险</li>
+          <li>路径不清晰，迷路概率高</li>
+        </ul>
+
+        <div class="verdict danger">
+          进阶/探索级，不建议第一次就深入。需要丰富户外经验。
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================== SECTION 5: WANZHOU ============================== -->
+<section>
+  <div class="container">
+    <div class="section-header">
+      <div class="section-region">低强度 · 万州</div>
+      <h2 class="section-title">小江支流体系</h2>
+      <p class="section-desc">城市周边河谷，适合轻度玩水和体能恢复日</p>
+    </div>
+
+    <div class="route-card level-green">
+      <div class="card-illustration">
+        <svg viewBox="0 0 200 140">
+          <rect width="200" height="140" fill="#101e2e"/>
+          <!-- Gentle hills -->
+          <path d="M0 70 Q50 50 100 65 Q150 80 200 60 L200 140 L0 140Z" fill="#152838"/>
+          <path d="M0 85 Q60 75 120 85 Q160 90 200 80 L200 140 L0 140Z" fill="#1a3040"/>
+          <!-- Calm water -->
+          <path d="M20 100 Q60 96 100 100 Q140 104 180 98" stroke="#4a8fe7" stroke-width="2" fill="none" opacity="0.15"/>
+          <path d="M30 108 Q70 104 110 108 Q150 112 170 106" stroke="#4a8fe7" stroke-width="1" fill="none" opacity="0.1"/>
+          <!-- City hint -->
+          <rect x="140" y="55" width="4" height="15" fill="#1e3550" opacity="0.3"/>
+          <rect x="148" y="50" width="3" height="20" fill="#1e3550" opacity="0.25"/>
+          <rect x="155" y="58" width="3" height="12" fill="#1e3550" opacity="0.3"/>
+          <!-- Gentle atmosphere -->
+          <circle cx="160" cy="30" r="20" fill="#e8a838" opacity="0.03"/>
+          <text x="100" y="130" fill="#4a8fe7" font-size="8" text-anchor="middle" font-family="Crimson Pro" opacity="0.4">Calm · Gentle · Urban-adjacent</text>
+          <text x="100" y="18" fill="#3ecfb0" font-size="8" text-anchor="middle" font-family="Crimson Pro" opacity="0.6">XIAOJIANG TRIBUTARIES</text>
+        </svg>
+      </div>
+      <div class="card-header">
+        <div class="card-number">07</div>
+        <div class="card-title-group">
+          <h3 class="card-title">万州小江支流体系</h3>
+          <div class="card-type">城市周边河谷 · 轻度玩水</div>
+        </div>
+      </div>
+      <div class="card-badges">
+        <span class="badge badge-green">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+          极低风险
+        </span>
+        <span class="badge badge-blue">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
+          适合恢复日
+        </span>
+      </div>
+      <div class="card-body">
+        <h4>核心特点</h4>
+        <ul>
+          <li>水流较缓，安全性高</li>
+          <li>适合短距离玩水、亲子活动</li>
+          <li>交通便利，城市周边可达</li>
+        </ul>
+
+        <div class="verdict">
+          适合"轻玩水 + 体能恢复"，不追求溯溪强度
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================== SECTION 6: WUSHAN ============================== -->
+<section>
+  <div class="container">
+    <div class="section-header">
+      <div class="section-region">经典替代 · 巫山</div>
+      <h2 class="section-title">巫山小三峡 · 瞿塘峡支流</h2>
+      <p class="section-desc">三峡东段"峡谷支流系统"，峡深水多、风景极强，但偏观景徒步型</p>
+    </div>
+
+    <div class="route-card level-yellow">
+      <div class="card-illustration">
+        <svg viewBox="0 0 200 140">
+          <rect width="200" height="140" fill="#0c1825"/>
+          <!-- Dramatic gorges -->
+          <path d="M0 0 L45 0 L35 140 L0 140Z" fill="#1a2840" opacity="0.8"/>
+          <path d="M155 0 L200 0 L200 140 L165 140Z" fill="#1a2840" opacity="0.8"/>
+          <path d="M10 0 L35 0 L30 140 L10 140Z" fill="#1e3050" opacity="0.6"/>
+          <path d="M165 0 L190 0 L190 140 L170 140Z" fill="#1e3050" opacity="0.6"/>
+          <!-- Tourist boat hint -->
+          <path d="M80 110 L120 110 L115 118 L85 118Z" fill="#2a4060" opacity="0.3"/>
+          <line x1="100" y1="105" x2="100" y2="110" stroke="#e8a838" stroke-width="1" opacity="0.3"/>
+          <!-- River -->
+          <path d="M50 115 Q100 108 150 115" stroke="#4a8fe7" stroke-width="3" fill="none" opacity="0.12"/>
+          <!-- Side stream -->
+          <path d="M50 60 Q55 80 52 115" stroke="#3ecfb0" stroke-width="1" fill="none" opacity="0.25" stroke-dasharray="4 3"/>
+          <text x="100" y="40" fill="#4a8fe7" font-size="10" text-anchor="middle" font-family="Noto Serif SC" opacity="0.4">小三峡</text>
+          <text x="100" y="18" fill="#3ecfb0" font-size="8" text-anchor="middle" font-family="Crimson Pro" opacity="0.6">THREE GORGES · WUSHAN</text>
+        </svg>
+      </div>
+      <div class="card-header">
+        <div class="card-number">02</div>
+        <div class="card-title-group">
+          <h3 class="card-title">大宁河上游支流体系（巫山段）</h3>
+          <div class="card-type">峡谷主干 + 支流溯溪组合 · 巫山最推荐</div>
+        </div>
+      </div>
+      <div class="card-badges">
+        <span class="badge badge-yellow">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v4m0 4h.01M12 2l10 18H2z"/></svg>
+          水位变化快
+        </span>
+        <span class="badge badge-green">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          连续性好 · 典型溯溪结构
+        </span>
+      </div>
+      <div class="card-body">
+        <h4>推荐玩法</h4>
+        <ul>
+          <li>宁厂古镇上游支流进入</li>
+          <li>小支沟进入峡谷腹地</li>
+          <li>深潭段游泳 + 轻攀爬</li>
+        </ul>
+        <h4>核心特点</h4>
+        <ul>
+          <li>峡谷连续性好，是重庆东北部最完整的之一</li>
+          <li>上游水质较清，有典型的"潭 + 瀑 + 石滩"溯溪结构</li>
+        </ul>
+
+        <div class="verdict">
+          巫山周边"最像正经溯溪"的地方，首选推荐
+        </div>
+      </div>
+    </div>
+
+    <div class="route-card level-yellow">
+      <div class="card-header">
+        <div class="card-number">03</div>
+        <div class="card-title-group">
+          <h3 class="card-title">小三峡支流</h3>
+          <div class="card-type">长江支流 + 观光峡谷 + 小溪段</div>
+        </div>
+      </div>
+      <div class="card-badges">
+        <span class="badge badge-blue">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          风景极强
+        </span>
+        <span class="badge badge-yellow">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v4m0 4h.01M12 2l10 18H2z"/></svg>
+          主河不可进入
+        </span>
+      </div>
+      <div class="card-body">
+        <h4>可玩内容</h4>
+        <ul>
+          <li>支流涉水、岸边浅溯</li>
+          <li>部分滩涂行走</li>
+        </ul>
+        <div class="verdict warn">
+          更适合"徒步 + 玩水"，不是硬核溯溪
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================== RANKING SECTION ============================== -->
+<section>
+  <div class="container">
+    <div class="section-header">
+      <div class="section-region">综合评级</div>
+      <h2 class="section-title">溯溪质量分级</h2>
+      <p class="section-desc">按安全性和溯溪体验质量，给你一个真实可用的分级体系</p>
+    </div>
+
+    <div class="ranking-grid">
+      <div class="rank-card green">
+        <div class="rank-level green">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M8 12l3 3 5-5"/></svg>
+          入门级 · 安全优先
+        </div>
+        <h3>适合所有人的起点</h3>
+        <ul>
+          <li>云阳清水河</li>
+          <li>万州支流小河</li>
+          <li>云阳龙缸景区</li>
+        </ul>
+      </div>
+
+      <div class="rank-card yellow">
+        <div class="rank-level yellow">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 9v4m0 4h.01"/></svg>
+          进阶级 · 推荐体验
+        </div>
+        <h3>有基础后的首选</h3>
+        <ul>
+          <li>大宁河上游支流</li>
+          <li>云阳龙缸水系深处</li>
+          <li>巫山大宁河支流</li>
+        </ul>
+      </div>
+
+      <div class="rank-card red">
+        <div class="rank-level red">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 9v4m0 4h.01M12 2l10 18H2z"/></svg>
+          高风险 · 探索级
+        </div>
+        <h3>仅限经验丰富者</h3>
+        <ul>
+          <li>城口大巴山溪谷</li>
+          <li>奉节非景区支流</li>
+          <li>白鹿溪深处</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================== CORE RULES ============================== -->
+<section>
+  <div class="container">
+    <div class="rule-box">
+      <h3 style="font-family: 'Noto Serif SC', serif; font-size: 1.4rem; font-weight: 700; margin-bottom: 1.5rem; color: var(--accent-teal);">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle; margin-right: 0.4rem;"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+        核心选择逻辑
+      </h3>
+      <div class="rule-quote">选"支流系统"，不选"主河"</div>
+      <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">重庆东北部溯溪不是"选一条河"，而是选对的支流</p>
+      <div class="rule-columns">
+        <div class="rule-col can">
+          <h4>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align: middle;"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            可以玩
+          </h4>
+          <ul>
+            <li>支流溪沟</li>
+            <li>小峡谷段</li>
+            <li>上游溪沟</li>
+            <li>连续浅滩段</li>
+          </ul>
+        </div>
+        <div class="rule-col cant">
+          <h4>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align: middle;"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+            不能玩
+          </h4>
+          <ul>
+            <li>长江主干</li>
+            <li>瞿塘峡主航道</li>
+            <li>洪水型河道</li>
+            <li>大宁河主干深处</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================== WARNINGS ============================== -->
+<section>
+  <div class="container">
+    <div class="insight-box">
+      <h3>
+        <span class="icon-circle">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        </span>
+        这个区域的三大核心风险
+      </h3>
+      <div class="insight-item">
+        <div class="insight-num">1</div>
+        <div>
+          <h4>水位变化极快</h4>
+          <p>上游暴雨可在几小时内导致水位暴涨。出发前必须查看上游天气，遇到阴天要格外谨慎。</p>
+        </div>
+      </div>
+      <div class="insight-item">
+        <div class="insight-num">2</div>
+        <div>
+          <h4>支流呈"断续型"结构</h4>
+          <p>走着走着可能会遇到断崖或峡谷收窄，需要上岸绕行。路线不是连续的，要有预案。</p>
+        </div>
+      </div>
+      <div class="insight-item">
+        <div class="insight-num">3</div>
+        <div>
+          <h4>深潭暗藏回流</h4>
+          <p>看起来平静的深潭水面下可能存在吸力结构，尤其是瀑布下方的深潭。不要贸然跳水。</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="tip-row">
+      <div class="tip-card">
+        <div class="tip-icon red">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3l18 18"/><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg>
+        </div>
+        <h4>水位预警</h4>
+        <p>山雨过后水位暴涨极快。出发前查上游降雨情况，途中听到雷声立即上岸。</p>
+      </div>
+      <div class="tip-card">
+        <div class="tip-icon amber">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        </div>
+        <h4>时间规划</h4>
+        <p>建议早上出发、午后撤离。峡谷内天黑很快，下午3点前必须开始回撤。</p>
+      </div>
+      <div class="tip-card">
+        <div class="tip-icon teal">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        </div>
+        <h4>装备底线</h4>
+        <p>头盔（防落石）、溯溪鞋、防水包、救生衣。这四样是这个区域的最低配置。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================== FINAL RECOMMENDATION ============================== -->
+<section>
+  <div class="container">
+    <div class="final-box">
+      <h3>如果只选一个目的地</h3>
+      <div class="recommend">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        巫溪大宁河支流 + 云阳清水河体系
+      </div>
+      <p style="color: var(--text-secondary); max-width: 500px; margin: 0 auto;">这是重庆东北部最接近"溯溪完整体验"的组合——风险可控、可玩性稳定、风景一流。</p>
+      <div class="reasons">
+        <div class="reason">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+          风险可控
+        </div>
+        <div class="reason">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+          可玩性稳定
+        </div>
+        <div class="reason">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+          溯溪结构完整
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================== FOOTER ============================== -->
+<footer>
+  <div class="container">
+    <p class="footer-line">重庆东北部溯溪路线指南 · 万州—云阳—奉节—巫溪—城口—巫山</p>
+    <p class="footer-line" style="opacity: 0.5; font-size: 0.8rem;">户外活动有风险，请根据自身能力选择路线，注意安全</p>
+  </div>
+</footer>
+
+<script>
+// Intersection Observer for scroll-triggered animations
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.style.animationPlayState = 'running';
+    }
+  });
+}, { threshold: 0.1 });
+
+document.querySelectorAll('.route-card, .rank-card, .tip-card').forEach(el => {
+  el.style.animationPlayState = 'paused';
+  observer.observe(el);
+});
+
+// Parallax effect on hero landscape
+window.addEventListener('scroll', () => {
+  const scrolled = window.pageYOffset;
+  const hero = document.querySelector('.hero-landscape');
+  if (hero && scrolled < window.innerHeight) {
+    hero.style.transform = `translateY(${scrolled * 0.3}px)`;
+  }
+});
+</script>
+</body>
+</html>

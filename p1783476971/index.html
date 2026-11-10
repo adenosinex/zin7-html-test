@@ -1,0 +1,1182 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🖼️ 10万元级汽车全生命周期价值研究报告</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;600;700;900&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #080b10;
+            --bg-warm: #0b0d12;
+            --surface: #0f1219;
+            --surface-raised: #151a24;
+            --surface-elevated: #1a2030;
+            --border: #1e2636;
+            --border-light: #283244;
+
+            --accent: #d4a24e;
+            --accent-dim: rgba(212, 162, 78, 0.08);
+            --accent-glow: rgba(212, 162, 78, 0.15);
+
+            --blue: #5b9bd5;
+            --blue-dim: rgba(91, 155, 213, 0.08);
+            --green: #4caf7d;
+            --green-dim: rgba(76, 175, 125, 0.08);
+            --red: #d9534f;
+            --red-dim: rgba(217, 83, 79, 0.08);
+            --purple: #9b7ed8;
+            --purple-dim: rgba(155, 126, 216, 0.08);
+            --orange: #e8874a;
+            --orange-dim: rgba(232, 135, 74, 0.08);
+
+            --text-primary: #e8e4dc;
+            --text-secondary: #9aa0ad;
+            --text-muted: #555d6e;
+            --text-bright: #f5f0e8;
+
+            --font-display: 'Syne', 'Noto Serif SC', sans-serif;
+            --font-serif: 'Noto Serif SC', serif;
+            --font-mono: 'DM Mono', monospace;
+        }
+
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; background: var(--bg); }
+        body {
+            font-family: var(--font-serif);
+            color: var(--text-primary);
+            background: var(--bg);
+            line-height: 1.85;
+            -webkit-font-smoothing: antialiased;
+            font-size: 16px;
+        }
+
+        body::after {
+            content: '';
+            position: fixed; inset: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+            opacity: 0.02; pointer-events: none; z-index: 10000;
+        }
+
+        .container { max-width: 1100px; margin: 0 auto; padding: 0 28px; }
+
+        /* ===== HERO ===== */
+        .hero {
+            position: relative; padding: 120px 0 100px; overflow: hidden;
+            background:
+                radial-gradient(ellipse at 20% 30%, rgba(212, 162, 78, 0.05) 0%, transparent 55%),
+                radial-gradient(ellipse at 80% 70%, rgba(91, 155, 213, 0.03) 0%, transparent 50%),
+                var(--bg);
+        }
+        .hero::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+            background: linear-gradient(90deg, transparent 5%, var(--accent) 50%, transparent 95%);
+            opacity: 0.35;
+        }
+        .hero-eyebrow {
+            font-family: var(--font-mono); font-size: 0.68rem; font-weight: 500;
+            letter-spacing: 0.25em; text-transform: uppercase; color: var(--accent);
+            margin-bottom: 24px; opacity: 0; animation: fadeDown 0.6s ease forwards 0.15s;
+        }
+        .hero h1 {
+            font-family: var(--font-display); font-weight: 800;
+            font-size: clamp(2rem, 4.5vw, 3rem); line-height: 1.25;
+            color: var(--text-bright); letter-spacing: -0.015em;
+            margin-bottom: 16px; opacity: 0; animation: fadeDown 0.7s ease forwards 0.3s;
+            max-width: 800px;
+        }
+        .hero h1 em {
+            font-style: normal;
+            background: linear-gradient(135deg, var(--accent), #e8c87a);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+        }
+        .hero-subtitle {
+            font-family: var(--font-serif); font-size: 1rem; font-weight: 300;
+            color: var(--text-secondary); max-width: 680px; line-height: 1.9; margin-bottom: 48px;
+            opacity: 0; animation: fadeDown 0.7s ease forwards 0.45s;
+        }
+
+        /* Hero stats */
+        .hero-stats {
+            display: grid; grid-template-columns: repeat(4, 1fr); gap: 2px;
+            border-radius: 6px; overflow: hidden;
+            opacity: 0; animation: fadeUp 0.8s ease forwards 0.6s;
+        }
+        .h-stat {
+            background: var(--surface-raised); padding: 24px 20px;
+            border: 1px solid var(--border); border-radius: 0;
+            transition: background 0.25s;
+        }
+        .h-stat:hover { background: var(--surface-elevated); }
+        .h-stat-label {
+            font-family: var(--font-mono); font-size: 0.6rem; font-weight: 500;
+            letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-muted);
+            margin-bottom: 8px; display: block;
+        }
+        .h-stat-value {
+            font-family: var(--font-display); font-weight: 800; font-size: 1.55rem;
+            color: var(--accent); line-height: 1.2;
+        }
+        .h-stat-note {
+            font-family: var(--font-mono); font-size: 0.65rem; color: var(--text-muted);
+            margin-top: 4px; line-height: 1.5;
+        }
+
+        /* ===== NAV ===== */
+        .report-nav {
+            position: sticky; top: 0; z-index: 100;
+            background: rgba(8, 11, 16, 0.92); backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border); padding: 0;
+            opacity: 0; animation: fadeDown 0.5s ease forwards 0.8s;
+        }
+        .nav-inner {
+            display: flex; gap: 0; overflow-x: auto; scrollbar-width: none;
+            max-width: 1100px; margin: 0 auto; padding: 0 28px;
+        }
+        .nav-inner::-webkit-scrollbar { display: none; }
+        .nav-link {
+            font-family: var(--font-mono); font-size: 0.65rem; font-weight: 500;
+            letter-spacing: 0.08em; color: var(--text-muted); text-decoration: none;
+            padding: 14px 18px; white-space: nowrap; border-bottom: 2px solid transparent;
+            transition: color 0.2s, border-color 0.2s;
+        }
+        .nav-link:hover { color: var(--text-secondary); border-bottom-color: var(--border-light); }
+
+        /* ===== CONTENT SECTIONS ===== */
+        .content-section { padding: 72px 0; }
+        .content-section + .content-section { padding-top: 0; }
+
+        /* Section header */
+        .sec-head {
+            margin-bottom: 40px; position: relative; padding-left: 20px;
+        }
+        .sec-head::before {
+            content: ''; position: absolute; left: 0; top: 4px; bottom: 4px;
+            width: 3px; border-radius: 2px;
+        }
+        .sec-head.head-accent::before { background: var(--accent); }
+        .sec-head.head-blue::before { background: var(--blue); }
+        .sec-head.head-green::before { background: var(--green); }
+        .sec-head.head-red::before { background: var(--red); }
+        .sec-head.head-purple::before { background: var(--purple); }
+
+        .sec-num {
+            font-family: var(--font-mono); font-size: 0.6rem; font-weight: 500;
+            letter-spacing: 0.2em; text-transform: uppercase; color: var(--text-muted);
+            margin-bottom: 8px; display: block;
+        }
+        .sec-head h2 {
+            font-family: var(--font-display); font-weight: 700;
+            font-size: clamp(1.4rem, 3vw, 1.9rem); line-height: 1.3;
+            color: var(--text-bright); margin-bottom: 10px;
+        }
+        .sec-head .sec-desc {
+            font-size: 0.95rem; color: var(--text-secondary); max-width: 680px; line-height: 1.85;
+        }
+
+        /* Sub section */
+        .sub-head {
+            margin: 48px 0 24px; padding-bottom: 12px; border-bottom: 1px solid var(--border);
+        }
+        .sub-head h3 {
+            font-family: var(--font-display); font-weight: 700; font-size: 1.2rem;
+            color: var(--text-primary); display: flex; align-items: center; gap: 10px;
+        }
+        .sub-head .sub-tag {
+            font-family: var(--font-mono); font-size: 0.55rem; font-weight: 500;
+            letter-spacing: 0.12em; text-transform: uppercase; padding: 3px 10px;
+            border-radius: 2px; flex-shrink: 0;
+        }
+        .tag-phev { color: var(--green); background: var(--green-dim); border: 1px solid rgba(76,175,125,0.2); }
+        .tag-ev { color: var(--blue); background: var(--blue-dim); border: 1px solid rgba(91,155,213,0.2); }
+        .tag-ice { color: var(--orange); background: var(--orange-dim); border: 1px solid rgba(232,135,74,0.2); }
+        .tag-used { color: var(--purple); background: var(--purple-dim); border: 1px solid rgba(155,126,216,0.2); }
+        .tag-risk { color: var(--red); background: var(--red-dim); border: 1px solid rgba(217,83,79,0.2); }
+
+        /* Body text */
+        .body-text { margin-bottom: 20px; font-size: 0.98rem; color: var(--text-secondary); line-height: 1.9; }
+        .body-text strong { color: var(--text-primary); font-weight: 600; }
+        .body-text .accent { color: var(--accent); font-weight: 600; }
+        .body-text .warn { color: var(--red); font-weight: 600; }
+
+        /* ===== VEHICLE CARD ===== */
+        .vehicle-card {
+            background: var(--surface-raised); border: 1px solid var(--border);
+            border-radius: 8px; margin-bottom: 28px; overflow: hidden;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+        .vehicle-card:hover { border-color: var(--border-light); box-shadow: 0 8px 40px rgba(0,0,0,0.25); }
+        .vcard-header {
+            padding: 22px 28px; display: flex; justify-content: space-between;
+            align-items: flex-start; flex-wrap: wrap; gap: 12px;
+            border-bottom: 1px solid var(--border);
+        }
+        .vcard-title-block { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+        .vcard-name {
+            font-family: var(--font-display); font-weight: 700; font-size: 1.1rem;
+            color: var(--text-bright);
+        }
+        .vcard-badge {
+            font-family: var(--font-mono); font-size: 0.58rem; font-weight: 500;
+            letter-spacing: 0.1em; padding: 3px 10px; border-radius: 2px;
+        }
+        .badge-phev { color: var(--green); background: var(--green-dim); border: 1px solid rgba(76,175,125,0.2); }
+        .badge-ev { color: var(--blue); background: var(--blue-dim); border: 1px solid rgba(91,155,213,0.2); }
+        .badge-ice { color: var(--orange); background: var(--orange-dim); border: 1px solid rgba(232,135,74,0.2); }
+        .badge-used { color: var(--purple); background: var(--purple-dim); border: 1px solid rgba(155,126,216,0.2); }
+
+        .vcard-price {
+            font-family: var(--font-display); font-weight: 800; font-size: 1.3rem;
+            color: var(--accent);
+        }
+        .vcard-price .price-unit { font-size: 0.75rem; font-weight: 400; color: var(--text-muted); }
+
+        .vcard-body { padding: 0; }
+        .vcard-grid {
+            display: grid; grid-template-columns: 1fr 1fr;
+        }
+        .vcard-col {
+            padding: 22px 28px;
+        }
+        .vcard-col + .vcard-col {
+            border-left: 1px solid var(--border);
+        }
+        .vcard-col-title {
+            font-family: var(--font-mono); font-size: 0.58rem; font-weight: 500;
+            letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 12px;
+            display: flex; align-items: center; gap: 6px;
+        }
+        .vcard-col-title.col-strength { color: var(--green); }
+        .vcard-col-title.col-weakness { color: var(--red); }
+        .vcard-col-title.col-cost { color: var(--accent); }
+
+        .vcard-list {
+            list-style: none; display: flex; flex-direction: column; gap: 8px;
+        }
+        .vcard-list li {
+            font-size: 0.88rem; color: var(--text-secondary); line-height: 1.7;
+            padding-left: 16px; position: relative;
+        }
+        .vcard-list li::before {
+            content: ''; position: absolute; left: 0; top: 10px;
+            width: 5px; height: 5px; border-radius: 50%;
+        }
+        .vcard-list.str-list li::before { background: var(--green); }
+        .vcard-list.weak-list li::before { background: var(--red); }
+
+        .vcard-cost-bar {
+            background: var(--bg); border: 1px solid var(--border); border-radius: 5px;
+            padding: 16px 18px; margin-top: 0;
+        }
+        .cost-row {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 6px 0;
+        }
+        .cost-row + .cost-row { border-top: 1px solid rgba(30,38,54,0.5); }
+        .cost-label {
+            font-family: var(--font-mono); font-size: 0.72rem; color: var(--text-muted);
+        }
+        .cost-value {
+            font-family: var(--font-mono); font-size: 0.8rem; font-weight: 500; color: var(--text-primary);
+        }
+        .cost-total {
+            margin-top: 8px; padding-top: 10px; border-top: 1px solid var(--accent);
+            display: flex; justify-content: space-between; align-items: baseline;
+        }
+        .cost-total .cost-label { color: var(--accent); font-weight: 500; }
+        .cost-total .cost-value {
+            font-family: var(--font-display); font-weight: 800; font-size: 1.1rem; color: var(--accent);
+        }
+
+        /* Full-width card body for single-column */
+        .vcard-full { padding: 22px 28px; }
+
+        /* ===== COMPARISON TABLE ===== */
+        .comp-table-wrap {
+            overflow-x: auto; -webkit-overflow-scrolling: touch;
+            border: 1px solid var(--border); border-radius: 8px;
+            background: var(--surface-raised); margin: 32px 0;
+        }
+        .comp-table {
+            width: 100%; border-collapse: collapse; min-width: 900px;
+        }
+        .comp-table thead { background: rgba(255,255,255,0.015); }
+        .comp-table th {
+            font-family: var(--font-mono); font-size: 0.58rem; font-weight: 500;
+            letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-muted);
+            text-align: left; padding: 14px 16px; border-bottom: 1px solid var(--border);
+            white-space: nowrap;
+        }
+        .comp-table td {
+            font-size: 0.85rem; padding: 14px 16px;
+            border-bottom: 1px solid rgba(30,38,54,0.5);
+            vertical-align: top; line-height: 1.6; color: var(--text-secondary);
+        }
+        .comp-table tbody tr:hover { background: rgba(255,255,255,0.01); }
+        .comp-table tbody tr:last-child td { border-bottom: none; }
+        .comp-table .car-name {
+            font-family: var(--font-display); font-weight: 600; font-size: 0.88rem;
+            color: var(--text-primary);
+        }
+        .comp-table .mono { font-family: var(--font-mono); font-weight: 400; }
+        .comp-table .highlight { color: var(--accent); font-weight: 600; }
+        .comp-table .cell-warn { color: var(--red); }
+        .comp-table .cell-good { color: var(--green); }
+
+        /* ===== INSIGHT CALLOUT ===== */
+        .insight-box {
+            background: var(--accent-dim); border: 1px solid rgba(212,162,78,0.2);
+            border-radius: 6px; padding: 24px 28px; margin: 32px 0;
+            position: relative;
+        }
+        .insight-box::before {
+            content: ''; position: absolute; left: 0; top: 0; bottom: 0;
+            width: 3px; background: var(--accent); border-radius: 6px 0 0 6px;
+        }
+        .insight-label {
+            font-family: var(--font-mono); font-size: 0.6rem; font-weight: 500;
+            letter-spacing: 0.15em; text-transform: uppercase; color: var(--accent);
+            margin-bottom: 10px; display: block;
+        }
+        .insight-text {
+            font-size: 0.92rem; color: var(--text-secondary); line-height: 1.85;
+        }
+        .insight-text strong { color: var(--text-primary); }
+
+        .insight-box.insight-red { background: var(--red-dim); border-color: rgba(217,83,79,0.2); }
+        .insight-box.insight-red::before { background: var(--red); }
+        .insight-box.insight-red .insight-label { color: var(--red); }
+
+        .insight-box.insight-blue { background: var(--blue-dim); border-color: rgba(91,155,213,0.2); }
+        .insight-box.insight-blue::before { background: var(--blue); }
+        .insight-box.insight-blue .insight-label { color: var(--blue); }
+
+        .insight-box.insight-green { background: var(--green-dim); border-color: rgba(76,175,125,0.2); }
+        .insight-box.insight-green::before { background: var(--green); }
+        .insight-box.insight-green .insight-label { color: var(--green); }
+
+        /* ===== DETECTION PLATFORM TABLE ===== */
+        .platform-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 16px; margin: 28px 0;
+        }
+        .platform-card {
+            background: var(--surface-raised); border: 1px solid var(--border);
+            border-radius: 6px; padding: 22px 24px;
+            transition: border-color 0.25s;
+        }
+        .platform-card:hover { border-color: var(--border-light); }
+        .platform-name {
+            font-family: var(--font-display); font-weight: 700; font-size: 1rem;
+            color: var(--text-bright); margin-bottom: 4px;
+        }
+        .platform-price {
+            font-family: var(--font-mono); font-size: 0.72rem; color: var(--accent);
+            margin-bottom: 12px;
+        }
+        .platform-pro, .platform-con {
+            font-size: 0.82rem; line-height: 1.65; margin-bottom: 8px; padding-left: 14px;
+            position: relative;
+        }
+        .platform-pro::before {
+            content: ''; position: absolute; left: 0; top: 8px;
+            width: 5px; height: 5px; border-radius: 50%; background: var(--green);
+        }
+        .platform-pro { color: var(--text-secondary); }
+        .platform-con::before {
+            content: ''; position: absolute; left: 0; top: 8px;
+            width: 5px; height: 5px; border-radius: 50%; background: var(--red);
+        }
+        .platform-con { color: var(--text-muted); }
+
+        /* ===== CONCLUSION CARDS ===== */
+        .conclusion-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 18px; margin: 28px 0;
+        }
+        .conc-card {
+            background: var(--surface-raised); border: 1px solid var(--border);
+            border-radius: 8px; padding: 28px; position: relative; overflow: hidden;
+            transition: border-color 0.3s, transform 0.3s;
+        }
+        .conc-card:hover { border-color: var(--border-light); transform: translateY(-2px); }
+        .conc-card::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+        }
+        .conc-card.conc-green::before { background: linear-gradient(90deg, var(--green), transparent); }
+        .conc-card.conc-orange::before { background: linear-gradient(90deg, var(--orange), transparent); }
+        .conc-card.conc-purple::before { background: linear-gradient(90deg, var(--purple), transparent); }
+
+        .conc-persona {
+            font-family: var(--font-mono); font-size: 0.6rem; font-weight: 500;
+            letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 12px; display: block;
+        }
+        .conc-card.conc-green .conc-persona { color: var(--green); }
+        .conc-card.conc-orange .conc-persona { color: var(--orange); }
+        .conc-card.conc-purple .conc-persona { color: var(--purple); }
+
+        .conc-title {
+            font-family: var(--font-display); font-weight: 700; font-size: 1.05rem;
+            color: var(--text-bright); margin-bottom: 10px;
+        }
+        .conc-text {
+            font-size: 0.88rem; color: var(--text-secondary); line-height: 1.8;
+        }
+        .conc-rec {
+            margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--border);
+            font-family: var(--font-mono); font-size: 0.72rem; color: var(--text-muted);
+            line-height: 1.7;
+        }
+        .conc-rec strong { color: var(--text-primary); }
+
+        /* ===== SECTION DIVIDER ===== */
+        .sec-divider {
+            display: flex; align-items: center; gap: 16px; padding: 48px 0;
+        }
+        .sec-divider .div-line { flex: 1; height: 1px; background: var(--border); }
+        .sec-divider .div-label {
+            font-family: var(--font-mono); font-size: 0.6rem; font-weight: 500;
+            letter-spacing: 0.2em; text-transform: uppercase; color: var(--text-muted);
+            white-space: nowrap;
+        }
+
+        /* ===== FOOTER ===== */
+        footer {
+            padding: 48px 0; border-top: 1px solid var(--border); margin-top: 40px;
+        }
+        .footer-inner {
+            display: flex; justify-content: space-between; flex-wrap: wrap; gap: 16px;
+        }
+        .footer-left, .footer-right {
+            font-family: var(--font-mono); font-size: 0.7rem; color: var(--text-muted); line-height: 1.8;
+        }
+        .footer-right { text-align: right; }
+
+        /* ===== ANIMATIONS ===== */
+        @keyframes fadeDown { from { opacity: 0; transform: translateY(-14px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeUp { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* ===== SCROLL REVEAL ===== */
+        .reveal {
+            opacity: 0; transform: translateY(24px);
+            transition: opacity 0.7s ease, transform 0.7s ease;
+        }
+        .reveal.visible { opacity: 1; transform: translateY(0); }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 768px) {
+            .hero { padding: 80px 0 64px; }
+            .hero-stats { grid-template-columns: repeat(2, 1fr); }
+            .vcard-grid { grid-template-columns: 1fr; }
+            .vcard-col + .vcard-col { border-left: none; border-top: 1px solid var(--border); }
+            .platform-grid { grid-template-columns: 1fr; }
+            .conclusion-grid { grid-template-columns: 1fr; }
+            .nav-link { font-size: 0.6rem; padding: 12px 14px; }
+            .content-section { padding: 48px 0; }
+        }
+        @media (max-width: 480px) {
+            .container { padding: 0 16px; }
+            .vcard-header { padding: 16px 18px; }
+            .vcard-col { padding: 16px 18px; }
+            .vcard-full { padding: 16px 18px; }
+            .hero-stats { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- HERO -->
+    <header class="hero">
+        <div class="container">
+            <div class="hero-eyebrow">Deep Research Report &mdash; 2026</div>
+            <h1>10万元级汽车<em>全生命周期价值</em>与使用体验深度研究报告</h1>
+            <p class="hero-subtitle">
+                新车市场的价格坍塌与价值重构，正在产生强烈的二阶效应——二手车市场资产价格的剧烈波动。本报告从全生命周期成本、驾驶体验、品牌调性及深层风险四个维度，对10万元以内极具代表性的新车与二手车展开交叉分析。
+            </p>
+            <div class="hero-stats">
+                <div class="h-stat">
+                    <span class="h-stat-label">价格带定义</span>
+                    <div class="h-stat-value">≤10万</div>
+                    <div class="h-stat-note">落地价（含购置税、保险等）</div>
+                </div>
+                <div class="h-stat">
+                    <span class="h-stat-label">核心博弈</span>
+                    <div class="h-stat-value">新 vs 旧</div>
+                    <div class="h-stat-note">自主品牌新能源 vs 合资二手车</div>
+                </div>
+                <div class="h-stat">
+                    <span class="h-stat-label">年行驶模型</span>
+                    <div class="h-stat-value">1.5-2万</div>
+                    <div class="h-stat-note">公里/年（混合工况）</div>
+                </div>
+                <div class="h-stat">
+                    <span class="h-stat-label">核心指标</span>
+                    <div class="h-stat-value">TCO</div>
+                    <div class="h-stat-note">Total Cost of Ownership</div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- NAV -->
+    <nav class="report-nav">
+        <div class="nav-inner">
+            <a href="#sec-new" class="nav-link">新车市场</a>
+            <a href="#sec-phev" class="nav-link">插混 / 纯电</a>
+            <a href="#sec-ice" class="nav-link">燃油车</a>
+            <a href="#sec-used" class="nav-link">二手车市场</a>
+            <a href="#sec-inspect" class="nav-link">交易风险防范</a>
+            <a href="#sec-conclusion" class="nav-link">结论与策略</a>
+        </div>
+    </nav>
+
+    <!-- MAIN -->
+    <main>
+
+        <!-- SECTION 1: 新能源阵营 -->
+        <section class="content-section" id="sec-phev">
+            <div class="container">
+
+                <div class="sec-head head-green reveal" id="sec-new">
+                    <span class="sec-num">Part 01 &mdash; 新车市场</span>
+                    <h2>插电混动与纯电阵营：能源成本的彻底降维</h2>
+                    <p class="sec-desc">自主品牌新能源汽车已确立绝对统治地位。核心商业逻辑在于通过极低的使用成本和跨级的智能化配置重塑消费者心智。</p>
+                </div>
+
+                <div class="comp-table-wrap reveal">
+                    <table class="comp-table">
+                        <thead>
+                            <tr>
+                                <th>车型</th>
+                                <th>类型</th>
+                                <th>落地参考价</th>
+                                <th>年均能源成本</th>
+                                <th>首年保险</th>
+                                <th>预估月均 TCO</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="car-name">比亚迪秦PLUS DM-i</td>
+                                <td><span class="mono" style="color:var(--green)">PHEV</span></td>
+                                <td class="highlight">~8万</td>
+                                <td class="mono">≈4,288</td>
+                                <td class="mono cell-warn">≈5,000+</td>
+                                <td class="mono highlight">800–900</td>
+                            </tr>
+                            <tr>
+                                <td class="car-name">五菱星光</td>
+                                <td><span class="mono" style="color:var(--green)">PHEV</span></td>
+                                <td class="highlight">~8.5万</td>
+                                <td class="mono">≈3,000–5,000</td>
+                                <td class="mono cell-warn">≈5,000–6,000</td>
+                                <td class="mono highlight">700–900</td>
+                            </tr>
+                            <tr>
+                                <td class="car-name">长安启源A05</td>
+                                <td><span class="mono" style="color:var(--green)">PHEV</span></td>
+                                <td class="highlight">~8.5万</td>
+                                <td class="mono">≈3,500–5,500</td>
+                                <td class="mono cell-warn">≈4,800–5,500</td>
+                                <td class="mono highlight">750–950</td>
+                            </tr>
+                            <tr>
+                                <td class="car-name">吉利帝豪L HiP</td>
+                                <td><span class="mono" style="color:var(--green)">PHEV</span></td>
+                                <td class="highlight">~9.5万</td>
+                                <td class="mono">≈4,500–6,000</td>
+                                <td class="mono cell-warn">≈5,200+</td>
+                                <td class="mono highlight">850–1,050</td>
+                            </tr>
+                            <tr>
+                                <td class="car-name">比亚迪海鸥</td>
+                                <td><span class="mono" style="color:var(--blue)">EV</span></td>
+                                <td class="highlight">~7.5万</td>
+                                <td class="mono cell-good">≈600–1,200</td>
+                                <td class="mono cell-warn">≈4,500</td>
+                                <td class="mono highlight">500–600</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- 秦PLUS -->
+                <div class="sub-head reveal"><h3><span class="sub-tag tag-phev">PHEV</span> 比亚迪秦PLUS DM-i 荣耀版</h3></div>
+                <div class="vehicle-card reveal">
+                    <div class="vcard-header">
+                        <div class="vcard-title-block">
+                            <span class="vcard-name">比亚迪秦PLUS DM-i 荣耀版</span>
+                            <span class="vcard-badge badge-phev">插电混动 · 价格锚点</span>
+                        </div>
+                        <div class="vcard-price">~8<span class="price-unit"> 万元落地</span></div>
+                    </div>
+                    <div class="vcard-body">
+                        <div class="vcard-grid">
+                            <div class="vcard-col">
+                                <div class="vcard-col-title col-strength">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+                                    核心优势
+                                </div>
+                                <ul class="vcard-list str-list">
+                                    <li>DM-i 超级混动系统，亏电油耗仅 3.8–4.0L/百公里</li>
+                                    <li>不挑油品（92 号），年均能源成本约 4,288 元</li>
+                                    <li>行驶平顺无顿挫，低速静谧性极佳</li>
+                                    <li>小保养单次约 400 元，年均 1,546 元</li>
+                                </ul>
+                            </div>
+                            <div class="vcard-col">
+                                <div class="vcard-col-title col-weakness">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                                    痛点与风险
+                                </div>
+                                <ul class="vcard-list weak-list">
+                                    <li>新能源专属保险费率偏高，首年 5,000+，比同级燃油车贵 1,500–2,000 元</li>
+                                    <li>网约车保有量巨大，部分消费者有"营运车"刻板印象</li>
+                                    <li>底盘悬架调校偏向基础代步，连续颠簸时滤震质感欠佳</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 五菱星光 -->
+                <div class="sub-head reveal"><h3><span class="sub-tag tag-phev">PHEV</span> 五菱星光</h3></div>
+                <div class="vehicle-card reveal">
+                    <div class="vcard-header">
+                        <div class="vcard-title-block">
+                            <span class="vcard-name">五菱星光</span>
+                            <span class="vcard-badge badge-phev">越级中型 · 独立后悬</span>
+                        </div>
+                        <div class="vcard-price">~8.5<span class="price-unit"> 万元落地</span></div>
+                    </div>
+                    <div class="vcard-body">
+                        <div class="vcard-grid">
+                            <div class="vcard-col">
+                                <div class="vcard-col-title col-strength">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+                                    核心优势
+                                </div>
+                                <ul class="vcard-list str-list">
+                                    <li>2800mm 轴距降维打击同价位紧凑型轿车</li>
+                                    <li>后轮独立悬挂，舒适性上限更高</li>
+                                    <li>保养周期优化（12 月 / 7500km HEV），单次耗材 &lt;200 元</li>
+                                    <li>神炼电池支持单电芯独立维修</li>
+                                </ul>
+                            </div>
+                            <div class="vcard-col">
+                                <div class="vcard-col-title col-weakness">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                                    痛点与风险
+                                </div>
+                                <ul class="vcard-list weak-list">
+                                    <li>内饰大面积硬塑料，细节质感有妥协</li>
+                                    <li>部分原厂配件（如磁吸遮阳帘）安装不规范可能遮挡后视镜区域</li>
+                                    <li>五菱品牌调性偏草根，缺乏高级感</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 长安启源A05 -->
+                <div class="sub-head reveal"><h3><span class="sub-tag tag-phev">PHEV</span> 长安启源A05</h3></div>
+                <div class="vehicle-card reveal">
+                    <div class="vcard-header">
+                        <div class="vcard-title-block">
+                            <span class="vcard-name">长安启源A05</span>
+                            <span class="vcard-badge badge-phev">年轻化 · 电机响应快</span>
+                        </div>
+                        <div class="vcard-price">~8.5<span class="price-unit"> 万元落地</span></div>
+                    </div>
+                    <div class="vcard-body">
+                        <div class="vcard-grid">
+                            <div class="vcard-col">
+                                <div class="vcard-col-title col-strength">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+                                    核心优势
+                                </div>
+                                <ul class="vcard-list str-list">
+                                    <li>电机起步响应极为迅速，城市穿梭灵活性强</li>
+                                    <li>亏电油耗 4.2–5.9L，燃油经济性突出</li>
+                                    <li>底盘调校偏家用舒适，过滤细碎颠簸能力较好</li>
+                                </ul>
+                            </div>
+                            <div class="vcard-col">
+                                <div class="vcard-col-title col-weakness">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                                    痛点与风险
+                                </div>
+                                <ul class="vcard-list weak-list">
+                                    <li><strong>车速超 100km/h 后风噪/胎噪指数级增加</strong></li>
+                                    <li>后排地台明显凸起，中间乘客腿部空间受限</li>
+                                    <li>电池包挤压后备箱储物空间</li>
+                                    <li class="warn" style="color:var(--red)">售后体系僵化：有车主因APP后台录入错误被拒退3,000元终身保养预付费</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 帝豪L HiP -->
+                <div class="sub-head reveal"><h3><span class="sub-tag tag-phev">PHEV</span> 吉利帝豪L HiP 冠军版</h3></div>
+                <div class="insight-box insight-red reveal">
+                    <span class="insight-label">品控警告 · 高度谨慎</span>
+                    <p class="insight-text">
+                        账面数据堪称"性能卷王"——1.5T 涡轮增压 + 6.9 秒百公里加速。然而<strong>过度追求性能与复杂软硬件架构</strong>导致了密集的可靠性危机：车机系统长期死机卡顿且更换主机后复发；GPS 导航模块经常失灵；官方大肆宣传的"增程模式"交付后数年未兑现；充电口存在物理设计缺陷导致充电机报废（售后常归咎"人为损坏"拒绝质保）；前轮异响无法查明原因；空调漏水倒流导致车内大面积积水；实际亏电油耗高达 7–8 升。更有经销商隐瞒车辆二次销售信息，引发"退一赔三"法律纠纷。<strong>在成本受限下过度堆叠复杂技术，品控反噬严重。</strong>
+                    </p>
+                </div>
+
+                <!-- 海鸥 -->
+                <div class="sub-head reveal"><h3><span class="sub-tag tag-ev">EV</span> 比亚迪海鸥 活力版</h3></div>
+                <div class="vehicle-card reveal">
+                    <div class="vcard-header">
+                        <div class="vcard-title-block">
+                            <span class="vcard-name">比亚迪海鸥 活力版</span>
+                            <span class="vcard-badge badge-ev">纯电微型 · 最低TCO</span>
+                        </div>
+                        <div class="vcard-price">~7.5<span class="price-unit"> 万元落地</span></div>
+                    </div>
+                    <div class="vcard-body">
+                        <div class="vcard-grid">
+                            <div class="vcard-col">
+                                <div class="vcard-col-title col-cost">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+                                    全生命周期成本
+                                </div>
+                                <div class="vcard-cost-bar">
+                                    <div class="cost-row">
+                                        <span class="cost-label">月均电费（家用谷电）</span>
+                                        <span class="cost-value">50–100 元</span>
+                                    </div>
+                                    <div class="cost-row">
+                                        <span class="cost-label">保养（每 1 万 km / 年）</span>
+                                        <span class="cost-value">200–300 元</span>
+                                    </div>
+                                    <div class="cost-row">
+                                        <span class="cost-label">首年保险</span>
+                                        <span class="cost-value">~4,500 元</span>
+                                    </div>
+                                    <div class="cost-total">
+                                        <span class="cost-label">年度总用车成本</span>
+                                        <span class="cost-value">6,000–7,000</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="vcard-col">
+                                <div class="vcard-col-title col-weakness">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                                    物理限制
+                                </div>
+                                <ul class="vcard-list weak-list">
+                                    <li>高速行驶车身发飘，风噪/胎噪明显</li>
+                                    <li>大面积硬塑料内饰</li>
+                                    <li>后排缺失中间头枕</li>
+                                    <li>无挂钩设计、无电动尾门</li>
+                                    <li>10%-80% 闪充需 30 分钟</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- SECTION 2: 燃油车 -->
+        <section class="content-section" id="sec-ice">
+            <div class="container">
+
+                <div class="sec-divider"><div class="div-line"></div><span class="div-label">Part 01-B · 燃油车阵营</span><div class="div-line"></div></div>
+
+                <div class="sec-head head-orange reveal">
+                    <span class="sec-num">燃油阵营</span>
+                    <h2>以价换量的底层实用主义</h2>
+                    <p class="sec-desc">合资与自主燃油车通过破坏性降价稳固基本盘。优势在于经时间检验的机械可靠性，但在智能化与能源成本上已显露疲态。</p>
+                </div>
+
+                <!-- 别克威朗Pro -->
+                <div class="sub-head reveal"><h3><span class="sub-tag tag-ice">燃油</span> 别克威朗Pro 乐逸版</h3></div>
+                <div class="vehicle-card reveal">
+                    <div class="vcard-header">
+                        <div class="vcard-title-block">
+                            <span class="vcard-name">别克威朗Pro 乐逸版</span>
+                            <span class="vcard-badge badge-ice">合资 A+ · 降价最惨烈</span>
+                        </div>
+                        <div class="vcard-price">~7.5<span class="price-unit"> 万元落地</span></div>
+                    </div>
+                    <div class="vcard-body">
+                        <div class="vcard-grid">
+                            <div class="vcard-col">
+                                <div class="vcard-col-title col-strength">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+                                    核心优势
+                                </div>
+                                <ul class="vcard-list str-list">
+                                    <li>1.5T 四缸 184 马力 / 250Nm，动力碾压同价日系</li>
+                                    <li>百公里加速 7.7 秒，底盘扎实</li>
+                                    <li>A+ 级空间，CVT 平顺</li>
+                                </ul>
+                            </div>
+                            <div class="vcard-col">
+                                <div class="vcard-col-title col-weakness">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                                    痛点与风险
+                                </div>
+                                <ul class="vcard-list weak-list">
+                                    <li>百公里油耗 7.3L，年均燃油费 ~11,680 元</li>
+                                    <li>年均保养 ~3,811 元（6 万 km 总费用约 12,305 元）</li>
+                                    <li><strong>新车价格崩塌 → 二手残值极低，"买入即重度贬值"</strong></li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div style="padding: 0 28px 20px;">
+                            <div class="vcard-cost-bar">
+                                <div class="cost-row">
+                                    <span class="cost-label">年均燃油费（2 万 km · 92# · ¥8/L）</span>
+                                    <span class="cost-value">~11,680</span>
+                                </div>
+                                <div class="cost-row">
+                                    <span class="cost-label">年均保养</span>
+                                    <span class="cost-value">~3,811</span>
+                                </div>
+                                <div class="cost-row">
+                                    <span class="cost-label">保险（首年/续年）</span>
+                                    <span class="cost-value">5,000 / 4,405</span>
+                                </div>
+                                <div class="cost-total">
+                                    <span class="cost-label">月均综合</span>
+                                    <span class="cost-value">~1,658</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 科鲁泽 -->
+                <div class="sub-head reveal"><h3><span class="sub-tag tag-ice">燃油</span> 雪佛兰科鲁泽 1.5L</h3></div>
+                <div class="vehicle-card reveal">
+                    <div class="vcard-header">
+                        <div class="vcard-title-block">
+                            <span class="vcard-name">雪佛兰科鲁泽 1.5L</span>
+                            <span class="vcard-badge badge-ice">底线防御 · 极致可靠</span>
+                        </div>
+                        <div class="vcard-price">~6.5<span class="price-unit"> 万元落地</span></div>
+                    </div>
+                    <div class="vcard-body">
+                        <div class="vcard-grid">
+                            <div class="vcard-col">
+                                <div class="vcard-col-title col-strength">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+                                    核心优势
+                                </div>
+                                <ul class="vcard-list str-list">
+                                    <li>同价位罕见后轮独立悬挂</li>
+                                    <li>1.5L 四缸 + 6AT，技术老旧但机械结构异常可靠</li>
+                                    <li>百公里综合油耗 7.1L，小保养仅 300–400 元</li>
+                                    <li>年度总养车费 ~9,489 元（1.5 万 km）</li>
+                                </ul>
+                            </div>
+                            <div class="vcard-col">
+                                <div class="vcard-col-title col-weakness">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                                    产品定位
+                                </div>
+                                <ul class="vcard-list weak-list">
+                                    <li>动力羸弱，纯粹代步</li>
+                                    <li>内饰廉价感强，隔音效果差</li>
+                                    <li>对维修成本高度敏感用户的"遮风挡雨工具"</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 自主燃油 -->
+                <div class="sub-head reveal"><h3><span class="sub-tag tag-ice">燃油</span> 自主燃油"国产双雄"与SUV</h3></div>
+                <div class="body-text reveal">
+                    <strong>长安逸动PLUS</strong>与<strong>吉利帝豪冠军版</strong>是长期霸榜的自主紧凑型轿车，核心卖点在于越级配置（360° 全景影像、大尺寸中控屏、皮质座椅）和极低维保成本（4S 店小保养仅 300 余元）。然而普遍面临<strong>"小马拉大车"</strong>困境：1.5L 自吸发动机起步迟缓，时速超 100km/h 后超车需提前深踩油门预留极大空间；市区表显油耗 6–8L；NVH 控制极差，车速超 90km/h 风噪胎噪急剧传入，底盘缺乏隔音棉，暴晒后内饰散发异味。
+                </div>
+                <div class="body-text reveal">
+                    <strong>哈弗H6 国潮版</strong>与<strong>长安CS75 PLUS 经典版</strong>代表了 10 万预算 SUV 需求。保有量极大，副厂配件丰富。但 SUV 车身高大、风阻高、自重达，哈弗H6 市区油耗甚至高达 10L/百公里（"一公里一块钱"）。在机械品质上，哈弗H6 长期面临密集三大件投诉：1.5T 发动机起步极"肉"，变速箱异响/顿挫/换挡困难，怠速抖动与空调压缩机异响成为久治不愈的通病，曾引来中国消费者协会的"红头文件"调查函。
+                </div>
+
+            </div>
+        </section>
+
+        <!-- SECTION 3: 二手车 -->
+        <section class="content-section" id="sec-used">
+            <div class="container">
+
+                <div class="sec-divider"><div class="div-line"></div><span class="div-label">Part 02 · 二手车市场</span><div class="div-line"></div></div>
+
+                <div class="sec-head head-purple reveal">
+                    <span class="sec-num">Part 02</span>
+                    <h2>二手车市场深度剖析：越级体验与隐性通病的博弈</h2>
+                    <p class="sec-desc">新车价格战将二手车价格中枢强力下压。10 万元预算的消费者，如今在二手市场能触及几年前 20 万以上的中型轿车甚至豪华品牌入门车型。但汽车作为典型高复杂度耐用消费品，二手车的潜在风险远超新车。</p>
+                </div>
+
+                <!-- 合资中型轿车 -->
+                <div class="sub-head reveal"><h3><span class="sub-tag tag-used">二手</span> 合资中型轿车：机械黄金时代的回光</h3></div>
+
+                <!-- 阿特兹 -->
+                <div class="insight-box insight-red reveal">
+                    <span class="insight-label">严重警告 · 马自达阿特兹 2.5L (2020-2021)</span>
+                    <p class="insight-text">
+                        创驰蓝天 2.5L + 6AT 被誉为标杆级动力总成，转向精准、驾驶乐趣越级。<strong>但 2020 款爆发全国性"异响门"：</strong>车身钣金尺寸偏差导致 A/B/C 柱、中控台、天窗频繁发出高频金属撞击声（"哒哒哒"），被车主戏称"阿特吱"。厂家打钣金防震胶的方案治标不治本。更致命的是，<strong>中保研 25% 偏置碰撞仅获 M（一般）评级，A 柱明显弯折</strong>，车身结构性刚性不足暴露无遗。购买此车需极度谨慎，必须接受伴随终身的异响折磨与较低的安全冗余。
+                    </p>
+                </div>
+
+                <!-- 蒙迪欧 -->
+                <div class="vehicle-card reveal">
+                    <div class="vcard-header">
+                        <div class="vcard-title-block">
+                            <span class="vcard-name">福特蒙迪欧 2.0T (2020款)</span>
+                            <span class="vcard-badge badge-used">二手 · 长途利器</span>
+                        </div>
+                        <div class="vcard-price">~8-10<span class="price-unit"> 万元（二手）</span></div>
+                    </div>
+                    <div class="vcard-body">
+                        <div class="vcard-grid">
+                            <div class="vcard-col">
+                                <div class="vcard-col-title col-strength">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+                                    核心卖点
+                                </div>
+                                <ul class="vcard-list str-list">
+                                    <li>2.0T 高功率发动机，动力强悍</li>
+                                    <li>美系厚重底盘 + 卓越隔音，长途巡航利器</li>
+                                </ul>
+                            </div>
+                            <div class="vcard-col">
+                                <div class="vcard-col-title col-weakness">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                                    深层风险
+                                </div>
+                                <ul class="vcard-list weak-list">
+                                    <li>车机黑屏卡顿，无法 OTA 升级</li>
+                                    <li>低速变速箱顿挫，中段加速迟钝</li>
+                                    <li>部分车辆存在 P2636 燃油泵电脑板缺陷</li>
+                                    <li><strong>天窗集雨板设计缺陷导致变速箱进水大修</strong></li>
+                                    <li>后备箱极易漏水，市区油耗居高不下</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 精品小车 -->
+                <div class="sub-head reveal"><h3><span class="sub-tag tag-used">二手</span> 精品小车与家用代步：可靠与定时炸弹的极致反差</h3></div>
+
+                <!-- 高尔夫 -->
+                <div class="vehicle-card reveal">
+                    <div class="vcard-header">
+                        <div class="vcard-title-block">
+                            <span class="vcard-name">大众高尔夫7.5 1.4T (2018-2020)</span>
+                            <span class="vcard-badge badge-used">德系精品 · 达摩克利斯之剑</span>
+                        </div>
+                        <div class="vcard-price">~7-9<span class="price-unit"> 万元（二手）</span></div>
+                    </div>
+                    <div class="vcard-body">
+                        <div class="vcard-full">
+                            <div class="body-text">
+                                EA211 1.4T 高功率 + 底盘完美匹配，穿梭灵活。<strong>但 DQ200 七速干式双离合是头顶达摩克利斯之剑。</strong>干式结构在拥堵散热极差，机电单元故障率极高——一旦损坏，行驶中直接失去动力（趴窝）。4S 店更换原厂件高达<strong> 2.6 万元</strong>，维修厂再制造件也需 4,800 元。对于一辆残值不足 10 万的二手车，这是足以让人绝望的维修账单。
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 雷凌双擎 -->
+                <div class="vehicle-card reveal">
+                    <div class="vcard-header">
+                        <div class="vcard-title-block">
+                            <span class="vcard-name">丰田雷凌/卡罗拉双擎 (2019-2021)</span>
+                            <span class="vcard-badge badge-used">变态可靠 · 情绪价值为零</span>
+                        </div>
+                        <div class="vcard-price">~8-10<span class="price-unit"> 万元（二手）</span></div>
+                    </div>
+                    <div class="vcard-body">
+                        <div class="vcard-full">
+                            <div class="body-text">
+                                丰田 THS 混动系统提供<strong>变态级可靠性</strong>与极致燃油经济性，一箱油续航 1000 公里并非虚言。标配 TSS 智行安全套装。<strong>但代价是完全放弃情绪价值：</strong>驾驶体验平淡如水，内饰极为廉价，隔音形同虚设，车机系统停留在十年前。专为对机械毫无激情、纯粹追求"不坏"与"省油"的极端理性消费者准备。
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 豪华品牌 -->
+                <div class="sub-head reveal"><h3><span class="sub-tag tag-used">二手</span> 豪华品牌入门：梦想与整备代价</h3></div>
+                <div class="vehicle-card reveal">
+                    <div class="vcard-header">
+                        <div class="vcard-title-block">
+                            <span class="vcard-name">宝马 1系 120i/125i (2018-2020)</span>
+                            <span class="vcard-badge badge-used">蓝天白云 · 最低门槛</span>
+                        </div>
+                        <div class="vcard-price">~8-10<span class="price-unit"> 万元（二手）</span></div>
+                    </div>
+                    <div class="vcard-body">
+                        <div class="vcard-full">
+                            <div class="body-text">
+                                触及蓝天白云车标的最低门槛。即使基于 UKL 前驱平台，底盘韧性和转向手感仍保留宝马工程底蕴。125i 的 2.0T + 爱信 8AT 动力强悍。但核心风险在于<strong>"买得起，修不起"</strong>：1.5T 三缸不可避免的怠速抖动；豪华品牌极高零整比意味着维修/保养/保险依然遵循 20 万以上标准。购买此类二手车，<strong>必须预留 1–2 万元整备预算</strong>应对 3–5 年后普遍爆发的底盘橡胶件老化、发动机舱漏油渗水等慢性病。
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- SECTION 4: 检测 -->
+        <section class="content-section" id="sec-inspect">
+            <div class="container">
+
+                <div class="sec-divider"><div class="div-line"></div><span class="div-label">Part 03 · 交易风控</span><div class="div-line"></div></div>
+
+                <div class="sec-head head-red reveal">
+                    <span class="sec-num">Part 03</span>
+                    <h2>二手车交易风险防范与第三方检测生态</h2>
+                    <p class="sec-desc">2025 年底新规明确要求：每台待售二手车必须提供国家认定检测机构的第三方报告。车商隐瞒泡水/调表/重大事故等行为，将被界定为商业欺诈，消费者有权主张"退一赔三"。</p>
+                </div>
+
+                <div class="sub-head reveal"><h3><span class="sub-tag tag-risk">风控</span> 三大致命风险排查手段</h3></div>
+                <div class="conclusion-grid reveal">
+                    <div class="conc-card conc-green">
+                        <span class="conc-persona">风险 01 · 调表车（里程造假）</span>
+                        <div class="conc-title">OBD 读取底层数据</div>
+                        <p class="conc-text">传统观察油门/方向盘/座椅物理磨损法已落后。专业机构通过 OBD 接口读取发动机 ECU 或变速箱控制模块中的<strong>底层实际行驶里程</strong>，进行数据交叉验证，精准锁定调表行为。头部平台识别率已接近 100%。</p>
+                    </div>
+                    <div class="conc-card conc-orange">
+                        <span class="conc-persona">风险 02 · 泡水车（水淹车）</span>
+                        <div class="conc-title">死角检查 + 内窥镜 + ECU 数据</div>
+                        <p class="conc-text">重点检查座椅滑轨内部、地毯下方、内饰板角落等极难清理死角；利用内窥镜深入仪表台内部骨架观察异常锈蚀；读取 ECU 数据流分析是否曾发生涉水导致的全局断电记录。</p>
+                    </div>
+                    <div class="conc-card conc-purple">
+                        <span class="conc-persona">风险 03 · 重大事故车</span>
+                        <div class="conc-title">漆面厚度仪 + 底盘逆向倒查</div>
+                        <p class="conc-text">高精度漆面厚度检测仪全车数十锚点打点测量，异常波动指向深度钣金或切割焊接修复；上架后从底盘角度逆向倒查大梁平整度与原厂焊点状态。</p>
+                    </div>
+                </div>
+
+                <div class="sub-head reveal"><h3><span class="sub-tag tag-risk">平台</span> 主流第三方检测平台对比</h3></div>
+                <div class="platform-grid reveal">
+                    <div class="platform-card">
+                        <div class="platform-name">查博士</div>
+                        <div class="platform-price">¥399–599</div>
+                        <p class="platform-pro">AI 视觉诊断（5 分钟外观检测，准确率 98%）；90 天原价回购兜底；全国 200+ 城市覆盖</p>
+                        <p class="platform-con">三四线及县城覆盖极差，响应 48h；曾发生不同网点定级标准争议</p>
+                    </div>
+                    <div class="platform-card">
+                        <div class="platform-name">检车家</div>
+                        <div class="platform-price">¥599–899</div>
+                        <p class="platform-pro">深度依赖人工资深经验（江浙沪技师平均从业 8 年+）；调表车识别能力行业顶尖</p>
+                        <p class="platform-con">收费偏高；无原价回购承诺，仅提供报告终身追溯；西北/西南网点不足</p>
+                    </div>
+                    <div class="platform-card">
+                        <div class="platform-name">车明鉴</div>
+                        <div class="platform-price">¥499</div>
+                        <p class="platform-pro">新能源二手车专项检测能力；三电系统深度检测，电池衰减误差 ≤5%；支持错检回购</p>
+                        <p class="platform-con">线上预约+合作师傅模式，基层检测师水平参差不齐</p>
+                    </div>
+                </div>
+
+                <div class="insight-box reveal">
+                    <span class="insight-label">避坑实操建议</span>
+                    <p class="insight-text">
+                        进入市场前，使用"用车 300"等数据工具查询同款同年限<strong>真实市场成交价</strong>。若车商报价低于均价 20% 以上，立刻放弃，切勿抱有捡漏心态。看中车辆后，<strong>坚决拒绝车商推荐的检测机构</strong>，必须自费聘请具备商务部备案资质的第三方平台独立检测。通过区块链存证技术确保报告不可篡改，为争议维权保留法律武器。
+                    </p>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- SECTION 5: 结论 -->
+        <section class="content-section" id="sec-conclusion">
+            <div class="container">
+
+                <div class="sec-divider"><div class="div-line"></div><span class="div-label">Part 04 · 结论与策略</span><div class="div-line"></div></div>
+
+                <div class="sec-head head-accent reveal">
+                    <span class="sec-num">Part 04</span>
+                    <h2>市场深层洞察与战略研判</h2>
+                </div>
+
+                <div class="insight-box reveal">
+                    <span class="insight-label">洞察一 · 价值评价体系的根本性转移</span>
+                    <p class="insight-text">
+                        传统燃油车时代，10 万元消费者购买的对价核心是发动机、变速箱与底盘三大件。新能源时代，比亚迪秦PLUS DM-i 和五菱星光用电机的物理特性以绝对平顺性掩盖低端内燃机 NVH 劣势，同时用大屏幕、智能语音和极低能耗重塑该价位段的<strong>价值获得感</strong>。合资品牌品牌溢价已被击穿，别克威朗 Pro 和雪佛兰科鲁泽的骨折价求生，标志着合资车企在中国下沉市场的全面溃败。汽车正从"精密机械产品"加速演变为<strong>"带轮子的智能移动终端"</strong>。
+                    </p>
+                </div>
+
+                <div class="insight-box insight-blue reveal">
+                    <span class="insight-label">洞察二 · 用车成本悖论</span>
+                    <p class="insight-text">
+                        新能源汽车日常能源补给和常规保养成本低至冰点，但依然面临<strong>高昂的专属保险费率</strong>以及电子架构快速迭代带来的<strong>隐性折旧成本</strong>。如果年行驶里程低于 1.5 万公里，通过充电省下的能源费用很可能刚好抵消高额保费溢价与贬值损失。相反，技术极度成熟的二手日系车或低价合资燃油新车，绝对购车门槛低、保险便宜、维修零整比已充分稀释。<strong>对于低频用车人群，传统燃油车反而是 TCO 最优解。</strong>
+                    </p>
+                </div>
+
+                <div class="insight-box insight-red reveal">
+                    <span class="insight-label">洞察三 · 品控反噬与修车刺客</span>
+                    <p class="insight-text">
+                        10 万元预算下，极致成本控制往往不可避免地导致品控妥协。吉利帝豪L HiP 复杂 DHT 系统带来的软硬件纠纷，反映了<strong>成本受限下过度堆叠复杂技术的反噬效应</strong>。二手市场中，高尔夫 DQ200 天价维修费、阿特兹无解的车身异响、蒙迪欧设计漏水隐患，都在警示消费者：<strong>二手市场省下的每一分购车款，都极有可能在某次关键零部件崩溃中被连本带利转移至高昂维修账单上。</strong>
+                    </p>
+                </div>
+
+                <div class="sub-head reveal"><h3><span class="sub-tag tag-accent" style="color:var(--accent);border:1px solid rgba(212,162,78,0.3);background:var(--accent-dim);">策略</span> 最终策略建议</h3></div>
+                <div class="conclusion-grid reveal">
+                    <div class="conc-card conc-green">
+                        <span class="conc-persona">策略 A · 高频通勤 + 有家充</span>
+                        <div class="conc-title">自主品牌插混新车</div>
+                        <p class="conc-text">年行驶 1.5 万公里以上、具备便利家用充电条件的消费者，应毫不犹豫拥抱 <strong>秦PLUS DM-i</strong> 或 <strong>五菱星光</strong>。它们代表了当前中国汽车工业规模化效应下的最佳普惠成果。</p>
+                        <div class="conc-rec">推荐：<strong>秦PLUS DM-i · 五菱星光</strong></div>
+                    </div>
+                    <div class="conc-card conc-orange">
+                        <span class="conc-persona">策略 B · 预算吃紧 + 无桩 + 纯代步</span>
+                        <div class="conc-title">极端降价合资燃油 / 二手日系双擎</div>
+                        <p class="conc-text">预算极度吃紧、无私人充电桩、车辆纯粹作为遮风挡雨工具的务实群体，<strong>科鲁泽</strong>等极端降价合资燃油车或<strong>二手丰田双擎</strong>，是能提供最强确定性的兜底选择。</p>
+                        <div class="conc-rec">推荐：<strong>科鲁泽 · 二手雷凌/卡罗拉双擎</strong></div>
+                    </div>
+                    <div class="conc-card conc-purple">
+                        <span class="conc-persona">策略 C · 热爱驾驶 + 愿承担整备</span>
+                        <div class="conc-title">二手合资中型车</div>
+                        <p class="conc-text">对底盘高级感有执念、愿为机械素质承担整备成本与油耗的消费者。但<strong>必须避开阿特兹等严重设计缺陷雷区</strong>，选择蒙迪欧或迈锐宝XL，且交易必须引入拥有回购保障的第三方独立检测。</p>
+                        <div class="conc-rec">推荐：<strong>蒙迪欧 2.0T · 迈锐宝XL</strong> + 强制第三方检测</div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer>
+        <div class="container">
+            <div class="footer-inner">
+                <div class="footer-left">
+                    本报告基于公开市场数据、车主社区反馈及行业研究整理<br>
+                    所有成本估算基于年行驶 1.5–2 万公里模型，随地区油价/电价/保险费率浮动
+                </div>
+                <div class="footer-right">
+                    Deep Research Report &mdash; 2026<br>
+                    不构成投资或购买建议
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Scroll reveal
+        const reveals = document.querySelectorAll('.reveal');
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
+        reveals.forEach(el => observer.observe(el));
+    </script>
+
+</body>
+</html>

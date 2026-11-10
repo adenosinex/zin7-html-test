@@ -1,0 +1,1140 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>体态自检手册 | 久坐改善方案</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Noto+Serif+SC:wght@400;600;700&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg: #f4efe6;
+      --surface: #fff;
+      --surface-alt: #faf7f2;
+      --accent: #b5452a;
+      --accent-hover: #963a23;
+      --accent-light: #f0d9d2;
+      --green: #3a7d44;
+      --green-light: #e4f0e6;
+      --yellow: #b5892a;
+      --yellow-light: #f5eed8;
+      --blue: #2a6ab5;
+      --blue-light: #dce8f5;
+      --text: #2a2520;
+      --text-sec: #5a544c;
+      --text-muted: #8a8078;
+      --border: #e0d8ce;
+      --border-light: #ece6dc;
+      --radius: 10px;
+      --shadow: 0 1px 3px rgba(42, 37, 32, .06), 0 4px 12px rgba(42, 37, 32, .04);
+    }
+
+    body {
+      font-family: 'Noto Serif SC', 'Cormorant Garamond', serif;
+      font-weight: 400;
+      font-size: 15px;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.75;
+      min-height: 100vh;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.03'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .mono {
+      font-family: 'DM Mono', monospace;
+    }
+
+    .container {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 48px 24px 100px;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* 头部区域 */
+    .hero {
+      margin-bottom: 40px;
+    }
+
+    .hero h1 {
+      font-family: 'Cormorant Garamond', 'Noto Serif SC', serif;
+      font-weight: 700;
+      font-size: clamp(32px, 6vw, 46px);
+      line-height: 1.15;
+      letter-spacing: -0.02em;
+      margin-bottom: 6px;
+    }
+
+    .hero h1 em {
+      font-style: normal;
+      color: var(--accent);
+    }
+
+    .hero-sub {
+      color: var(--text-sec);
+      font-size: 15px;
+      max-width: 600px;
+    }
+
+    .hero-divider {
+      width: 50px;
+      height: 2px;
+      background: var(--accent);
+      margin: 18px 0 0;
+    }
+
+    /* 基础卡片 */
+    .card {
+      background: var(--surface);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border-light);
+      padding: 24px 28px;
+      margin-bottom: 18px;
+    }
+
+    .card h2 {
+      font-family: 'Cormorant Garamond', 'Noto Serif SC', serif;
+      font-weight: 600;
+      font-size: 20px;
+      margin-bottom: 10px;
+    }
+
+    .card p {
+      margin-bottom: 8px;
+      font-size: 15px;
+    }
+
+    .card ul {
+      padding-left: 20px;
+      margin: 4px 0 10px;
+    }
+
+    .card li {
+      margin-bottom: 4px;
+      font-size: 14px;
+    }
+
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin: 12px 0;
+    }
+
+    .tc {
+      padding: 12px 14px;
+      border-radius: var(--radius);
+      border: 1px solid var(--border-light);
+      background: var(--surface-alt);
+    }
+
+    .tc-title {
+      font-weight: 600;
+      font-size: 13px;
+      color: var(--accent);
+      margin-bottom: 2px;
+    }
+
+    .tc-body {
+      font-size: 13px;
+      color: var(--text-sec);
+    }
+
+    .progression {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      flex-wrap: wrap;
+      margin: 12px 0 4px;
+      font-size: 13px;
+      color: var(--text-sec);
+    }
+
+    .prog-step {
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-weight: 500;
+      background: var(--border-light);
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      white-space: nowrap;
+    }
+
+    .prog-step.act {
+      background: var(--accent-light);
+      color: var(--accent);
+    }
+
+    .prog-arrow {
+      color: var(--border);
+      font-size: 13px;
+    }
+
+    /* 体态问题卡片 */
+    .issue-card {
+      background: var(--surface);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border-light);
+      margin-bottom: 20px;
+      overflow: hidden;
+      transition: box-shadow 0.2s;
+    }
+
+    .issue-head {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      padding: 22px 24px 18px;
+      user-select: none;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border-light);
+    }
+
+    .issue-num {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 700;
+      font-size: 32px;
+      line-height: 1;
+      color: var(--accent);
+      opacity: 0.35;
+      flex-shrink: 0;
+      width: 32px;
+      text-align: center;
+    }
+
+    .issue-title-group {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .issue-title {
+      font-family: 'Cormorant Garamond', 'Noto Serif SC', serif;
+      font-weight: 600;
+      font-size: 20px;
+      line-height: 1.3;
+      margin-bottom: 5px;
+    }
+
+    .issue-brief {
+      font-size: 13px;
+      color: var(--text-sec);
+      line-height: 1.55;
+    }
+
+    .issue-right {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    .sev {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      font-weight: 500;
+      padding: 2px 9px;
+      border-radius: 20px;
+      white-space: nowrap;
+    }
+
+    .sev-h {
+      background: var(--accent-light);
+      color: var(--accent);
+    }
+
+    .sev-m {
+      background: var(--yellow-light);
+      color: var(--yellow);
+    }
+
+    .chk {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      padding: 5px 12px;
+      border-radius: 30px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.2s;
+      white-space: nowrap;
+      font-weight: 500;
+    }
+
+    .chk:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .chk.on {
+      background: var(--accent-light);
+      color: var(--accent);
+      border-color: var(--accent-light);
+    }
+
+    /* 体态详细数据区域 —— 默认完全显示，无需折叠 */
+    .issue-body {
+      max-height: none;
+      overflow: visible;
+      transition: none;
+    }
+
+    .issue-body-inner {
+      padding: 0 24px 24px;
+    }
+
+    .sl {
+      font-family: 'DM Mono', monospace;
+      font-weight: 500;
+      font-size: 11px;
+      letter-spacing: 0.07em;
+      color: var(--accent);
+      text-transform: uppercase;
+      margin: 28px 0 12px 0;
+      padding-bottom: 5px;
+      border-bottom: 1px solid var(--border-light);
+    }
+
+    .sl:first-of-type {
+      margin-top: 10px;
+    }
+
+    /* 测试盒子 */
+    .tbox {
+      background: var(--surface-alt);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius);
+      padding: 16px 18px;
+      margin: 8px 0 14px;
+    }
+
+    .tbox-title {
+      font-weight: 600;
+      font-size: 14px;
+      margin-bottom: 6px;
+    }
+
+    .tbox ol {
+      padding-left: 18px;
+      margin: 0 0 8px 0;
+    }
+
+    .tbox li {
+      margin-bottom: 5px;
+      font-size: 14px;
+    }
+
+    .trow {
+      display: flex;
+      gap: 10px;
+      padding: 5px 0;
+      border-bottom: 1px solid var(--border-light);
+      font-size: 14px;
+      align-items: flex-start;
+    }
+
+    .trow:last-child {
+      border-bottom: none;
+    }
+
+    .tdot {
+      flex-shrink: 0;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 700;
+      margin-top: 1px;
+    }
+
+    .tdot-g {
+      background: var(--green-light);
+      color: var(--green);
+    }
+
+    .tdot-y {
+      background: var(--yellow-light);
+      color: var(--yellow);
+    }
+
+    .tdot-r {
+      background: var(--accent-light);
+      color: var(--accent);
+    }
+
+    /* 动作表格 */
+    .xtbl {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 8px 0 14px;
+      font-size: 14px;
+    }
+
+    .xtbl th {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      text-align: left;
+      padding: 6px 6px;
+      border-bottom: 2px solid var(--border);
+    }
+
+    .xtbl td {
+      padding: 8px 6px;
+      border-bottom: 1px solid var(--border-light);
+      font-size: 14px;
+      vertical-align: top;
+    }
+
+    .xtbl tr:last-child td {
+      border-bottom: none;
+    }
+
+    .xo {
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      color: var(--text-muted);
+      width: 26px;
+      text-align: center;
+    }
+
+    .st {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      font-weight: 500;
+      padding: 2px 8px;
+      border-radius: 20px;
+      white-space: nowrap;
+      display: inline-block;
+    }
+
+    .st-rel {
+      background: var(--blue-light);
+      color: var(--blue);
+    }
+
+    .st-dyn {
+      background: var(--green-light);
+      color: var(--green);
+    }
+
+    .st-str {
+      background: var(--yellow-light);
+      color: var(--yellow);
+    }
+
+    .st-ctl {
+      background: var(--accent-light);
+      color: var(--accent);
+    }
+
+    .xn {
+      font-weight: 600;
+      font-size: 14px;
+    }
+
+    .xd {
+      font-size: 13px;
+      color: var(--text-sec);
+      margin-top: 2px;
+    }
+
+    .xp {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    /* 方案盒子 */
+    .pbox {
+      background: var(--surface-alt);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius);
+      padding: 14px 18px;
+      margin: 12px 0;
+    }
+
+    .pl {
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+      padding: 5px 0;
+      font-size: 13px;
+      flex-wrap: wrap;
+    }
+
+    .plt {
+      font-family: 'DM Mono', monospace;
+      font-size: 12px;
+      color: var(--text-muted);
+      flex-shrink: 0;
+      width: 70px;
+    }
+
+    /* 其他常见问题网格 */
+    .ogrid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .oi {
+      padding: 14px 16px;
+      border-radius: var(--radius);
+      border: 1px solid var(--border-light);
+      background: var(--surface-alt);
+    }
+
+    .oi h3 {
+      font-size: 15px;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+
+    .oi p {
+      font-size: 13px;
+      color: var(--text-sec);
+      line-height: 1.5;
+    }
+
+    .oitag {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      font-weight: 500;
+      padding: 2px 10px;
+      border-radius: 20px;
+      display: inline-block;
+      margin-top: 8px;
+      background: var(--border-light);
+      color: var(--text-sec);
+    }
+
+    /* 方案卡片 */
+    .plan-card {
+      background: var(--surface);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border-light);
+      padding: 28px;
+      margin-top: 32px;
+    }
+
+    .plan-card h2 {
+      font-family: 'Cormorant Garamond', 'Noto Serif SC', serif;
+      font-weight: 600;
+      font-size: 24px;
+      margin-bottom: 6px;
+    }
+
+    .plan-card .psub {
+      font-size: 14px;
+      color: var(--text-sec);
+      margin-bottom: 20px;
+    }
+
+    .sel-box {
+      min-height: 65px;
+      padding: 16px;
+      background: var(--surface-alt);
+      border: 1px dashed var(--border);
+      border-radius: var(--radius);
+      margin-bottom: 16px;
+      font-size: 14px;
+      color: var(--text-sec);
+    }
+
+    .sel-box.has {
+      border-style: solid;
+      border-color: var(--accent-light);
+      background: var(--surface);
+    }
+
+    .stag {
+      display: inline-block;
+      font-family: 'DM Mono', monospace;
+      font-size: 12px;
+      font-weight: 500;
+      padding: 4px 12px;
+      border-radius: 40px;
+      background: var(--accent-light);
+      color: var(--accent);
+      margin: 2px 6px 2px 0;
+    }
+
+    .no-sel {
+      color: var(--text-muted);
+      font-style: italic;
+    }
+
+    .pout {
+      display: none;
+      margin-top: 20px;
+      padding: 20px;
+      background: var(--surface-alt);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius);
+    }
+
+    .pout.vis {
+      display: block;
+    }
+
+    .pout h3 {
+      font-family: 'Cormorant Garamond', 'Noto Serif SC', serif;
+      font-weight: 600;
+      font-size: 20px;
+      margin-bottom: 14px;
+    }
+
+    .pb {
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border-light);
+    }
+
+    .pb:last-child {
+      border-bottom: none;
+      margin-bottom: 0;
+      padding-bottom: 0;
+    }
+
+    .pbt {
+      font-weight: 600;
+      font-size: 15px;
+      margin-bottom: 8px;
+    }
+
+    .pel {
+      padding-left: 20px;
+    }
+
+    .pel li {
+      font-size: 14px;
+      margin-bottom: 5px;
+    }
+
+    .psets {
+      font-family: 'DM Mono', monospace;
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-right: 6px;
+    }
+
+    .pnote {
+      font-size: 13px;
+      color: var(--text-sec);
+      font-style: italic;
+      margin-top: 14px;
+      padding: 12px 16px;
+      background: var(--yellow-light);
+      border-radius: var(--radius);
+    }
+
+    .btn-row {
+      display: flex;
+      gap: 12px;
+      margin-top: 18px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      font-family: 'DM Mono', monospace;
+      font-size: 12px;
+      font-weight: 500;
+      padding: 10px 22px;
+      border: none;
+      border-radius: 40px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      letter-spacing: 0.03em;
+    }
+
+    .btn-p {
+      background: var(--accent);
+      color: #fff;
+    }
+
+    .btn-p:hover {
+      background: var(--accent-hover);
+      transform: translateY(-1px);
+    }
+
+    .btn-p:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .btn-s {
+      background: var(--surface);
+      color: var(--text-sec);
+      border: 1px solid var(--border);
+    }
+
+    .btn-s:hover {
+      background: var(--surface-alt);
+    }
+
+    .btn-s.ok {
+      background: var(--green);
+      color: white;
+      border-color: var(--green);
+    }
+
+    .txto {
+      width: 100%;
+      min-height: 110px;
+      margin-top: 16px;
+      font-family: 'DM Mono', monospace;
+      font-size: 12px;
+      line-height: 1.7;
+      color: var(--text);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px;
+      resize: vertical;
+    }
+
+    .txto:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 28px;
+      left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: var(--text);
+      color: var(--bg);
+      padding: 10px 26px;
+      border-radius: 60px;
+      font-family: 'DM Mono', monospace;
+      font-size: 12px;
+      transition: transform 0.25s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+      z-index: 100;
+      pointer-events: none;
+    }
+
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .fade-in {
+      animation: fadeUp 0.5s ease both;
+    }
+
+    @keyframes fadeUp {
+      from {
+        opacity: 0;
+        transform: translateY(16px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @media (max-width: 600px) {
+      .container {
+        padding: 24px 16px 70px;
+      }
+
+      .hero h1 {
+        font-size: 28px;
+      }
+
+      .card,
+      .issue-head,
+      .issue-body-inner,
+      .plan-card {
+        padding-left: 16px;
+        padding-right: 16px;
+      }
+
+      .two-col,
+      .ogrid {
+        grid-template-columns: 1fr;
+      }
+
+      .issue-num {
+        font-size: 28px;
+        width: 28px;
+      }
+
+      .xtbl td,
+      .xtbl th {
+        font-size: 12px;
+      }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <header class="hero fade-in">
+    <h1>久坐<em>体态</em>自检手册</h1>
+    <p class="hero-sub">六种最容易出现、影响最深的体态问题。完整数据——测试、根源、阶梯式改善方案。</p>
+    <div class="hero-divider"></div>
+  </header>
+
+  <div class="card fade-in" style="animation-delay: 0.05s">
+    <h2>为什么力量训练不能解决一切</h2>
+    <p>力量训练建造的是<strong>容量</strong>——更强的肌肉、更高的代谢。但久坐毁掉的是<strong>模式</strong>——关节活动度丢失、肌肉长度失衡、神经控制固化。</p>
+    <div class="two-col">
+      <div class="tc"><div class="tc-title">力量训练覆盖</div><div class="tc-body">肌肉萎缩 · 核心退化 · 代谢下降 · 骨密度流失 · 体力不足</div></div>
+      <div class="tc"><div class="tc-title">需要专项处理</div><div class="tc-body">关节僵硬 · 肌肉缩短 · 运动控制错误 · 呼吸模式异常 · 筋膜粘连</div></div>
+    </div>
+    <p>完整改善流程必须包含四个阶段：</p>
+    <div class="progression">
+      <span class="prog-step act">筋膜释放</span><span class="prog-arrow">→</span>
+      <span class="prog-step">关节活动度</span><span class="prog-arrow">→</span>
+      <span class="prog-step">静态拉伸</span><span class="prog-arrow">→</span>
+      <span class="prog-step act">运动控制</span>
+    </div>
+    <p style="font-size: 13px; color: var(--text-muted); margin-top: 8px">只做拉伸容易反弹；四层都做才能从根本上改变。筋膜释放必须在拉伸之前做。</p>
+  </div>
+
+  <!-- 体态列表容器（数据默认全部展开） -->
+  <div id="issues-container"></div>
+
+  <div class="card fade-in" style="animation-delay: 0.2s">
+    <h2>其他常见关联问题</h2>
+    <div class="ogrid" id="other-grid"></div>
+  </div>
+
+  <div class="plan-card fade-in" style="animation-delay: 0.28s">
+    <h2>你的改善方案</h2>
+    <p class="psub">在上方选择你存在的问题（点击「自测」标记），生成针对性方案。</p>
+    <div class="sel-box" id="sel-box"><span class="no-sel">点击各问题卡片的「自测」按钮标记</span></div>
+    <button class="btn btn-p" id="gen-btn" disabled>生成我的方案</button>
+    <div class="pout" id="pout"></div>
+    <div class="btn-row" id="exp-row" style="display: none">
+      <button class="btn btn-p" id="txt-btn">生成文本</button>
+      <button class="btn btn-s" id="cp-btn">复制</button>
+    </div>
+    <textarea class="txto" id="txto" readonly placeholder="点击「生成文本」后显示结构化训练计划"></textarea>
+  </div>
+</div>
+<div id="toast" class="toast"></div>
+
+<script>
+  // ----------------------------- 体态完整数据 -----------------------------
+  const ISSUES = [
+    {
+      id: "hip-flexor", num: "01", title: "髋屈肌紧张",
+      brief: "久坐第一大受害者。髋屈肌持续缩短，直接导致骨盆偏移、腰痛连锁反应。",
+      sev: "h", sevLabel: "高发 · 严重",
+      desc: '<p>髋屈肌（主要为髂腰肌）位于髋部深处，连接腰椎和股骨。久坐时它处于持续缩短位置，数小时后肌纤维开始"记住"这个短长度。</p><p>后果是<strong>骨盆被拉向前倾</strong>，腰椎过度前凸，下背部承受不必要的压力。同时臀部肌群因为髋屈肌过紧而被"关掉"（抑制性弱化），形成"臀肌失忆症"。</p><p>更隐蔽的问题：即使站起来之后髋屈肌感觉不紧，它的神经-肌张力已经偏高。深蹲到底部时髋部前侧卡住、硬拉时骨盆翻转不到位，根源常常在这里。</p>',
+      tName: "托马斯测试",
+      tSteps: ["躺在床或桌子边缘，双腿悬空", "双手抱住一侧膝盖，用力拉向胸口", "另一条腿自然下垂，观察大腿和小腿位置"],
+      tResults: [
+        { lv: "g", lb: "正常", dt: "大腿贴平桌面，小腿自然弯曲约90°" },
+        { lv: "y", lb: "髋屈肌紧张", dt: "大腿无法贴平桌面，翘起来了" },
+        { lv: "r", lb: "严重", dt: "大腿翘起且小腿伸直——髋屈肌+股直肌都紧张" }
+      ],
+      exercises: [
+        { st: "rel", nm: "泡沫轴滚压大腿前侧", dt: "从髋部到膝盖上方，遇到痛点停留15-20秒", pr: "核心动作", tm: "每侧60-90秒" },
+        { st: "dyn", nm: "90/90 髋部切换", dt: "坐在地上双腿成90°，来回切换前后腿位置", pr: "核心动作", tm: "每侧8次" },
+        { st: "str", nm: "半跪姿髋屈肌拉伸", dt: "后腿膝跪地，前腿90°，骨盆向下向前推，不要弯腰", pr: "核心动作", tm: "每侧45-60秒 ×2" },
+        { st: "ctl", nm: "半跪姿收缩对抗", dt: "在拉伸位收紧后腿臀部，对抗拉伸感3秒，松开重复", pr: "防反弹关键", tm: "每侧8次 ×3秒" }
+      ],
+      proto: [
+        { t: "训练前", x: "90/90 髋部切换 × 每侧8次" },
+        { t: "训练后", x: "泡沫轴大腿前侧 → 半跪姿拉伸 → 收缩对抗" },
+        { t: "周末", x: "完整四步流程，每侧增加时间" }
+      ]
+    },
+    {
+      id: "thoracic", num: "02", title: "胸椎活动度不足",
+      brief: "圆肩驼背的结构性根源。胸椎锁死后，颈椎和腰椎被迫代偿。",
+      sev: "h", sevLabel: "高发 · 影响深远",
+      desc: '<p>胸椎（上背部，共12节椎骨）正常情况下应能灵活旋转和伸展。但长期含胸盯屏幕会让椎骨间关节面"冻结"，逐渐丧失活动能力。</p><p>胸椎不动的代价是<strong>其他关节过度代偿</strong>：颈椎被迫承担更多旋转（导致颈部僵硬），腰椎被迫承担更多伸展（导致腰部不适）。这是"上游堵塞、下游泛滥"的问题。</p>',
+      tName: "坐姿胸椎旋转测试",
+      tSteps: ["坐在椅子上，双手交叉抱胸", "保持骨盆不动（屁股不能跟着转）", "上身尽量向左转，再向右转", "让人从正上方观察角度或拍照"],
+      tResults: [
+        { lv: "g", lb: "正常", dt: "两侧都能转到45°以上" },
+        { lv: "y", lb: "不对称", dt: "一侧能到45°另一侧明显不到——可能有侧弯或单侧紧张" },
+        { lv: "r", lb: "严重受限", dt: "两侧都不到35°，或转动时骨盆跟着动（腰椎在代偿）" }
+      ],
+      exercises: [
+        { st: "rel", nm: "泡沫轴胸椎伸展", dt: "泡沫轴放在上背部（肩胛骨下方），双手抱头缓慢后仰", pr: "核心动作", tm: "60-90秒" },
+        { st: "dyn", nm: "开书式", dt: "侧卧双膝弯曲叠放，上方手臂打开向对侧旋转，眼随手动", pr: "核心动作", tm: "每侧8次" },
+        { st: "dyn", nm: "猫牛式", dt: "四足跪姿交替拱背塌腰，注意运动发生在胸椎不是腰椎", pr: "辅助", tm: "10次慢速" },
+        { st: "ctl", nm: "四足胸椎旋转", dt: "四足跪姿一手放耳后，肘向天花板旋转最大幅度停3秒", pr: "进阶", tm: "每侧8次 ×3秒" }
+      ],
+      proto: [{ t: "训练前", x: "猫牛式 ×10 → 开书式 × 每侧6次" }, { t: "训练后", x: "泡沫轴胸椎伸展 90秒" }, { t: "周末", x: "四步完整流程" }]
+    },
+    {
+      id: "rounded", num: "03", title: "圆肩与头前伸",
+      brief: "上交叉综合征。前侧肌肉缩短、后侧弱化，肩膀和头部逐渐前移。",
+      sev: "h", sevLabel: "高发 · 外观明显",
+      desc: '<p>圆肩是前侧（胸大肌、胸小肌）持续缩短，后侧（菱形肌、中下斜方肌）被持续拉长后无力的结果。看手机/电脑时手臂内旋前伸、头部前探，每天6-8小时持续这个姿势，肌肉张力失衡几乎不可避免。</p>',
+      tName: "靠墙站立测试",
+      tSteps: ["背靠墙站立，脚后跟、臀部、肩胛骨贴墙", "保持姿势，尝试让后脑勺也贴墙", "观察需要多大努力才能四点贴墙"],
+      tResults: [
+        { lv: "g", lb: "正常", dt: "四点轻松贴墙，呼吸自然" },
+        { lv: "y", lb: "头前伸", dt: "后脑勺需要用力才能贴到，或完全贴不到" },
+        { lv: "r", lb: "多项问题", dt: "后脑勺贴不到，且肩胛骨贴墙时胸口有拉扯感" }
+      ],
+      exercises: [
+        { st: "rel", nm: "筋膜球滚压胸小肌", dt: "球放在锁骨下方靠墙施压", pr: "核心动作", tm: "每侧60秒" },
+        { st: "dyn", nm: "手臂大画圈", dt: "站直，手臂从前→上→后→下做大圈", pr: "热身", tm: "每侧10次" },
+        { st: "str", nm: "门框胸肌拉伸", dt: "手臂90°抵住门框，身体前倾30-45度", pr: "核心动作", tm: "每侧45秒" },
+        { st: "ctl", nm: "收下巴训练", dt: "下巴向后收做出双下巴，保持5秒", pr: "纠正头前伸", tm: "10次 ×5秒" }
+      ],
+      proto: [{ t: "训练前", x: "手臂大画圈 → 收下巴训练" }, { t: "训练后", x: "筋膜球胸小肌 → 门框拉伸" }, { t: "周末", x: "完整流程" }]
+    },
+    {
+      id: "pelvis", num: "04", title: "骨盆位置异常",
+      brief: "骨盆前倾或后倾，直接影响腰椎健康。",
+      sev: "m", sevLabel: "中高发 · 连锁影响",
+      desc: '<p>骨盆是身体的"地基"。前倾更常见：髋屈肌紧+竖脊肌紧+腹肌弱+臀肌弱。</p>',
+      tName: "侧面照 + 髂前上棘位置",
+      tSteps: ["侧身对镜自然站立", "找到髂前上棘与耻骨联合", "观察两点垂直线"],
+      tResults: [
+        { lv: "g", lb: "正常", dt: "两点基本在垂直线上" },
+        { lv: "y", lb: "骨盆前倾", dt: "髂前上棘明显在前方" },
+        { lv: "r", lb: "骨盆后倾", dt: "髂前上棘在后方" }
+      ],
+      exercises: [
+        { st: "rel", nm: "泡沫轴滚压竖脊肌", dt: "下背部缓慢滚动", pr: "前倾适用", tm: "60秒" },
+        { st: "str", nm: "半跪姿髋屈肌拉伸", dt: "纠正前倾核心动作", pr: "核心动作", tm: "每侧45秒" },
+        { st: "ctl", nm: "死虫子", dt: "腰部贴地，对侧手脚交替", pr: "强化腹肌", tm: "每侧8-10次" }
+      ],
+      proto: [{ t: "训练前", x: "死虫子激活" }, { t: "训练后", x: "髋屈肌拉伸 + 臀桥后倾版" }, { t: "日常", x: "每小时站起做3次臀桥激活" }]
+    },
+    {
+      id: "ankle", num: "05", title: "踝关节活动度不足",
+      brief: "深蹲天花板的隐藏原因。踝背屈不足影响膝盖健康。",
+      sev: "m", sevLabel: "中等 · 训练相关",
+      desc: '<p>踝关节背屈正常应有10-15°。久坐小腿缩短导致活动度下降，引发深蹲受限和膝痛。</p>',
+      tName: "膝盖触墙测试",
+      tSteps: ["脚尖距墙约10cm，膝盖向前顶墙", "逐渐增加距离，量最远距离"],
+      tResults: [
+        { lv: "g", lb: "正常", dt: "≥10cm" },
+        { lv: "y", lb: "略有不足", dt: "8-9cm" },
+        { lv: "r", lb: "明显受限", dt: "<7cm" }
+      ],
+      exercises: [
+        { st: "rel", nm: "泡沫轴滚压小腿后侧", dt: "从跟腱到膝盖下方", pr: "核心动作", tm: "每侧60秒" },
+        { st: "dyn", nm: "跪姿踝背屈", dt: "跪姿脚尖踩地，臀部坐向脚跟", pr: "核心动作", tm: "每侧8次" },
+        { st: "ctl", nm: "深蹲底部保持", dt: "轻重量蹲到底部停留", pr: "动作迁移", tm: "3组×15秒" }
+      ],
+      proto: [{ t: "深蹲前", x: "泡沫轴小腿 → 跪姿踝背屈" }, { t: "周末", x: "完整流程" }]
+    },
+    {
+      id: "breathing", num: "06", title: "呼吸模式异常",
+      brief: "被忽视的根本问题。错误呼吸导致颈肩紧张、核心不稳。",
+      sev: "m", sevLabel: "中等 · 隐性影响",
+      desc: '<p>正常应是腹式呼吸。久坐转为胸式/肩式呼吸，造成颈部僵硬、核心无法有效绷紧。</p>',
+      tName: "仰卧呼吸观察",
+      tSteps: ["仰卧双手分别放胸口和腹部", "自然呼吸观察哪只手先动"],
+      tResults: [
+        { lv: "g", lb: "正常", dt: "腹部先起后落" },
+        { lv: "y", lb: "胸式呼吸", dt: "胸口先动，腹部不动" },
+        { lv: "r", lb: "肩式呼吸", dt: "肩膀起伏，呼吸浅短" }
+      ],
+      exercises: [
+        { st: "dyn", nm: "仰卧腹式呼吸", dt: "吸气腹部膨胀，呼气收回", pr: "核心动作", tm: "10次慢速" },
+        { st: "ctl", nm: "呼吸暂停腹肌收紧", dt: "呼气末收紧腹横肌再吸气", pr: "建立控制", tm: "8次" }
+      ],
+      proto: [{ t: "每天", x: "仰卧腹式呼吸×10次" }, { t: "训练前", x: "90/90仰卧呼吸重置模式" }]
+    }
+  ];
+
+  const OTHER = [
+    { title: "手指/手腕僵硬", desc: "农夫行走和硬拉对手腕屈肌高强度刺激，长期可能手腕活动度下降", tag: "泡沫轴前臂 + 手腕伸展拉伸" },
+    { title: "肩关节活动度", desc: "过头举受限、肩峰撞击。需要肩胛稳定训练 + 胸椎灵活性配合", tag: "弹力带肩外旋 + 面拉" },
+    { title: "膝关节不适", desc: "多因髋/踝活动度不足导致膝关节代偿，少数为髌骨轨迹问题", tag: "优先解决髋踝 → 髌骨松动术" },
+    { title: "腰椎间盘压力", desc: "硬拉/深蹲腰椎受力过大，可能核心不足或骨盆异常的下游结果", tag: "核心稳定性优先 → 麦肯基伸展" }
+  ];
+
+  const STLABEL = { rel: "筋膜释放", dyn: "动态活动", str: "静态拉伸", ctl: "运动控制" };
+  const STCSS = { rel: "st-rel", dyn: "st-dyn", str: "st-str", ctl: "st-ctl" };
+  let checked = {};
+
+  // 渲染所有体态问题 (详细数据完全可见)
+  function renderIssues() {
+    const container = document.getElementById("issues-container");
+    let html = "";
+    ISSUES.forEach((iss, idx) => {
+      html += `<div class="issue-card">
+        <div class="issue-head" data-idx="${idx}">
+          <div class="issue-num">${iss.num}</div>
+          <div class="issue-title-group">
+            <div class="issue-title">${iss.title}</div>
+            <div class="issue-brief">${iss.brief}</div>
+          </div>
+          <div class="issue-right">
+            <span class="sev sev-${iss.sev}">${iss.sevLabel}</span>
+            <button class="chk" data-idx="${idx}">自测</button>
+          </div>
+        </div>
+        <div class="issue-body">
+          <div class="issue-body-inner">
+            <div class="sl">问题本质</div>${iss.desc}
+            <div class="sl">自测方法：${iss.tName}</div>
+            <div class="tbox">
+              <div class="tbox-title">操作步骤</div><ol>${iss.tSteps.map(s => `<li>${s}</li>`).join("")}</ol>
+              ${iss.tResults.map(r => `<div class="trow"><div class="tdot ${r.lv === 'g' ? 'tdot-g' : r.lv === 'y' ? 'tdot-y' : 'tdot-r'}">${r.lv === 'g' ? '✓' : r.lv === 'y' ? '!' : '×'}</div><div><strong>${r.lb}</strong>：${r.dt}</div></div>`).join("")}
+            </div>
+            <div class="sl">最佳改善动作</div>
+            <table class="xtbl"><thead><tr><th></th><th>阶段</th><th>动作</th><th>说明</th></tr></thead><tbody>
+              ${iss.exercises.map((ex, ei) => `<tr><td class="xo">${ei + 1}</td><td><span class="st ${STCSS[ex.st]}">${STLABEL[ex.st]}</span></td><td><div class="xn">${ex.nm}</div><div class="xp">${ex.pr}</div></td><td><div class="xd">${ex.dt}</div><div class="xp">${ex.tm}</div></td></tr>`).join("")}
+            </tbody></table>
+            <div class="sl">日常方案</div><div class="pbox">${iss.proto.map(p => `<div class="pl"><span class="plt">${p.t}</span><span>${p.x}</span></div>`).join("")}</div>
+          </div>
+        </div>
+      </div>`;
+    });
+    container.innerHTML = html;
+  }
+
+  function renderOther() {
+    const grid = document.getElementById("other-grid");
+    grid.innerHTML = OTHER.map(o => `<div class="oi"><h3>${o.title}</h3><p>${o.desc}</p><span class="oitag">${o.tag}</span></div>`).join("");
+  }
+
+  function updateSel() {
+    const box = document.getElementById("sel-box");
+    const btn = document.getElementById("gen-btn");
+    const ids = Object.keys(checked);
+    if (!ids.length) {
+      box.innerHTML = '<span class="no-sel">点击各问题卡片的「自测」按钮标记</span>';
+      box.classList.remove("has");
+      btn.disabled = true;
+      document.getElementById("pout").classList.remove("vis");
+      document.getElementById("exp-row").style.display = "none";
+      return;
+    }
+    box.classList.add("has");
+    btn.disabled = false;
+    const tags = ISSUES.filter(iss => checked[iss.id]).map(iss => `<span class="stag">${iss.title}</span>`).join("");
+    box.innerHTML = `<div style="margin-bottom:6px;font-weight:600;">已选择 ${ids.length} 项：</div>${tags}`;
+  }
+
+  function genPlan() {
+    const sel = ISSUES.filter(iss => checked[iss.id]);
+    if (!sel.length) return;
+    const names = sel.map(i => i.title).join(" + ");
+    let pre = [], post = [], other = [];
+    sel.forEach(iss => {
+      iss.proto.forEach(p => {
+        if (p.t.includes("训练前")) pre.push(p.x);
+        else if (p.t.includes("训练后")) post.push(p.x);
+        else other.push(`[${p.t}] ${p.x}`);
+      });
+    });
+    const html = `<h3>针对：${names}</h3>
+      <div class="pb"><div class="pbt">训练前 5 分钟</div><ul class="pel">${pre.map(x => `<li>${x}</li>`).join("")}</ul></div>
+      <div class="pb"><div class="pbt">训练后 5-10 分钟</div><ul class="pel">${post.map(x => `<li>${x}</li>`).join("")}</ul></div>
+      <div class="pb"><div class="pbt">日常 / 周末补充</div><ul class="pel">${other.map(x => `<li>${x}</li>`).join("")}</ul></div>
+      <div class="pnote">顺序：筋膜释放 → 动态活动 → 静态拉伸 → 运动控制。只做拉伸不做运动控制，改善会快速反弹。</div>`;
+    const out = document.getElementById("pout");
+    out.innerHTML = html;
+    out.classList.add("vis");
+    document.getElementById("exp-row").style.display = "flex";
+  }
+
+  function genText() {
+    const sel = ISSUES.filter(iss => checked[iss.id]);
+    if (!sel.length) return;
+    const lines = [`[体态改善方案] ${sel.map(i => i.title).join(" + ")}`];
+    const groups = { "训练前": [], "训练后": [], "其他": [] };
+    sel.forEach(iss => {
+      iss.proto.forEach(p => {
+        if (p.t.includes("训练前")) groups["训练前"].push(p.x);
+        else if (p.t.includes("训练后")) groups["训练后"].push(p.x);
+        else groups["其他"].push(`[${p.t}] ${p.x}`);
+      });
+    });
+    for (let k of Object.keys(groups)) {
+      if (groups[k].length) {
+        lines.push(`\n── ${k} ──`);
+        groups[k].forEach(x => lines.push(`  ${x}`));
+      }
+    }
+    lines.push("\n顺序：筋膜释放 → 动态活动 → 静态拉伸 → 运动控制");
+    document.getElementById("txto").value = lines.join("\n");
+  }
+
+  function copyText() {
+    let text = document.getElementById("txto").value;
+    if (!text) { genText(); text = document.getElementById("txto").value; }
+    if (!text) return;
+    navigator.clipboard?.writeText(text).then(() => copyOk()).catch(() => copyFallback(text));
+    function copyFallback(t) { const ta = document.getElementById("txto"); ta.select(); document.execCommand("copy"); copyOk(); }
+    function copyOk() {
+      const btn = document.getElementById("cp-btn");
+      btn.textContent = "已复制 ✓"; btn.classList.add("ok");
+      showToast("已复制到剪贴板");
+      setTimeout(() => { btn.textContent = "复制"; btn.classList.remove("ok"); }, 1800);
+    }
+  }
+
+  function showToast(msg) {
+    const toast = document.getElementById("toast");
+    toast.textContent = msg;
+    toast.classList.add("show");
+    clearTimeout(window.toastTimer);
+    window.toastTimer = setTimeout(() => toast.classList.remove("show"), 1800);
+  }
+
+  function bindEvents() {
+    const container = document.getElementById("issues-container");
+    container.addEventListener("click", (e) => {
+      const chkBtn = e.target.closest(".chk");
+      if (chkBtn) {
+        e.stopPropagation();
+        const idx = parseInt(chkBtn.dataset.idx);
+        const iss = ISSUES[idx];
+        if (checked[iss.id]) {
+          delete checked[iss.id];
+          chkBtn.classList.remove("on");
+          chkBtn.textContent = "自测";
+        } else {
+          checked[iss.id] = true;
+          chkBtn.classList.add("on");
+          chkBtn.textContent = "✓ 我有此问题";
+        }
+        updateSel();
+      }
+    });
+    document.getElementById("gen-btn").addEventListener("click", genPlan);
+    document.getElementById("txt-btn").addEventListener("click", genText);
+    document.getElementById("cp-btn").addEventListener("click", copyText);
+  }
+
+  renderIssues();
+  renderOther();
+  bindEvents();
+</script>
+</body>
+</html>

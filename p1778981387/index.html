@@ -1,0 +1,1455 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>医学术语系统科普</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #faf9f7;
+    --surface: #ffffff;
+    --surface-alt: #f3f1ed;
+    --ink: #1a1a1a;
+    --ink-mid: #4a4a4a;
+    --ink-light: #8a8a8a;
+    --border: #e5e2dc;
+    --border-light: #efeee9;
+
+    --red: #c0392b;
+    --red-bg: #fdf2f0;
+    --orange: #d35400;
+    --orange-bg: #fef5ec;
+    --amber: #b8860b;
+    --amber-bg: #fdf8ec;
+    --green: #1a7a4c;
+    --green-bg: #eef7f2;
+    --teal: #0e7c6b;
+    --teal-bg: #eef7f5;
+    --blue: #1a5276;
+    --blue-bg: #eef3f8;
+    --purple: #6c3483;
+    --purple-bg: #f5eef8;
+    --pink: #a93226;
+    --pink-bg: #fdf0ef;
+    --gray: #5d6d7e;
+    --gray-bg: #f0f2f4;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Noto Sans SC', sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    line-height: 1.8;
+    min-height: 100vh;
+  }
+
+  .container {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 3rem 2rem;
+  }
+
+  /* Header */
+  header {
+    margin-bottom: 3rem;
+    padding-bottom: 2rem;
+    border-bottom: 2px solid var(--ink);
+  }
+
+  .page-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--ink-light);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-bottom: 1.5rem;
+  }
+
+  h1 {
+    font-size: clamp(1.8rem, 4vw, 2.6rem);
+    font-weight: 900;
+    line-height: 1.2;
+    letter-spacing: -0.03em;
+    margin-bottom: 0.8rem;
+  }
+
+  .lead {
+    font-size: 1.05rem;
+    color: var(--ink-mid);
+    font-weight: 300;
+    max-width: 680px;
+    line-height: 1.8;
+  }
+
+  /* Section */
+  .section {
+    margin-bottom: 3.5rem;
+  }
+
+  .sec-head {
+    display: flex;
+    align-items: baseline;
+    gap: 0.8rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.6rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .sec-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--ink-light);
+    letter-spacing: 0.15em;
+    flex-shrink: 0;
+  }
+
+  .sec-title {
+    font-size: 1.2rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+
+  .sec-intro {
+    font-size: 0.92rem;
+    color: var(--ink-mid);
+    margin-bottom: 1.5rem;
+    max-width: 750px;
+    line-height: 1.8;
+  }
+
+  /* Term Cards */
+  .term-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 2rem;
+    margin-bottom: 1.2rem;
+    position: relative;
+    transition: box-shadow 0.2s ease;
+  }
+
+  .term-card:hover {
+    box-shadow: 0 2px 16px rgba(0,0,0,0.06);
+  }
+
+  .term-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .term-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.3rem 0.8rem;
+    border-radius: 6px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    font-family: 'JetBrains Mono', monospace;
+    flex-shrink: 0;
+    letter-spacing: 0.05em;
+  }
+
+  .term-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    line-height: 1.4;
+  }
+
+  .term-subtitle {
+    font-size: 0.82rem;
+    color: var(--ink-light);
+    font-family: 'JetBrains Mono', monospace;
+    margin-top: 0.2rem;
+  }
+
+  .term-body {
+    font-size: 0.9rem;
+    color: var(--ink-mid);
+    line-height: 1.85;
+  }
+
+  .term-body p { margin-bottom: 0.8rem; }
+  .term-body p:last-child { margin-bottom: 0; }
+
+  .term-body strong { color: var(--ink); font-weight: 600; }
+
+  /* Analogy box */
+  .analogy {
+    background: var(--surface-alt);
+    border-left: 3px solid var(--ink-light);
+    border-radius: 0 8px 8px 0;
+    padding: 1rem 1.2rem;
+    margin: 1rem 0;
+    font-size: 0.88rem;
+    color: var(--ink-mid);
+    line-height: 1.7;
+  }
+
+  .analogy .label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--ink-light);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 0.3rem;
+  }
+
+  /* Drug examples */
+  .drug-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-top: 0.8rem;
+  }
+
+  .drug-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    padding: 0.25rem 0.6rem;
+    border-radius: 4px;
+    background: var(--surface-alt);
+    border: 1px solid var(--border);
+    color: var(--ink-mid);
+  }
+
+  /* Key distinction */
+  .key-dist {
+    background: var(--amber-bg);
+    border: 1px solid rgba(184,134,11,0.2);
+    border-radius: 10px;
+    padding: 1.5rem 1.8rem;
+    margin-bottom: 1.2rem;
+  }
+
+  .key-dist-title {
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: var(--amber);
+    margin-bottom: 0.5rem;
+  }
+
+  .key-dist-body {
+    font-size: 0.88rem;
+    color: var(--ink-mid);
+    line-height: 1.8;
+  }
+
+  .key-dist-body strong { color: var(--ink); }
+
+  /* Comparison table */
+  .cmp-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1rem 0;
+    font-size: 0.88rem;
+  }
+
+  .cmp-table th {
+    text-align: left;
+    font-size: 0.72rem;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--ink-light);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    padding: 0.7rem 1rem;
+    border-bottom: 2px solid var(--ink);
+    font-weight: 400;
+  }
+
+  .cmp-table td {
+    padding: 0.8rem 1rem;
+    border-bottom: 1px solid var(--border-light);
+    color: var(--ink-mid);
+    vertical-align: top;
+  }
+
+  .cmp-table tr:last-child td { border-bottom: none; }
+
+  .cmp-table .term-cell {
+    font-weight: 600;
+    color: var(--ink);
+    white-space: nowrap;
+  }
+
+  /* Mechanism diagram (text-based) */
+  .mechanism {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 2rem;
+    margin: 1.5rem 0;
+  }
+
+  .mech-title {
+    font-weight: 700;
+    font-size: 0.95rem;
+    margin-bottom: 1.2rem;
+  }
+
+  .mech-flow {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.3rem;
+    align-items: center;
+    font-size: 0.82rem;
+    line-height: 1.6;
+  }
+
+  .mech-node {
+    padding: 0.4rem 0.8rem;
+    border-radius: 6px;
+    font-weight: 500;
+  }
+
+  .mech-arrow {
+    color: var(--ink-light);
+    font-size: 0.9rem;
+    padding: 0 0.2rem;
+  }
+
+  /* Warning box */
+  .warning {
+    background: var(--red-bg);
+    border: 1px solid rgba(192,57,43,0.15);
+    border-radius: 10px;
+    padding: 1.5rem 1.8rem;
+    margin: 1rem 0;
+  }
+
+  .warning-title {
+    font-weight: 700;
+    font-size: 0.9rem;
+    color: var(--red);
+    margin-bottom: 0.4rem;
+  }
+
+  .warning-body {
+    font-size: 0.88rem;
+    color: var(--ink-mid);
+    line-height: 1.8;
+  }
+
+  .warning-body strong { color: var(--red); }
+
+  /* Info box */
+  .info-box {
+    background: var(--blue-bg);
+    border: 1px solid rgba(26,82,118,0.12);
+    border-radius: 10px;
+    padding: 1.5rem 1.8rem;
+    margin: 1rem 0;
+  }
+
+  .info-box-title {
+    font-weight: 700;
+    font-size: 0.9rem;
+    color: var(--blue);
+    margin-bottom: 0.4rem;
+  }
+
+  .info-box-body {
+    font-size: 0.88rem;
+    color: var(--ink-mid);
+    line-height: 1.8;
+  }
+
+  /* Tree view for hierarchy */
+  .tree {
+    padding-left: 1.2rem;
+    margin: 0.8rem 0;
+  }
+
+  .tree-item {
+    position: relative;
+    padding: 0.3rem 0 0.3rem 1.5rem;
+    font-size: 0.88rem;
+    color: var(--ink-mid);
+  }
+
+  .tree-item::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: var(--border);
+  }
+
+  .tree-item::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 1rem;
+    width: 12px;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .tree-item strong { color: var(--ink); }
+
+  /* Inline highlight */
+  .hl {
+    background: rgba(184,134,11,0.12);
+    padding: 0.1rem 0.4rem;
+    border-radius: 3px;
+    font-weight: 500;
+  }
+
+  /* Grand Summary */
+  .grand-summary {
+    background: var(--ink);
+    color: #f0ece4;
+    border-radius: 12px;
+    padding: 2.5rem;
+    margin: 2rem 0;
+  }
+
+  .grand-summary h3 {
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+    color: #f0ece4;
+  }
+
+  .grand-summary p {
+    font-size: 0.9rem;
+    color: #c8c4bc;
+    line-height: 1.9;
+    margin-bottom: 0.8rem;
+  }
+
+  .grand-summary p:last-child { margin-bottom: 0; }
+  .grand-summary strong { color: #f0ece4; }
+
+  /* Notes */
+  .notes {
+    margin-top: 3rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--border);
+  }
+
+  .notes-title {
+    font-size: 0.72rem;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--ink-light);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    margin-bottom: 0.8rem;
+  }
+
+  .notes p {
+    font-size: 0.8rem;
+    color: var(--ink-light);
+    line-height: 1.7;
+  }
+
+  footer {
+    margin-top: 2rem;
+    font-size: 0.72rem;
+    color: var(--ink-light);
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  @media (max-width: 600px) {
+    .container { padding: 2rem 1.2rem; }
+    .term-card { padding: 1.5rem; }
+    .cmp-table { font-size: 0.8rem; }
+    .cmp-table td, .cmp-table th { padding: 0.5rem 0.6rem; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+<header>
+  <div class="page-num">Medical Terminology · 系统科普</div>
+  <h1>你吃的药，到底在身体里干什么</h1>
+  <p class="lead">镇痛、抗炎、抗菌、退热、止咳……这些药品说明书上的常见术语，大多数人其实分不清楚。这篇文章尝试用直白的语言，把它们一个一个讲明白。</p>
+</header>
+
+<!-- ========== 第一部分：疼痛与炎症 ========== -->
+<div class="section">
+  <div class="sec-head">
+    <span class="sec-num">01</span>
+    <span class="sec-title">疼痛与炎症相关</span>
+  </div>
+  <p class="sec-intro">这是日常用药中最常遇到、也最容易混淆的一组概念。镇痛 ≠ 抗炎 ≠ 退热，虽然某些药物可以同时做到两三件事。</p>
+
+  <!-- 镇痛 -->
+  <div class="term-card">
+    <div class="term-header">
+      <div>
+        <div class="term-badge" style="background:var(--red-bg);color:var(--red);">镇痛</div>
+      </div>
+      <div>
+        <div class="term-title">镇痛（Analgesic）</div>
+        <div class="term-subtitle">Ana（无）+ algesic（痛觉）= 止痛</div>
+      </div>
+    </div>
+    <div class="term-body">
+      <p><strong>核心含义：</strong>减轻或消除疼痛的感觉。<strong>注意：镇痛 ≠ 消除病因。</strong>它做的事情是阻断或减弱"疼痛信号"的传递，让大脑感觉不到那么疼，但引起疼痛的原因（炎症、损伤等）可能还在。</p>
+
+      <div class="analogy">
+        <div class="label">比喻</div>
+        你的手被刀割了（病因），疼痛信号沿神经传到大脑（感觉）。镇痛药的作用类似于<strong>把电话线掐断</strong>——大脑收不到"疼"的信号了，但手上的伤口还在。
+      </div>
+
+      <p><strong>两大类镇痛药，机制完全不同：</strong></p>
+      <p>① <strong>非阿片类镇痛药</strong>（如布洛芬、对乙酰氨基酚）——通过抑制疼痛相关的化学物质（前列腺素等）来止痛，同时往往有退热/抗炎作用。</p>
+      <p>② <strong>阿片类镇痛药</strong>（如吗啡、曲马多、可待因）——直接作用于大脑和脊髓中的阿片受体，"关闭"疼痛感知。效果强，但有成瘾性。</p>
+
+      <div class="drug-list">
+        <span class="drug-tag">对乙酰氨基酚（扑热息痛）</span>
+        <span class="drug-tag">布洛芬</span>
+        <span class="drug-tag">阿司匹林</span>
+        <span class="drug-tag">双氯芬酸</span>
+        <span class="drug-tag">曲马多</span>
+        <span class="drug-tag">吗啡</span>
+        <span class="drug-tag">芬太尼</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 抗炎 -->
+  <div class="term-card">
+    <div class="term-header">
+      <div>
+        <div class="term-badge" style="background:var(--orange-bg);color:var(--orange);">抗炎</div>
+      </div>
+      <div>
+        <div class="term-title">抗炎（Anti-inflammatory）</div>
+        <div class="term-subtitle">Anti（对抗）+ inflammatory（炎症的）</div>
+      </div>
+    </div>
+    <div class="term-body">
+      <p><strong>核心含义：</strong>抑制身体的<strong>炎症反应</strong>。</p>
+
+      <p>那什么是"炎症"？它是身体受到刺激（损伤、感染、过敏等）后的<strong>防御性反应</strong>，表现为五种经典症状：</p>
+      <p style="padding-left:1rem;border-left:3px solid var(--orange);margin:0.8rem 0;">
+        红（血管扩张）· 肿（液体渗出）· 热（局部温度升高）· 痛（神经受刺激）· 功能障碍
+      </p>
+      <p>抗炎药做的事情是<strong>抑制产生这些反应的化学物质</strong>（主要是前列腺素、白三烯等），从而减轻红肿热痛。</p>
+
+      <div class="analogy">
+        <div class="label">比喻</div>
+        炎症反应像是身体的"消防队"——哪里有事就去喷水（但喷水本身也会造成"水灾"，比如肿胀、疼痛）。抗炎药不是灭火，而是<strong>让消防队少喷点水</strong>，减少"水灾"的副反应。
+      </div>
+
+      <p><strong>两大类抗炎药，非常关键的区别：</strong></p>
+
+      <table class="cmp-table">
+        <thead>
+          <tr>
+            <th></th>
+            <th>NSAIDs（非甾体抗炎药）</th>
+            <th>糖皮质激素（甾体抗炎药）</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="term-cell">代表药物</td>
+            <td>布洛芬、阿司匹林、双氯芬酸、塞来昔布</td>
+            <td>地塞米松、泼尼松、氢化可的松</td>
+          </tr>
+          <tr>
+            <td class="term-cell">抗炎强度</td>
+            <td>中等</td>
+            <td>非常强</td>
+          </tr>
+          <tr>
+            <td class="term-cell">镇痛</td>
+            <td>有</td>
+            <td>有（通过消炎间接止痛）</td>
+          </tr>
+          <tr>
+            <td class="term-cell">退热</td>
+            <td>有</td>
+            <td>有（强效退热）</td>
+          </tr>
+          <tr>
+            <td class="term-cell">免疫影响</td>
+            <td>轻度免疫抑制</td>
+            <td>强免疫抑制</td>
+          </tr>
+          <tr>
+            <td class="term-cell">主要副作用</td>
+            <td>胃黏膜损伤、肾损伤</td>
+            <td>血糖升高、骨质疏松、满月脸、肾上腺抑制</td>
+          </tr>
+          <tr>
+            <td class="term-cell">可否长期用</td>
+            <td>需评估</td>
+            <td>需要严格的减量方案</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="warning">
+        <div class="warning-title">关键区分点</div>
+        <div class="warning-body">
+          <strong>"甾体"就是"类固醇/激素"</strong>，"非甾体"就是"不是激素的"。<br>
+          NSAIDs = 相对温和，短期安全，但伤胃。<br>
+          激素 = 效果强大，但副作用也大，不规范使用后果严重。<br>
+          日常止痛（头痛、痛经、肌肉酸痛）一般用 NSAIDs 就够了。<strong>不要自行使用激素止痛。</strong>
+        </div>
+      </div>
+
+      <div class="drug-list">
+        <span class="drug-tag">布洛芬</span>
+        <span class="drug-tag">阿司匹林</span>
+        <span class="drug-tag">双氯芬酸（扶他林）</span>
+        <span class="drug-tag">塞来昔布（西乐葆）</span>
+        <span class="drug-tag">地塞米松</span>
+        <span class="drug-tag">泼尼松</span>
+        <span class="drug-tag">氢化可的松</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 退热 -->
+  <div class="term-card">
+    <div class="term-header">
+      <div>
+        <div class="term-badge" style="background:var(--amber-bg);color:var(--amber);">退热</div>
+      </div>
+      <div>
+        <div class="term-title">退热 / 解热（Antipyretic）</div>
+        <div class="term-subtitle">Anti（对抗）+ pyretic（热的）</div>
+      </div>
+    </div>
+    <div class="term-body">
+      <p><strong>核心含义：</strong>降低升高的体温。</p>
+      <p>发烧是怎么回事？当身体检测到入侵者（细菌、病毒等），免疫系统会释放"致热原"，通知大脑的体温调节中枢："把设定温度调高！"于是身体开始发抖产热、收缩毛孔保温，体温从 37°C 升到 38~40°C。</p>
+
+      <p>退热药做的事情是：<strong>告诉大脑的温控器"别调那么高了"</strong>，让它把设定温度降回 37°C。然后身体开始出汗散热，体温下降。</p>
+
+      <div class="analogy">
+        <div class="label">比喻</div>
+        你家空调的温控器被人调到了 40°C，屋里越来越热。退热药不是搬个风扇来吹（那只是临时的），而是<strong>去把温控器调回 37°C</strong>。
+      </div>
+
+      <div class="info-box">
+        <div class="info-box-title">退热药 ≠ 杀灭病原体</div>
+        <div class="info-box-body">
+          退热药只是让你不那么烧，<strong>不治疗引起发烧的病因</strong>。吃了退烧药体温降了，不代表病好了。发烧本身是免疫系统的正常反应，<strong>38.5°C 以下的低热通常不需要退热处理</strong>，盲目退热反而可能干扰免疫。
+        </div>
+      </div>
+
+      <p><strong>常用退热药只有两个"安全选项"：</strong></p>
+      <p>① <strong>对乙酰氨基酚（扑热息痛/泰诺林）</strong>——退热 + 镇痛，但<strong>不抗炎</strong>。安全窗较窄，过量伤肝。</p>
+      <p>② <strong>布洛芬（美林/芬必得）</strong>——退热 + 镇痛 + 抗炎。对胃有刺激。</p>
+
+      <div class="warning">
+        <div class="warning-title">已被限制的退热药</div>
+        <div class="warning-body">
+          <strong>安乃近</strong>：退热极快但有致命的粒细胞缺乏风险，多国已撤市，中国已限制使用。<br>
+          <strong>阿司匹林退热</strong>：儿童使用可能引起瑞氏综合征（致命），<strong>16岁以下不推荐作为退热药使用</strong>。
+        </div>
+      </div>
+
+      <div class="drug-list">
+        <span class="drug-tag">对乙酰氨基酚（安全首选）</span>
+        <span class="drug-tag">布洛芬（安全首选）</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 关系图 -->
+  <div class="key-dist">
+    <div class="key-dist-title">镇痛 · 抗炎 · 退热 三者关系</div>
+    <div class="key-dist-body">
+      <strong>它们不是同一件事，但经常重叠：</strong><br><br>
+      <strong>对乙酰氨基酚</strong> → 镇痛 ✅ · 退热 ✅ · 抗炎 ❌（几乎不抗炎）<br>
+      <strong>布洛芬</strong> → 镇痛 ✅ · 退热 ✅ · 抗炎 ✅（三件事都能做）<br>
+      <strong>阿司匹林</strong> → 镇痛 ✅ · 退热 ✅ · 抗炎 ✅ · 抗血小板 ✅（还多了这个功能）<br>
+      <strong>地塞米松</strong> → 镇痛 ✅（间接） · 退热 ✅ · 抗炎 ✅✅（非常强） · 免疫抑制 ✅✅<br>
+      <strong>吗啡</strong> → 镇痛 ✅✅✅（最强） · 退热 ❌ · 抗炎 ❌<br><br>
+      所以当有人说"这个药消炎止痛"，你需要搞清楚：<br>
+      ① 它"消炎"是哪种级别的（NSAIDs 还是激素）？<br>
+      ② 它"止痛"是通过消炎间接止痛，还是直接阻断痛觉？
+    </div>
+  </div>
+</div>
+
+<!-- ========== 第二部分：感染相关 ========== -->
+<div class="section">
+  <div class="sec-head">
+    <span class="sec-num">02</span>
+    <span class="sec-title">抗感染相关</span>
+  </div>
+  <p class="sec-intro">这一组术语的层级关系非常关键：抗菌 ≠ 抗生素 ≠ 抗病毒 ≠ 消炎，但现实中它们经常被混为一谈。</p>
+
+  <!-- 抗菌 vs 抗生素 -->
+  <div class="term-card">
+    <div class="term-header">
+      <div>
+        <div class="term-badge" style="background:var(--green-bg);color:var(--green);">抗菌</div>
+      </div>
+      <div>
+        <div class="term-title">抗菌（Antibacterial）</div>
+        <div class="term-subtitle">杀死或抑制细菌的总称</div>
+      </div>
+    </div>
+    <div class="term-body">
+      <p><strong>"抗菌"是一个大概念</strong>，指的是能杀死或抑制<strong>细菌</strong>生长的所有手段。</p>
+      <p>它包括两大类：</p>
+      <p>① <strong>抗生素（Antibiotic）</strong>——由微生物（如真菌、细菌）天然产生或半合成的抗菌物质。如青霉素（来自青霉菌）、链霉素（来自链霉菌）。</p>
+      <p>② <strong>人工合成抗菌药</strong>——化学合成的，自然界不存在的。如左氧氟沙星、甲硝唑、磺胺类。</p>
+
+      <div class="tree">
+        <div class="tree-item"><strong>抗菌药（Antibacterials）</strong></div>
+        <div class="tree-item">├── <strong>抗生素</strong>（天然/半合成来源）：青霉素、头孢、阿奇霉素、红霉素</div>
+        <div class="tree-item">└── <strong>合成抗菌药</strong>（化学合成）：左氧氟沙星、甲硝唑、复方新诺明</div>
+      </div>
+
+      <p>日常说的"消炎药"如果指的是"头孢""阿莫西林"，那准确说法应该是<strong>"抗菌药"或"抗生素"</strong>，不是"消炎药"。它们只在<strong>细菌感染</strong>引起的炎症中有效。</p>
+
+      <div class="warning">
+        <div class="warning-title">最常见的用药误区</div>
+        <div class="warning-body">
+          <strong>感冒 → 吃头孢。</strong><br>
+          普通感冒 90%+ 是<strong>病毒</strong>引起的。头孢是抗菌药，只杀细菌，<strong>对病毒完全无效</strong>。<br>
+          吃了头孢"好了"——那是因为感冒是自限性疾病，7天左右自己会好，跟你吃不吃头孢没关系。
+        </div>
+      </div>
+
+      <div class="drug-list">
+        <span class="drug-tag">阿莫西林（青霉素类）</span>
+        <span class="drug-tag">头孢克肟（头孢类）</span>
+        <span class="drug-tag">阿奇霉素（大环内酯类）</span>
+        <span class="drug-tag">左氧氟沙星（喹诺酮类）</span>
+        <span class="drug-tag">甲硝唑（硝基咪唑类）</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 抗病毒 -->
+  <div class="term-card">
+    <div class="term-header">
+      <div>
+        <div class="term-badge" style="background:var(--blue-bg);color:var(--blue);">抗病毒</div>
+      </div>
+      <div>
+        <div class="term-title">抗病毒（Antiviral）</div>
+        <div class="term-subtitle">对抗病毒感染的药物</div>
+      </div>
+    </div>
+    <div class="term-body">
+      <p><strong>核心含义：</strong>干扰病毒在人体内复制、繁殖的过程。</p>
+
+      <p>病毒和细菌完全不同——<strong>细菌</strong>是独立的活细胞，可以自己繁殖；<strong>病毒</strong>只是一小段遗传物质（DNA或RNA）裹了一层蛋白质外壳，必须钻进人体细胞里"借壳繁殖"。</p>
+
+      <div class="analogy">
+        <div class="label">比喻</div>
+        <strong>细菌</strong> = 闯进你家的入侵者，可以直接抓住它。<br>
+        <strong>病毒</strong> = 劫持了你家人的匪徒——你不能直接开枪，因为会伤到自己人。<br>
+        抗病毒药做的就是<strong>精准干扰匪徒的行动</strong>（阻止它进入、阻止它复制、阻止它离开），同时尽量不伤害被劫持的细胞。
+      </div>
+
+      <p>这就是为什么<strong>抗病毒药比抗菌药更难开发</strong>——你很难只打病毒而不伤及人体细胞。</p>
+
+      <div class="info-box">
+        <div class="info-box-title">为什么普通感冒没有"特效抗病毒药"？</div>
+        <div class="info-box-body">
+          普通感冒由 200+ 种不同的病毒引起（主要是鼻病毒），没有一种抗病毒药能覆盖所有种类。而且感冒是自限性的（自己会好），开发针对性药物的性价比低。所以普通感冒的治疗就是<strong>"对症处理"：退热、止痛、休息、等它自己好</strong>。
+        </div>
+      </div>
+
+      <p><strong>常见抗病毒药和它们的靶点：</strong></p>
+
+      <table class="cmp-table">
+        <thead>
+          <tr><th>药物</th><th>针对</th><th>原理</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="term-cell">奥司他韦（达菲）</td><td>流感病毒</td><td>阻止病毒从被感染细胞中释放</td></tr>
+          <tr><td class="term-cell">阿昔洛韦</td><td>疱疹病毒</td><td>干扰病毒 DNA 复制</td></tr>
+          <tr><td class="term-cell">恩替卡韦</td><td>乙肝病毒</td><td>抑制病毒逆转录酶</td></tr>
+          <tr><td class="term-cell">Paxlovid</td><td>新冠病毒</td><td>抑制病毒蛋白酶，阻止病毒成熟</td></tr>
+        </tbody>
+      </table>
+
+      <div class="warning">
+        <div class="warning-title">利巴韦林 ≠ 万能抗病毒药</div>
+        <div class="warning-body">
+          利巴韦林（病毒唑）在基层被广泛用于治疗普通感冒和流感，但它<strong>对鼻病毒（感冒主因）无效，也不是流感一线用药</strong>。更关键的是它有严重的<strong>致畸性</strong>——育龄女性使用后 6 个月内不应怀孕。
+        </div>
+      </div>
+
+      <div class="drug-list">
+        <span class="drug-tag">奥司他韦（流感）</span>
+        <span class="drug-tag">阿昔洛韦（疱疹）</span>
+        <span class="drug-tag">恩替卡韦（乙肝）</span>
+        <span class="drug-tag">Paxlovid（新冠）</span>
+        <span class="drug-tag">利巴韦林（窄适应症）</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 抗真菌 -->
+  <div class="term-card">
+    <div class="term-header">
+      <div>
+        <div class="term-badge" style="background:var(--purple-bg);color:var(--purple);">抗真菌</div>
+      </div>
+      <div>
+        <div class="term-title">抗真菌（Antifungal）</div>
+        <div class="term-subtitle">对抗真菌感染</div>
+      </div>
+    </div>
+    <div class="term-body">
+      <p><strong>核心含义：</strong>杀灭或抑制真菌（霉菌、酵母菌等）。</p>
+      <p>真菌 ≠ 细菌 ≠ 病毒。它们是完全不同的东西：</p>
+
+      <table class="cmp-table">
+        <thead><tr><th>类型</th><th>细胞结构</th><th>大小</th><th>常见感染</th></tr></thead>
+        <tbody>
+          <tr><td class="term-cell">细菌</td><td>原核细胞</td><td>1~10 μm</td><td>扁桃体炎、尿路感染、肺炎</td></tr>
+          <tr><td class="term-cell">病毒</td><td>无细胞结构</td><td>0.02~0.3 μm</td><td>感冒、流感、COVID-19</td></tr>
+          <tr><td class="term-cell">真菌</td><td>真核细胞</td><td>5~100 μm</td><td>脚气、鹅口疮、灰指甲、阴道炎（霉菌性）</td></tr>
+        </tbody>
+      </table>
+
+      <p>抗真菌药对细菌和病毒无效，反过来也一样。<strong>用头孢治脚气是完全没用的</strong>。</p>
+
+      <div class="drug-list">
+        <span class="drug-tag">氟康唑（口服抗真菌）</span>
+        <span class="drug-tag">克霉唑（外用）</span>
+        <span class="drug-tag">特比萘芬（灰指甲）</span>
+        <span class="drug-tag">制霉菌素（鹅口疮）</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 整体关系 -->
+  <div class="key-dist">
+    <div class="key-dist-title">抗菌 ≠ 抗病毒 ≠ 抗真菌 —— 它们各管各的</div>
+    <div class="key-dist-body">
+      <strong>这是最重要的一个认知：</strong><br><br>
+      细菌、病毒、真菌是<strong>完全不同的生物/非生物</strong>，用错药毫无效果：<br><br>
+      <strong>头孢</strong> → 杀细菌 ✅ · 杀病毒 ❌ · 杀真菌 ❌<br>
+      <strong>奥司他韦</strong> → 杀细菌 ❌ · 对抗流感病毒 ✅ · 杀真菌 ❌<br>
+      <strong>氟康唑</strong> → 杀细菌 ❌ · 杀病毒 ❌ · 杀真菌 ✅<br><br>
+      所以"消炎药"这个日常用法极具误导性——<strong>你必须首先搞清楚炎症的原因</strong>，才能选对药。
+    </div>
+  </div>
+</div>
+
+<!-- ========== 第三部分：呼吸系统 ========== -->
+<div class="section">
+  <div class="sec-head">
+    <span class="sec-num">03</span>
+    <span class="sec-title">呼吸系统相关</span>
+  </div>
+  <p class="sec-intro">止咳、化痰、平喘——这三个词经常一起出现，但它们做的是完全不同的事情，有时候甚至是矛盾的。</p>
+
+  <!-- 止咳 -->
+  <div class="term-card">
+    <div class="term-header">
+      <div>
+        <div class="term-badge" style="background:var(--teal-bg);color:var(--teal);">止咳</div>
+      </div>
+      <div>
+        <div class="term-title">止咳（Antitussive）</div>
+        <div class="term-subtitle">抑制咳嗽反射</div>
+      </div>
+    </div>
+    <div class="term-body">
+      <p><strong>核心含义：</strong>减少或消除咳嗽。但咳嗽本身是<strong>保护性反射</strong>——它在帮你排出气道中的痰液、异物、病原体。</p>
+
+      <p><strong>两大类止咳药：</strong></p>
+      <p>① <strong>中枢性镇咳</strong>——直接作用于大脑的咳嗽中枢，"关掉"咳嗽信号。代表：右美沙芬、可待因。<br>
+      ② <strong>外周性镇咳</strong>——在气道局部起作用，减少气道的刺激感。代表：甘草流浸膏、那可丁。</p>
+
+      <div class="warning">
+        <div class="warning-title">止咳的矛盾</div>
+        <div class="warning-body">
+          如果咳嗽是因为<strong>有痰</strong>，那强行止咳等于<strong>不让身体排痰</strong>，痰液淤积在气道里可能导致感染加重。这就是为什么很多时候<strong>"有痰不镇咳"</strong>是基本用药原则。<br><br>
+          该止咳的场景：干咳（无痰）、剧烈咳嗽影响休息、咳嗽变异性哮喘等。<br>
+          不该止咳的场景：大量痰液、感染期、需要排痰的阶段。
+        </div>
+      </div>
+
+      <div class="drug-list">
+        <span class="drug-tag">右美沙芬（中枢性）</span>
+        <span class="drug-tag">可待因（中枢性，管控药物）</span>
+        <span class="drug-tag">那可丁（外周性）</span>
+        <span class="drug-tag">甘草制剂（外周性）</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 化痰/祛痰 -->
+  <div class="term-card">
+    <div class="term-header">
+      <div>
+        <div class="term-badge" style="background:var(--green-bg);color:var(--green);">化痰</div>
+      </div>
+      <div>
+        <div class="term-title">化痰 / 祛痰（Expectorant / Mucolytic）</div>
+        <div class="term-subtitle">让痰变稀、更容易咳出来</div>
+      </div>
+    </div>
+    <div class="term-body">
+      <p><strong>核心含义：</strong>不是消灭痰液，而是<strong>改变痰的性状</strong>，让它从浓稠变稀薄，更容易被咳出。</p>
+
+      <p>两种机制：</p>
+      <p>① <strong>祛痰药（Expectorant）</strong>——增加气道分泌的水分，把痰"稀释"。代表：氯化铵、愈创甘油醚。<br>
+      ② <strong>黏液溶解剂（Mucolytic）</strong>——直接打断痰液中黏蛋白的化学键，让痰从"胶水"变成"水"。代表：氨溴索、乙酰半胱氨酸。</p>
+
+      <div class="info-box">
+        <div class="info-box-title">化痰 vs 止咳：有时是矛盾的</div>
+        <div class="info-box-body">
+          化痰药让痰变稀 → 刺激气道 → 反而可能<strong>加重咳嗽</strong>（但这种咳嗽是"好的咳嗽"，帮助排痰）。<br>
+          所以临床上常见组合："化痰 + 不止咳"（让痰好排出来），或者"先化痰，实在需要再镇咳"。
+        </div>
+      </div>
+
+      <div class="drug-list">
+        <span class="drug-tag">氨溴索（沐舒坦）</span>
+        <span class="drug-tag">乙酰半胱氨酸（富露施）</span>
+        <span class="drug-tag">愈创甘油醚</span>
+        <span class="drug-tag">桉柠蒎（切诺）</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 平喘 -->
+  <div class="term-card">
+    <div class="term-header">
+      <div>
+        <div class="term-badge" style="background:var(--blue-bg);color:var(--blue);">平喘</div>
+      </div>
+      <div>
+        <div class="term-title">平喘（Bronchodilator）</div>
+        <div class="term-subtitle">扩张支气管，让呼吸更通畅</div>
+      </div>
+    </div>
+    <div class="term-body">
+      <p><strong>核心含义：</strong>"喘"是因为支气管痉挛收缩（变窄了），空气进出困难。平喘药让收缩的支气管平滑肌<strong>放松</strong>，管腔重新打开。</p>
+
+      <div class="analogy">
+        <div class="label">比喻</div>
+        想象一根吸管被人捏紧了（支气管痉挛），你吸不动。平喘药做的事情就是<strong>松开捏吸管的手</strong>。
+      </div>
+
+      <p><strong>两类主要的平喘药：</strong></p>
+      <p>① <strong>β2 受体激动剂</strong>——直接让支气管平滑肌放松。短效（沙丁胺醇/万托林，急救用）、长效（沙美特罗，维持用）。<br>
+      ② <strong>抗胆碱能药</strong>——阻断让支气管收缩的神经信号。代表：异丙托溴铵。</p>
+
+      <p>平喘药<strong>不等于</strong>止咳药、不等于抗炎药。但在哮喘治疗中，通常需要 <strong>平喘 + 抗炎（吸入激素）</strong>联合使用。</p>
+
+      <div class="drug-list">
+        <span class="drug-tag">沙丁胺醇（万托林，急救）</span>
+        <span class="drug-tag">特布他林</span>
+        <span class="drug-tag">异丙托溴铵（爱全乐）</span>
+        <span class="drug-tag">噻托溴铵（思力华）</span>
+        <span class="drug-tag">氨茶碱</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== 第四部分：过敏相关 ========== -->
+<div class="section">
+  <div class="sec-head">
+    <span class="sec-num">04</span>
+    <span class="sec-title">过敏相关</span>
+  </div>
+
+  <div class="term-card">
+    <div class="term-header">
+      <div>
+        <div class="term-badge" style="background:var(--pink-bg);color:var(--pink);">抗过敏</div>
+      </div>
+      <div>
+        <div class="term-title">抗过敏 / 抗组胺（Antihistamine）</div>
+        <div class="term-subtitle">阻断过敏反应中的关键化学物质——组胺</div>
+      </div>
+    </div>
+    <div class="term-body">
+      <p><strong>核心含义：</strong>当身体遇到过敏原（花粉、尘螨、海鲜等），免疫系统过度反应，释放大量<strong>组胺</strong>。组胺导致血管扩张、渗出增加、神经末梢刺激 → 表现为打喷嚏、流鼻涕、皮肤痒、起红疹、眼睛痒等。</p>
+      <p>抗组胺药做的事情就是<strong>占领组胺的受体</strong>，让组胺"找不到位置发出信号"。</p>
+
+      <div class="analogy">
+        <div class="label">比喻</div>
+        组胺是"喇叭"，在大声喊"过敏了！过敏了！"。抗组胺药是<strong>"耳塞"</strong>——喇叭还在喊，但你的细胞"听不到了"。过敏原还在，但症状减轻了。
+      </div>
+
+      <p><strong>两代抗组胺药：</strong></p>
+
+      <table class="cmp-table">
+        <thead><tr><th></th><th>第一代</th><th>第二代</th></tr></thead>
+        <tbody>
+          <tr><td class="term-cell">代表</td><td>扑尔敏、苯海拉明、酮替芬</td><td>氯雷他定（开瑞坦）、西替利嗪（仙特明）</td></tr>
+          <tr><td class="term-cell">嗜睡</td><td>严重嗜睡</td><td>嗜睡轻微或无</td></tr>
+          <tr><td class="term-cell">持续时间</td><td>短（4~6h）</td><td>长（24h）</td></tr>
+          <tr><td class="term-cell">日常推荐</td><td>不推荐白天使用</td><td>日常首选</td></tr>
+        </tbody>
+      </table>
+
+      <p>注意：抗组胺药只抑制过敏的<strong>症状</strong>，不能根治过敏。严重的过敏反应（过敏性休克）需要<strong>肾上腺素</strong>急救。</p>
+
+      <div class="drug-list">
+        <span class="drug-tag">氯雷他定（开瑞坦）</span>
+        <span class="drug-tag">西替利嗪（仙特明）</span>
+        <span class="drug-tag">依巴斯汀</span>
+        <span class="drug-tag">扑尔敏（第一代，嗜睡）</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== 第五部分：消化系统 ========== -->
+<div class="section">
+  <div class="sec-head">
+    <span class="sec-num">05</span>
+    <span class="sec-title">消化系统相关</span>
+  </div>
+
+  <div class="term-card">
+    <div class="term-header">
+      <div>
+        <div class="term-badge" style="background:var(--amber-bg);color:var(--amber);">抑酸</div>
+      </div>
+      <div>
+        <div class="term-title">抑酸（Acid Suppression）</div>
+        <div class="term-subtitle">减少胃酸分泌</div>
+      </div>
+    </div>
+    <div class="term-body">
+      <p><strong>核心含义：</strong>胃酸过多或胃黏膜防御力下降 → 胃痛、反酸、烧心、胃溃疡。抑酸药减少胃酸的"攻击"。</p>
+      <p>两大类：</p>
+      <p>① <strong>PPI（质子泵抑制剂）</strong>——直接"关掉"胃壁细胞产生胃酸的"水泵"。效果最强。代表：奥美拉唑、兰索拉唑、雷贝拉唑。</p>
+      <p>② <strong>H2 受体拮抗剂</strong>——阻断组胺刺激胃酸分泌的信号（没错，组胺不只跟过敏有关）。效果较 PPI 弱。代表：雷尼替丁、法莫替丁。</p>
+
+      <div class="drug-list">
+        <span class="drug-tag">奥美拉唑（PPI）</span>
+        <span class="drug-tag">兰索拉唑（PPI）</span>
+        <span class="drug-tag">雷贝拉唑（PPI）</span>
+        <span class="drug-tag">法莫替丁（H2）</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="term-card">
+    <div class="term-header">
+      <div>
+        <div class="term-badge" style="background:var(--teal-bg);color:var(--teal);">胃黏膜保护</div>
+      </div>
+      <div>
+        <div class="term-title">胃黏膜保护剂（Mucosal Protectant）</div>
+        <div class="term-subtitle">给胃壁"穿一层防护服"</div>
+      </div>
+    </div>
+    <div class="term-body">
+      <p><strong>核心含义：</strong>不减少胃酸，而是在胃黏膜表面形成一层<strong>保护膜</strong>，把溃疡面或受损黏膜和胃酸隔离开。</p>
+
+      <div class="analogy">
+        <div class="label">比喻</div>
+        抑酸药 = <strong>关掉水龙头</strong>（减少攻击）。<br>
+        胃黏膜保护剂 = <strong>给伤口贴创可贴</strong>（隔离攻击）。
+      </div>
+
+      <div class="drug-list">
+        <span class="drug-tag">铝碳酸镁（达喜）</span>
+        <span class="drug-tag">硫糖铝</span>
+        <span class="drug-tag">枸橼酸铋钾（丽珠得乐）</span>
+        <span class="drug-tag">瑞巴派特</span>
+        <span class="drug-tag">替普瑞酮</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="term-card">
+    <div class="term-header">
+      <div>
+        <div class="term-badge" style="background:var(--green-bg);color:var(--green);">促动力</div>
+      </div>
+      <div>
+        <div class="term-title">促胃肠动力药（Prokinetic）</div>
+        <div class="term-subtitle">让胃肠"动起来"</div>
+      </div>
+    </div>
+    <div class="term-body">
+      <p><strong>核心含义：</strong>当胃肠道蠕动减慢 → 腹胀、早饱、恶心、消化不良。促动力药增强胃肠道平滑肌的收缩，加速食物向下运动。</p>
+
+      <div class="drug-list">
+        <span class="drug-tag">多潘立酮（吗丁啉）</span>
+        <span class="drug-tag">莫沙必利</span>
+        <span class="drug-tag">伊托必利</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="term-card">
+    <div class="term-header">
+      <div>
+        <div class="term-badge" style="background:var(--orange-bg);color:var(--orange);">止泻/泻药</div>
+      </div>
+      <div>
+        <div class="term-title">止泻（Antidiarrheal）与 泻药（Laxative）</div>
+        <div class="term-subtitle">一对反义词，但同样重要</div>
+      </div>
+    </div>
+    <div class="term-body">
+      <p><strong>止泻：</strong>减慢肠道蠕动 + 吸附毒素/水分 → 减少排便次数。代表：蒙脱石散（物理吸附）、洛哌丁胺（抑制蠕动）。</p>
+      <p><strong>泻药：</strong>促进排便。分渗透性（乳果糖，把水"吸"进肠道）、刺激性（番泻叶，直接刺激肠壁蠕动）、容积性（膳食纤维，增加便便体积）。</p>
+
+      <div class="warning">
+        <div class="warning-title">腹泻时不要急着止泻</div>
+        <div class="warning-body">
+          腹泻（尤其是感染性腹泻）是身体的<strong>排异反应</strong>——在把病原体和毒素排出去。过早使用洛哌丁胺等止泻药，等于把"敌人"留在了肠道里。<br>
+          轻度腹泻：补液 + 观察，通常自愈。<br>
+          严重腹泻：就医，判断是否需要抗菌药（细菌性）或支持治疗（病毒性）。
+        </div>
+      </div>
+
+      <div class="drug-list">
+        <span class="drug-tag">蒙脱石散（思密达）</span>
+        <span class="drug-tag">洛哌丁胺（易蒙停）</span>
+        <span class="drug-tag">乳果糖（杜密克）</span>
+        <span class="drug-tag">开塞露（甘油）</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== 第六部分：心血管 ========== -->
+<div class="section">
+  <div class="sec-head">
+    <span class="sec-num">06</span>
+    <span class="sec-title">心血管相关</span>
+  </div>
+
+  <div class="term-card">
+    <div class="term-header">
+      <div>
+        <div class="term-badge" style="background:var(--red-bg);color:var(--red);">降压</div>
+      </div>
+      <div>
+        <div class="term-title">降压（Antihypertensive）</div>
+        <div class="term-subtitle">降低血压的一系列药物的总称</div>
+      </div>
+    </div>
+    <div class="term-body">
+      <p>"降压药"不是一个单一类型，而是<strong>多种不同机制的药物的统称</strong>：</p>
+
+      <table class="cmp-table">
+        <thead><tr><th>类型</th><th>机制（通俗）</th><th>代表药物</th></tr></thead>
+        <tbody>
+          <tr><td class="term-cell">CCB（钙拮抗剂）</td><td>放松血管壁肌肉，让血管"松开"</td><td>氨氯地平、硝苯地平</td></tr>
+          <tr><td class="term-cell">ACEI（普利类）</td><td>阻止血管收缩信号的产生</td><td>依那普利、贝那普利</td></tr>
+          <tr><td class="term-cell">ARB（沙坦类）</td><td>阻止血管收缩信号被"接收"</td><td>缬沙坦、氯沙坦、厄贝沙坦</td></tr>
+          <tr><td class="term-cell">β受体阻滞剂</td><td>减慢心跳、减轻心脏用力</td><td>美托洛尔（倍他乐克）、比索洛尔</td></tr>
+          <tr><td class="term-cell">利尿剂</td><td>减少血容量（减少血管里的"水量"）</td><td>氢氯噻嗪、吲达帕胺</td></tr>
+        </tbody>
+      </table>
+
+      <div class="analogy">
+        <div class="label">用水管比喻</div>
+        血压 = 水压。降压可以通过：<br>
+        <strong>CCB</strong> = 换一根更粗的水管（扩大管径）<br>
+        <strong>ACEI/ARB</strong> = 关小水泵的输出（减少收缩信号）<br>
+        <strong>β受体阻滞剂</strong> = 让水泵打得慢一点（减慢心率）<br>
+        <strong>利尿剂</strong> = 放掉一部分水（减少血容量）
+      </div>
+    </div>
+  </div>
+
+  <div class="term-card">
+    <div class="term-header">
+      <div>
+        <div class="term-badge" style="background:var(--blue-bg);color:var(--blue);">抗凝/抗血小板</div>
+      </div>
+      <div>
+        <div class="term-title">抗凝（Anticoagulant）与 抗血小板（Antiplatelet）</div>
+        <div class="term-subtitle">防止血液凝固——两个层次</div>
+      </div>
+    </div>
+    <div class="term-body">
+      <p>血液凝固分两步：<strong>血小板聚集</strong>（先形成初步"塞子"）→ <strong>凝血因子激活</strong>（形成坚固的纤维蛋白网）。</p>
+      <p>抗血小板药阻断第一步，抗凝药阻断第二步：</p>
+
+      <table class="cmp-table">
+        <thead><tr><th></th><th>抗血小板</th><th>抗凝</th></tr></thead>
+        <tbody>
+          <tr><td class="term-cell">代表药物</td><td>阿司匹林、氯吡格雷</td><td>华法林、利伐沙班、达比加群</td></tr>
+          <tr><td class="term-cell">作用环节</td><td>阻止血小板"抱团"</td><td>阻止凝血因子形成纤维蛋白网</td></tr>
+          <tr><td class="term-cell">主要用途</td><td>预防动脉血栓（心梗、脑梗）</td><td>预防静脉血栓（房颤、术后）</td></tr>
+          <tr><td class="term-cell">主要风险</td><td>出血</td><td>出血（更显著）</td></tr>
+        </tbody>
+      </table>
+
+      <div class="info-box">
+        <div class="info-box-title">小剂量阿司匹林 ≠ 止痛用的阿司匹林</div>
+        <div class="info-box-body">
+          <strong>75~100mg</strong> 小剂量阿司匹林 → 抗血小板（预防心梗脑梗）<br>
+          <strong>300~500mg</strong> 阿司匹林 → 解热镇痛<br>
+          同一个药，剂量不同，用途完全不同。
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== 第七部分：神经/精神 ========== -->
+<div class="section">
+  <div class="sec-head">
+    <span class="sec-num">07</span>
+    <span class="sec-title">神经 / 精神系统相关</span>
+  </div>
+
+  <div class="term-card">
+    <div class="term-header">
+      <div>
+        <div class="term-badge" style="background:var(--purple-bg);color:var(--purple);">镇静</div>
+      </div>
+      <div>
+        <div class="term-title">镇静（Sedative）与 催眠（Hypnotic）</div>
+        <div class="term-subtitle">让人安静 / 让人入睡——同一类药，不同剂量</div>
+      </div>
+    </div>
+    <div class="term-body">
+      <p>很多镇静催眠药是<strong>同一种药的不同剂量</strong>：</p>
+      <p>小剂量 → 镇静（减轻焦虑、紧张）<br>
+      中剂量 → 催眠（促进入睡）<br>
+      大剂量 → 抗惊厥 / 麻醉</p>
+
+      <p>代表：苯二氮䓬类（安定、阿普唑仑）和新型非苯二氮䓬类（佐匹克隆、唑吡坦）。</p>
+
+      <div class="warning">
+        <div class="warning-title">依赖性风险</div>
+        <div class="warning-body">
+          苯二氮䓬类药物有明确的<strong>生理依赖和心理依赖</strong>风险。连续使用 2~4 周就可能产生耐受性（需要更大剂量才有同样效果）。<strong>不应自行长期服用</strong>。
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="term-card">
+    <div class="term-header">
+      <div>
+        <div class="term-badge" style="background:var(--green-bg);color:var(--green);">抗抑郁</div>
+      </div>
+      <div>
+        <div class="term-title">抗抑郁药（Antidepressant）</div>
+        <div class="term-subtitle">调节大脑中与情绪相关的化学物质</div>
+      </div>
+    </div>
+    <div class="term-body">
+      <p>抑郁症与大脑中<strong>血清素（5-HT）、去甲肾上腺素、多巴胺</strong>等神经递质水平失衡有关。抗抑郁药不是"让人高兴"，而是<strong>帮助恢复这些化学物质的正常水平</strong>。</p>
+
+      <div class="analogy">
+        <div class="label">比喻</div>
+        大脑的情绪调节系统像一个"失衡的天平"。抗抑郁药不是往一头加砝码（那只是临时的），而是<strong>慢慢修复天平的支点</strong>——这就是为什么它需要 2~4 周才起效。
+      </div>
+
+      <p><strong>常见类型：</strong></p>
+      <table class="cmp-table">
+        <thead><tr><th>缩写</th><th>全称</th><th>代表</th></tr></thead>
+        <tbody>
+          <tr><td class="term-cell">SSRI</td><td>选择性血清素再摄取抑制剂</td><td>氟西汀（百忧解）、舍曲林、帕罗西汀</td></tr>
+          <tr><td class="term-cell">SNRI</td><td>血清素+去甲肾上腺素再摄取抑制剂</td><td>文拉法辛、度洛西汀</td></tr>
+          <tr><td class="term-cell">NASSA</td><td>去甲肾上腺素+特异性血清素能抗抑郁药</td><td>米氮平</td></tr>
+        </tbody>
+      </table>
+
+      <div class="info-box">
+        <div class="info-box-title">抗抑郁药 ≠ 安定/镇静药</div>
+        <div class="info-box-body">
+          抗抑郁药<strong>不会成瘾</strong>（与安定类药物本质不同），但<strong>不能突然停药</strong>——需要在医生指导下逐步减量，否则可能出现停药反应（头晕、恶心、电击感等）。
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== 第八部分：免疫相关 ========== -->
+<div class="section">
+  <div class="sec-head">
+    <span class="sec-num">08</span>
+    <span class="sec-title">免疫相关</span>
+  </div>
+
+  <div class="term-card">
+    <div class="term-header">
+      <div>
+        <div class="term-badge" style="background:var(--orange-bg);color:var(--orange);">免疫</div>
+      </div>
+      <div>
+        <div class="term-title">免疫抑制 vs 免疫调节 vs 免疫增强</div>
+        <div class="term-subtitle">三个方向相反的概念</div>
+      </div>
+    </div>
+    <div class="term-body">
+
+      <table class="cmp-table">
+        <thead><tr><th>术语</th><th>做什么</th><th>什么时候需要</th><th>代表药物</th></tr></thead>
+        <tbody>
+          <tr>
+            <td class="term-cell">免疫抑制</td>
+            <td><strong>压制</strong>免疫系统的活性</td>
+            <td>自身免疫病（免疫系统攻击自己）、器官移植后（防止排异）</td>
+            <td>环孢素、他克莫司、糖皮质激素</td>
+          </tr>
+          <tr>
+            <td class="term-cell">免疫调节</td>
+            <td>让过高或过低的免疫反应<strong>回到正常</strong></td>
+            <td>免疫功能紊乱</td>
+            <td>胸腺肽、某些中药制剂</td>
+          </tr>
+          <tr>
+            <td class="term-cell">免疫增强</td>
+            <td><strong>增强</strong>免疫系统活性</td>
+            <td>免疫功能低下</td>
+            <td>干扰素、白介素、疫苗（主动免疫）</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="warning">
+        <div class="warning-title">"提高免疫力"不能乱来</div>
+        <div class="warning-body">
+          免疫力不是越高越好。<strong>过强的免疫反应</strong>会导致：过敏、自身免疫病（类风湿、红斑狼疮、I型糖尿病）、甚至细胞因子风暴（COVID-19 重症的重要机制之一）。<br>
+          正常人不需要"提高免疫力"——保持健康的生活方式（睡眠、运动、营养、心理健康）就是最好的免疫支持。
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== 第九部分：麻醉 ========== -->
+<div class="section">
+  <div class="sec-head">
+    <span class="sec-num">09</span>
+    <span class="sec-title">容易混淆的概念辨析</span>
+  </div>
+
+  <div class="term-card">
+    <div class="term-header">
+      <div>
+        <div class="term-badge" style="background:var(--gray-bg);color:var(--gray);">辨析</div>
+      </div>
+      <div>
+        <div class="term-title">麻醉（Anesthesia）vs 镇痛（Analgesia）vs 镇静（Sedation）</div>
+      </div>
+    </div>
+    <div class="term-body">
+      <table class="cmp-table">
+        <thead><tr><th>概念</th><th>效果</th><th>典型案例</th></tr></thead>
+        <tbody>
+          <tr>
+            <td class="term-cell">镇痛</td>
+            <td><strong>不疼了</strong>，但清醒、有触觉</td>
+            <td>吃布洛芬缓解头痛</td>
+          </tr>
+          <tr>
+            <td class="term-cell">镇静</td>
+            <td><strong>不紧张了/困了</strong>，可能有点迷糊，但可唤醒</td>
+            <td>胃镜检查前的"半麻"</td>
+          </tr>
+          <tr>
+            <td class="term-cell">局部麻醉</td>
+            <td>身体某一部位<strong>完全失去感觉</strong>，但人是清醒的</td>
+            <td>拔牙时的麻药、剖腹产的腰麻</td>
+          </tr>
+          <tr>
+            <td class="term-cell">全身麻醉</td>
+            <td><strong>完全失去意识</strong>、无痛觉、无记忆、肌肉松弛</td>
+            <td>心脏手术、大型外科手术</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="analogy">
+        <div class="label">比喻</div>
+        <strong>镇痛</strong> = 关掉手机铃声（信号还在，你听不到了）<br>
+        <strong>镇静</strong> = 手机调成勿扰模式（你还在，但反应慢了）<br>
+        <strong>局麻</strong> = 某一个 App 被强制关闭了（只影响特定区域）<br>
+        <strong>全麻</strong> = 手机关机了（一切功能暂停）
+      </div>
+    </div>
+  </div>
+
+  <div class="term-card">
+    <div class="term-header">
+      <div>
+        <div class="term-badge" style="background:var(--gray-bg);color:var(--gray);">辨析</div>
+      </div>
+      <div>
+        <div class="term-title">"消炎"这个词到底指什么？</div>
+      </div>
+    </div>
+    <div class="term-body">
+      <p>"消炎"是中文日常用语中<strong>歧义最大</strong>的医学词。不同的人说"消炎"，指的可能是完全不同的东西：</p>
+
+      <table class="cmp-table">
+        <thead><tr><th>说"消炎"时可能指</th><th>准确术语</th><th>例子</th></tr></thead>
+        <tbody>
+          <tr><td class="term-cell">"消炎药 = 头孢"</td><td>抗菌药 / 抗生素</td><td>杀细菌</td></tr>
+          <tr><td class="term-cell">"消炎药 = 布洛芬"</td><td>非甾体抗炎药（NSAIDs）</td><td>抑制炎症反应</td></tr>
+          <tr><td class="term-cell">"消炎药 = 地塞米松"</td><td>糖皮质激素</td><td>强效抗炎 + 免疫抑制</td></tr>
+          <tr><td class="term-cell">"消炎 = 消肿退红"</td><td>抗炎 / 消肿</td><td>可以是以上任何一种</td></tr>
+        </tbody>
+      </table>
+
+      <div class="key-dist">
+        <div class="key-dist-title">所以"消炎"到底该怎么理解？</div>
+        <div class="key-dist-body">
+          <strong>严格意义上</strong>，"消炎" = 抗炎 = 抑制炎症反应（NSAIDs 或激素）。<br>
+          <strong>日常口语中</strong>，"消炎"经常被用来指"抗菌/抗生素"，这是一个<strong>广泛存在的误用</strong>。<br><br>
+          这种混淆是危险的：如果你的"消炎"是指"头孢"，但你的炎症不是细菌引起的，那你吃了一个完全不对症的药。<br><br>
+          <strong>建议：</strong>尽量用更准确的说法——<br>
+          "抗菌/杀菌" → 杀细菌的药<br>
+          "抗炎" → 抑制炎症反应的药<br>
+          "抗病毒" → 对抗病毒的药<br>
+          "退热" → 降体温的药
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== 大总结 ========== -->
+<div class="grand-summary">
+  <h3>一张表看懂你常遇到的药物术语</h3>
+  <p>
+    <strong>镇痛</strong> = 止痛（不一定消炎，如对乙酰氨基酚）<br>
+    <strong>抗炎</strong> = 抑制炎症反应（不一定抗菌，如布洛芬、地塞米松）<br>
+    <strong>退热</strong> = 降体温（不治疗病因，如对乙酰氨基酚、布洛芬）<br>
+    <strong>抗菌/抗生素</strong> = 杀细菌（不抗病毒，如头孢、阿莫西林）<br>
+    <strong>抗病毒</strong> = 对抗病毒（不抗菌，如奥司他韦）<br>
+    <strong>抗真菌</strong> = 杀真菌（如氟康唑）<br>
+    <strong>止咳</strong> = 抑制咳嗽（有痰时慎用）<br>
+    <strong>化痰</strong> = 让痰变稀好排出（可能反而引起咳嗽）<br>
+    <strong>平喘</strong> = 扩张支气管（如沙丁胺醇）<br>
+    <strong>抗过敏/抗组胺</strong> = 阻断过敏信号（如氯雷他定）<br>
+    <strong>抑酸</strong> = 减少胃酸（如奥美拉唑）<br>
+    <strong>降压</strong> = 降低血压（多种机制不同的药统称）<br>
+    <strong>镇静</strong> = 让人安静/减缓紧张<br>
+    <strong>催眠</strong> = 让人入睡（常与镇静同一类药，剂量不同）<br>
+    <strong>抗凝/抗血小板</strong> = 防止血液凝固（预防血栓）
+  </p>
+  <p>
+    最重要的一条：<strong>"消炎"是中文里最有歧义的医学词</strong>——它可能指抗菌、可能指抗炎、也可能指退热。下次再听到"消炎药"，请先问清楚：<strong>"你说的是杀细菌的，还是抑制炎症反应的？"</strong>
+  </p>
+</div>
+
+<div class="notes">
+  <div class="notes-title">说明</div>
+  <p>本文为医学术语科普，不构成任何诊疗建议。具体用药请遵医嘱。药物的选择需要考虑疾病类型、个体差异、合并用药、肝肾功能等多种因素，远比"对号入座"复杂。本文旨在帮助读者理解药物分类和基本原理，以便更好地与医疗专业人员沟通。</p>
+</div>
+
+<footer>Medical Terminology Demystified · 医学术语系统科普</footer>
+
+</div>
+</body>
+</html>

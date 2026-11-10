@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>Docker Command ⇌ Compose Converter</title>
+    <!-- 引入 js-yaml 用于解析和生成 YAML -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/4.1.0/js-yaml.min.js"></script>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f8f9fa;
+            color: #333;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .container {
+            display: flex;
+            gap: 20px;
+            height: calc(100vh - 120px);
+        }
+        .panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: #fff;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .panel h3 {
+            margin-top: 0;
+            margin-bottom: 10px;
+            font-size: 16px;
+            color: #495057;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        textarea {
+            flex: 1;
+            width: 100%;
+            padding: 15px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 14px;
+            background-color: #1e1e1e;
+            color: #d4d4d4;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            resize: none;
+            box-sizing: border-box;
+            line-height: 1.5;
+        }
+        textarea:focus {
+            outline: none;
+            border-color: #0d6efd;
+        }
+        .actions {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: bold;
+            color: #fff;
+            background-color: #0d6efd;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        button:hover {
+            background-color: #0b5ed7;
+        }
+        .btn-clear {
+            background-color: #6c757d;
+            padding: 4px 8px;
+            font-size: 12px;
+        }
+        .btn-clear:hover {
+            background-color: #5c636a;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h2>🐳 Docker Run ⇌ Docker Compose</h2>
+    </div>
+
+    <div class="container">
+        <!-- 左侧：Docker Run -->
+        <div class="panel">
+            <h3>
+                Docker Run Command
+                <button class="btn-clear" onclick="document.getElementById('dockerRun').value=''">清空</button>
+            </h3>
+            <textarea id="dockerRun" placeholder="在此粘贴 docker run 命令...&#10;例如:&#10;docker run -d \&#10;  --name my-app \&#10;  -p 8080:80 \&#10;  -v /host/data:/app/data \&#10;  -e ENV=prod \&#10;  nginx:latest"></textarea>
+            <div class="actions">
+                <button onclick="runToCompose()">转换至 Compose &gt;&gt;</button>
+            </div>
+        </div>
+
+        <!-- 右侧：Docker Compose -->
+        <div class="panel">
+            <h3>
+                docker-compose.yml
+                <button class="btn-clear" onclick="document.getElementById('dockerCompose').value=''">清空</button>
+            </h3>
+            <textarea id="dockerCompose" placeholder="在此粘贴 docker-compose.yml 内容..."></textarea>
+            <div class="actions">
+                <button onclick="composeToRun()">&lt;&lt; 转换至 Docker Run</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 去除包裹的引号
+        function stripQuotes(str) {
+            return str.replace(/^["'](.*)["']$/, '$1');
+        }
+
+        // Docker Run -> Docker Compose
+        function runToCompose() {
+            let cmdStr = document.getElementById('dockerRun').value;
+            if (!cmdStr.trim()) return;
+
+            // 处理换行符和多余空格，保持引号内的内容完整
+            cmdStr = cmdStr.replace(/\\\n/g, ' ').replace(/\s+/g, ' ').trim();
+            if (!cmdStr.startsWith('docker run')) {
+                alert('命令必须以 docker run 开头');
+                return;
+            }
+
+            // 正则分割，保留引号内的空格
+            const argsRegex = /(?:[^\s"']+|"[^"]*"|'[^']*')+/g;
+            const args = cmdStr.match(argsRegex).slice(2);
+
+            let serviceName = 'app';
+            let service = {};
+            let ports = [], volumes = [], environment = [];
+
+            for (let i = 0; i < args.length; i++) {
+                let arg = args[i];
+
+                if (arg === '-p' || arg === '--publish') {
+                    ports.push(stripQuotes(args[++i]));
+                } else if (arg === '-v' || arg === '--volume') {
+                    volumes.push(stripQuotes(args[++i]));
+                } else if (arg === '-e' || arg === '--env') {
+                    environment.push(stripQuotes(args[++i]));
+                } else if (arg === '--name') {
+                    service.container_name = stripQuotes(args[++i]);
+                    serviceName = service.container_name.replace(/[^a-zA-Z0-9_-]/g, '') || 'app';
+                } else if (arg === '--restart') {
+                    service.restart = stripQuotes(args[++i]);
+                } else if (arg === '--network') {
+                    service.network_mode = stripQuotes(args[++i]);
+                } else if (arg === '-d' || arg === '--detach' || arg === '-it' || arg === '--rm') {
+                    // 忽略或不需要在 compose 中严格映射的基础标志
+                    continue;
+                } else if (!arg.startsWith('-') && !service.image) {
+                    service.image = stripQuotes(arg);
+                } else if (service.image && !arg.startsWith('-')) {
+                    if (!service.command) service.command = [];
+                    service.command.push(stripQuotes(arg));
+                }
+            }
+
+            if (ports.length) service.ports = ports;
+            if (volumes.length) service.volumes = volumes;
+            if (environment.length) service.environment = environment;
+            if (service.command) service.command = service.command.join(' ');
+
+            let config = {
+                version: '3.8',
+                services: {
+                    [serviceName]: service
+                }
+            };
+
+            try {
+                document.getElementById('dockerCompose').value = jsyaml.dump(config, { lineWidth: -1 });
+            } catch (e) {
+                alert('生成 YAML 失败: ' + e.message);
+            }
+        }
+
+        // Docker Compose -> Docker Run
+        function composeToRun() {
+            let yamlText = document.getElementById('dockerCompose').value;
+            if (!yamlText.trim()) return;
+
+            try {
+                let doc = jsyaml.load(yamlText);
+                if (!doc || !doc.services) {
+                    alert('无效的 docker-compose 结构，缺少 services 节点');
+                    return;
+                }
+
+                let commands = [];
+
+                for (let sName in doc.services) {
+                    let s = doc.services[sName];
+                    let cmd = ['docker run -d'];
+
+                    if (s.container_name) {
+                        cmd.push(`--name ${s.container_name}`);
+                    } else {
+                        cmd.push(`--name ${sName}`);
+                    }
+
+                    if (s.restart) cmd.push(`--restart ${s.restart}`);
+                    if (s.network_mode) cmd.push(`--network ${s.network_mode}`);
+                    
+                    if (s.ports) {
+                        s.ports.forEach(p => cmd.push(`-p ${p}`));
+                    }
+                    if (s.volumes) {
+                        s.volumes.forEach(v => {
+                            if (typeof v === 'string') cmd.push(`-v ${v}`);
+                            else if (v.source && v.target) cmd.push(`-v ${v.source}:${v.target}`);
+                        });
+                    }
+                    if (s.environment) {
+                        if (Array.isArray(s.environment)) {
+                            s.environment.forEach(e => cmd.push(`-e "${e}"`));
+                        } else {
+                            Object.keys(s.environment).forEach(k => {
+                                let val = s.environment[k];
+                                // 处理包含空格的变量值
+                                if (typeof val === 'string' && val.includes(' ')) {
+                                    cmd.push(`-e ${k}="${val}"`);
+                                } else {
+                                    cmd.push(`-e ${k}=${val}`);
+                                }
+                            });
+                        }
+                    }
+
+                    cmd.push(s.image || 'missing-image');
+
+                    if (s.command) {
+                        if (Array.isArray(s.command)) {
+                            cmd.push(s.command.join(' '));
+                        } else {
+                            cmd.push(s.command);
+                        }
+                    }
+
+                    // 使用 \ 换行格式化输出
+                    commands.push(cmd.join(' \\\n  '));
+                }
+
+                document.getElementById('dockerRun').value = commands.join('\n\n');
+            } catch (e) {
+                alert('解析 YAML 失败: ' + e.message);
+            }
+        }
+    </script>
+</body>
+</html>

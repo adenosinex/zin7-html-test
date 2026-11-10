@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>运动项目投入产出比（ROI）评估模型</title>
+    <style>
+        /* 页面基础复位与全局样式 */
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: 'PingFang SC', 'Microsoft YaHei', -apple-system, sans-serif;
+            color: #262626;
+            line-height: 1.6;
+            background-color: #f8fafc;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        /* 顶部横幅 */
+        .page-header {
+            background: linear-gradient(135deg, #1e3a8a, #3b82f6);
+            color: #ffffff;
+            margin: -40px -40px 30px -40px;
+            padding: 35px 40px;
+            border-top-left-radius: 8px;
+            border-top-right-radius: 8px;
+            border-bottom: 4px solid #60a5fa;
+        }
+
+        .page-header h1 {
+            margin: 0 0 10px 0;
+            font-size: 24pt;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        .page-header p {
+            margin: 0;
+            font-size: 11pt;
+            color: #dbeafe;
+            opacity: 0.9;
+        }
+
+        /* 标题样式 */
+        h2 {
+            font-size: 15pt;
+            color: #1e3a8a;
+            margin: 35px 0 15px 0;
+            padding-left: 10px;
+            border-left: 4px solid #3b82f6;
+        }
+
+        h3 {
+            font-size: 12pt;
+            color: #2c3e50;
+            margin: 20px 0 10px 0;
+        }
+
+        p, ul {
+            margin: 0 0 12px 0;
+        }
+
+        ul {
+            padding-left: 20px;
+        }
+
+        li {
+            margin-bottom: 6px;
+        }
+
+        /* 公式卡片 */
+        .formula-container {
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .formula-title {
+            font-size: 10pt;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 5px;
+        }
+
+        .formula-display {
+            font-family: 'Times New Roman', serif;
+            font-size: 18pt;
+            font-weight: bold;
+            color: #1e3a8a;
+            margin: 10px 0;
+        }
+
+        .formula-display span.math {
+            font-style: italic;
+            color: #2563eb;
+        }
+
+        .formula-note {
+            font-size: 9.5pt;
+            color: #64748b;
+        }
+
+        /* 矩阵评估打分表 */
+        .matrix-table {
+            display: table;
+            width: 100%;
+            margin: 20px 0 30px 0;
+            border-collapse: separate;
+            border-spacing: 10px 0;
+        }
+
+        .matrix-cell {
+            display: table-cell;
+            width: 25%;
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-top: 3px solid #3b82f6;
+            border-radius: 4px;
+            padding: 12px;
+            vertical-align: top;
+        }
+
+        .matrix-cell.cost {
+            border-top-color: #ef4444;
+        }
+
+        .matrix-cell-title {
+            font-weight: bold;
+            font-size: 11pt;
+            margin-bottom: 8px;
+            color: #1e293b;
+            text-align: center;
+        }
+
+        .matrix-cell ul {
+            padding-left: 14px;
+            margin: 0;
+            font-size: 9.5pt;
+            color: #475569;
+        }
+
+        /* 项目数据卡片 */
+        .project-card {
+            background-color: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            padding: 16px;
+            margin-bottom: 15px;
+        }
+
+        .project-header {
+            display: table;
+            width: 100%;
+            border-bottom: 1px dashed #e2e8f0;
+            padding-bottom: 8px;
+            margin-bottom: 12px;
+        }
+
+        .project-title {
+            display: table-cell;
+            font-weight: bold;
+            font-size: 12pt;
+            color: #1e293b;
+        }
+
+        .project-roi {
+            display: table-cell;
+            text-align: right;
+            font-weight: bold;
+            font-size: 14pt;
+            color: #2563eb;
+        }
+
+        .project-roi.high { color: #10b981; }
+        .project-roi.low { color: #ef4444; }
+
+        .project-details {
+            display: table;
+            width: 100%;
+        }
+
+        .project-metrics {
+            display: table-cell;
+            width: 65%;
+            font-size: 10pt;
+            color: #475569;
+            vertical-align: middle;
+            line-height: 1.7;
+        }
+
+        .project-conclusion {
+            display: table-cell;
+            width: 35%;
+            border-radius: 4px;
+            padding: 8px 12px;
+            font-size: 10pt;
+            font-weight: 500;
+            vertical-align: middle;
+            text-align: center;
+        }
+
+        /* 不同项目状态的色彩视觉锚定 */
+        .project-card.core { border-left: 5px solid #10b981; }
+        .project-card.core .project-conclusion { background-color: #ecfdf5; color: #065f46; }
+        
+        .project-card.main { border-left: 5px solid #3b82f6; }
+        .project-card.main .project-conclusion { background-color: #eff6ff; color: #1e40af; }
+        
+        .project-card.sub { border-left: 5px solid #f59e0b; }
+        .project-card.sub .project-conclusion { background-color: #fffbeb; color: #92400e; }
+        
+        .project-card.eliminated { border-left: 5px solid #ef4444; background-color: #fafafa; }
+        .project-card.eliminated .project-conclusion { background-color: #fef2f2; color: #991b1b; font-weight: bold; }
+
+        /* 排行榜柱状图 */
+        .ranking-container {
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            padding: 20px;
+            margin: 25px 0;
+        }
+
+        .ranking-row {
+            display: table;
+            width: 100%;
+            margin-bottom: 12px;
+        }
+
+        .ranking-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .ranking-name {
+            display: table-cell;
+            width: 25%;
+            font-size: 10pt;
+            font-weight: 500;
+            color: #334155;
+            vertical-align: middle;
+        }
+
+        .ranking-bar-wrapper {
+            display: table-cell;
+            width: 63%;
+            vertical-align: middle;
+            padding-right: 15px;
+        }
+
+        .ranking-bar-bg {
+            background-color: #e2e8f0;
+            border-radius: 10px;
+            height: 14px;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        .ranking-bar-fill {
+            height: 100%;
+            border-radius: 10px;
+            background: linear-gradient(90deg, #3b82f6, #10b981);
+            /* 浏览器端平滑过渡动画 */
+            transition: width 1s ease-in-out;
+        }
+
+        .ranking-score {
+            display: table-cell;
+            width: 12%;
+            font-size: 11pt;
+            font-weight: bold;
+            color: #1e3a8a;
+            text-align: right;
+            vertical-align: middle;
+        }
+
+        /* 执行策略分栏 */
+        .strategy-table {
+            display: table;
+            width: 100%;
+            margin-top: 20px;
+            border-collapse: separate;
+            border-spacing: 15px 0;
+        }
+
+        .strategy-col {
+            display: table-cell;
+            width: 50%;
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            padding: 18px;
+            vertical-align: top;
+        }
+
+        .strategy-title {
+            font-weight: bold;
+            font-size: 11.5pt;
+            color: #1e3a8a;
+            margin-bottom: 12px;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 6px;
+        }
+
+        .strategy-item {
+            font-size: 10pt;
+            margin-bottom: 10px;
+            color: #334155;
+            line-height: 1.5;
+        }
+
+        .strategy-item strong {
+            color: #0f172a;
+        }
+
+        /* 阈值徽章 */
+        .badge-delta {
+            display: inline-block;
+            background-color: #fee2e2;
+            color: #991b1b;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 9pt;
+            font-weight: bold;
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="page-header">
+            <h1>运动项目投入产出比（ROI）评估模型</h1>
+            <p>一套可执行的量化分析工具，用于决策个人运动项目的取舍与精力分配</p>
+        </div>
+
+        <h2>一、 模型核心架构</h2>
+        <p>为了科学管理个人精力，本模型引入商业决策中的 ROI 概念，将主观运动体验转化为量化指标。核心评价公式如下：</p>
+        
+        <div class="formula-container">
+            <div class="formula-title">量化评估核心公式</div>
+            <div class="formula-display">
+                ROI = (<span class="math">收益 × 使用频率 × 可持续性</span>) / <span class="math" style="color:#ef4444;">成本阻力</span>
+            </div>
+            <div class="formula-note">* 综合得分越高表示该运动越值得投入精力；得分过低则应当精简或果断淘汰。</div>
+        </div>
+
+        <p>各项指标采用 <strong>1–5 分制</strong> 进行打分，多维度细分评估标准如下矩阵所示：</p>
+
+        <div class="matrix-table">
+            <div class="matrix-cell">
+                <div class="matrix-cell-title">收益 (Benefits)</div>
+                <ul>
+                    <li><strong>5分:</strong> 多维收益 (体能+健康+实用+多场景)</li>
+                    <li><strong>3分:</strong> 单一收益 (如纯绝对力量)</li>
+                    <li><strong>1分:</strong> 娱乐消遣为主</li>
+                </ul>
+            </div>
+            <div class="matrix-cell">
+                <div class="matrix-cell-title">使用频率 (Frequency)</div>
+                <ul>
+                    <li><strong>5分:</strong> 高频 (每周 &ge; 3次)</li>
+                    <li><strong>3分:</strong> 中频 (每周 1–2次)</li>
+                    <li><strong>1分:</strong> 低频 (偶尔/随机)</li>
+                </ul>
+            </div>
+            <div class="matrix-cell">
+                <div class="matrix-cell-title">可持续性 (Sustainability)</div>
+                <ul>
+                    <li><strong>5分:</strong> 几乎无门槛限制</li>
+                    <li><strong>3分:</strong> 有一定环境/场地限制</li>
+                    <li><strong>1分:</strong> 极易因外在因素中断</li>
+                </ul>
+            </div>
+            <div class="matrix-cell cost">
+                <div class="matrix-cell-title" style="color:#b91c1c;">成本阻力 (Resistance)</div>
+                <ul>
+                    <li><strong>1分:</strong> 极低 (几乎无资金/时间损耗)</li>
+                    <li><strong>3分:</strong> 中等阻力与损耗</li>
+                    <li><strong>5分:</strong> 极高 (资金/时间/门槛要求过高)</li>
+                </ul>
+            </div>
+        </div>
+
+        <h2>二、 当前项目代入测算</h2>
+        
+        <div class="project-card core">
+            <div class="project-header">
+                <div class="project-title">1️⃣ 自重力量训练（引体、双杠等）</div>
+                <div class="project-roi high">ROI: 125</div>
+            </div>
+            <div class="project-details">
+                <div class="project-metrics">
+                    • 收益：5（力量 + 控制 + 爆发 + 体型）<br>
+                    • 频率：5（随时随地可练） | 可持续：5（完全不受外界限制）<br>
+                    • 成本阻力：1（接近 0 成本消耗） &rarr; <em>(5 × 5 × 5) / 1</em>
+                </div>
+                <div class="project-conclusion">
+                    绝对核心项目<br>效率极高，不可动摇
+                </div>
+            </div>
+        </div>
+
+        <div class="project-card main">
+            <div class="project-header">
+                <div class="project-title">2️⃣ 骑行（山地 + 公路）</div>
+                <div class="project-roi">ROI: 26.7</div>
+            </div>
+            <div class="project-details">
+                <div class="project-metrics">
+                    • 收益：5（心肺 + 耐力 + 恢复 + 户外）<br>
+                    • 频率：4（已有良好习惯） | 可持续：4（受天气与路线轻微影响）<br>
+                    • 成本阻力：3（时间消耗 + 装备损耗） &rarr; <em>(5 × 4 × 4) / 3</em>
+                </div>
+                <div class="project-conclusion">
+                    长期主力项目<br>维持现有频次，深化专项耐力
+                </div>
+            </div>
+        </div>
+
+        <div class="project-card sub">
+            <div class="project-header">
+                <div class="project-title">3️⃣ 跑步（作为补充）</div>
+                <div class="project-roi">ROI: 18.0</div>
+            </div>
+            <div class="project-details">
+                <div class="project-metrics">
+                    • 收益：4（高效心肺激活 + 快速补短板）<br>
+                    • 频率：3 | 可持续：3（需注意防范关节冲击与劳损）<br>
+                    • 成本阻力：2（低资金成本，低时间门槛） &rarr; <em>(4 × 3 × 3) / 2</em>
+                </div>
+                <div class="project-conclusion">
+                    优质备选/补充项目<br>动态穿插于主线间隙
+                </div>
+            </div>
+        </div>
+
+        <div class="project-card sub">
+            <div class="project-header">
+                <div class="project-title">4️⃣ 爬山 / 徒步</div>
+                <div class="project-roi">ROI: 13.3</div>
+            </div>
+            <div class="project-details">
+                <div class="project-metrics">
+                    • 收益：5（长时耐力 + 下肢专项 + 精神恢复）<br>
+                    • 频率：2（低频） | 可持续：4（可长期坚持的终身爱好）<br>
+                    • 成本阻力：3（单次硬性时间成本较高） &rarr; <em>(5 × 2 × 4) / 3</em>
+                </div>
+                <div class="project-conclusion">
+                    低频放松项目<br>保留作为周末特定调节机制
+                </div>
+            </div>
+        </div>
+
+        <div class="project-card sub">
+            <div class="project-header">
+                <div class="project-title">5️⃣ 游泳（场景 A：低频突击 / 仅为学会水性）</div>
+                <div class="project-roi">ROI: 7.5</div>
+            </div>
+            <div class="project-details">
+                <div class="project-metrics">
+                    • 收益：3（生存技能兜底 + 运动体验）<br>
+                    • 频率：1 | 可持续：5（学会即终身掌握，边际效应长青）<br>
+                    • 成本阻力：2（单次虽有花费，但总投入次数少，总成本低） &rarr; <em>(3 × 1 × 5) / 2</em>
+                </div>
+                <div class="project-conclusion">
+                    一次性技能解锁<br>属于高回报的“单点投资”
+                </div>
+            </div>
+        </div>
+
+        <div class="project-card eliminated">
+            <div class="project-header">
+                <div class="project-title">5️⃣ 游泳（场景 B：长期日常 / 作为固定锻炼）</div>
+                <div class="project-roi low">ROI: 4.0</div>
+            </div>
+            <div class="project-details">
+                <div class="project-metrics">
+                    • 收益：4（全身运动 + 关节恢复友好）<br>
+                    • 频率：2（严重受场地局限） | 可持续：2（受通勤、卫生、水质影响）<br>
+                    • 成本阻力：4（长期累积资金与时间成本过高） &rarr; <em>(4 × 2 × 2) / 4</em>
+                </div>
+                <div class="project-conclusion">
+                    性价比极低 &rarr; 淘汰<br>不建议作为日常主练项目
+                </div>
+            </div>
+        </div>
+
+        <h2>三、 整体优先级可视化排序</h2>
+        <p>清晰的市场断层结构表明：自重训练拥有无与伦比的性价比优势，而长期游泳则处于明显的投入劣势。</p>
+        
+        <div class="ranking-container">
+            <div class="ranking-row">
+                <div class="ranking-name">自重力量训练</div>
+                <div class="ranking-bar-wrapper"><div class="ranking-bar-bg"><div class="ranking-bar-fill" style="width: 100%;"></div></div></div>
+                <div class="ranking-score">125.0</div>
+            </div>
+            <div class="ranking-row">
+                <div class="ranking-name">骑行（山地/公路）</div>
+                <div class="ranking-bar-wrapper"><div class="ranking-bar-bg"><div class="ranking-bar-fill" style="width: 21.3%;"></div></div></div>
+                <div class="ranking-score">26.7</div>
+            </div>
+            <div class="ranking-row">
+                <div class="ranking-name">跑步（补充）</div>
+                <div class="ranking-bar-wrapper"><div class="ranking-bar-bg"><div class="ranking-bar-fill" style="width: 14.4%;"></div></div></div>
+                <div class="ranking-score">18.0</div>
+            </div>
+            <div class="ranking-row">
+                <div class="ranking-name">爬山 / 徒步</div>
+                <div class="ranking-bar-wrapper"><div class="ranking-bar-bg"><div class="ranking-bar-fill" style="width: 10.6%;"></div></div></div>
+                <div class="ranking-score">13.3</div>
+            </div>
+            <div class="ranking-row">
+                <div class="ranking-name">游泳（技能解锁）</div>
+                <div class="ranking-bar-wrapper"><div class="ranking-bar-bg"><div class="ranking-bar-fill" style="width: 6.0%; background: #64748b;"></div></div></div>
+                <div class="ranking-score">7.5</div>
+            </div>
+            <div class="ranking-row" style="opacity: 0.6;">
+                <div class="ranking-name">游泳（长期日常）</div>
+                <div class="ranking-bar-wrapper"><div class="ranking-bar-bg"><div class="ranking-bar-fill" style="width: 3.2%; background: #ef4444;"></div></div></div>
+                <div class="ranking-score">4.0</div>
+            </div>
+        </div>
+
+        <h2>四、 最优项目组合与执行策略</h2>
+        <p>通过精简与结构优化，建议形成以下互补的“黄金组合体系”，最大化提升运动的总收益率：</p>
+
+        <div class="strategy-table">
+            <div class="strategy-col">
+                <div class="strategy-title">💡 核心结构 (日常基石)</div>
+                <div class="strategy-item"><strong>主线 1：力量（自重训练）</strong><br>无损耗的高频刺激，维持肌肉质量、身体控制力和基础代谢。</div>
+                <div class="strategy-item"><strong>主线 2：骑行（有氧大户）</strong><br>构建强大的心肺耐力系统与下肢力量恢复窗口。</div>
+            </div>
+            <div class="strategy-col">
+                <div class="strategy-title">⚡ 辅助结构 (场景补充)</div>
+                <div class="strategy-item"><strong>补短板：跑步</strong><br>不受场地约束，在时间碎片化或出差场景下灵活穿插。</div>
+                <div class="strategy-item"><strong>精神恢复：徒步</strong><br>周末低频进行，作为有氧补充与精神“森林浴”洗礼。</div>
+                <div class="strategy-item"><strong>技能解锁：游泳</strong><br>采用短期高集中度攻克，掌握后封存，不列入日常。</div>
+            </div>
+        </div>
+
+        <h3 style="margin-top: 25px; color:#0f172a;">📈 关键优化原则</h3>
+        <ul>
+            <li><strong>强化绝对优势：</strong> 骑行已作为王牌，未来可精细化拆分为 <em>Z2</em> 基础耐力构建与爬坡力量耐力专项；自重力量则继续向高阶控制力（如倒立架、全水平）与爆发力（双力臂进阶）纵深发展。</li>
+            <li><strong>防御性加法准则：</strong> <br><div class="badge-delta">动态门槛阈值 &ge; 18.0</div><br> 未来任何试图加入日常训练体系的新项目，其代入公式计算后的修正 ROI <strong>必须高于 18.0（即跑步的得分）</strong>。若低于此红线，坚决不予纳入日常课程表，从源头上杜绝精力分散。</li>
+        </ul>
+    </div>
+
+</body>
+</html>

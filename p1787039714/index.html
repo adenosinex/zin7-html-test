@@ -1,0 +1,860 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>双层+等效距离 · 路线对比计算器（分类梯度版）</title>
+    <style>
+        :root {
+            --bg: #f0f4f8;
+            --card-bg: #ffffff;
+            --primary: #1a365d;
+            --primary-light: #2b4c7e;
+            --accent: #2f855a;
+            --accent-light: #48bb78;
+            --warn: #c05621;
+            --danger: #c53030;
+            --text: #1a202c;
+            --text-light: #4a5568;
+            --text-muted: #718096;
+            --border: #e2e8f0;
+            --shadow: 0 4px 6px -1px rgba(0,0,0,0.08);
+            --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1);
+            --radius: 12px;
+            --radius-sm: 8px;
+            --transition: 0.2s ease;
+            --font-mono: 'SF Mono','Fira Code','Consolas',monospace;
+
+            /* 梯度颜色定义 */
+            --good-strong: #1a7a3a;
+            --good-mid: #38a169;
+            --good-light: #68d391;
+            --bad-strong: #c53030;
+            --bad-mid: #e53e3e;
+            --bad-light: #fc8181;
+            --neutral: #a0aec0;
+        }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        .container { max-width: 1100px; margin: 0 auto; }
+
+        .header {
+            text-align: center;
+            margin-bottom: 25px;
+            padding: 25px 20px;
+            background: linear-gradient(135deg, #1a365d 0%, #2b4c7e 50%, #2f855a 100%);
+            border-radius: var(--radius);
+            color: white;
+            box-shadow: var(--shadow-lg);
+        }
+        .header h1 { font-size: 1.6rem; font-weight: 700; letter-spacing:0.5px; margin-bottom:6px; }
+        .header .subtitle { font-size: 0.9rem; opacity: 0.85; }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 18px 20px;
+            margin-bottom: 16px;
+            border: 1px solid var(--border);
+            transition: box-shadow var(--transition);
+        }
+        .card:hover { box-shadow: var(--shadow-lg); }
+        .card-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 8px;
+        }
+        .card-title .icon { font-size: 1.2rem; }
+
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px,1fr)); gap: 12px; }
+        .form-group { display:flex; flex-direction:column; gap:4px; }
+        .form-group label { font-size:0.8rem; font-weight:500; color:var(--text-light); }
+        .form-group .unit { font-size:0.7rem; color:var(--text-muted); }
+        .form-group input {
+            padding: 8px 10px;
+            border:1.5px solid var(--border);
+            border-radius: var(--radius-sm);
+            font-size:0.85rem;
+            transition:border-color var(--transition);
+            background:#fafbfc;
+            width:100%;
+        }
+        .form-group input:focus { outline:none; border-color:var(--accent); background:white; }
+
+        .routes-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+        @media (max-width: 700px) { .routes-grid { grid-template-columns:1fr; } }
+        .route-card {
+            border-radius: var(--radius);
+            padding:16px;
+            background:#fafbfc;
+            border:2px solid var(--border);
+        }
+        .route-a { border-color:#4299e1; background:#f0f7ff; }
+        .route-b { border-color:#48bb78; background:#f0fff4; }
+        .route-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
+        .route-label { font-weight:700; font-size:1rem; }
+        .route-a .route-label { color:#2b6cb0; }
+        .route-b .route-label { color:#2f855a; }
+        .route-badge { padding:2px 8px; border-radius:20px; font-size:0.7rem; font-weight:600; }
+        .route-a .route-badge { background:#bee3f8; color:#2b6cb0; }
+        .route-b .route-badge { background:#c6f6d5; color:#2f855a; }
+
+        .btn {
+            padding:10px 24px; border:none; border-radius:var(--radius-sm);
+            font-size:0.95rem; font-weight:600; cursor:pointer;
+            letter-spacing:0.5px; transition: all var(--transition);
+        }
+        .btn-primary { background:var(--primary); color:white; }
+        .btn-primary:hover { background:var(--primary-light); transform:translateY(-1px); }
+        .btn-secondary { background:#edf2f7; color:var(--text); }
+        .btn-secondary:hover { background:#e2e8f0; }
+        .btn-row { display:flex; gap:12px; justify-content:center; flex-wrap:wrap; margin-top:6px; }
+
+        /* 摘要卡片 */
+        .summary-card {
+            background: linear-gradient(135deg, #f7fafc 0%, #ffffff 100%);
+            border-left: 5px solid var(--accent);
+            padding: 16px 18px;
+        }
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 12px;
+            margin-top: 6px;
+        }
+        .summary-item {
+            text-align: center;
+            padding: 10px 6px;
+            border-radius: var(--radius-sm);
+            background: white;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            border: 1px solid var(--border);
+        }
+        .summary-item .label {
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+        }
+        .summary-item .value {
+            font-size: 1.4rem;
+            font-weight: 700;
+            font-family: var(--font-mono);
+            color: var(--primary);
+        }
+
+        /* 梯度颜色类 */
+        .good-strong { color: var(--good-strong) !important; }
+        .good-mid { color: var(--good-mid) !important; }
+        .good-light { color: var(--good-light) !important; }
+        .bad-strong { color: var(--bad-strong) !important; }
+        .bad-mid { color: var(--bad-mid) !important; }
+        .bad-light { color: var(--bad-light) !important; }
+        .neutral { color: var(--neutral) !important; }
+
+        /* 结果卡片 */
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 12px;
+            margin-top: 8px;
+        }
+        .result-card {
+            background: #f8fafc;
+            border-radius: var(--radius-sm);
+            padding: 12px 14px;
+            border: 1px solid var(--border);
+            transition: all 0.2s;
+        }
+        .result-card:hover {
+            border-color: #cbd5e0;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+        }
+        .result-card .label {
+            font-size: 0.72rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            margin-bottom: 2px;
+        }
+        .result-card .value {
+            font-size: 1.15rem;
+            font-weight: 700;
+            font-family: var(--font-mono);
+            color: var(--primary);
+        }
+        .result-card .desc { font-size: 0.75rem; color: var(--text-muted); margin-top: 2px; }
+        .result-card .value.highlight { color: var(--accent); }
+        .result-card .value.warn { color: var(--warn); }
+        .result-card .value.danger { color: var(--danger); }
+        .result-card.winner { border-left: 4px solid var(--accent); background: #f0fff4; }
+        .result-card.loser { border-left: 4px solid var(--danger); background: #fff5f5; }
+        .result-card.neutral { border-left: 4px solid var(--neutral); }
+
+        /* 折叠面板 */
+        details.card { padding:0; overflow:hidden; }
+        details.card > summary {
+            padding: 14px 18px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: var(--primary);
+            cursor: pointer;
+            list-style: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: #fafbfc;
+            border-bottom: 1px solid var(--border);
+            transition: background var(--transition);
+        }
+        details.card > summary::-webkit-details-marker { display:none; }
+        details.card > summary::after {
+            content: "▾";
+            margin-left: auto;
+            font-size: 0.8rem;
+            transition: transform 0.2s;
+        }
+        details.card[open] > summary::after { transform: rotate(180deg); }
+        details.card > summary:hover { background: #f0f4f8; }
+        details.card .card-content { padding:16px 18px; }
+
+        .table-wrapper { overflow-x:auto; margin-top:12px; border-radius:var(--radius-sm); border:1px solid var(--border); }
+        table { width:100%; border-collapse:collapse; font-size:0.8rem; }
+        table th, table td { padding:8px 12px; text-align:left; border-bottom:1px solid var(--border); }
+        table th { background:#f7fafc; font-weight:600; color:var(--text-light); font-size:0.72rem; text-transform:uppercase; }
+        table tr:last-child td { border-bottom:none; }
+        .mono { font-family: var(--font-mono); }
+
+        .conclusion {
+            padding: 16px 18px;
+            border-radius: var(--radius-sm);
+            font-size: 0.9rem;
+            line-height: 1.6;
+            border-left: 4px solid var(--accent);
+            background: #f7fafc;
+            font-weight: 500;
+            color: var(--text-light);
+        }
+        .conclusion strong { color: var(--primary); }
+        .winner-tag {
+            display: inline-block;
+            padding: 1px 8px;
+            border-radius: 4px;
+            font-weight: 700;
+            font-size: 0.8rem;
+            margin: 0 3px;
+        }
+        .winner-tag.route-a-win { background:#bee3f8; color:#2b6cb0; }
+        .winner-tag.route-b-win { background:#c6f6d5; color:#2f855a; }
+
+        .chart-container { margin-top:12px; padding:10px; background:#fafbfc; border-radius:var(--radius-sm); border:1px solid var(--border); text-align:center; }
+        .chart-container canvas { max-width:100%; height:auto; }
+
+        @media (max-width: 600px) {
+            .summary-grid { grid-template-columns: repeat(2,1fr); }
+            .form-grid { grid-template-columns: repeat(auto-fit, minmax(130px,1fr)); }
+            .btn { width:100%; }
+            .results-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>🛣️ 路线对比计算器</h1>
+        <p class="subtitle">双层模型：经济成本 + 安全/舒适 · 输出临界距离与等效距离</p>
+    </div>
+
+    <!-- 全局参数 -->
+    <div class="card">
+        <div class="card-title"><span class="icon">⚙️</span> 全局参数</div>
+        <div class="form-grid">
+            <div class="form-group">
+                <label>油价 P <span class="unit">(元/L)</span></label>
+                <input type="number" id="globalOilPrice" value="7.5" step="0.1" min="0">
+            </div>
+            <div class="form-group">
+                <label>时间价值 W <span class="unit">(元/h)</span></label>
+                <input type="number" id="globalTimeValue" value="6" step="0.5" min="0">
+            </div>
+            <div class="form-group">
+                <label>安全溢价 <span class="unit">(元/次)</span></label>
+                <input type="number" id="globalSafetyPremium" value="0" step="0.1">
+            </div>
+            <div class="form-group">
+                <label>舒适溢价 <span class="unit">(元/次)</span></label>
+                <input type="number" id="globalComfortPremium" value="0" step="0.1">
+            </div>
+        </div>
+    </div>
+
+    <!-- 路线输入 -->
+    <div class="routes-grid">
+        <div class="route-card route-a">
+            <div class="route-header">
+                <span class="route-label">🅰️ 路线 A（基准）</span>
+                <span class="route-badge">主干道</span>
+            </div>
+            <div class="form-grid">
+                <div class="form-group"><label>距离 d_A <span class="unit">(km)</span></label><input type="number" id="aDistance" value="5" step="0.1" min="0"></div>
+                <div class="form-group"><label>时间 t_A <span class="unit">(min)</span></label><input type="number" id="aTime" value="16" step="0.5" min="0"></div>
+                <div class="form-group"><label>油耗 f_A <span class="unit">(L/100km)</span></label><input type="number" id="aFuelConsumption" value="3.0" step="0.1" min="0"></div>
+                <div class="form-group"><label>刹车损耗 b_A <span class="unit">(元/km)</span></label><input type="number" id="aBrakeWear" value="0.005" step="0.001" min="0"></div>
+                <div class="form-group"><label>传动损耗 q_A <span class="unit">(元/km)</span></label><input type="number" id="aDrivetrainWear" value="0.002" step="0.001" min="0"></div>
+                <div class="form-group"><label>固定成本 F_A <span class="unit">(元/次)</span></label><input type="number" id="aFixedCost" value="0" step="0.5" min="0"></div>
+                <div class="form-group"><label>安全暴露指数 R_A</label><input type="number" id="aRiskIndex" value="1.0" step="0.1" min="0"></div>
+                <div class="form-group"><label>舒适度评分 H_A <span class="unit">(1-10)</span></label><input type="number" id="aComfort" value="5" step="0.5" min="1" max="10"></div>
+            </div>
+            <div style="margin-top:8px; font-size:0.8rem; color:var(--text-muted);">平均速度：<span id="aSpeedDisplay">-- km/h</span></div>
+        </div>
+        <div class="route-card route-b">
+            <div class="route-header">
+                <span class="route-label">🅱️ 路线 B（对比）</span>
+                <span class="route-badge">绕城路</span>
+            </div>
+            <div class="form-grid">
+                <div class="form-group"><label>距离 d_B <span class="unit">(km)</span></label><input type="number" id="bDistance" value="6" step="0.1" min="0"></div>
+                <div class="form-group"><label>时间 t_B <span class="unit">(min)</span></label><input type="number" id="bTime" value="15" step="0.5" min="0"></div>
+                <div class="form-group"><label>油耗 f_B <span class="unit">(L/100km)</span></label><input type="number" id="bFuelConsumption" value="2.2" step="0.1" min="0"></div>
+                <div class="form-group"><label>刹车损耗 b_B <span class="unit">(元/km)</span></label><input type="number" id="bBrakeWear" value="0.003" step="0.001" min="0"></div>
+                <div class="form-group"><label>传动损耗 q_B <span class="unit">(元/km)</span></label><input type="number" id="bDrivetrainWear" value="0.001" step="0.001" min="0"></div>
+                <div class="form-group"><label>固定成本 F_B <span class="unit">(元/次)</span></label><input type="number" id="bFixedCost" value="0" step="0.5" min="0"></div>
+                <div class="form-group"><label>安全暴露指数 R_B</label><input type="number" id="bRiskIndex" value="0.3" step="0.1" min="0"></div>
+                <div class="form-group"><label>舒适度评分 H_B <span class="unit">(1-10)</span></label><input type="number" id="bComfort" value="8" step="0.5" min="1" max="10"></div>
+            </div>
+            <div style="margin-top:8px; font-size:0.8rem; color:var(--text-muted);">平均速度：<span id="bSpeedDisplay">-- km/h</span></div>
+        </div>
+    </div>
+
+    <!-- 按钮 -->
+    <div class="card" style="text-align:center;">
+        <div class="btn-row">
+            <button class="btn btn-primary" onclick="calculateAll()">📊 计算全部指标</button>
+            <button class="btn btn-secondary" onclick="resetDefaults()">🔄 恢复默认值</button>
+            <button class="btn btn-secondary" onclick="exportResults()">📋 导出结果</button>
+        </div>
+    </div>
+
+    <!-- 结果容器 -->
+    <div id="resultsContainer" style="display:none;">
+        <!-- 核心摘要 -->
+        <div class="card summary-card">
+            <div class="card-title"><span class="icon">🎯</span> 核心摘要</div>
+            <div class="summary-grid" id="summaryGrid"></div>
+        </div>
+
+        <!-- 折叠详情区域 -->
+        <details class="card" id="detailsEconomic" open>
+            <summary>💰 经济成本明细（按重要性排序）</summary>
+            <div class="card-content">
+                <div class="results-grid" id="economicResults"></div>
+            </div>
+        </details>
+
+        <details class="card" id="detailsDistance">
+            <summary>📏 临界距离与等效距离（按决策影响排序）</summary>
+            <div class="card-content">
+                <div class="results-grid" id="distanceResults"></div>
+            </div>
+        </details>
+
+        <details class="card" id="detailsTimeValue">
+            <summary>⏱️ 时间价值分析</summary>
+            <div class="card-content">
+                <div class="results-grid" id="timeValueResults"></div>
+                <div class="table-wrapper" id="timeValueTableWrapper"></div>
+                <div class="chart-container"><canvas id="timeValueChart" width="600" height="260"></canvas></div>
+            </div>
+        </details>
+
+        <details class="card" id="detailsSafetyComfort">
+            <summary>🛡️ 安全·舒适·个性化（按风险梯度排序）</summary>
+            <div class="card-content">
+                <div class="results-grid" id="safetyResults"></div>
+                <div class="results-grid" id="personalizedResults" style="margin-top:12px;"></div>
+            </div>
+        </details>
+
+        <!-- 综合结论 -->
+        <div class="card">
+            <div class="card-title"><span class="icon">📋</span> 综合结论</div>
+            <div id="conclusionBox" class="conclusion"></div>
+        </div>
+    </div>
+
+    <!-- 空状态 -->
+    <div id="emptyState" class="card" style="text-align:center; padding:40px 20px;">
+        <div style="font-size:2rem; margin-bottom:12px;">📊</div>
+        <p style="color:var(--text-muted);">点击「计算全部指标」查看结果</p>
+        <p style="color:var(--text-muted); font-size:0.85rem; margin-top:4px;">分类排序展示，高亮采用梯度颜色</p>
+    </div>
+</div>
+
+<script>
+    // ==================== 工具函数 ====================
+    function getVal(id) { return parseFloat(document.getElementById(id).value) || 0; }
+    function fmt(num, decimals = 2) { if (num === null || num === undefined || isNaN(num)) return '—'; return num.toFixed(decimals); }
+    function safeDiv(a, b) { return (b === 0 || isNaN(b)) ? NaN : a / b; }
+    function clamp(val, min, max) { return Math.min(Math.max(val, min), max); }
+
+    // 梯度颜色函数：根据数值大小返回对应的CSS类
+    function gradientClass(value, thresholds, direction = 'good') {
+        // thresholds: [strong, mid, light] 分别对应强、中、轻
+        const [strong, mid, light] = thresholds;
+        if (direction === 'good') {
+            if (value <= strong) return 'good-strong';
+            if (value <= mid) return 'good-mid';
+            if (value <= light) return 'good-light';
+            return '';
+        } else if (direction === 'bad') {
+            if (value >= strong) return 'bad-strong';
+            if (value >= mid) return 'bad-mid';
+            if (value >= light) return 'bad-light';
+            return '';
+        }
+        return '';
+    }
+
+    // 风险比梯度
+    function riskGradientClass(rr) {
+        if (rr <= 0.3) return 'good-strong';
+        if (rr <= 0.6) return 'good-mid';
+        if (rr <= 0.8) return 'good-light';
+        if (rr <= 1.2) return 'neutral';
+        if (rr <= 2.0) return 'bad-light';
+        if (rr <= 3.0) return 'bad-mid';
+        return 'bad-strong';
+    }
+
+    // 节省成本梯度（正值表示B更省）
+    function savingGradientClass(saving) {
+        if (saving >= 0.5) return 'good-strong';
+        if (saving >= 0.2) return 'good-mid';
+        if (saving > 0) return 'good-light';
+        if (saving < 0 && saving > -0.2) return 'bad-light';
+        if (saving <= -0.2 && saving > -0.5) return 'bad-mid';
+        if (saving <= -0.5) return 'bad-strong';
+        return 'neutral';
+    }
+
+    // ==================== 实时速度显示 ====================
+    function updateSpeedDisplay() {
+        const dA = getVal('aDistance'), tA = getVal('aTime');
+        const dB = getVal('bDistance'), tB = getVal('bTime');
+        const vA = (tA > 0 && dA > 0) ? (60 * dA / tA) : NaN;
+        const vB = (tB > 0 && dB > 0) ? (60 * dB / tB) : NaN;
+        document.getElementById('aSpeedDisplay').textContent = isNaN(vA) ? '-- km/h' : fmt(vA, 2) + ' km/h';
+        document.getElementById('bSpeedDisplay').textContent = isNaN(vB) ? '-- km/h' : fmt(vB, 2) + ' km/h';
+    }
+    ['aDistance','aTime','bDistance','bTime'].forEach(id => document.getElementById(id).addEventListener('input', updateSpeedDisplay));
+    updateSpeedDisplay();
+
+    // ==================== 核心计算 ====================
+    function calculateAll() {
+        const P = getVal('globalOilPrice');
+        const W = getVal('globalTimeValue');
+        const safetyPremium = getVal('globalSafetyPremium');
+        const comfortPremium = getVal('globalComfortPremium');
+
+        const dA = getVal('aDistance'), tA = getVal('aTime');
+        const fA = getVal('aFuelConsumption'), bA = getVal('aBrakeWear'), qA = getVal('aDrivetrainWear');
+        const FA = getVal('aFixedCost'), RA = getVal('aRiskIndex'), HA = getVal('aComfort');
+
+        const dB = getVal('bDistance'), tB = getVal('bTime');
+        const fB = getVal('bFuelConsumption'), bB = getVal('bBrakeWear'), qB = getVal('bDrivetrainWear');
+        const FB = getVal('bFixedCost'), RB = getVal('bRiskIndex'), HB = getVal('bComfort');
+
+        const VA = (tA > 0) ? 60 * dA / tA : NaN;
+        const VB = (tB > 0) ? 60 * dB / tB : NaN;
+
+        const mA = P * fA / 100 + bA + qA;
+        const mB = P * fB / 100 + bB + qB;
+
+        const MA_direct = FA + mA * dA;
+        const MB_direct = FB + mB * dB;
+
+        const CA = FA + mA * dA + W * tA / 60;
+        const CB = FB + mB * dB + W * tB / 60;
+
+        const KA = mA + W / VA;
+        const KB = mB + W / VB;
+
+        const dBCritical = safeDiv(FA + mA * dA + W * tA / 60 - FB, mB + W / VB);
+        const dBdirectEq = safeDiv(FA + mA * dA, mB);
+        const dBtimeEq = safeDiv(dA * VB, VA);
+        const dBeconEq = safeDiv(CB - FA, KA);
+        const dAeconEq = safeDiv(CA - FB, KB);
+        const RR = safeDiv(RB, RA);
+
+        const timeDiff = tB - tA;
+        const costDiffDirect = MA_direct - MB_direct;
+        const Wcritical = (timeDiff > 0 && Math.abs(costDiffDirect) > 1e-10) ? (costDiffDirect * 60 / timeDiff) : NaN;
+
+        const econWinner = (CB < CA) ? 'B' : (CA < CB) ? 'A' : 'TIE';
+
+        document.getElementById('resultsContainer').style.display = 'block';
+        document.getElementById('emptyState').style.display = 'none';
+
+        renderSummary({ econWinner, dBCritical, dB, RR, Wcritical, CA, CB, HA, HB, safetyPremium, comfortPremium });
+        renderEconomicResults({ VA, VB, mA, mB, MA_direct, MB_direct, CA, CB, KA, KB, econWinner, costDiffDirect, timeDiff });
+        renderDistanceResults({ dBCritical, dBdirectEq, dBtimeEq, dBeconEq, dAeconEq, dB, dA });
+        renderTimeValueResults({ Wcritical, dBCritical, mA, mB, dA, dB, tA, tB, FA, FB, VA, VB });
+        renderSafetyPersonalizedResults({ RA, RB, RR, HA, HB, safetyPremium, comfortPremium, CA, CB, dBCritical, VA, VB, bB, qB, P, fB, W });
+        renderConclusion({ econWinner, dBCritical, dB, dBtimeEq, dBeconEq, dAeconEq, RR, Wcritical, CA, CB, MA_direct, MB_direct, HA, HB, safetyPremium, comfortPremium, costDiffDirect, timeDiff });
+        drawTimeValueChart(mA, mB, dA, dB, tA, tB, FA, FB, VA, VB);
+    }
+
+    // ==================== 核心摘要 ====================
+    function renderSummary(data) {
+        const { econWinner, dBCritical, dB, RR, Wcritical, CA, CB, HA, HB, safetyPremium, comfortPremium } = data;
+        const summaryGrid = document.getElementById('summaryGrid');
+        let html = '';
+
+        const winnerClass = econWinner === 'B' ? 'good-strong' : econWinner === 'A' ? 'bad-strong' : 'neutral';
+        const winnerText = econWinner === 'B' ? '🅱️ 路线B' : econWinner === 'A' ? '🅰️ 路线A' : '⚖️ 持平';
+        html += `<div class="summary-item"><div class="label">经济胜者</div><div class="value ${winnerClass}">${winnerText}</div></div>`;
+
+        const dCritClass = dB <= dBCritical ? 'good-strong' : 'bad-strong';
+        html += `<div class="summary-item"><div class="label">B经济临界距离</div><div class="value ${dCritClass}">${fmt(dBCritical, 2)} km</div></div>`;
+
+        const rrClass = riskGradientClass(RR);
+        html += `<div class="summary-item"><div class="label">安全暴露比</div><div class="value ${rrClass}">${fmt(RR, 2)}</div></div>`;
+
+        if (!isNaN(Wcritical) && isFinite(Wcritical)) {
+            html += `<div class="summary-item"><div class="label">时间价值临界点</div><div class="value">${fmt(Wcritical, 2)} 元/h</div></div>`;
+        } else {
+            html += `<div class="summary-item"><div class="label">时间价值临界点</div><div class="value">—</div></div>`;
+        }
+
+        let recommendation = '—';
+        if (dB <= dBCritical && RR < 1) recommendation = '🅱️ 推荐B';
+        else if (econWinner === 'A' && RR < 1) recommendation = '⚠️ 权衡';
+        else if (econWinner === 'B') recommendation = '🅱️ 推荐B';
+        else recommendation = '🅰️ 推荐A';
+        html += `<div class="summary-item"><div class="label">综合推荐</div><div class="value">${recommendation}</div></div>`;
+
+        summaryGrid.innerHTML = html;
+    }
+
+    // ==================== 经济明细（排序：胜者→成本→速度→损耗） ====================
+    function renderEconomicResults(data) {
+        const { VA, VB, mA, mB, MA_direct, MB_direct, CA, CB, KA, KB, econWinner, costDiffDirect, timeDiff } = data;
+        const container = document.getElementById('economicResults');
+        const winnerClass = econWinner === 'B' ? 'winner' : econWinner === 'A' ? 'loser' : 'neutral';
+        const winnerLabel = econWinner === 'B' ? '🅱️ B占优' : econWinner === 'A' ? '🅰️ A占优' : '⚖️ 持平';
+
+        const saving = MA_direct - MB_direct; // 正值表示B更省
+        const savingClass = savingGradientClass(saving);
+        const timeClass = timeDiff > 0 ? 'bad-light' : (timeDiff < 0 ? 'good-light' : 'neutral');
+
+        // 按重要性排序：胜者、广义成本对比、直接成本对比、直接成本差、速度、每公里成本
+        let html = `
+            <div class="result-card ${winnerClass}">
+                <div class="label">经济胜者</div>
+                <div class="value ${winnerClass}">${winnerLabel}</div>
+                <div class="desc">广义经济成本比较</div>
+            </div>
+            <div class="result-card ${CA < CB ? 'winner' : 'loser'}">
+                <div class="label">广义成本对比 (A vs B)</div>
+                <div class="value">${fmt(CA,3)} vs ${fmt(CB,3)} 元</div>
+                <div class="desc">差 ${fmt(CA-CB,3)} 元</div>
+            </div>
+            <div class="result-card ${saving >= 0 ? 'winner' : 'loser'}">
+                <div class="label">直接成本对比 (A vs B)</div>
+                <div class="value">${fmt(MA_direct,3)} vs ${fmt(MB_direct,3)} 元</div>
+                <div class="desc">差 ${fmt(saving,3)} 元</div>
+            </div>
+            <div class="result-card">
+                <div class="label">直接成本节省</div>
+                <div class="value ${savingClass}">${fmt(saving,3)} 元</div>
+                <div class="desc">${saving > 0 ? 'B更省' : saving < 0 ? 'A更省' : '相同'}</div>
+            </div>
+            <div class="result-card">
+                <div class="label">时间差 (A-B)</div>
+                <div class="value ${timeClass}">${fmt(timeDiff,1)} min</div>
+                <div class="desc">${timeDiff > 0 ? 'A更快' : timeDiff < 0 ? 'B更快' : '相同'}</div>
+            </div>
+            <div class="result-card">
+                <div class="label">平均速度 (A / B)</div>
+                <div class="value">${fmt(VA,2)} / ${fmt(VB,2)} km/h</div>
+                <div class="desc">B速度优势 ${fmt(VB-VA,2)} km/h</div>
+            </div>
+            <div class="result-card">
+                <div class="label">每公里直接成本 (A / B)</div>
+                <div class="value">${fmt(mA,4)} / ${fmt(mB,4)} 元/km</div>
+            </div>
+        `;
+        container.innerHTML = html;
+    }
+
+    // ==================== 距离明细（排序：临界→等效→时间） ====================
+    function renderDistanceResults(data) {
+        const { dBCritical, dBdirectEq, dBtimeEq, dBeconEq, dAeconEq, dB, dA } = data;
+        const container = document.getElementById('distanceResults');
+        const dCritClass = dB <= dBCritical ? 'good-strong' : 'bad-strong';
+        const timeEqClass = dB <= dBtimeEq ? 'good-strong' : 'bad-light';
+
+        let html = `
+            <div class="result-card ${dB <= dBCritical ? 'winner' : 'loser'}">
+                <div class="label">B 经济临界距离（最重要）</div>
+                <div class="value ${dCritClass}">${fmt(dBCritical,3)} km</div>
+                <div class="desc">B实际=${fmt(dB,2)} km → ${dB<=dBCritical?'✅ 经济占优':'⚠️ A占优'}</div>
+            </div>
+            <div class="result-card ${dB <= dBtimeEq ? 'winner' : 'loser'}">
+                <div class="label">B 时间等效距离</div>
+                <div class="value ${timeEqClass}">${fmt(dBtimeEq,3)} km</div>
+                <div class="desc">B最多走 ${fmt(dBtimeEq,2)} km 不增加时间</div>
+            </div>
+            <div class="result-card">
+                <div class="label">B→A 经济等效距离</div>
+                <div class="value">${fmt(dBeconEq,3)} km</div>
+                <div class="desc">B走${fmt(dB,1)}km ≈ A走${fmt(dBeconEq,2)}km</div>
+            </div>
+            <div class="result-card">
+                <div class="label">A→B 经济等效距离</div>
+                <div class="value">${fmt(dAeconEq,3)} km</div>
+                <div class="desc">A走${fmt(dA,1)}km ≈ B走${fmt(dAeconEq,2)}km</div>
+            </div>
+            <div class="result-card">
+                <div class="label">直接成本等效距离</div>
+                <div class="value">${fmt(dBdirectEq,3)} km</div>
+                <div class="desc">仅考虑油费+损耗</div>
+            </div>
+        `;
+        container.innerHTML = html;
+    }
+
+    // ==================== 时间价值 ====================
+    function renderTimeValueResults(data) {
+        const { Wcritical, dBCritical, mA, mB, dA, dB, tA, tB, FA, FB, VA, VB } = data;
+        const container = document.getElementById('timeValueResults');
+        let html = '';
+        if (!isNaN(Wcritical) && isFinite(Wcritical)) {
+            html += `<div class="result-card"><div class="label">时间价值临界点 W*</div><div class="value highlight">${fmt(Wcritical,2)} 元/h</div><div class="desc">当前W=${fmt(getVal('globalTimeValue'),1)}元/h</div></div>`;
+        } else {
+            html += `<div class="result-card"><div class="label">时间价值临界点</div><div class="value">—</div></div>`;
+        }
+        html += `<div class="result-card"><div class="label">当前W对应B临界距离</div><div class="value">${fmt(dBCritical,3)} km</div></div>`;
+        container.innerHTML = html;
+
+        const wrapper = document.getElementById('timeValueTableWrapper');
+        const Wvalues = [0, 3, 6, 8.7, 12, 18, 30, 60];
+        let rows = '';
+        Wvalues.forEach(w => {
+            const dCrit = safeDiv(FA + mA * dA + w * tA / 60 - FB, mB + w / VB);
+            const highlight = Math.abs(w - getVal('globalTimeValue')) < 0.01;
+            rows += `<tr style="${highlight?'background:#f0fff4;font-weight:600;':''}"><td class="mono">${w}</td><td class="mono">${fmt(dCrit,3)}</td><td>${dB<=dCrit?'✅ B占优':'⚠️ A占优'}</td></tr>`;
+        });
+        wrapper.innerHTML = `<table><thead><tr><th>时间价值 W (元/h)</th><th>B临界距离 (km)</th><th>对比B实际 (${fmt(dB,1)}km)</th></tr></thead><tbody>${rows}</tbody></table>`;
+    }
+
+    // ==================== 安全与个性化（按风险梯度排序） ====================
+    function renderSafetyPersonalizedResults(data) {
+        const { RA, RB, RR, HA, HB, safetyPremium, comfortPremium, CA, CB, dBCritical, VA, VB, bB, qB, P, fB, W } = data;
+        const safetyContainer = document.getElementById('safetyResults');
+        const rrClass = riskGradientClass(RR);
+        const comfortDiff = HB - HA;
+        const comfortClass = comfortDiff >= 2 ? 'good-strong' : comfortDiff > 0 ? 'good-light' : 'bad-light';
+
+        let safetyHtml = `
+            <div class="result-card ${RR < 1 ? 'winner' : ''}">
+                <div class="label">安全暴露比 RR（最关键）</div>
+                <div class="value ${rrClass}">${fmt(RR,3)}</div>
+                <div class="desc">${RR < 1 ? `B风险为A的 ${fmt(RR*100,1)}%` : `B风险为A的 ${fmt(RR*100,1)}%`}</div>
+            </div>
+            <div class="result-card">
+                <div class="label">安全暴露指数 A / B</div>
+                <div class="value">${fmt(RA,2)} / ${fmt(RB,2)}</div>
+            </div>
+            <div class="result-card ${comfortDiff > 0 ? 'winner' : ''}">
+                <div class="label">舒适度对比 A / B</div>
+                <div class="value ${comfortClass}">${fmt(HA,1)} / ${fmt(HB,1)}</div>
+                <div class="desc">差值 ${comfortDiff > 0 ? '+' : ''}${fmt(comfortDiff,1)} 分</div>
+            </div>
+            <div class="result-card">
+                <div class="label">安全溢价</div>
+                <div class="value">${fmt(safetyPremium,2)} 元/次</div>
+            </div>
+            <div class="result-card">
+                <div class="label">舒适溢价</div>
+                <div class="value">${fmt(comfortPremium,2)} 元/次</div>
+            </div>
+        `;
+        safetyContainer.innerHTML = safetyHtml;
+
+        // 个性化调整后的临界距离
+        const personalizedContainer = document.getElementById('personalizedResults');
+        const mB_personal = P * fB / 100 + bB + qB;
+        const VB_personal = VB;
+        const dBCriticalPersonal = safeDiv(CA - safetyPremium - comfortPremium - getVal('bFixedCost'), mB_personal + W / VB_personal);
+        const dCritDiff = dBCriticalPersonal - dBCritical;
+        const dCritDiffClass = dCritDiff > 0 ? 'good-strong' : dCritDiff < 0 ? 'bad-light' : 'neutral';
+
+        let personalHtml = `
+            <div class="result-card">
+                <div class="label">A 调整后广义成本</div>
+                <div class="value">${fmt(CA,3)} 元</div>
+            </div>
+            <div class="result-card">
+                <div class="label">B 调整后广义成本</div>
+                <div class="value">${fmt(CB - safetyPremium - comfortPremium,3)} 元</div>
+            </div>
+            <div class="result-card ${dBCriticalPersonal > dBCritical ? 'winner' : ''}">
+                <div class="label">个性化调整后临界距离</div>
+                <div class="value ${dCritDiffClass}">${fmt(dBCriticalPersonal,3)} km</div>
+                <div class="desc">较基准 ${dCritDiff >= 0 ? '+' : ''}${fmt(dCritDiff,3)} km</div>
+            </div>
+        `;
+        personalizedContainer.innerHTML = personalHtml;
+    }
+
+    // ==================== 综合结论 ====================
+    function renderConclusion(data) {
+        const { econWinner, dBCritical, dB, dBtimeEq, dBeconEq, dAeconEq, RR, Wcritical, CA, CB, MA_direct, MB_direct, HA, HB, safetyPremium, comfortPremium, costDiffDirect, timeDiff } = data;
+        const box = document.getElementById('conclusionBox');
+        const winnerTagClass = econWinner === 'B' ? 'route-b-win' : econWinner === 'A' ? 'route-a-win' : '';
+        const winnerTagText = econWinner === 'B' ? '🅱️ 路线B' : econWinner === 'A' ? '🅰️ 路线A' : '⚖️ 持平';
+        let html = '';
+
+        html += `<p><strong>经济：</strong>`;
+        if (econWinner === 'B') html += `<span class="winner-tag ${winnerTagClass}">${winnerTagText}</span>占优，B成本 ${fmt(CB,2)} 元，A成本 ${fmt(CA,2)} 元。`;
+        else if (econWinner === 'A') html += `<span class="winner-tag ${winnerTagClass}">${winnerTagText}</span>占优，A成本 ${fmt(CA,2)} 元，B成本 ${fmt(CB,2)} 元。`;
+        else html += `两条路线经济成本持平。`;
+        html += `</p>`;
+
+        html += `<p><strong>临界距离：</strong>B经济临界距离 <strong>${fmt(dBCritical,2)} km</strong>。`;
+        if (dB <= dBCritical) html += `B实际 ${fmt(dB,2)} km 低于临界值，经济仍占优；`;
+        else html += `B实际 ${fmt(dB,2)} km 已超过临界值，A经济更优；`;
+        html += `</p>`;
+
+        html += `<p><strong>等效距离：</strong>B走 ${fmt(dB,2)} km ≈ A走 <strong>${fmt(dBeconEq,2)} km</strong>；A走 ${fmt(dA,2)} km ≈ B走 <strong>${fmt(dAeconEq,2)} km</strong>。</p>`;
+
+        if (!isNaN(RR) && isFinite(RR)) {
+            html += `<p><strong>安全：</strong>安全暴露比 RR = ${fmt(RR,3)}。`;
+            if (RR < 1) html += `B风险为A的 <strong>${fmt(RR*100,1)}%</strong>。`;
+            else html += `B风险高于A。`;
+            html += `</p>`;
+        }
+
+        if (!isNaN(Wcritical) && isFinite(Wcritical) && timeDiff > 0) {
+            html += `<p><strong>时间价值临界点：</strong>W* ≈ <strong>${fmt(Wcritical,2)} 元/h</strong>。当前W=${fmt(getVal('globalTimeValue'),1)} 元/h，建议选 ${getVal('globalTimeValue')>Wcritical?'A':'B'}。</p>`;
+        }
+
+        html += `<p style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border);"><strong>建议：</strong>`;
+        if (dB <= dBCritical && RR < 1) html += `B经济不劣，且更安全舒适，<strong>推荐B作为默认路线</strong>。`;
+        else if (econWinner === 'A' && RR < 1) html += `A经济占优但B更安全，<strong>需权衡安全溢价</strong>。`;
+        else if (econWinner === 'B') html += `<strong>B经济占优</strong>，可优先考虑。`;
+        else html += `<strong>请根据个人安全与舒适偏好综合决策</strong>。`;
+        html += `</p>`;
+
+        box.innerHTML = html;
+    }
+
+    // ==================== 图表 ====================
+    function drawTimeValueChart(mA, mB, dA, dB, tA, tB, FA, FB, VA, VB) {
+        const canvas = document.getElementById('timeValueChart');
+        const ctx = canvas.getContext('2d');
+        const width = canvas.width, height = canvas.height;
+        const padding = { left: 60, right: 30, top: 20, bottom: 40 };
+        const chartWidth = width - padding.left - padding.right;
+        const chartHeight = height - padding.top - padding.bottom;
+        ctx.clearRect(0, 0, width, height);
+
+        const Wmin = 0, Wmax = 60, Wstep = 3;
+        const points = [];
+        for (let w = Wmin; w <= Wmax; w += Wstep) {
+            const dCrit = safeDiv(FA + mA * dA + w * tA / 60 - FB, mB + w / VB);
+            if (!isNaN(dCrit)) points.push({ w, dCrit });
+        }
+        if (points.length === 0) return;
+        const dCritMin = Math.min(...points.map(p => p.dCrit)) - 0.5;
+        const dCritMax = Math.max(...points.map(p => p.dCrit)) + 0.5;
+        const dCritRange = dCritMax - dCritMin;
+
+        function xMap(w) { return padding.left + (w - Wmin) / (Wmax - Wmin) * chartWidth; }
+        function yMap(d) { return padding.top + chartHeight - (d - dCritMin) / dCritRange * chartHeight; }
+
+        ctx.strokeStyle = '#e2e8f0'; ctx.lineWidth = 0.5; ctx.font = '10px sans-serif'; ctx.fillStyle = '#718096';
+        for (let w = 0; w <= Wmax; w += 10) {
+            const x = xMap(w); ctx.beginPath(); ctx.moveTo(x, padding.top); ctx.lineTo(x, padding.top + chartHeight); ctx.stroke();
+            ctx.fillText(w + '', x - 8, padding.top + chartHeight + 16);
+        }
+        for (let d = Math.floor(dCritMin); d <= Math.ceil(dCritMax); d += 0.5) {
+            const y = yMap(d); ctx.beginPath(); ctx.moveTo(padding.left, y); ctx.lineTo(padding.left + chartWidth, y); ctx.stroke();
+            ctx.fillText(d.toFixed(1), 12, y + 3);
+        }
+        ctx.strokeStyle = '#4a5568'; ctx.lineWidth = 1.2;
+        ctx.beginPath(); ctx.moveTo(padding.left, padding.top); ctx.lineTo(padding.left, padding.top + chartHeight); ctx.lineTo(padding.left + chartWidth, padding.top + chartHeight); ctx.stroke();
+        ctx.fillStyle = '#1a202c'; ctx.font = '11px sans-serif';
+        ctx.fillText('时间价值 W (元/h)', padding.left + chartWidth / 2 - 50, height - 5);
+        ctx.save(); ctx.translate(14, padding.top + chartHeight / 2); ctx.rotate(-Math.PI / 2); ctx.fillText('B临界距离 (km)', 0, 0); ctx.restore();
+
+        ctx.strokeStyle = '#2f855a'; ctx.lineWidth = 2.5; ctx.beginPath();
+        points.forEach((p, i) => { const x = xMap(p.w), y = yMap(p.dCrit); i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y); });
+        ctx.stroke();
+        points.forEach(p => { ctx.fillStyle = '#2f855a'; ctx.beginPath(); ctx.arc(xMap(p.w), yMap(p.dCrit), 4, 0, Math.PI * 2); ctx.fill(); });
+
+        const currentW = getVal('globalTimeValue');
+        if (currentW >= Wmin && currentW <= Wmax) {
+            const cx = xMap(currentW);
+            ctx.strokeStyle = '#c05621'; ctx.lineWidth = 1.5; ctx.setLineDash([4, 3]);
+            ctx.beginPath(); ctx.moveTo(cx, padding.top); ctx.lineTo(cx, padding.top + chartHeight); ctx.stroke(); ctx.setLineDash([]);
+            const dAtW = safeDiv(FA + mA * dA + currentW * tA / 60 - FB, mB + currentW / VB);
+            const cy = yMap(dAtW);
+            ctx.fillStyle = '#c05621'; ctx.beginPath(); ctx.arc(cx, cy, 5, 0, Math.PI * 2); ctx.fill();
+            ctx.fillText(`W=${fmt(currentW,1)} → ${fmt(dAtW,2)}km`, cx + 8, cy - 6);
+        }
+
+        const dBval = getVal('bDistance');
+        if (dBval >= dCritMin && dBval <= dCritMax) {
+            const dy = yMap(dBval);
+            ctx.strokeStyle = '#4299e1'; ctx.lineWidth = 1.5; ctx.setLineDash([6, 3]);
+            ctx.beginPath(); ctx.moveTo(padding.left, dy); ctx.lineTo(padding.left + chartWidth, dy); ctx.stroke(); ctx.setLineDash([]);
+            ctx.fillStyle = '#4299e1'; ctx.fillText(`B实际=${fmt(dBval,2)}km`, padding.left + chartWidth - 100, dy - 6);
+        }
+    }
+
+    // ==================== 导出与重置 ====================
+    function exportResults() {
+        const resultsContainer = document.getElementById('resultsContainer');
+        if (resultsContainer.style.display === 'none') { alert('请先计算'); return; }
+        const text = resultsContainer.innerText || resultsContainer.textContent;
+        const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a'); a.href = url; a.download = '路线对比计算结果.txt'; a.click(); URL.revokeObjectURL(url);
+    }
+
+    function resetDefaults() {
+        const defaults = {
+            globalOilPrice: 7.5, globalTimeValue: 6, globalSafetyPremium: 0, globalComfortPremium: 0,
+            aDistance: 5, aTime: 16, aFuelConsumption: 3.0, aBrakeWear: 0.005, aDrivetrainWear: 0.002, aFixedCost: 0, aRiskIndex: 1.0, aComfort: 5,
+            bDistance: 6, bTime: 15, bFuelConsumption: 2.2, bBrakeWear: 0.003, bDrivetrainWear: 0.001, bFixedCost: 0, bRiskIndex: 0.3, bComfort: 8
+        };
+        Object.keys(defaults).forEach(id => document.getElementById(id).value = defaults[id]);
+        updateSpeedDisplay();
+        document.getElementById('resultsContainer').style.display = 'none';
+        document.getElementById('emptyState').style.display = 'block';
+    }
+
+    document.getElementById('resultsContainer').style.display = 'none';
+    document.getElementById('emptyState').style.display = 'block';
+</script>
+</body>
+</html>

@@ -1,0 +1,1132 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>健身房训练逻辑 · 修补厂方案</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Source+Sans+3:wght@300;400;600;700;900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #faf8f5;
+  --surface: #ffffff;
+  --surface-warm: #fdf9f3;
+  --accent: #c4611e;
+  --accent-light: #f4d9bc;
+  --accent-bg: #fef7ef;
+  --green: #2a7d5f;
+  --green-light: #e8f5ef;
+  --green-bg: #f0faf5;
+  --blue: #2b6cb0;
+  --blue-light: #dbeafe;
+  --red: #b94a3a;
+  --red-light: #fde8e5;
+  --red-bg: #fef5f3;
+  --yellow: #b8860b;
+  --yellow-light: #fef9e7;
+  --gray: #6b7280;
+  --gray-light: #f3f4f6;
+  --text: #1c1917;
+  --text-muted: #78716c;
+  --text-light: #a8a29e;
+  --border: #e7e5e4;
+  --border-light: #f0eeec;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.04);
+  --shadow: 0 4px 20px rgba(0,0,0,0.05);
+  --shadow-lg: 0 10px 40px rgba(0,0,0,0.06);
+  --radius: 14px;
+  --radius-sm: 8px;
+  --radius-lg: 20px;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: 'Source Sans 3', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+}
+.container { max-width: 1060px; margin: 0 auto; padding: 0 24px; }
+
+/* ===== HERO ===== */
+.hero {
+  padding: 56px 0 36px;
+  text-align: center;
+  position: relative;
+}
+.hero::before {
+  content: '';
+  position: absolute;
+  top: -60px; left: 50%; transform: translateX(-50%);
+  width: 600px; height: 300px;
+  background: radial-gradient(ellipse, var(--accent-light) 0%, transparent 70%);
+  opacity: 0.25;
+  pointer-events: none;
+}
+.hero-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 14px;
+  background: var(--accent);
+  color: #fff;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin-bottom: 18px;
+  animation: fadeUp 0.5s ease both;
+}
+.hero h1 {
+  font-family: 'DM Serif Display', serif;
+  font-size: clamp(30px, 4.5vw, 48px);
+  line-height: 1.15;
+  margin-bottom: 10px;
+  animation: fadeUp 0.5s ease 0.1s both;
+}
+.hero h1 em {
+  font-style: normal;
+  color: var(--accent);
+}
+.hero-sub {
+  font-size: 16px;
+  color: var(--text-muted);
+  max-width: 560px;
+  margin: 0 auto;
+  animation: fadeUp 0.5s ease 0.2s both;
+}
+
+/* ===== META CARDS ===== */
+.meta-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 14px;
+  margin: 30px 0 48px;
+  animation: fadeUp 0.5s ease 0.3s both;
+}
+.meta-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px 16px;
+  text-align: center;
+  box-shadow: var(--shadow-sm);
+}
+.meta-card .mc-icon { font-size: 24px; margin-bottom: 6px; }
+.meta-card .mc-val {
+  font-family: 'DM Mono', monospace;
+  font-size: 22px;
+  font-weight: 500;
+  color: var(--accent);
+}
+.meta-card .mc-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+/* ===== SECTION ===== */
+.section { margin-bottom: 52px; }
+.sec-head {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  margin-bottom: 20px;
+}
+.sec-num {
+  font-family: 'DM Serif Display', serif;
+  font-size: 36px;
+  color: var(--accent);
+  opacity: 0.25;
+  line-height: 1;
+}
+.sec-title {
+  font-family: 'DM Serif Display', serif;
+  font-size: 26px;
+  line-height: 1.2;
+}
+.sec-desc {
+  font-size: 14px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+.sec-line {
+  height: 2px;
+  background: linear-gradient(90deg, var(--accent-light), transparent);
+  margin-bottom: 24px;
+}
+
+/* ===== LOGIC DIAGRAM ===== */
+.logic-diagram {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 36px 32px;
+  box-shadow: var(--shadow);
+  margin: 24px 0;
+}
+.logic-columns {
+  display: grid;
+  grid-template-columns: 1fr 60px 1fr 60px 1fr;
+  align-items: center;
+  gap: 0;
+  margin: 24px 0;
+}
+.logic-box {
+  border-radius: var(--radius);
+  padding: 20px 18px;
+  text-align: center;
+}
+.logic-box.engine {
+  background: linear-gradient(135deg, #2a7d5f, #34a077);
+  color: #fff;
+}
+.logic-box.skill {
+  background: linear-gradient(135deg, #2b6cb0, #4a90d9);
+  color: #fff;
+}
+.logic-box.repair {
+  background: linear-gradient(135deg, #c4611e, #e07830);
+  color: #fff;
+}
+.logic-box h4 { font-size: 18px; font-weight: 700; margin-bottom: 6px; }
+.logic-box p { font-size: 13px; opacity: 0.9; line-height: 1.5; }
+.logic-arrow {
+  text-align: center;
+  font-size: 28px;
+  color: var(--text-light);
+}
+.logic-note {
+  text-align: center;
+  margin-top: 20px;
+  padding: 16px 20px;
+  background: var(--yellow-light);
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  color: var(--yellow);
+  font-weight: 600;
+}
+
+/* ===== PIE / DONUT (CSS) ===== */
+.time-chart {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 32px;
+  margin: 28px 0;
+  flex-wrap: wrap;
+}
+.donut {
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  background: conic-gradient(
+    #2a7d5f 0deg 180deg,
+    #2b6cb0 180deg 252deg,
+    #c4611e 252deg 324deg,
+    #d4a574 324deg 360deg
+  );
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+.donut-hole {
+  width: 120px;
+  height: 120px;
+  background: var(--bg);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+}
+.donut-hole span:first-child {
+  font-family: 'DM Mono', monospace;
+  font-size: 28px;
+  font-weight: 500;
+  color: var(--text);
+}
+.donut-hole span:last-child {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+.donut-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.donut-legend .dl-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+}
+.dl-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+.dl-item .dl-pct {
+  font-family: 'DM Mono', monospace;
+  font-size: 13px;
+  color: var(--text-muted);
+  min-width: 36px;
+}
+
+/* ===== MOVEMENT CARDS ===== */
+.mov-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+.mov-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 24px;
+  box-shadow: var(--shadow-sm);
+  display: grid;
+  grid-template-columns: 52px 1fr auto;
+  gap: 18px;
+  align-items: start;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.mov-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow);
+}
+.mov-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+}
+.mov-icon.keep { background: var(--green-light); }
+.mov-icon.drop { background: var(--red-light); }
+.mov-icon.opt { background: var(--blue-light); }
+.mov-body h3 {
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 2px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.mov-body .mov-sub {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+}
+.mov-body .mov-why {
+  font-size: 14px;
+  line-height: 1.65;
+}
+.mov-status {
+  flex-shrink: 0;
+}
+.status-tag {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.status-tag.keep { background: var(--green-light); color: var(--green); }
+.status-tag.drop { background: var(--red-light); color: var(--red); }
+.status-tag.opt { background: var(--blue-light); color: var(--blue); }
+
+/* ===== NECESSITY BAR ===== */
+.nec-wrap {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+}
+.nec-bar {
+  width: 28px;
+  height: 8px;
+  border-radius: 3px;
+  background: #eae6e1;
+}
+.nec-bar.on-green { background: var(--green); }
+.nec-bar.on-blue { background: var(--blue); }
+.nec-bar.on-red { background: var(--red); opacity: 0.4; }
+.nec-label {
+  font-size: 11px;
+  color: var(--text-light);
+  margin-left: 6px;
+}
+
+/* ===== COMPARISON TABLE ===== */
+.cmp-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  background: var(--surface);
+  border-radius: var(--radius);
+  overflow: hidden;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+  margin: 16px 0;
+  font-size: 14px;
+}
+.cmp-table th {
+  background: var(--surface-warm);
+  padding: 12px 16px;
+  text-align: left;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+  font-weight: 600;
+  border-bottom: 2px solid var(--border);
+}
+.cmp-table td {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border-light);
+  vertical-align: top;
+}
+.cmp-table tr:last-child td { border-bottom: none; }
+.cmp-table tr:hover { background: var(--surface-warm); }
+
+/* ===== TIMELINE ===== */
+.tl-wrap { margin: 24px 0; }
+.tl-row {
+  display: grid;
+  grid-template-columns: 90px 1fr;
+  gap: 16px;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--border-light);
+}
+.tl-row:last-child { border-bottom: none; }
+.tl-time {
+  font-family: 'DM Mono', monospace;
+  font-size: 12px;
+  color: var(--accent);
+  padding-top: 2px;
+}
+.tl-content h4 { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
+.tl-content p { font-size: 13px; color: var(--text-muted); line-height: 1.6; }
+
+/* ===== PHILOSOPHY BOX ===== */
+.phil-box {
+  background: var(--accent-bg);
+  border: 1px solid var(--accent-light);
+  border-left: 4px solid var(--accent);
+  border-radius: var(--radius);
+  padding: 24px 28px;
+  margin: 24px 0;
+}
+.phil-box h3 {
+  font-family: 'DM Serif Display', serif;
+  font-size: 20px;
+  margin-bottom: 10px;
+  color: var(--accent);
+}
+.phil-box p {
+  font-size: 15px;
+  line-height: 1.7;
+  color: var(--text);
+}
+.phil-box p + p { margin-top: 10px; }
+
+/* ===== QUICK SESSION ===== */
+.session-box {
+  background: var(--surface);
+  border: 2px solid var(--green);
+  border-radius: var(--radius-lg);
+  padding: 28px;
+  box-shadow: var(--shadow);
+  margin: 24px 0;
+}
+.session-box h3 {
+  font-family: 'DM Serif Display', serif;
+  font-size: 22px;
+  color: var(--green);
+  margin-bottom: 6px;
+}
+.session-box .session-sub {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-bottom: 20px;
+}
+.session-list {
+  list-style: none;
+}
+.session-list li {
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border-light);
+  display: grid;
+  grid-template-columns: 28px 1fr auto;
+  gap: 12px;
+  align-items: center;
+  font-size: 14px;
+}
+.session-list li:last-child { border-bottom: none; }
+.session-list .sl-num {
+  width: 28px;
+  height: 28px;
+  background: var(--green-light);
+  color: var(--green);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'DM Mono', monospace;
+  font-size: 13px;
+  font-weight: 600;
+}
+.session-list .sl-detail {
+  font-family: 'DM Mono', monospace;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+/* ===== STICK FIGURE ILLUSTRATION ===== */
+.stick-scene {
+  display: flex;
+  justify-content: center;
+  gap: 48px;
+  margin: 30px 0;
+  flex-wrap: wrap;
+}
+.stick-item {
+  text-align: center;
+}
+.stick-item svg { display: block; margin: 0 auto 10px; }
+.stick-item .si-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+}
+.stick-item .si-sub {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+/* ===== ANIMATION ===== */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ===== FOOTER ===== */
+.footer {
+  text-align: center;
+  padding: 36px 0;
+  font-size: 12px;
+  color: var(--text-light);
+  border-top: 1px solid var(--border);
+  margin-top: 20px;
+}
+
+@media (max-width: 768px) {
+  .logic-columns { grid-template-columns: 1fr; gap: 12px; }
+  .logic-arrow { transform: rotate(90deg); }
+  .mov-card { grid-template-columns: 1fr; }
+  .mov-status { text-align: left; }
+  .stick-scene { gap: 24px; }
+  .time-chart { flex-direction: column; }
+}
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<header class="hero">
+<div class="container">
+  <div class="hero-pill">&#9878; Training Blueprint</div>
+  <h1>健身房是<em>修补厂</em>，不是主战场</h1>
+  <p class="hero-sub">骑行是引擎，体操是技能，徒步是享受。健身房的唯一使命：修复肌肉不均衡，防止未来出问题。</p>
+
+  <div class="meta-row">
+    <div class="meta-card"><div class="mc-icon">🚴</div><div class="mc-val">26</div><div class="mc-label">km/h 骑行均速</div></div>
+    <div class="meta-card"><div class="mc-icon">💪</div><div class="mc-val">20</div><div class="mc-label">引体向上</div></div>
+    <div class="meta-card"><div class="mc-icon">💪</div><div class="mc-val">30</div><div class="mc-label">双杠臂屈伸</div></div>
+    <div class="meta-card"><div class="mc-icon">🏋️</div><div class="mc-val">150</div><div class="mc-label">臀推 kg×10</div></div>
+    <div class="meta-card"><div class="mc-icon">⚖️</div><div class="mc-val">70</div><div class="mc-label">体重 kg</div></div>
+  </div>
+</div>
+</header>
+
+<main class="container">
+
+<!-- SECTION 1: CORE LOGIC -->
+<section class="section">
+  <div class="sec-head">
+    <div class="sec-num">01</div>
+    <div>
+      <div class="sec-title">训练体系的分工逻辑</div>
+      <div class="sec-desc">每个部分各司其职，健身房只做"别处做不了的事"</div>
+    </div>
+  </div>
+  <div class="sec-line"></div>
+
+  <div class="logic-diagram">
+    <div class="logic-columns">
+      <div class="logic-box engine">
+        <h4>🚴 引擎</h4>
+        <p>骑行 · 徒步<br>心肺 · 髋伸展<br>下肢功能 · 享受</p>
+      </div>
+      <div class="logic-arrow">→</div>
+      <div class="logic-box skill">
+        <h4>🤸 技能</h4>
+        <p>引体 · 双杠 · 俄挺<br>上肢拉力 · 核心<br>体操进阶 · 享受</p>
+      </div>
+      <div class="logic-arrow">→</div>
+      <div class="logic-box repair">
+        <h4>🔧 修补厂</h4>
+        <p>Gym · 20-30分钟<br>修复不均衡<br>预防伤病 · 按需补足</p>
+      </div>
+    </div>
+    <div class="logic-note">⚠️ 健身房不做引擎和技能的工作。只做骑行/体操/徒步覆盖不了的部分。</div>
+  </div>
+
+  <!-- Time allocation donut -->
+  <div class="time-chart">
+    <div class="donut">
+      <div class="donut-hole">
+        <span>~7h</span>
+        <span>每周总量</span>
+      </div>
+    </div>
+    <div class="donut-legend">
+      <div class="dl-item">
+        <div class="dl-dot" style="background:#2a7d5f"></div>
+        <div><strong>骑行+徒步</strong> <span class="dl-pct">50%</span><br><span style="font-size:12px;color:var(--text-muted)">~3.5h · 引擎 · 心肺+髋伸展</span></div>
+      </div>
+      <div class="dl-item">
+        <div class="dl-dot" style="background:#2b6cb0"></div>
+        <div><strong>体操训练</strong> <span class="dl-pct">20%</span><br><span style="font-size:12px;color:var(--text-muted)">~1.5h · 技能 · 上肢+核心</span></div>
+      </div>
+      <div class="dl-item">
+        <div class="dl-dot" style="background:#c4611e"></div>
+        <div><strong>Gym 修补</strong> <span class="dl-pct">20%</span><br><span style="font-size:12px;color:var(--text-muted)">~1.5h · 修复 · 后链+脊柱+握力</span></div>
+      </div>
+      <div class="dl-item">
+        <div class="dl-dot" style="background:#d4a574"></div>
+        <div><strong>拉伸/恢复</strong> <span class="dl-pct">10%</span><br><span style="font-size:12px;color:var(--text-muted)">~0.5h · 踝关节+髋屈肌</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SECTION 2: WHAT'S COVERED -->
+<section class="section">
+  <div class="sec-head">
+    <div class="sec-num">02</div>
+    <div>
+      <div class="sec-title">骑行+体操已经覆盖了什么</div>
+      <div class="sec-desc">理解已有基础，才知道真正缺什么</div>
+    </div>
+  </div>
+  <div class="sec-line"></div>
+
+  <div class="stick-scene">
+    <!-- Body diagram: covered areas -->
+    <div class="stick-item">
+      <svg width="140" height="320" viewBox="0 0 140 320">
+        <!-- Head -->
+        <circle cx="70" cy="26" r="18" fill="var(--green-light)" stroke="var(--green)" stroke-width="1.5"/>
+        <!-- Neck -->
+        <line x1="70" y1="44" x2="70" y2="58" stroke="#ccc" stroke-width="4" stroke-linecap="round"/>
+        <!-- Torso -->
+        <rect x="44" y="58" width="52" height="80" rx="8" fill="var(--green-light)" stroke="var(--green)" stroke-width="1.5"/>
+        <!-- Core label -->
+        <text x="70" y="105" text-anchor="middle" font-size="10" fill="var(--green)" font-weight="600">核心 ✓</text>
+        <!-- Left arm -->
+        <line x1="44" y1="68" x2="18" y2="120" stroke="var(--green)" stroke-width="4" stroke-linecap="round"/>
+        <line x1="18" y1="120" x2="12" y2="168" stroke="var(--green)" stroke-width="3.5" stroke-linecap="round"/>
+        <!-- Right arm -->
+        <line x1="96" y1="68" x2="122" y2="120" stroke="var(--green)" stroke-width="4" stroke-linecap="round"/>
+        <line x1="122" y1="120" x2="128" y2="168" stroke="var(--green)" stroke-width="3.5" stroke-linecap="round"/>
+        <!-- Lats highlight -->
+        <rect x="46" y="70" width="10" height="30" rx="3" fill="var(--green)" opacity="0.25"/>
+        <rect x="84" y="70" width="10" height="30" rx="3" fill="var(--green)" opacity="0.25"/>
+        <text x="70" y="78" text-anchor="middle" font-size="9" fill="var(--green)" font-weight="600">背阔肌</text>
+        <!-- Left leg -->
+        <line x1="58" y1="138" x2="50" y2="210" stroke="var(--green)" stroke-width="5" stroke-linecap="round"/>
+        <line x1="50" y1="210" x2="48" y2="270" stroke="var(--green)" stroke-width="4.5" stroke-linecap="round"/>
+        <!-- Right leg -->
+        <line x1="82" y1="138" x2="90" y2="210" stroke="var(--green)" stroke-width="5" stroke-linecap="round"/>
+        <line x1="90" y1="210" x2="92" y2="270" stroke="var(--green)" stroke-width="4.5" stroke-linecap="round"/>
+        <!-- Feet -->
+        <line x1="48" y1="270" x2="36" y2="278" stroke="#ccc" stroke-width="3" stroke-linecap="round"/>
+        <line x1="92" y1="270" x2="104" y2="278" stroke="#ccc" stroke-width="3" stroke-linecap="round"/>
+        <!-- Glute highlight -->
+        <circle cx="62" cy="145" r="10" fill="var(--accent)" opacity="0.3" stroke="var(--accent)" stroke-width="1"/>
+        <circle cx="78" cy="145" r="10" fill="var(--accent)" opacity="0.3" stroke="var(--accent)" stroke-width="1"/>
+        <text x="70" y="163" text-anchor="middle" font-size="9" fill="var(--accent)" font-weight="600">臀肌 ✓✓</text>
+        <!-- Quad highlight -->
+        <ellipse cx="54" cy="195" rx="8" ry="22" fill="var(--green)" opacity="0.15" stroke="var(--green)" stroke-width="1"/>
+        <ellipse cx="86" cy="195" rx="8" ry="22" fill="var(--green)" opacity="0.15" stroke="var(--green)" stroke-width="1"/>
+        <text x="70" y="200" text-anchor="middle" font-size="9" fill="var(--green)" font-weight="600">股四头 ✓</text>
+      </svg>
+      <div class="si-label" style="color:var(--green)">骑行 + 体操已覆盖</div>
+      <div class="si-sub">臀肌 · 股四头(浅ROM) · 背阔肌 · 核心 · 肩前</div>
+    </div>
+
+    <!-- Body diagram: gaps -->
+    <div class="stick-item">
+      <svg width="140" height="320" viewBox="0 0 140 320">
+        <circle cx="70" cy="26" r="18" fill="#f3f4f6" stroke="#ddd" stroke-width="1.5"/>
+        <line x1="70" y1="44" x2="70" y2="58" stroke="#ddd" stroke-width="4" stroke-linecap="round"/>
+        <rect x="44" y="58" width="52" height="80" rx="8" fill="#f3f4f6" stroke="#ddd" stroke-width="1.5"/>
+        <!-- Lats (dimmed) -->
+        <rect x="46" y="70" width="10" height="30" rx="3" fill="#ddd" opacity="0.3"/>
+        <rect x="84" y="70" width="10" height="30" rx="3" fill="#ddd" opacity="0.3"/>
+        <!-- Mid-back gap -->
+        <rect x="52" y="75" width="36" height="20" rx="4" fill="var(--red)" opacity="0.15" stroke="var(--red)" stroke-width="1"/>
+        <text x="70" y="88" text-anchor="middle" font-size="8" fill="var(--red)" font-weight="600">中背 ✗</text>
+        <!-- Lower back gap -->
+        <rect x="52" y="115" width="36" height="16" rx="3" fill="var(--red)" opacity="0.25" stroke="var(--red)" stroke-width="1"/>
+        <text x="70" y="126" text-anchor="middle" font-size="8" fill="var(--red)" font-weight="600">腰椎 ✗</text>
+        <line x1="44" y1="68" x2="18" y2="120" stroke="#ddd" stroke-width="4" stroke-linecap="round"/>
+        <line x1="18" y1="120" x2="12" y2="168" stroke="#ddd" stroke-width="3.5" stroke-linecap="round"/>
+        <line x1="96" y1="68" x2="122" y2="120" stroke="#ddd" stroke-width="4" stroke-linecap="round"/>
+        <line x1="122" y1="120" x2="128" y2="168" stroke="#ddd" stroke-width="3.5" stroke-linecap="round"/>
+        <line x1="58" y1="138" x2="50" y2="210" stroke="#ddd" stroke-width="5" stroke-linecap="round"/>
+        <line x1="50" y1="210" x2="48" y2="270" stroke="#ddd" stroke-width="4.5" stroke-linecap="round"/>
+        <line x1="82" y1="138" x2="90" y2="210" stroke="#ddd" stroke-width="5" stroke-linecap="round"/>
+        <line x1="90" y1="210" x2="92" y2="270" stroke="#ddd" stroke-width="4.5" stroke-linecap="round"/>
+        <line x1="48" y1="270" x2="36" y2="278" stroke="#ddd" stroke-width="3" stroke-linecap="round"/>
+        <line x1="92" y1="270" x2="104" y2="278" stroke="#ddd" stroke-width="3" stroke-linecap="round"/>
+        <!-- Hamstring gap -->
+        <line x1="52" y1="225" x2="52" y2="260" stroke="var(--red)" stroke-width="6" stroke-linecap="round" opacity="0.4"/>
+        <line x1="88" y1="225" x2="88" y2="260" stroke="var(--red)" stroke-width="6" stroke-linecap="round" opacity="0.4"/>
+        <text x="70" y="248" text-anchor="middle" font-size="8" fill="var(--red)" font-weight="600">腘绳肌 ✗</text>
+        <!-- Grip -->
+        <text x="10" y="180" font-size="8" fill="var(--red)" font-weight="600">握力△</text>
+        <!-- Glute dimmed -->
+        <circle cx="62" cy="145" r="10" fill="#ddd" opacity="0.2"/>
+        <circle cx="78" cy="145" r="10" fill="#ddd" opacity="0.2"/>
+      </svg>
+      <div class="si-label" style="color:var(--red)">Gym 需要补足</div>
+      <div class="si-sub">腘绳肌 · 中背 · 腰椎压缩耐受 · 髋铰链模式</div>
+    </div>
+  </div>
+
+  <table class="cmp-table">
+    <thead>
+      <tr>
+        <th>身体区域</th>
+        <th>骑行覆盖</th>
+        <th>体操覆盖</th>
+        <th>日常覆盖</th>
+        <th>Gym 需求</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>臀大肌</strong></td>
+        <td style="color:var(--green)">★★★★★</td>
+        <td>★</td>
+        <td>★★</td>
+        <td><span class="status-tag drop">不需要</span></td>
+      </tr>
+      <tr>
+        <td><strong>股四头肌</strong></td>
+        <td style="color:var(--green)">★★★ (浅ROM)</td>
+        <td>—</td>
+        <td>★★★ (蹲厕全蹲)</td>
+        <td><span class="status-tag opt">可选补充</span></td>
+      </tr>
+      <tr>
+        <td><strong>腘绳肌</strong></td>
+        <td>★</td>
+        <td>—</td>
+        <td>—</td>
+        <td><span class="status-tag keep">必须</span></td>
+      </tr>
+      <tr>
+        <td><strong>背阔肌</strong></td>
+        <td>—</td>
+        <td style="color:var(--green)">★★★★★</td>
+        <td>—</td>
+        <td><span class="status-tag drop">不需要</span></td>
+      </tr>
+      <tr>
+        <td><strong>中背(菱形肌)</strong></td>
+        <td>—</td>
+        <td>★★ (面拉)</td>
+        <td>—</td>
+        <td><span class="status-tag keep">需要加强</span></td>
+      </tr>
+      <tr>
+        <td><strong>竖脊肌</strong></td>
+        <td>★</td>
+        <td>★★</td>
+        <td>★</td>
+        <td><span class="status-tag keep">必须</span></td>
+      </tr>
+      <tr>
+        <td><strong>脊柱压缩耐受</strong></td>
+        <td>—</td>
+        <td>—</td>
+        <td>—</td>
+        <td><span class="status-tag keep">必须</span></td>
+      </tr>
+      <tr>
+        <td><strong>握力</strong></td>
+        <td>—</td>
+        <td>★★★</td>
+        <td>—</td>
+        <td><span class="status-tag opt">可选</span></td>
+      </tr>
+      <tr>
+        <td><strong>核心</strong></td>
+        <td>★</td>
+        <td style="color:var(--green)">★★★★★</td>
+        <td>★★</td>
+        <td><span class="status-tag drop">不需要</span></td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- SECTION 3: RETAINED MOVEMENTS -->
+<section class="section">
+  <div class="sec-head">
+    <div class="sec-num">03</div>
+    <div>
+      <div class="sec-title">保留的动作</div>
+      <div class="sec-desc">每个动作解决一个具体问题，没有冗余</div>
+    </div>
+  </div>
+  <div class="sec-line"></div>
+
+  <div class="mov-grid">
+
+    <!-- RDL -->
+    <div class="mov-card">
+      <div class="mov-icon keep">🔄</div>
+      <div class="mov-body">
+        <h3>RDL（罗马尼亚硬拉）<span class="status-tag keep">必须 · 优先级 1</span></h3>
+        <div class="mov-sub">空杆 × 8次 × 3组 · 不加重直到动作完美</div>
+        <div class="mov-why">
+          <strong>解决什么：</strong>髋铰链模式缺失——你的腰伤根源。学会"弯腰时用髋关节而不是腰椎发力"。这个技能直接保护日常搬重物、背包、骑行后弯腰等所有涉及弯腰的场景。<br>
+          <strong>为什么不加重：</strong>50kg已经证明在错误模式下会受伤。空杆练到完美的髋铰链动作模式，比任何重量都重要。<br>
+          <strong>什么时候加重：</strong>空杆×15次×3组、全程无腰痛、连续2周稳定后，每2周+2.5kg。
+        </div>
+        <div class="nec-wrap">
+          <div class="nec-bar on-green"></div><div class="nec-bar on-green"></div><div class="nec-bar on-green"></div><div class="nec-bar on-green"></div><div class="nec-bar on-green"></div>
+          <span class="nec-label">必要性 5/5</span>
+        </div>
+      </div>
+      <div class="mov-status"></div>
+    </div>
+
+    <!-- Nordic curl -->
+    <div class="mov-card">
+      <div class="mov-icon keep">🦵</div>
+      <div class="mov-body">
+        <h3>北欧挺（Nordic Curl）<span class="status-tag keep">必须 · 优先级 2</span></h3>
+        <div class="mov-sub">3组 × 3-5次 · 向前缓慢倒下，推回</div>
+        <div class="mov-why">
+          <strong>解决什么：</strong>腘绳肌力量——腿弯举45kg第6个抽筋证明这是明确短板。骑行几乎不训练腘绳肌。<br>
+          <strong>为什么选它而不是腿弯举：</strong>零器械需求、自重即可产生极高负荷、对腘绳肌的离心力量训练效率远超器械。<br>
+          <strong>对骑行的帮助：</strong>腘绳肌是骑行踏蹬中"拉起"阶段的辅助肌群，强腘绳肌=更圆滑的踏蹬。
+        </div>
+        <div class="nec-wrap">
+          <div class="nec-bar on-green"></div><div class="nec-bar on-green"></div><div class="nec-bar on-green"></div><div class="nec-bar on-green"></div><div class="nec-bar on-green"></div>
+          <span class="nec-label">必要性 5/5</span>
+        </div>
+      </div>
+      <div class="mov-status"></div>
+    </div>
+
+    <!-- Back extension -->
+    <div class="mov-card">
+      <div class="mov-icon keep">⛰️</div>
+      <div class="mov-body">
+        <h3>山羊挺身<span class="status-tag keep">必须 · 优先级 3</span></h3>
+        <div class="mov-sub">20-25kg × 10次 × 3组 · 手持哑铃/壶铃</div>
+        <div class="mov-why">
+          <strong>解决什么：</strong>竖脊肌维护——已经验证无痛且有效。在非压缩负荷下训练下背力量。<br>
+          <strong>与RDL的区别：</strong>山羊挺身训练的是"伸展力量"（把弯下去的身体拉回来），RDL训练的是"抗屈曲能力"（弯腰时保持脊柱不弯曲）。两者互补，都需要。<br>
+          <strong>加重策略：</strong>20kg×10稳定后→25kg→30kg，不急。
+        </div>
+        <div class="nec-wrap">
+          <div class="nec-bar on-green"></div><div class="nec-bar on-green"></div><div class="nec-bar on-green"></div><div class="nec-bar on-green"></div><div class="nec-bar"></div>
+          <span class="nec-label">必要性 4/5</span>
+        </div>
+      </div>
+      <div class="mov-status"></div>
+    </div>
+
+    <!-- Farmer carry -->
+    <div class="mov-card">
+      <div class="mov-icon keep">🚶</div>
+      <div class="mov-body">
+        <h3>农夫行走<span class="status-tag keep">保留 · 优先级 4</span></h3>
+        <div class="mov-sub">单手30kg × 3 × 40s · 双手60kg × 3 × 40s</div>
+        <div class="mov-why">
+          <strong>解决什么：</strong>握力 + 脊柱压缩耐受力 + 全身张力。这是唯一一个在直立位训练脊柱压缩的动作，不会触发腰伤。<br>
+          <strong>为什么保留：</strong>你说了——负重感是少有的享受，肌肉感受明显。享受=可持续=最重要。<br>
+          <strong>隐藏价值：</strong>单手农夫行走训练抗侧屈核心能力（身体不能往重物那边倒），这在骑行中转弯时有直接迁移。
+        </div>
+        <div class="nec-wrap">
+          <div class="nec-bar on-green"></div><div class="nec-bar on-green"></div><div class="nec-bar on-green"></div><div class="nec-bar"></div><div class="nec-bar"></div>
+          <span class="nec-label">必要性 3/5 · 享受加权 5/5</span>
+        </div>
+      </div>
+      <div class="mov-status"></div>
+    </div>
+
+    <!-- Cable row -->
+    <div class="mov-card">
+      <div class="mov-icon opt">🔗</div>
+      <div class="mov-body">
+        <h3>绳索划船<span class="status-tag opt">可选 · 有时间就做</span></h3>
+        <div class="mov-sub">120kg × 10 × 3-5组 · 底部停顿2秒夹紧肩胛骨</div>
+        <div class="mov-why">
+          <strong>解决什么：</strong>中背（菱形肌/中斜方肌）+ 肩胛骨后缩能力。引体向上练的是背阔肌（肩内收），不训练肩胛骨后缩。<br>
+          <strong>对体操的帮助：</strong>俄挺和前水平中肩胛骨需要极度前倾——如果后缩力量不足，肩胛骨控制不稳定。<br>
+          <strong>已在做：</strong>120kg×10说明有足够的力量基础，保持即可。
+        </div>
+        <div class="nec-wrap">
+          <div class="nec-bar on-blue"></div><div class="nec-bar on-blue"></div><div class="nec-bar on-blue"></div><div class="nec-bar"></div><div class="nec-bar"></div>
+          <span class="nec-label">必要性 3/5</span>
+        </div>
+      </div>
+      <div class="mov-status"></div>
+    </div>
+
+    <!-- Face pull -->
+    <div class="mov-card">
+      <div class="mov-icon opt">🎯</div>
+      <div class="mov-body">
+        <h3>面拉（加重版）<span class="status-tag opt">可选 · 肩关节维护</span></h3>
+        <div class="mov-sub">25-30kg × 8次 × 3组 · 从15kg×15加重减次</div>
+        <div class="mov-why">
+          <strong>解决什么：</strong>后三角肌+外旋肌群。你的体操训练让前肩承受大量负荷（俄挺/双力臂），面拉维持后肩的平衡。<br>
+          <strong>调整方向：</strong>从高次数耐力型(15kg×15)转向中等次数力量型(25-30kg×8)。面拉练力量比练耐力对你更有价值。
+        </div>
+        <div class="nec-wrap">
+          <div class="nec-bar on-blue"></div><div class="nec-bar on-blue"></div><div class="nec-bar"></div><div class="nec-bar"></div><div class="nec-bar"></div>
+          <span class="nec-label">必要性 2/5</span>
+        </div>
+      </div>
+      <div class="mov-status"></div>
+    </div>
+
+    <!-- Leg press (optional) -->
+    <div class="mov-card">
+      <div class="mov-icon opt">🦿</div>
+      <div class="mov-body">
+        <h3>腿举<span class="status-tag opt">可选 · 股四头补充</span></h3>
+        <div class="mov-sub">60kg × 10 × 3组 · 不追求加重</div>
+        <div class="mov-why">
+          <strong>解决什么：</strong>股四头肌的深ROM维持——骑行只练浅ROM，腿举补足全范围。<br>
+          <strong>不追求重量的理由：</strong>骑行+日常蹲厕已覆盖股四头肌的功能需求。腿举只是"保险"，不是"主攻"。<br>
+          <strong>定位：</strong>如果有时间就做，没时间可以跳过。优先级低于RDL/北欧挺/山羊挺身。
+        </div>
+        <div class="nec-wrap">
+          <div class="nec-bar on-blue"></div><div class="nec-bar on-blue"></div><div class="nec-bar"></div><div class="nec-bar"></div><div class="nec-bar"></div>
+          <span class="nec-label">必要性 2/5</span>
+        </div>
+      </div>
+      <div class="mov-status"></div>
+    </div>
+
+  </div>
+</section>
+
+<!-- SECTION 4: DROPPED MOVEMENTS -->
+<section class="section">
+  <div class="sec-head">
+    <div class="sec-num">04</div>
+    <div>
+      <div class="sec-title">舍弃的动作</div>
+      <div class="sec-desc">不是"不好"，是"对你的体系来说不需要"</div>
+    </div>
+  </div>
+  <div class="sec-line"></div>
+
+  <div class="mov-grid">
+
+    <!-- Hip thrust -->
+    <div class="mov-card">
+      <div class="mov-icon drop">❌</div>
+      <div class="mov-body">
+        <h3>臀推<span class="status-tag drop">删除</span></h3>
+        <div class="mov-why">
+          <strong>删除理由：</strong>骑行累计数十万次髋伸展，臀推从150kg加到220kg对骑行/体操/徒步目标的边际收益接近零。每次臀推占20分钟训练时间——把这些时间给北欧挺和RDL，对整体均衡的改善大得多。<br>
+          <strong>臀肌会退化吗：</strong>不会。每次骑行的站姿摇车冲刺就是轻负荷版臀推。只要骑行不停，臀肌就不会掉。
+        </div>
+      </div>
+      <div class="mov-status"></div>
+    </div>
+
+    <!-- Back squat -->
+    <div class="mov-card">
+      <div class="mov-icon drop">❌</div>
+      <div class="mov-body">
+        <h3>杠铃深蹲（前蹲/后蹲）<span class="status-tag drop">删除</span></h3>
+        <div class="mov-why">
+          <strong>删除理由：</strong>日常蹲厕全蹲没问题+骑行+徒步已覆盖下肢功能需求。深蹲的学习成本高（动作模式+踝背屈+核心抗屈曲），投入产出比不如腿举直接。<br>
+          <strong>如果未来想学：</strong>先完成高脚杯深蹲过渡期。但不学也完全不影响你的运动体系。
+        </div>
+      </div>
+      <div class="mov-status"></div>
+    </div>
+
+    <!-- Conventional deadlift -->
+    <div class="mov-card">
+      <div class="mov-icon drop">❌</div>
+      <div class="mov-body">
+        <h3>传统硬拉<span class="status-tag drop">删除 · 腰伤恢复前禁止</span></h3>
+        <div class="mov-why">
+          <strong>删除理由：</strong>50kg就受伤且14天未恢复——问题不在力量而在动作模式。RDL是硬拉的前置训练，先用RDL重建髋铰链模式。即使伤好后，RDL对你的价值也高于传统硬拉（RDL侧重离心控制+腘绳肌，传统硬拉侧重从地面拉起的力量）。<br>
+          <strong>什么时候可以考虑：</strong>RDL空杆×15×3稳定后，如果仍然想练硬拉——从40kg开始学动作。
+        </div>
+      </div>
+      <div class="mov-status"></div>
+    </div>
+
+    <!-- Bench press -->
+    <div class="mov-card">
+      <div class="mov-icon drop">❌</div>
+      <div class="mov-body">
+        <h3>卧推<span class="status-tag drop">删除 · 用俯卧撑进阶替代</span></h3>
+        <div class="mov-why">
+          <strong>删除理由：</strong>卧推是仰卧位、肩胛骨被凳子固定的推力动作——与你的体操训练（俯身位、肩胛自由活动）几乎零迁移。伪俄挺5×5已经是一个极端版本的俯卧撑，卧推对俄挺/前水平的帮助远不如负重俯卧撑。<br>
+          <strong>替代方案：</strong>抬脚俯卧撑 / 负重俯卧撑（背心/杠铃片）——动作模式更贴近体操，同时训练核心。
+        </div>
+      </div>
+      <div class="mov-status"></div>
+    </div>
+
+    <!-- Overhead press -->
+    <div class="mov-card">
+      <div class="mov-icon drop">❌</div>
+      <div class="mov-body">
+        <h3>肩推（站姿杠铃推举）<span class="status-tag drop">删除</span></h3>
+        <div class="mov-why">
+          <strong>删除理由：</strong>双力臂和伪俄挺已经提供了大量的垂直推力训练。肩推的发力角度（垂直向上推过头顶）与体操推力的发力角度（前倾位向前推）差异大，迁移有限。<br>
+          <strong>如果做肩推：</strong>时间成本高、对体操帮助小、还会增加肩前侧的额外负荷（已经承受大量俄挺负荷）。
+        </div>
+      </div>
+      <div class="mov-status"></div>
+    </div>
+
+    <!-- High bar goblet squat -->
+    <div class="mov-card">
+      <div class="mov-icon drop">❌</div>
+      <div class="mov-body">
+        <h3>高脚杯深蹲<span class="status-tag drop">删除 · 从"必须"降为"不需要"</span></h3>
+        <div class="mov-why">
+          <strong>删除理由：</strong>你日常蹲厕全蹲没问题、骑行+徒步覆盖下肢功能需求、腿举可以补足股四头肌的深ROM刺激。高脚杯深蹲的"动作学习"价值在你的情况下不是必须的——你已经会蹲了。<br>
+          <strong>保留条件：</strong>如果未来想升级到杠铃深蹲，需要先做高脚杯作为过渡。但你已经决定不走那条路。
+        </div>
+      </div>
+      <div class="mov-status"></div>
+    </div>
+
+  </div>
+</section>
+
+<!-- SECTION 5: PHILOSOPHY -->
+<section class="section">
+  <div class="sec-head">
+    <div class="sec-num">05</div>
+    <div>
+      <div class="sec-title">训练哲学</div>
+      <div class="sec-desc">贯穿所有决策的核心原则</div>
+    </div>
+  </div>
+  <div class="sec-line"></div>
+
+  <div class="phil-box">
+    <h3>修补厂法则</h3>
+    <p>健身房不是主战场。骑行、徒步、体操才是运动生活的主体。健身房的唯一使命是：<strong>修复那些"别处练不到"的弱点，防止未来因为肌肉不均衡而出问题。</strong></p>
+    <p>不需要进入深蹲/硬拉/卧推的力量举路径。不需要追求重量数字。需要的是：学会正确的髋铰链模式（RDL），补足腘绳肌（北欧挺），维护竖脊肌（山羊挺身），保持中背力量（划船），享受负重感（农夫行走）。</p>
+  </div>
+
+  <div class="phil-box" style="border-left-color:var(--green);background:var(--green-bg);border-color:var(--green-light);">
+    <h3 style="color:var(--green)">享受优先</h3>
+    <p>能持续10年的轻训练，胜过坚持3个月的重训练。享受=可持续=有效。农夫行走保留不是因为它"最优"，是因为你享受。骑行不停不是因为它"最科学"，是因为你享受。<strong>运动的第一原则是不受伤，第二原则是享受，第三原则才是有效。</strong></p>
+  </div>
+
+  <div class="phil-box" style="border-left-color:var(--blue);background:var(--blue-light);border-color:var(--blue-light);">
+    <h3 style="color:var(--blue)">深蹲硬拉的真正价值</h3>
+    <p>深蹲和硬拉的真正价值不是"练大肌肉"——而是<strong>学习正确的动作模式</strong>。学会髋铰链（不弯腰搬东西）、学会深蹲模式（安全地从地上站起来）。但动作模式的学习可以脱离重量追求：空杆RDL×8次完美执行 > 50kg硬拉做到腰痛。模式对了，重量是副产品；模式错了，重量是灾难。</p>
+  </div>
+</section>
+
+<!-- SECTION 6: QUICK SESSION -->
+<section class="section">
+  <div class="sec-head">
+    <div class="sec-num">06</div>
+    <div>
+      <div class="sec-title">一次完整的 Gym 修补</div>
+      <div class="sec-desc">20-30分钟搞定。不多做，不少做。</div>
+    </div>
+  </div>
+  <div class="sec-line"></div>
+
+  <div class="session-box">
+    <h3>Gym 修补日 · 约25分钟</h3>
+    <div class="session-sub">必做 4 动作 · 可选 3 动作 · 组间休息 60-90 秒</div>
+    <ul class="session-list">
+      <li>
+        <span class="sl-num">1</span>
+        <div><strong>RDL</strong>（髋铰链模式）</div>
+        <span class="sl-detail">空杆 × 8 × 3</span>
+      </li>
+      <li>
+        <span class="sl-num">2</span>
+        <div><strong>北欧挺</strong>（腘绳肌）</div>
+        <span class="sl-detail">自重 × 3-5 × 3</span>
+      </li>
+      <li>
+        <span class="sl-num">3</span>
+        <div><strong>山羊挺身</strong>（竖脊肌）</div>
+        <span class="sl-detail">20-25kg × 10 × 3</span>
+      </li>
+      <li>
+        <span class="sl-num">4</span>
+        <div><strong>农夫行走</strong>（握力+脊柱压缩+享受）</div>
+        <span class="sl-detail">30kg × 3 × 40s</span>
+      </li>
+      <li style="opacity:0.6">
+        <span class="sl-num" style="background:#e8f0fe;color:var(--blue)">5</span>
+        <div>绳索划船（中背）<em style="font-size:12px;color:var(--text-light)"> · 可选</em></div>
+        <span class="sl-detail">120kg × 10 × 3</span>
+      </li>
+      <li style="opacity:0.6">
+        <span class="sl-num" style="background:#e8f0fe;color:var(--blue)">6</span>
+        <div>面拉加重版（后肩）<em style="font-size:12px;color:var(--text-light)"> · 可选</em></div>
+        <span class="sl-detail">25-30kg × 8 × 3</span>
+      </li>
+      <li style="opacity:0.6">
+        <span class="sl-num" style="background:#e8f0fe;color:var(--blue)">7</span>
+        <div>腿举（股四头补充）<em style="font-size:12px;color:var(--text-light)"> · 可选</em></div>
+        <span class="sl-detail">60kg × 10 × 3</span>
+      </li>
+    </ul>
+  </div>
+</section>
+
+</main>
+
+<footer class="footer">
+  <div class="container">
+    <p>健身房训练逻辑 · 基于骑行/体操/徒步体系定制 · 2026年5月</p>
+    <p style="margin-top:6px;opacity:0.5">Generated by MiMo · Xiaomi LLM Core Team</p>
+  </div>
+</footer>
+
+</body>
+</html>

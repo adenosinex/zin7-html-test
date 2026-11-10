@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>大模型商业生态的底层秘密</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Mono:wght@400;500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0b0d0f;
+  --bg2: #121519;
+  --surface: #181c22;
+  --card: #1c2028;
+  --card-border: #252a33;
+  --accent: #3ecf8e;
+  --accent2: #6c5ce7;
+  --accent3: #f39c12;
+  --red: #e74c3c;
+  --cyan: #00cec9;
+  --text: #e8eaed;
+  --t2: #9aa0a9;
+  --t3: #636b76;
+  --t4: #3d444d;
+  --border: #1f242c;
+  --fd: 'Instrument Serif', serif;
+  --fb: 'Inter', sans-serif;
+  --fm: 'DM Mono', monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth;font-size:16px}
+body{background:var(--bg);color:var(--text);font-family:var(--fb);font-weight:400;line-height:1.85;overflow-x:hidden}
+::-webkit-scrollbar{width:5px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--accent);border-radius:3px}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes slideIn{from{width:0}to{width:100%}}
+@keyframes pulseGlow{0%,100%{box-shadow:0 0 0 rgba(62,207,142,0)}50%{box-shadow:0 0 20px rgba(62,207,142,.08)}}
+
+.rv{opacity:0;transform:translateY(24px);transition:opacity .6s ease,transform .6s ease}
+.rv.vis{opacity:1;transform:translateY(0)}
+
+/* Hero */
+.hero{position:relative;min-height:100vh;display:flex;align-items:center;justify-content:center;overflow:hidden;background:linear-gradient(160deg,#0b0d0f 0%,#0f1318 40%,#111620 100%)}
+.hero::before{content:'';position:absolute;top:-30%;right:-20%;width:800px;height:800px;border-radius:50%;background:radial-gradient(circle,rgba(62,207,142,.04),transparent 60%);pointer-events:none}
+.hero::after{content:'';position:absolute;bottom:-20%;left:-10%;width:600px;height:600px;border-radius:50%;background:radial-gradient(circle,rgba(108,92,231,.03),transparent 60%);pointer-events:none}
+.hero-c{position:relative;z-index:2;max-width:880px;padding:2rem;animation:fadeIn .8s ease}
+.hero-tag{display:inline-flex;align-items:center;gap:.4rem;font-family:var(--fm);font-size:.65rem;font-weight:500;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);padding:.3rem .8rem;border:1px solid rgba(62,207,142,.15);border-radius:4px;margin-bottom:2rem;animation:fadeUp .6s ease}
+.hero-tag .dot{width:5px;height:5px;border-radius:50%;background:var(--accent);animation:pulseGlow 2s ease infinite}
+.hero-t{font-family:var(--fd);font-weight:400;font-size:clamp(2.2rem,5.5vw,3.8rem);line-height:1.2;margin-bottom:1.5rem;color:var(--text);animation:fadeUp .8s ease .1s both}
+.hero-t em{font-style:italic;color:var(--accent)}
+.hero-s{font-size:1rem;color:var(--t2);max-width:580px;line-height:1.85;animation:fadeUp .8s ease .2s both}
+.hero-meta{display:flex;gap:2rem;margin-top:2.5rem;animation:fadeUp .8s ease .3s both;flex-wrap:wrap}
+.hero-meta-item{font-family:var(--fm);font-size:.7rem;color:var(--t3);letter-spacing:.04em}
+.hero-meta-item span{color:var(--t2)}
+
+/* Section */
+.sec{padding:5rem 1.5rem;position:relative}
+.si{max-width:960px;margin:0 auto}
+
+/* Pull quote */
+.pull-quote{position:relative;padding:2rem 0 2rem 2rem;margin:2.5rem 0;border-left:2px solid var(--accent)}
+.pull-quote p{font-family:var(--fd);font-style:italic;font-size:1.15rem;line-height:1.8;color:var(--text)}
+.pull-quote cite{display:block;margin-top:.8rem;font-family:var(--fm);font-style:normal;font-size:.7rem;color:var(--t3);letter-spacing:.06em}
+
+/* Cards */
+.tier-grid{display:grid;gap:1rem;margin:2rem 0}
+.tier-card{background:var(--surface);border:1px solid var(--card-border);border-radius:10px;padding:1.4rem 1.6rem;position:relative;overflow:hidden;transition:transform .3s,box-shadow .3s,border-color .3s}
+.tier-card:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.3);border-color:rgba(62,207,142,.15)}
+.tier-card .tc-tag{font-family:var(--fm);font-size:.6rem;font-weight:500;letter-spacing:.1em;text-transform:uppercase;display:inline-block;padding:.2rem .5rem;border-radius:3px;margin-bottom:.8rem}
+.tier-card .tc-title{font-family:var(--fd);font-size:1.15rem;margin-bottom:.5rem}
+.tier-card .tc-desc{font-size:.85rem;color:var(--t2);line-height:1.8}
+.tier-card .tc-companies{display:flex;flex-wrap:wrap;gap:.4rem;margin-top:.8rem}
+.tier-card .tc-comp{font-family:var(--fm);font-size:.68rem;padding:.25rem .5rem;border-radius:4px;background:rgba(255,255,255,.04);border:1px solid var(--card-border);color:var(--t2)}
+
+/* Accent stripe */
+.tier-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px}
+.tier-card.g1::before{background:linear-gradient(90deg,var(--accent),var(--cyan))}
+.tier-card.g2::before{background:linear-gradient(90deg,var(--accent2),#a29bfe)}
+.tier-card.g3::before{background:linear-gradient(90deg,var(--accent3),#fdcb6e)}
+
+/* Step list */
+.step-list{margin:2rem 0;counter-reset:steps}
+.step-item{display:grid;grid-template-columns:32px 1fr;gap:1rem;padding:1.2rem 0;border-bottom:1px solid var(--border);counter-increment:steps}
+.step-item:last-child{border-bottom:none}
+.step-num{width:28px;height:28px;border-radius:50%;border:1.5px solid var(--accent);display:flex;align-items:center;justify-content:center;font-family:var(--fm);font-size:.7rem;font-weight:500;color:var(--accent);flex-shrink:0;margin-top:.2rem}
+.step-body{font-size:.9rem;color:var(--t2);line-height:1.8}
+.step-body strong{color:var(--text)}
+.step-body code{font-family:var(--fm);font-size:.78rem;background:rgba(62,207,142,.08);color:var(--accent);padding:.15rem .4rem;border-radius:3px}
+
+/* Reveal box */
+.reveal-box{background:var(--surface);border:1px solid var(--card-border);border-radius:10px;padding:1.8rem;margin:2rem 0;position:relative;overflow:hidden}
+.reveal-box::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent2),var(--accent3))}
+.reveal-box .rb-label{font-family:var(--fm);font-size:.6rem;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);margin-bottom:.8rem}
+.reveal-box .rb-body{font-size:.9rem;color:var(--t2);line-height:1.85}
+.reveal-box .rb-body strong{color:var(--text)}
+
+/* Compare table */
+.compare-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:2rem 0}
+.compare-cell{background:var(--surface);border:1px solid var(--card-border);border-radius:10px;padding:1.4rem 1.6rem}
+.compare-cell .cc-label{font-family:var(--fm);font-size:.6rem;font-weight:500;letter-spacing:.08em;text-transform:uppercase;margin-bottom:.8rem;display:flex;align-items:center;gap:.4rem}
+.compare-cell .cc-body{font-size:.85rem;color:var(--t2);line-height:1.8}
+.compare-cell .cc-body strong{color:var(--text)}
+
+/* Price callout */
+.price-callout{display:grid;grid-template-columns:auto 1fr;gap:1.5rem;align-items:center;background:var(--surface);border:1px solid var(--card-border);border-radius:10px;padding:1.8rem;margin:2rem 0}
+.price-callout .pc-price{font-family:var(--fd);font-size:2.8rem;line-height:1;color:var(--accent)}
+.price-callout .pc-price .pc-unit{font-size:.9rem;color:var(--t3)}
+.price-callout .pc-detail{font-size:.85rem;color:var(--t2);line-height:1.8}
+.price-callout .pc-detail strong{color:var(--text)}
+
+/* Insight cards */
+.insight-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1rem;margin:2rem 0}
+.insight-card{background:var(--surface);border:1px solid var(--card-border);border-radius:10px;padding:1.5rem;transition:border-color .3s}
+.insight-card:hover{border-color:rgba(62,207,142,.15)}
+.insight-card .ic-icon{font-size:1.6rem;margin-bottom:.6rem}
+.insight-card .ic-title{font-family:var(--fd);font-size:1rem;margin-bottom:.4rem}
+.insight-card .ic-desc{font-size:.82rem;color:var(--t3);line-height:1.7}
+
+/* Advantage bar */
+.advantage-bar{margin:2rem 0}
+.adv-row{display:grid;grid-template-columns:140px 1fr 60px;align-items:center;gap:.8rem;margin-bottom:.6rem}
+.adv-label{font-family:var(--fm);font-size:.72rem;color:var(--t2);text-align:right}
+.adv-track{height:8px;background:var(--bg2);border-radius:4px;overflow:hidden}
+.adv-fill{height:100%;border-radius:4px;transition:width 1.2s cubic-bezier(.16,1,.3,1);width:0}
+.adv-fill.green{background:linear-gradient(90deg,var(--accent),rgba(62,207,142,.3))}
+.adv-fill.purple{background:linear-gradient(90deg,var(--accent2),rgba(108,92,231,.3))}
+.adv-fill.gold{background:linear-gradient(90deg,var(--accent3),rgba(243,156,18,.3))}
+.adv-fill.red{background:linear-gradient(90deg,var(--red),rgba(231,76,60,.3))}
+.adv-fill.cyan{background:linear-gradient(90deg,var(--cyan),rgba(0,206,201,.3))}
+.adv-val{font-family:var(--fm);font-size:.72rem;color:var(--t3)}
+
+/* Section heading */
+.sec-head{margin-bottom:2.5rem}
+.sec-tag{display:inline-flex;align-items:center;gap:.4rem;font-family:var(--fm);font-size:.6rem;font-weight:500;letter-spacing:.12em;text-transform:uppercase;padding:.3rem .7rem;border-radius:3px;margin-bottom:1rem}
+.sec-title{font-family:var(--fd);font-size:clamp(1.4rem,3vw,2rem);line-height:1.3;margin-bottom:.6rem}
+.sec-desc{font-size:.9rem;color:var(--t2);max-width:600px;line-height:1.85}
+
+/* Diagram */
+.diagram-wrap{margin:2rem 0;display:flex;justify-content:center}
+.diagram-wrap svg{max-width:100%;height:auto}
+
+/* List */
+.styled-list{margin:1rem 0;list-style:none}
+.styled-list li{position:relative;padding:.5rem 0 .5rem 1.2rem;font-size:.9rem;color:var(--t2);line-height:1.8}
+.styled-list li::before{content:'';position:absolute;left:0;top:1rem;width:5px;height:5px;border-radius:50%;background:var(--accent);opacity:.6}
+.styled-list li strong{color:var(--text)}
+
+/* Divider */
+.divider{height:1px;background:var(--border);max-width:960px;margin:0 auto}
+
+/* Footer */
+.footer{padding:4rem 1.5rem;text-align:center;border-top:1px solid var(--border)}
+.footer-quote{font-family:var(--fd);font-style:italic;font-size:1.1rem;color:var(--t2);max-width:500px;margin:0 auto .8rem;line-height:1.7}
+.footer-meta{font-family:var(--fm);font-size:.65rem;color:var(--t4);letter-spacing:.06em}
+
+/* Responsive */
+@media(max-width:768px){
+  .sec{padding:3.5rem 1rem}
+  .compare-row{grid-template-columns:1fr}
+  .price-callout{grid-template-columns:1fr;text-align:center}
+  .price-callout .pc-price{margin-bottom:.5rem}
+  .adv-row{grid-template-columns:100px 1fr 50px}
+  .hero-meta{flex-direction:column;gap:.8rem}
+}
+
+/* Scroll fade stagger */
+.d1{transition-delay:.08s}
+.d2{transition-delay:.16s}
+.d3{transition-delay:.24s}
+.d4{transition-delay:.32s}
+.d5{transition-delay:.4s}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════ HERO ═══════════════ -->
+<section class="hero">
+  <div class="hero-c">
+    <div class="hero-tag"><span class="dot"></span>LLM Business Ecology</div>
+    <h1 class="hero-t">大模型商业生态的<br><em>底层秘密</em></h1>
+    <p class="hero-s">关于算力转售、开源生态和定价权的博弈。当 DeepSeek 官方打到 2.5 折，第三方平台为什么不敢跟？</p>
+    <div class="hero-meta">
+      <div class="hero-meta-item">TYPE <span>· 行业拆解</span></div>
+      <div class="hero-meta-item">DEPTH <span>· 三层深度</span></div>
+      <div class="hero-meta-item">READ <span>· 8 min</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ SECTION 1: 谁在背后 ═══════════════ -->
+<section class="sec">
+  <div class="si">
+    <div class="sec-head rv">
+      <div class="sec-tag" style="color:var(--accent);border:1px solid rgba(62,207,142,.15);background:rgba(62,207,142,.04)">Question 01</div>
+      <h2 class="sec-title">频繁出现的平台，背后有巨头吗？</h2>
+      <p class="sec-desc">这个市场已经形成了明显的梯队，由三类玩家统治。</p>
+    </div>
+
+    <div class="tier-grid">
+      <div class="tier-card g1 rv">
+        <div class="tc-tag" style="color:var(--accent);border:1px solid rgba(62,207,142,.2);background:rgba(62,207,142,.06)">TIER 1 · 传统云巨头</div>
+        <div class="tc-title">Hyperscalers — 算力本身就是它们的生意</div>
+        <div class="tc-desc">拥有几十万张显卡的算力超级巨头。大模型只是它们云服务的一个组件，GPU 是它们已有的基础设施。对它们来说，提供大模型推理服务的边际成本几乎为零。</div>
+        <div class="tc-companies">
+          <span class="tc-comp">Baidu Qianfan · 百度千帆</span>
+          <span class="tc-comp">Alibaba Cloud · 阿里云</span>
+        </div>
+      </div>
+
+      <div class="tier-card g2 rv d1">
+        <div class="tc-tag" style="color:var(--accent2);border:1px solid rgba(108,92,231,.2);background:rgba(108,92,231,.06)">TIER 2 · 海外算力转售新巨头</div>
+        <div class="tc-title">MaaS — 模型即服务的"三大顶流"</div>
+        <div class="tc-desc">不一定自己买几万张卡，但拥有极强的 GPU 虚拟化和分布式调度技术。能在几千张显卡上把模型吞吐量榨干到极限——它们的核心竞争力不是"有多少卡"，而是"每张卡能榨出多少 Token"。</div>
+        <div class="tc-companies">
+          <span class="tc-comp">DeepInfra</span>
+          <span class="tc-comp">Together AI</span>
+          <span class="tc-comp">Fireworks AI</span>
+        </div>
+      </div>
+
+      <div class="tier-card g3 rv d2">
+        <div class="tc-tag" style="color:var(--accent3);border:1px solid rgba(243,156,18,.2);background:rgba(243,156,18,.06)">TIER 3 · 国内垂直算力黑马</div>
+        <div class="tc-title">SiliconFlow — 把推理成本榨干到极致</div>
+        <div class="tc-desc">国内大模型基础设施领域的绝对头部。核心团队来自清华和独角兽 OneFlow，以极限推理优化闻名，几乎垄断了国内很大一部分高并发的开源模型算力市场。</div>
+        <div class="tc-companies">
+          <span class="tc-comp">SiliconFlow · 硅基流动</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ═══════════════ SECTION 2: 模型部署 ═══════════════ -->
+<section class="sec">
+  <div class="si">
+    <div class="sec-head rv">
+      <div class="sec-tag" style="color:var(--accent2);border:1px solid rgba(108,92,231,.15);background:rgba(108,92,231,.04)">Question 02</div>
+      <h2 class="sec-title">模型是平台自己部署的吗？</h2>
+      <p class="sec-desc">完全独立部署。它们与 DeepSeek 官方没有任何物理连接。</p>
+    </div>
+
+    <div class="pull-quote rv">
+      <p>DeepSeek 是一家"开源大模型"公司。每发布一个新模型，都会把模型的完整"权重文件"——可以理解为模型的灵魂和大脑——公开发布在 Hugging Face 和 ModelScope 上。</p>
+      <cite>— 开源生态的底层逻辑</cite>
+    </div>
+
+    <div class="step-list rv">
+      <div class="step-item">
+        <div class="step-num">1</div>
+        <div class="step-body"><strong>下载权重</strong> — 去公网下载几百 GB 甚至上 TB 的 DeepSeek 权重文件</div>
+      </div>
+      <div class="step-item">
+        <div class="step-num">2</div>
+        <div class="step-body"><strong>采购算力</strong> — 买来或租来大量英伟达 H100、B200 或 AMD MI300X 显卡</div>
+      </div>
+      <div class="step-item">
+        <div class="step-num">3</div>
+        <div class="step-body"><strong>推理部署</strong> — 使用专门的推理加速引擎（如 <code>vLLM</code>、<code>SGLang</code> 或自研底层引擎），把模型在显卡集群上跑起来</div>
+      </div>
+      <div class="step-item">
+        <div class="step-num">4</div>
+        <div class="step-body"><strong>套壳售卖</strong> — 套上一个 API 接口，挂到 OpenRouter 上卖给全球开发者</div>
+      </div>
+    </div>
+
+    <div class="reveal-box rv">
+      <div class="rb-label">关键结论</div>
+      <div class="rb-body">这些供应商在硬件和网络上与 DeepSeek 官方<strong>没有任何物理连接</strong>。这既是它们定价权独立的根源，也是为什么它们能提供<strong>绝对的隐私隔离</strong>——你的请求数据流经的是完全独立的基础设施。</div>
+    </div>
+
+    <!-- Network diagram -->
+    <div class="diagram-wrap rv">
+      <svg viewBox="0 0 700 220" fill="none" width="700">
+        <!-- User -->
+        <rect x="10" y="80" width="100" height="60" rx="8" fill="var(--surface)" stroke="var(--card-border)" stroke-width="1.5"/>
+        <text x="60" y="105" text-anchor="middle" fill="var(--text)" font-family="DM Mono" font-size="10" font-weight="500">用户</text>
+        <text x="60" y="122" text-anchor="middle" fill="var(--t3)" font-family="DM Mono" font-size="8">你的请求</text>
+        <!-- OpenRouter -->
+        <rect x="180" y="80" width="120" height="60" rx="8" fill="var(--surface)" stroke="rgba(108,92,231,.3)" stroke-width="1.5"/>
+        <text x="240" y="105" text-anchor="middle" fill="var(--accent2)" font-family="DM Mono" font-size="10" font-weight="500">OpenRouter</text>
+        <text x="240" y="122" text-anchor="middle" fill="var(--t3)" font-family="DM Mono" font-size="8">路由/分发</text>
+        <!-- Providers -->
+        <rect x="370" y="20" width="120" height="44" rx="8" fill="var(--surface)" stroke="rgba(62,207,142,.3)" stroke-width="1.5"/>
+        <text x="430" y="47" text-anchor="middle" fill="var(--accent)" font-family="DM Mono" font-size="9">Together AI</text>
+        <rect x="370" y="78" width="120" height="44" rx="8" fill="var(--surface)" stroke="rgba(243,156,18,.3)" stroke-width="1.5"/>
+        <text x="430" y="105" text-anchor="middle" fill="var(--accent3)" font-family="DM Mono" font-size="9">SiliconFlow</text>
+        <rect x="370" y="136" width="120" height="44" rx="8" fill="var(--surface)" stroke="rgba(0,206,201,.3)" stroke-width="1.5"/>
+        <text x="430" y="163" text-anchor="middle" fill="var(--cyan)" font-family="DM Mono" font-size="9">DeepInfra</text>
+        <!-- GPU -->
+        <rect x="560" y="50" width="120" height="44" rx="8" fill="rgba(62,207,142,.04)" stroke="rgba(62,207,142,.2)" stroke-width="1"/>
+        <text x="620" y="77" text-anchor="middle" fill="var(--t3)" font-family="DM Mono" font-size="9">自建 GPU 集群</text>
+        <rect x="560" y="108" width="120" height="44" rx="8" fill="rgba(108,92,231,.04)" stroke="rgba(108,92,231,.2)" stroke-width="1"/>
+        <text x="620" y="135" text-anchor="middle" fill="var(--t3)" font-family="DM Mono" font-size="9">自建 GPU 集群</text>
+        <!-- DeepSeek (separate) -->
+        <rect x="560" y="170" width="120" height="36" rx="8" fill="var(--bg2)" stroke="var(--card-border)" stroke-width="1" stroke-dasharray="4 3"/>
+        <text x="620" y="192" text-anchor="middle" fill="var(--t4)" font-family="DM Mono" font-size="8">DeepSeek 官方（独立）</text>
+        <!-- Arrows -->
+        <path d="M110 110 L180 110" stroke="var(--t4)" stroke-width="1.5" marker-end="url(#arr)"/>
+        <path d="M300 110 L370 42" stroke="var(--t4)" stroke-width="1" marker-end="url(#arr)"/>
+        <path d="M300 110 L370 100" stroke="var(--t4)" stroke-width="1" marker-end="url(#arr)"/>
+        <path d="M300 110 L370 158" stroke="var(--t4)" stroke-width="1" marker-end="url(#arr)"/>
+        <path d="M490 42 L560 72" stroke="var(--accent)" stroke-width="1" marker-end="url(#arrG)"/>
+        <path d="M490 100 L560 130" stroke="var(--accent3)" stroke-width="1" marker-end="url(#arrG)"/>
+        <!-- No connection -->
+        <path d="M490 158 L560 158" stroke="var(--red)" stroke-width="1" stroke-dasharray="3 3"/>
+        <text x="525" y="153" text-anchor="middle" fill="var(--red)" font-family="DM Mono" font-size="7">✗ 无连接</text>
+        <defs>
+          <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0 0L10 5L0 10z" fill="var(--t4)"/></marker>
+          <marker id="arrG" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0 0L10 5L0 10z" fill="var(--accent)"/></marker>
+        </defs>
+      </svg>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ═══════════════ SECTION 3: 为什么不降价 ═══════════════ -->
+<section class="sec">
+  <div class="si">
+    <div class="sec-head rv">
+      <div class="sec-tag" style="color:var(--accent3);border:1px solid rgba(243,156,18,.15);background:rgba(243,156,18,.04)">Question 03</div>
+      <h2 class="sec-title">官方大降价，平台还是原价<br>这意味着什么？</h2>
+      <p class="sec-desc">这不是"不想跟"，而是"跟不了"。两个核心本质。</p>
+    </div>
+
+    <div class="compare-row rv">
+      <div class="compare-cell">
+        <div class="cc-label" style="color:var(--accent3)">本质 A · 它们是"GPU 房东"</div>
+        <div class="cc-body">
+          如果只是 API 代理商，官方降价必然跟降。但正因为模型是<strong>自己用 GPU 跑的</strong>，成本绑定在物理世界：<strong>电费、GPU 租金、机房空间、工程师薪水</strong>。英伟达的显卡租金并没有打 2.5 折。硬性成本卡在那里，根本降不下来。
+        </div>
+      </div>
+      <div class="compare-cell">
+        <div class="cc-label" style="color:var(--red)">本质 B · 官方在用"非对称武器"掀桌子</div>
+        <div class="cc-body">
+          DeepSeek 官方的定价不反映成本，而是反映<strong>战略意图</strong>——用融资补贴算力，亏本卖 API，目的只有一个：<strong>让全球开发者绑定在 DeepSeek 生态上</strong>。第三方是纯粹的算力零售生意，每吐出一个 Token 都必须有利润。
+        </div>
+      </div>
+    </div>
+
+    <h3 style="font-family:var(--fd);font-size:1.1rem;margin:3rem 0 1.5rem" class="rv">官方 vs 第三方的成本结构对比</h3>
+
+    <div class="advantage-bar rv">
+      <div style="font-family:var(--fm);font-size:.65rem;color:var(--t3);letter-spacing:.06em;margin-bottom:1rem">推理效率（每张 GPU 的 Token 吞吐量）</div>
+      <div class="adv-row">
+        <div class="adv-label">DeepSeek 官方</div>
+        <div class="adv-track"><div class="adv-fill green" data-width="95"></div></div>
+        <div class="adv-val">100%</div>
+      </div>
+      <div class="adv-row">
+        <div class="adv-label">第三方（vLLM）</div>
+        <div class="adv-track"><div class="adv-fill purple" data-width="40"></div></div>
+        <div class="adv-val">~35-50%</div>
+      </div>
+      <div style="margin-top:1.5rem;font-family:var(--fm);font-size:.65rem;color:var(--t3);letter-spacing:.06em;margin-bottom:1rem">GPU 租金成本（$/h per H100）</div>
+      <div class="adv-row">
+        <div class="adv-label">DeepSeek 官方</div>
+        <div class="adv-track"><div class="adv-fill green" data-width="25"></div></div>
+        <div class="adv-val">自研集群</div>
+      </div>
+      <div class="adv-row">
+        <div class="adv-label">第三方平台</div>
+        <div class="adv-track"><div class="adv-fill red" data-width="75"></div></div>
+        <div class="adv-val">$2-3/h</div>
+      </div>
+      <div style="margin-top:1.5rem;font-family:var(--fm);font-size:.65rem;color:var(--t3);letter-spacing:.06em;margin-bottom:1rem">定价策略</div>
+      <div class="adv-row">
+        <div class="adv-label">DeepSeek 官方</div>
+        <div class="adv-track"><div class="adv-fill cyan" data-width="15"></div></div>
+        <div class="adv-val">战略性亏损</div>
+      </div>
+      <div class="adv-row">
+        <div class="adv-label">第三方平台</div>
+        <div class="adv-track"><div class="adv-fill gold" data-width="70"></div></div>
+        <div class="adv-val">必须盈利</div>
+      </div>
+    </div>
+
+    <h3 style="font-family:var(--fd);font-size:1.1rem;margin:3rem 0 1.5rem" class="rv">为什么第三方追不上官方？</h3>
+
+    <div class="insight-grid rv">
+      <div class="insight-card">
+        <div class="ic-icon">
+          <svg width="28" height="28" viewBox="0 0 28 28" fill="none"><rect x="2" y="2" width="24" height="24" rx="6" fill="rgba(62,207,142,.08)" stroke="rgba(62,207,142,.3)" stroke-width="1.5"/><path d="M9 14h10M14 9v10" stroke="var(--accent)" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </div>
+        <div class="ic-title">独家硬件架构优化</div>
+        <div class="ic-desc">DeepSeek 拥有自研的硬件架构和独家算力调度算法，在自家专属机房跑自家模型，效率到极致。第三方只能用通用引擎（vLLM/SGLang）跑，同样模型耗费的资源可能是官方数倍。</div>
+      </div>
+      <div class="insight-card d1">
+        <div class="ic-icon">
+          <svg width="28" height="28" viewBox="0 0 28 28" fill="none"><rect x="2" y="2" width="24" height="24" rx="6" fill="rgba(108,92,231,.08)" stroke="rgba(108,92,231,.3)" stroke-width="1.5"/><path d="M8 14l4 4 8-8" stroke="var(--accent2)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <div class="ic-title">Multi-Token Prediction</div>
+        <div class="ic-desc">自研的多 Token 预测技术，一次推理生成多个 Token，推理效率远超标准自回归模型。这是第三方无法复制的底层技术优势。</div>
+      </div>
+      <div class="insight-card d2">
+        <div class="ic-icon">
+          <svg width="28" height="28" viewBox="0 0 28 28" fill="none"><rect x="2" y="2" width="24" height="24" rx="6" fill="rgba(243,156,18,.08)" stroke="rgba(243,156,18,.3)" stroke-width="1.5"/><path d="M14 8v8M10 16l4 4 4-4" stroke="var(--accent3)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <div class="ic-title">战略性亏损补贴</div>
+        <div class="ic-desc">DeepSeek API 甚至可以亏本卖。用融资补贴算力，目的是让全球开发者死死绑定在它的生态上。第三方是零售生意，必须保证每个 Token 有利润，无法跟进自杀式价格战。</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ═══════════════ SECTION 4: 价格对比 ═══════════════ -->
+<section class="sec">
+  <div class="si">
+    <div class="sec-head rv">
+      <div class="sec-tag" style="color:var(--red);border:1px solid rgba(231,76,60,.15);background:rgba(231,76,60,.04)">Price Reality</div>
+      <h2 class="sec-title">你多付的溢价，买到的是什么？</h2>
+    </div>
+
+    <div class="compare-row rv">
+      <div class="compare-cell" style="border-color:rgba(62,207,142,.2)">
+        <div class="cc-label" style="color:var(--accent)">DeepSeek 官方 API</div>
+        <div class="price-callout" style="background:transparent;border:none;padding:0;margin:0">
+          <div class="pc-price">$0.1-0.3 <span class="pc-unit">/百万 Token</span></div>
+        </div>
+        <div class="cc-body" style="margin-top:.8rem">
+          直接调用 DeepSeek 服务器。<br>性价比高到恐怖。<br>但偶尔会<strong>断网、宕机</strong>。<br>隐私隔离取决于你对 DeepSeek 的信任。
+        </div>
+      </div>
+      <div class="compare-cell" style="border-color:rgba(231,76,60,.2)">
+        <div class="cc-label" style="color:var(--red)">OpenRouter 第三方平台</div>
+        <div class="price-callout" style="background:transparent;border:none;padding:0;margin:0">
+          <div class="pc-price" style="color:var(--red)">$1.5-2.4 <span class="pc-unit">/百万 Token</span></div>
+        </div>
+        <div class="cc-body" style="margin-top:.8rem">
+          通过 OpenRouter 路由。<br>价格是官方的 <strong>5-10 倍</strong>。<br>但提供免翻墙、合规节点、<br>多路由高可用。
+        </div>
+      </div>
+    </div>
+
+    <div class="reveal-box rv">
+      <div class="rb-label">你多付的溢价，到底买到了什么？</div>
+      <div class="rb-body">
+        <ul class="styled-list">
+          <li><strong>多平台免翻墙便利</strong> — 不需要自己维护 API Key 和代理</li>
+          <li><strong>US/SG 节点合规与隐私隔离</strong> — 数据不经过 DeepSeek 官方服务器</li>
+          <li><strong>多路由高可用性</strong> — 一个供应商宕机，OpenRouter 自动切换到另一个，对抗官方偶尔断网</li>
+          <li><strong>一站式管理</strong> — 所有模型、所有供应商，一个 API Key 搞定</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ═══════════════ SECTION 5: 结论 ═══════════════ -->
+<section class="sec">
+  <div class="si">
+    <div class="sec-head rv">
+      <div class="sec-tag" style="color:var(--accent);border:1px solid rgba(62,207,142,.15);background:rgba(62,207,142,.04)">Verdict</div>
+      <h2 class="sec-title">决策建议</h2>
+    </div>
+
+    <div class="step-list rv">
+      <div class="step-item">
+        <div class="step-num" style="border-color:var(--accent);color:var(--accent)">→</div>
+        <div class="step-body">如果你只是<strong>日常跑 Python 脚本、写无关公司机密的代码</strong>，直接冲 DeepSeek 官方 API。性价比高到恐怖，省下的钱够你多跑几个数量级。</div>
+      </div>
+      <div class="step-item">
+        <div class="step-num" style="border-color:var(--accent2);color:var(--accent2)">→</div>
+        <div class="step-body">如果你对<strong>数据隐私有严格要求</strong>（企业机密、医疗数据、法律文书），通过 OpenRouter 走第三方平台。多付的溢价买到的是物理层面的隐私隔离。</div>
+      </div>
+      <div class="step-item">
+        <div class="step-num" style="border-color:var(--accent3);color:var(--accent3)">→</div>
+        <div class="step-body">如果你需要<strong>高可用性</strong>（生产环境、不能容忍官方宕机），OpenRouter 的多供应商路由是目前最可靠的方案。但准备好为此付出 5-10 倍的价格。</div>
+      </div>
+    </div>
+
+    <div class="pull-quote rv" style="border-left-color:var(--accent3)">
+      <p>你多付出的几倍溢价，买到的不是模型本身——模型是开源的，谁都可以下载。你买到的是便利、合规、隐私隔离、和对抗断网的高可用性。</p>
+      <cite>— 当前大模型商业生态的核心定价逻辑</cite>
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <p class="footer-quote">这不是一个技术问题，而是一个关于<strong>谁控制算力定价权</strong>的博弈。</p>
+  <p class="footer-meta">LLM Business Ecology Analysis · 2025</p>
+</footer>
+
+<script>
+// Intersection Observer for scroll reveals
+const obs=new IntersectionObserver(e=>{e.forEach(x=>{if(x.isIntersecting){x.target.classList.add('vis');obs.unobserve(x.target)}})},{threshold:.08,rootMargin:'0px 0px -40px 0px'});
+document.querySelectorAll('.rv').forEach(el=>obs.observe(el));
+
+// Advantage bars animation
+const barObs=new IntersectionObserver(e=>{e.forEach(x=>{if(x.isIntersecting){x.target.querySelectorAll('.adv-fill').forEach((f,i)=>{setTimeout(()=>{f.style.width=f.dataset.width+'%'},i*80)});barObs.unobserve(x.target)}})},{threshold:.15});
+document.querySelectorAll('.advantage-bar').forEach(el=>barObs.observe(el));
+
+// Parallax hero
+window.addEventListener('scroll',()=>{const s=window.scrollY,h=document.querySelector('.hero-c');if(h&&s<window.innerHeight){h.style.transform=`translateY(${s*.12}px)`;h.style.opacity=1-(s/window.innerHeight)*.5}},{passive:true});
+</script>
+</body>
+</html>

@@ -1,0 +1,922 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>📊 运动身体风险分类全景图</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Source+Serif+4:ital,wght@0,300;0,400;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f5f2ec;
+  --bg2: #eae6de;
+  --surface: #ffffff;
+  --card: #ffffff;
+  --card-border: #e2ddd4;
+  --accent: #c45e28;
+  --accent2: #2878c4;
+  --accent3: #28a060;
+  --gold: #b8860b;
+  --red: #c43030;
+  --orange: #c47828;
+  --teal: #288080;
+  --purple: #6b3fa0;
+  --text: #2a2520;
+  --t2: #5a544c;
+  --t3: #8a847c;
+  --t4: #b0a89c;
+  --border: #ddd8d0;
+  --fd: 'Playfair Display', serif;
+  --fb: 'Source Serif 4', serif;
+  --fm: 'JetBrains Mono', monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth;font-size:16px}
+body{background:var(--bg);color:var(--text);font-family:var(--fb);font-weight:400;line-height:1.85;overflow-x:hidden}
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--accent);border-radius:3px}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes pulse{0%,100%{opacity:.5}50%{opacity:1}}
+
+.rv{opacity:0;transform:translateY(30px);transition:opacity .6s ease,transform .6s ease}
+.rv.vis{opacity:1;transform:translateY(0)}
+.d1{transition-delay:.1s}.d2{transition-delay:.2s}.d3{transition-delay:.3s}.d4{transition-delay:.4s}
+
+/* Hero */
+.hero{position:relative;min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(180deg,#f5f2ec,#ede8df);overflow:hidden}
+.hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 30% 60%,rgba(196,94,40,.06),transparent 50%),radial-gradient(ellipse at 70% 30%,rgba(40,120,196,.04),transparent 50%)}
+.hero-c{position:relative;z-index:2;text-align:center;padding:2rem;max-width:860px;animation:fadeIn 1s ease}
+.hero-l{font-family:var(--fm);font-size:.68rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--accent);margin-bottom:1.5rem;opacity:.7}
+.hero-t{font-family:var(--fd);font-weight:900;font-size:clamp(2rem,5vw,3.5rem);line-height:1.15;margin-bottom:1.5rem;color:var(--text)}
+.hero-t em{font-style:italic;color:var(--accent)}
+.hero-s{font-size:clamp(.9rem,1.5vw,1.05rem);color:var(--t2);max-width:600px;margin:0 auto 2.5rem;line-height:1.9}
+.hero-stats{display:flex;justify-content:center;gap:3rem;flex-wrap:wrap}
+.hero-pn{font-family:var(--fd);font-size:2.2rem;color:var(--accent);line-height:1}
+.hero-pl{font-family:var(--fm);font-size:.6rem;color:var(--t3);letter-spacing:.1em;text-transform:uppercase;margin-top:.3rem}
+
+/* Section */
+.sec{padding:5rem 1.5rem;position:relative}
+.si{max-width:1100px;margin:0 auto}
+.sh{margin-bottom:3rem}
+.sl{display:inline-flex;align-items:center;gap:.5rem;font-family:var(--fm);font-size:.65rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;padding:.35rem 1rem;border-radius:100px;margin-bottom:1.2rem}
+.st{font-family:var(--fd);font-weight:900;font-size:clamp(1.4rem,3vw,2.2rem);line-height:1.25;margin-bottom:.8rem}
+.sd{color:var(--t2);font-size:.92rem;max-width:600px;line-height:1.9}
+
+.divider{height:1px;background:var(--border);max-width:1100px;margin:0 auto}
+
+/* Category header */
+.cat-header{display:flex;align-items:flex-start;gap:2rem;margin-bottom:2.5rem;flex-wrap:wrap}
+.cat-visual{flex-shrink:0;width:160px;height:120px;display:flex;align-items:center;justify-content:center;background:var(--surface);border:1px solid var(--card-border);border-radius:16px;box-shadow:0 2px 12px rgba(0,0,0,.04)}
+.cat-visual svg{width:100%;height:100%}
+.cat-info{flex:1;min-width:280px}
+.cat-tag{font-family:var(--fm);font-size:.6rem;font-weight:700;letter-spacing:.1em;margin-bottom:.4rem;display:inline-block;padding:.2rem .6rem;border-radius:4px}
+
+/* Table */
+.tw{overflow-x:auto;margin:1.5rem 0;border-radius:12px;border:1px solid var(--card-border);background:var(--surface);box-shadow:0 2px 8px rgba(0,0,0,.03)}
+table{width:100%;border-collapse:collapse;font-size:.85rem}
+th{font-family:var(--fm);font-size:.65rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--accent);background:var(--bg2);padding:.8rem 1rem;text-align:left;border-bottom:1px solid var(--card-border);white-space:nowrap}
+td{padding:.7rem 1rem;border-bottom:1px solid var(--border);color:var(--t2);vertical-align:top}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:rgba(0,0,0,.01)}
+.hl{color:var(--accent);font-weight:600}
+.hl2{color:var(--accent2);font-weight:600}
+
+/* Verdict */
+.verdict{background:var(--surface);border:1px solid var(--card-border);border-left:4px solid var(--accent);border-radius:0 12px 12px 0;padding:1.4rem 1.8rem;margin:2rem 0;box-shadow:0 2px 8px rgba(0,0,0,.03)}
+.verdict-l{font-family:var(--fm);font-size:.6rem;font-weight:700;color:var(--accent);letter-spacing:.1em;text-transform:uppercase;margin-bottom:.3rem}
+.verdict-t{font-size:.95rem;line-height:1.8}
+.verdict-t strong{color:var(--text)}
+
+/* Risk cards */
+.risk-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1rem;margin:1.5rem 0}
+.risk-card{background:var(--surface);border:1px solid var(--card-border);border-radius:12px;padding:1.4rem;transition:transform .3s,box-shadow .3s;position:relative;overflow:hidden}
+.risk-card:hover{transform:translateY(-3px);box-shadow:0 6px 20px rgba(0,0,0,.06)}
+.risk-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px}
+.risk-card.red::before{background:var(--red)}
+.risk-card.orange::before{background:var(--orange)}
+.risk-card.teal::before{background:var(--teal)}
+.risk-card.purple::before{background:var(--purple)}
+.risk-card.accent2::before{background:var(--accent2)}
+.risk-card.accent::before{background:var(--accent)}
+.risk-card.gold::before{background:var(--gold)}
+.risk-card-name{font-family:var(--fd);font-weight:700;font-size:1.05rem;margin-bottom:.5rem}
+.risk-card-desc{font-size:.82rem;color:var(--t3);line-height:1.7}
+.risk-card-stat{display:flex;justify-content:space-between;margin-top:.8rem;padding-top:.6rem;border-top:1px solid var(--border)}
+.risk-card-stat span{font-family:var(--fm);font-size:.65rem;font-weight:700;letter-spacing:.05em}
+
+/* Alert box */
+.alert-box{background:rgba(196,48,48,.04);border:1px solid rgba(196,48,48,.12);border-left:4px solid var(--red);border-radius:0 12px 12px 0;padding:1.2rem 1.6rem;margin:1.5rem 0}
+.alert-box .alert-title{font-family:var(--fm);font-size:.68rem;font-weight:700;color:var(--red);letter-spacing:.08em;text-transform:uppercase;margin-bottom:.3rem}
+.alert-box p{font-size:.88rem;color:var(--t2);line-height:1.7}
+
+/* Silent box */
+.silent-box{background:rgba(184,134,11,.04);border:1px solid rgba(184,134,11,.12);border-left:4px solid var(--gold);border-radius:0 12px 12px 0;padding:1.2rem 1.6rem;margin:1.5rem 0}
+.silent-box .alert-title{font-family:var(--fm);font-size:.68rem;font-weight:700;color:var(--gold);letter-spacing:.08em;text-transform:uppercase;margin-bottom:.3rem}
+.silent-box p{font-size:.88rem;color:var(--t2);line-height:1.7}
+
+/* Comparison bar */
+.cbar-group{margin:1.5rem 0}
+.cbar-row{display:grid;grid-template-columns:130px 1fr 70px;align-items:center;gap:.6rem;margin-bottom:.5rem}
+.cbar-label{font-family:var(--fm);font-size:.7rem;font-weight:700;color:var(--t2);text-align:right;white-space:nowrap}
+.cbar-track{height:20px;background:var(--bg2);border-radius:5px;overflow:hidden}
+.cbar-fill{height:100%;border-radius:5px;transform-origin:left;transform:scaleX(0);transition:transform 1s cubic-bezier(.16,1,.3,1)}
+.cbar-fill.red{background:linear-gradient(90deg,rgba(196,48,48,.6),rgba(196,48,48,.2))}
+.cbar-fill.orange{background:linear-gradient(90deg,rgba(196,120,40,.6),rgba(196,120,40,.2))}
+.cbar-fill.accent{background:linear-gradient(90deg,rgba(196,94,40,.6),rgba(196,94,40,.2))}
+.cbar-fill.teal{background:linear-gradient(90deg,rgba(40,128,128,.6),rgba(40,128,128,.2))}
+.cbar-fill.purple{background:linear-gradient(90deg,rgba(107,63,160,.5),rgba(107,63,160,.15))}
+.cbar-fill.accent2{background:linear-gradient(90deg,rgba(40,120,196,.5),rgba(40,120,196,.15))}
+.cbar-fill.gold{background:linear-gradient(90deg,rgba(184,134,11,.5),rgba(184,134,11,.15))}
+.cbar-val{font-family:var(--fm);font-size:.72rem;font-weight:700;color:var(--t3)}
+
+/* Tier section */
+.tier-header{display:flex;align-items:center;gap:1rem;margin-bottom:1rem;flex-wrap:wrap}
+.tier-badge{font-family:var(--fm);font-size:.65rem;font-weight:700;letter-spacing:.06em;padding:.3rem .8rem;border-radius:6px;border:1px solid}
+.tier-badge.silent{color:var(--gold);border-color:rgba(184,134,11,.25);background:rgba(184,134,11,.06)}
+.tier-badge.acute{color:var(--red);border-color:rgba(196,48,48,.25);background:rgba(196,48,48,.06)}
+.tier-badge.chronic{color:var(--orange);border-color:rgba(196,120,40,.25);background:rgba(196,120,40,.06)}
+.tier-badge.systemic{color:var(--purple);border-color:rgba(107,63,160,.25);background:rgba(107,63,160,.06)}
+
+/* Param cards */
+.param-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1rem;margin:1.5rem 0}
+.param-card{background:var(--surface);border:1px solid var(--card-border);border-radius:12px;padding:1.3rem;text-align:center;transition:transform .3s;box-shadow:0 2px 6px rgba(0,0,0,.02)}
+.param-card:hover{transform:translateY(-2px)}
+.param-icon{font-size:2rem;margin-bottom:.5rem}
+.param-name{font-family:var(--fd);font-size:.95rem;font-weight:700;margin-bottom:.3rem}
+.param-note{font-size:.78rem;color:var(--t3);line-height:1.6}
+
+/* Symptom timeline */
+.timeline{margin:2rem 0;padding-left:2rem;border-left:2px solid var(--border)}
+.tl-item{padding:0 0 2rem 1.5rem;position:relative}
+.tl-item::before{content:'';position:absolute;left:-2rem;top:.3rem;width:12px;height:12px;border-radius:50%;border:2px solid var(--border);background:var(--bg)}
+.tl-item.red::before{border-color:var(--red);background:rgba(196,48,48,.1)}
+.tl-item.orange::before{border-color:var(--orange);background:rgba(196,120,40,.1)}
+.tl-item.teal::before{border-color:var(--teal);background:rgba(40,128,128,.1)}
+.tl-item.gold::before{border-color:var(--gold);background:rgba(184,134,11,.1)}
+.tl-title{font-family:var(--fm);font-size:.7rem;font-weight:700;letter-spacing:.06em;margin-bottom:.3rem}
+.tl-body{font-size:.88rem;color:var(--t2);line-height:1.7}
+
+/* Footer */
+.footer{text-align:center;padding:4rem 1.5rem;border-top:1px solid var(--border)}
+.footer-q{font-family:var(--fd);font-weight:700;font-size:1.15rem;color:var(--t2);margin-bottom:.5rem;line-height:1.7}
+.footer-s{font-size:.78rem;color:var(--t4)}
+
+@media(max-width:768px){
+  .sec{padding:3.5rem 1rem}
+  .cat-header{flex-direction:column}
+  .cat-visual{width:100%}
+  .cbar-row{grid-template-columns:100px 1fr 60px}
+  .hero-stats{gap:1.5rem}
+}
+</style>
+</head>
+<body>
+
+<!-- ══════════ HERO ══════════ -->
+<section class="hero">
+  <div class="hero-c">
+    <div class="hero-l">Injury Science · 运动风险分类</div>
+    <h1 class="hero-t">运动身体风险<br><em>系统性分类</em></h1>
+    <p class="hero-s">从"沉默磨损"到"急性断裂"——覆盖 8 大风险类型、40+ 种具体损伤，帮你建立完整的风险认知框架。</p>
+    <div class="hero-stats">
+      <div style="text-align:center"><div class="hero-pn">8</div><div class="hero-pl">风险大类</div></div>
+      <div style="text-align:center"><div class="hero-pn">40+</div><div class="hero-pl">具体损伤</div></div>
+      <div style="text-align:center"><div class="hero-pn">2</div><div class="hero-pl">核心维度</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ OVERVIEW: TWO DIMENSIONS ══════════ -->
+<section class="sec" id="overview">
+  <div class="si">
+    <div class="sh rv">
+      <div class="sl" style="color:var(--accent);border-color:rgba(196,94,40,.2);background:rgba(196,94,40,.05)">核心框架 · Framework</div>
+      <h2 class="st">运动损伤的两个核心维度</h2>
+      <p class="sd">所有运动损伤都可以沿两个维度分类：急性 vs 慢性，可感知 vs 不可感知。</p>
+    </div>
+
+    <!-- 2x2 matrix -->
+    <div class="rv" style="margin:2rem 0">
+      <svg viewBox="0 0 600 320" fill="none" style="width:100%;max-width:650px;display:block;margin:0 auto">
+        <!-- Grid -->
+        <rect x="80" y="40" width="440" height="240" rx="4" fill="none" stroke="var(--border)" stroke-width="1.5"/>
+        <line x1="300" y1="40" x2="300" y2="280" stroke="var(--border)" stroke-width="1" stroke-dasharray="5 4"/>
+        <line x1="80" y1="160" x2="520" y2="160" stroke="var(--border)" stroke-width="1" stroke-dasharray="5 4"/>
+        <!-- Axis labels -->
+        <text x="190" y="300" text-anchor="middle" fill="var(--t3)" font-family="JetBrains Mono" font-size="10" font-weight="700">可感知（有症状）</text>
+        <text x="410" y="300" text-anchor="middle" fill="var(--t3)" font-family="JetBrains Mono" font-size="10" font-weight="700">不可感知（无症状）</text>
+        <text x="60" y="105" text-anchor="middle" fill="var(--t3)" font-family="JetBrains Mono" font-size="10" font-weight="700" transform="rotate(-90,60,105)">急性</text>
+        <text x="60" y="225" text-anchor="middle" fill="var(--t3)" font-family="JetBrains Mono" font-size="10" font-weight="700" transform="rotate(-90,60,225)">慢性</text>
+        <!-- Quadrant 1: Acute + Felt -->
+        <rect x="82" y="42" width="216" height="116" rx="4" fill="rgba(196,48,48,.06)"/>
+        <text x="190" y="80" text-anchor="middle" fill="var(--red)" font-family="JetBrains Mono" font-size="10" font-weight="700">急性可感知</text>
+        <text x="190" y="100" text-anchor="middle" fill="var(--t3)" font-family="Source Serif 4" font-size="11">韧带撕裂 · 肌肉拉伤</text>
+        <text x="190" y="118" text-anchor="middle" fill="var(--t3)" font-family="Source Serif 4" font-size="11">骨折 · 脱臼</text>
+        <text x="190" y="138" text-anchor="middle" fill="var(--red)" font-family="JetBrains Mono" font-size="8" font-weight="700">立即剧痛，无法继续</text>
+        <!-- Quadrant 2: Acute + Silent -->
+        <rect x="302" y="42" width="216" height="116" rx="4" fill="rgba(184,134,11,.06)"/>
+        <text x="410" y="80" text-anchor="middle" fill="var(--gold)" font-family="JetBrains Mono" font-size="10" font-weight="700">急性不可感知</text>
+        <text x="410" y="100" text-anchor="middle" fill="var(--t3)" font-family="Source Serif 4" font-size="11">软骨微损伤</text>
+        <text x="410" y="118" text-anchor="middle" fill="var(--t3)" font-family="Source Serif 4" font-size="11">椎间盘轻微膨出</text>
+        <text x="410" y="138" text-anchor="middle" fill="var(--gold)" font-family="JetBrains Mono" font-size="8" font-weight="700">发生了但你不知道</text>
+        <!-- Quadrant 3: Chronic + Felt -->
+        <rect x="82" y="162" width="216" height="116" rx="4" fill="rgba(196,120,40,.06)"/>
+        <text x="190" y="200" text-anchor="middle" fill="var(--orange)" font-family="JetBrains Mono" font-size="10" font-weight="700">慢性可感知</text>
+        <text x="190" y="220" text-anchor="middle" fill="var(--t3)" font-family="Source Serif 4" font-size="11">网球肘 · 膝前痛</text>
+        <text x="190" y="238" text-anchor="middle" fill="var(--t3)" font-family="Source Serif 4" font-size="11">肩峰撞击 · 足底筋膜炎</text>
+        <text x="190" y="258" text-anchor="middle" fill="var(--orange)" font-family="JetBrains Mono" font-size="8" font-weight="700">反复隐痛，时好时坏</text>
+        <!-- Quadrant 4: Chronic + Silent -->
+        <rect x="302" y="162" width="216" height="116" rx="4" fill="rgba(107,63,160,.06)"/>
+        <text x="410" y="200" text-anchor="middle" fill="var(--purple)" font-family="JetBrains Mono" font-size="10" font-weight="700">慢性不可感知</text>
+        <text x="410" y="220" text-anchor="middle" fill="var(--t3)" font-family="Source Serif 4" font-size="11">软骨累积磨损</text>
+        <text x="410" y="238" text-anchor="middle" fill="var(--t3)" font-family="Source Serif 4" font-size="11">骨密度下降 · 椎间盘退变</text>
+        <text x="410" y="258" text-anchor="middle" fill="var(--purple)" font-family="JetBrains Mono" font-size="8" font-weight="700">最危险：感觉不到就做不了</text>
+      </svg>
+    </div>
+
+    <div class="verdict rv">
+      <div class="verdict-l">核心认知</div>
+      <div class="verdict-t"><strong>最危险的损伤不是"急性可感知"的（你会立即停下来），而是"慢性不可感知"的——软骨磨损、椎间盘退变、骨密度下降。</strong>它们在你毫无感觉的情况下持续发展，等你发现时往往已经不可逆。</div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ══════════ CATEGORY 1: CARTILAGE ══════════ -->
+<section class="sec" id="cartilage">
+  <div class="si">
+    <div class="cat-header rv">
+      <div class="cat-visual">
+        <svg viewBox="0 0 160 120" fill="none">
+          <!-- Joint cross-section -->
+          <rect x="30" y="10" width="40" height="35" rx="6" fill="rgba(196,94,40,.06)" stroke="rgba(196,94,40,.25)" stroke-width="1.5"/>
+          <text x="50" y="32" text-anchor="middle" fill="rgba(196,94,40,.35)" font-family="JetBrains Mono" font-size="7">骨骼</text>
+          <!-- Cartilage layer -->
+          <rect x="30" y="45" width="40" height="8" rx="2" fill="rgba(196,94,40,.15)" stroke="rgba(196,94,40,.35)" stroke-width="1.2"/>
+          <text x="50" y="52" text-anchor="middle" fill="rgba(196,94,40,.5)" font-family="JetBrains Mono" font-size="5.5" font-weight="700">软骨</text>
+          <!-- Gap (synovial fluid) -->
+          <rect x="30" y="53" width="40" height="6" rx="1" fill="rgba(40,120,196,.06)"/>
+          <!-- Bottom cartilage -->
+          <rect x="30" y="59" width="40" height="8" rx="2" fill="rgba(196,94,40,.15)" stroke="rgba(196,94,40,.35)" stroke-width="1.2"/>
+          <!-- Bottom bone -->
+          <rect x="30" y="67" width="40" height="35" rx="6" fill="rgba(196,94,40,.06)" stroke="rgba(196,94,40,.25)" stroke-width="1.5"/>
+          <text x="50" y="89" text-anchor="middle" fill="rgba(196,94,40,.35)" font-family="JetBrains Mono" font-size="7">骨骼</text>
+          <!-- Arrows showing compression -->
+          <path d="M90 25 L90 45" stroke="rgba(196,48,48,.4)" stroke-width="1.5" marker-end="url(#arrowR)"/>
+          <path d="M90 95 L90 75" stroke="rgba(196,48,48,.4)" stroke-width="1.5" marker-end="url(#arrowR)"/>
+          <text x="90" y="63" text-anchor="middle" fill="rgba(196,48,48,.5)" font-family="JetBrains Mono" font-size="6">压力</text>
+          <!-- Wear damage -->
+          <path d="M35 52 L38 48 L42 52 L46 49 L50 52 L54 48 L58 52" stroke="rgba(196,48,48,.3)" stroke-width="1" fill="none"/>
+          <text x="115" y="55" fill="rgba(196,48,48,.4)" font-family="JetBrains Mono" font-size="5.5">磨损面</text>
+          <!-- No nerve symbol -->
+          <circle cx="130" cy="30" r="14" fill="none" stroke="rgba(184,134,11,.3)" stroke-width="1.5"/>
+          <line x1="120" y1="20" x2="140" y2="40" stroke="rgba(184,134,11,.4)" stroke-width="1.5"/>
+          <text x="130" y="55" text-anchor="middle" fill="rgba(184,134,11,.5)" font-family="JetBrains Mono" font-size="5.5">无神经</text>
+          <defs><marker id="arrowR" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="rgba(196,48,48,.4)"/></marker></defs>
+        </svg>
+      </div>
+      <div class="cat-info">
+        <div class="cat-tag" style="color:var(--accent);border:1px solid rgba(196,94,40,.2);background:rgba(196,94,40,.04)">CATEGORY 01</div>
+        <h2 class="st" style="margin-bottom:.5rem">软骨损伤</h2>
+        <p class="sd">运动中最危险的损伤类型。软骨没有神经、没有血管——磨了不痛、破了不修。</p>
+      </div>
+    </div>
+
+    <div class="silent-box rv">
+      <div class="alert-title">为什么软骨损伤最危险？</div>
+      <p><strong>无神经</strong>——磨损初期完全没有疼痛感，你不知道它在坏。<strong>无血管</strong>——没有血液供应，几乎无法自我修复。磨损了就是磨掉了，不可逆。等到有感觉时，往往已磨损 60% 以上。</p>
+    </div>
+
+    <div class="tw rv">
+      <table>
+        <thead><tr><th>损伤类型</th><th>发生位置</th><th>机制</th><th>体感信号</th><th>可逆性</th></tr></thead>
+        <tbody>
+          <tr><td class="hl">关节软骨磨损</td><td>膝/髋/肩/腕</td><td>长期错误力学加载</td><td>弹响→僵硬→酸痛</td><td style="color:var(--red)">不可逆</td></tr>
+          <tr><td class="hl">髌骨软化</td><td>膝盖骨背面</td><td>髌骨轨迹偏移</td><td>下楼膝盖酸</td><td style="color:var(--red)">不可逆</td></tr>
+          <tr><td class="hl">半月板损伤</td><td>膝关节内/外侧</td><td>旋转+压缩力</td><td>膝关节交锁/弹响</td><td style="color:var(--orange)">部分可修</td></tr>
+          <tr><td class="hl">盂唇撕裂</td><td>肩关节/髋关节</td><td>反复冲击或脱位</td><td>深部疼痛/弹响</td><td style="color:var(--orange)">需手术</td></tr>
+          <tr><td class="hl">椎间盘退变</td><td>腰椎/颈椎</td><td>长期压缩+剪切</td><td>背僵→放射痛</td><td style="color:var(--red)">不可逆</td></tr>
+          <tr><td class="hl">关节软骨终板损伤</td><td>椎体-椎间盘连接处</td><td>轴向冲击</td><td>几乎无症状</td><td style="color:var(--red)">不可逆</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3 style="font-family:var(--fd);font-weight:700;font-size:1.1rem;margin:2rem 0 1rem" class="rv">软骨磨损的感知时间线</h3>
+    <div class="timeline rv">
+      <div class="tl-item gold">
+        <div class="tl-title" style="color:var(--gold)">0-60% 磨损 · 完全无感</div>
+        <div class="tl-body">软骨没有神经，浅层到中层的磨损不会产生任何信号。你可以做错误动作几百次、几千次，身体不报警。</div>
+      </div>
+      <div class="tl-item orange">
+        <div class="tl-title" style="color:var(--orange)">60-80% 磨损 · 间接信号出现</div>
+        <div class="tl-body">关节活动时弹响/研磨音。晨起僵硬（活动几分钟后缓解）。训练后关节深处隐隐酸——不是肌肉酸。特定角度"不对劲"的感觉。</div>
+      </div>
+      <div class="tl-item red">
+        <div class="tl-title" style="color:var(--red)">80%+ 磨损 · 明确疼痛</div>
+        <div class="tl-body">负重时疼痛（上下楼梯）。关节肿胀。活动范围受限。静息痛（不动也痛）——说明已经相当严重。</div>
+      </div>
+    </div>
+
+    <div class="risk-grid rv">
+      <div class="risk-card gold">
+        <div class="risk-card-name">触发因素：错误力学</div>
+        <div class="risk-card-desc">膝盖内扣深蹲、弓背硬拉、耸肩推肩——任何让关节在非设计意图位置承重的动作。</div>
+        <div class="risk-card-stat"><span style="color:var(--gold)">危险等级</span><span style="color:var(--red)">★★★★★</span></div>
+      </div>
+      <div class="risk-card gold">
+        <div class="risk-card-name">触发因素：冲击载荷</div>
+        <div class="risk-card-desc">借力甩重量、底部弹跳、快速放下重物——突然的力对软骨损伤不成比例地大于缓慢的力。</div>
+        <div class="risk-card-stat"><span style="color:var(--gold)">危险等级</span><span style="color:var(--red)">★★★★</span></div>
+      </div>
+      <div class="risk-card gold">
+        <div class="risk-card-name">触发因素：累积过度</div>
+        <div class="risk-card-desc">即使动作正确，重复次数过多也会磨——因为每次重复都是一次"挤压-释放"。关节不是肌肉，不能靠堆积训练量变强。</div>
+        <div class="risk-card-stat"><span style="color:var(--gold)">危险等级</span><span style="color:var(--orange)">★★★</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ══════════ CATEGORY 2: LIGAMENTS ══════════ -->
+<section class="sec" id="ligaments">
+  <div class="si">
+    <div class="cat-header rv">
+      <div class="cat-visual">
+        <svg viewBox="0 0 160 120" fill="none">
+          <!-- Bone top -->
+          <rect x="30" y="10" width="50" height="30" rx="6" fill="rgba(40,120,196,.06)" stroke="rgba(40,120,196,.25)" stroke-width="1.5"/>
+          <!-- Ligament fibers -->
+          <path d="M45 40 L40 55 L50 55 L45 70" stroke="rgba(40,120,196,.5)" stroke-width="2" fill="none"/>
+          <path d="M55 40 L60 55 L50 55 L55 70" stroke="rgba(40,120,196,.5)" stroke-width="2" fill="none"/>
+          <path d="M65 40 L63 55 L67 55 L65 70" stroke="rgba(40,120,196,.5)" stroke-width="2" fill="none"/>
+          <!-- Bone bottom -->
+          <rect x="30" y="70" width="50" height="30" rx="6" fill="rgba(40,120,196,.06)" stroke="rgba(40,120,196,.25)" stroke-width="1.5"/>
+          <!-- Tear mark -->
+          <path d="M55 55 L60 50 L58 58 L63 53" stroke="rgba(196,48,48,.5)" stroke-width="1.5" fill="none"/>
+          <!-- Labels -->
+          <text x="110" y="28" fill="rgba(40,120,196,.4)" font-family="JetBrains Mono" font-size="6">骨骼</text>
+          <text x="110" y="58" fill="rgba(40,120,196,.5)" font-family="JetBrains Mono" font-size="6" font-weight="700">韧带</text>
+          <text x="110" y="88" fill="rgba(40,120,196,.4)" font-family="JetBrains Mono" font-size="6">骨骼</text>
+          <text x="120" y="48" fill="rgba(196,48,48,.4)" font-family="JetBrains Mono" font-size="5.5">撕裂点</text>
+        </svg>
+      </div>
+      <div class="cat-info">
+        <div class="cat-tag" style="color:var(--accent2);border:1px solid rgba(40,120,196,.2);background:rgba(40,120,196,.04)">CATEGORY 02</div>
+        <h2 class="st" style="margin-bottom:.5rem">韧带损伤</h2>
+        <p class="sd">关节的"安全绳"——连接骨骼与骨骼。一旦断裂，关节失去稳定性。</p>
+      </div>
+    </div>
+
+    <div class="alert-box rv">
+      <div class="alert-title">与软骨的关键区别</div>
+      <p>韧带<strong>有神经</strong>——所以韧带损伤<strong>立刻会痛</strong>，你能马上知道出事了。这是"急性可感知"类损伤，和软骨的"沉默磨损"完全不同。</p>
+    </div>
+
+    <div class="tw rv">
+      <table>
+        <thead><tr><th>损伤</th><th>位置</th><th>机制</th><th>体感</th><th>恢复时间</th></tr></thead>
+        <tbody>
+          <tr><td class="hl2">ACL 撕裂（前交叉韧带）</td><td>膝关节</td><td>急停变向/旋转</td><td>即时剧痛+"啪"一声</td><td>6-12 个月</td></tr>
+          <tr><td class="hl2">MCL 撕裂（内侧副韧带）</td><td>膝关节</td><td>膝外翻力</td><td>内侧剧痛+肿胀</td><td>2-8 周</td></tr>
+          <tr><td class="hl2">踝关节扭伤</td><td>踝外侧</td><td>内翻扭伤</td><td>即时肿胀+淤青</td><td>2-6 周</td></tr>
+          <tr><td class="hl2">肩关节脱位后韧带松弛</td><td>肩关节</td><td>过度外展+外旋</td><td>肩膀"滑出"+剧痛</td><td>3-6 个月</td></tr>
+          <tr><td class="hl2">腕关节韧带扭伤</td><td>手腕</td><td>摔倒撑地</td><td>手腕肿胀+活动痛</td><td>2-6 周</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ══════════ CATEGORY 3: MUSCLE/TENDON ══════════ -->
+<section class="sec" id="muscle">
+  <div class="si">
+    <div class="cat-header rv">
+      <div class="cat-visual">
+        <svg viewBox="0 0 160 120" fill="none">
+          <!-- Muscle belly -->
+          <ellipse cx="55" cy="50" rx="30" ry="22" fill="rgba(196,94,40,.08)" stroke="rgba(196,94,40,.3)" stroke-width="1.5"/>
+          <!-- Fiber lines -->
+          <line x1="35" y1="40" x2="75" y2="40" stroke="rgba(196,94,40,.12)" stroke-width=".8"/>
+          <line x1="30" y1="50" x2="80" y2="50" stroke="rgba(196,94,40,.12)" stroke-width=".8"/>
+          <line x1="35" y1="60" x2="75" y2="60" stroke="rgba(196,94,40,.12)" stroke-width=".8"/>
+          <!-- Tendon left -->
+          <path d="M25 50 L10 50" stroke="rgba(184,134,11,.4)" stroke-width="4" stroke-linecap="round"/>
+          <!-- Tendon right -->
+          <path d="M85 50 L100 50" stroke="rgba(184,134,11,.4)" stroke-width="4" stroke-linecap="round"/>
+          <!-- Bone attachment -->
+          <rect x="100" y="35" width="20" height="30" rx="4" fill="rgba(40,120,196,.08)" stroke="rgba(40,120,196,.2)" stroke-width="1"/>
+          <!-- Tear -->
+          <path d="M55 35 L60 28 L58 38" stroke="rgba(196,48,48,.5)" stroke-width="1.5" fill="none"/>
+          <!-- Labels -->
+          <text x="55" y="18" text-anchor="middle" fill="rgba(196,94,40,.4)" font-family="JetBrains Mono" font-size="6">肌纤维撕裂</text>
+          <text x="55" y="85" text-anchor="middle" fill="rgba(196,94,40,.4)" font-family="JetBrains Mono" font-size="6.5" font-weight="700">肌腹</text>
+          <text x="18" y="68" fill="rgba(184,134,11,.4)" font-family="JetBrains Mono" font-size="5.5">肌腱</text>
+          <text x="88" y="68" fill="rgba(184,134,11,.4)" font-family="JetBrains Mono" font-size="5.5">肌腱</text>
+          <!-- Repair arrow -->
+          <circle cx="55" cy="98" r="10" fill="rgba(40,128,128,.08)" stroke="rgba(40,128,128,.25)" stroke-width="1"/>
+          <text x="55" y="102" text-anchor="middle" fill="rgba(40,128,128,.5)" font-family="JetBrains Mono" font-size="5.5">可修复</text>
+        </svg>
+      </div>
+      <div class="cat-info">
+        <div class="cat-tag" style="color:var(--orange);border:1px solid rgba(196,120,40,.2);background:rgba(196,120,40,.04)">CATEGORY 03</div>
+        <h2 class="st" style="margin-bottom:.5rem">肌肉与肌腱损伤</h2>
+        <p class="sd">运动损伤的"最大类别"。好消息是：肌肉和肌腱都有血管，可以修复。</p>
+      </div>
+    </div>
+
+    <div class="tw rv">
+      <table>
+        <thead><tr><th>损伤</th><th>类型</th><th>机制</th><th>体感</th><th>恢复</th></tr></thead>
+        <tbody>
+          <tr><td class="hl">DOMS（延迟性酸痛）</td><td>微损伤</td><td>初次/超量训练</td><td>24-72h 后酸痛</td><td>3-14 天</td></tr>
+          <tr><td class="hl">肌肉拉伤 I 度</td><td>轻微撕裂</td><td>过度拉伸/收缩</td><td>运动时刺痛</td><td>1-3 周</td></tr>
+          <tr><td class="hl">肌肉拉伤 II 度</td><td>部分撕裂</td><td>爆发力超限</td><td>明显疼痛+肿胀</td><td>4-8 周</td></tr>
+          <tr><td class="hl">肌肉拉伤 III 度</td><td>完全断裂</td><td>极端负荷</td><td>剧痛+凹陷+功能丧失</td><td>3-6 月（手术）</td></tr>
+          <tr><td class="hl">肌腱炎</td><td>慢性炎症</td><td>反复微损伤</td><td>活动时酸痛</td><td>4-12 周</td></tr>
+          <tr><td class="hl">肌腱撕裂</td><td>急性断裂</td><td>瞬间超限</td><td>"啪"+功能丧失</td><td>4-6 月（手术）</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3 style="font-family:var(--fd);font-weight:700;font-size:1.1rem;margin:2rem 0 1rem" class="rv">肌腱 vs 韧带：容易混淆的关键区别</h3>
+    <div class="rv" style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:2rem">
+      <div class="risk-card accent2">
+        <div class="risk-card-name">肌腱（Tendon）</div>
+        <div class="risk-card-desc"><strong>肌肉→骨骼</strong>的连接绳。把肌肉的力量传递给骨骼。例：跟腱、肱二头肌腱。</div>
+      </div>
+      <div class="risk-card accent2">
+        <div class="risk-card-name">韧带（Ligament）</div>
+        <div class="risk-card-desc"><strong>骨骼→骨骼</strong>的连接绳。稳定关节，限制异常运动。例：ACL、MCL。</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ══════════ CATEGORY 4: BONE ══════════ -->
+<section class="sec" id="bone">
+  <div class="si">
+    <div class="cat-header rv">
+      <div class="cat-visual">
+        <svg viewBox="0 0 160 120" fill="none">
+          <!-- Bone cross-section -->
+          <rect x="25" y="15" width="60" height="80" rx="8" fill="rgba(40,120,196,.04)" stroke="rgba(40,120,196,.2)" stroke-width="1.5"/>
+          <!-- Cortical bone -->
+          <rect x="25" y="15" width="60" height="12" rx="4" fill="rgba(40,120,196,.08)" stroke="rgba(40,120,196,.15)" stroke-width="1"/>
+          <rect x="25" y="83" width="60" height="12" rx="4" fill="rgba(40,120,196,.08)" stroke="rgba(40,120,196,.15)" stroke-width="1"/>
+          <!-- Trabecular pattern inside -->
+          <line x1="32" y1="35" x2="48" y2="35" stroke="rgba(40,120,196,.1)" stroke-width=".8"/>
+          <line x1="38" y1="45" x2="55" y2="45" stroke="rgba(40,120,196,.1)" stroke-width=".8"/>
+          <line x1="35" y1="55" x2="50" y2="55" stroke="rgba(40,120,196,.1)" stroke-width=".8"/>
+          <line x1="40" y1="65" x2="58" y2="65" stroke="rgba(40,120,196,.1)" stroke-width=".8"/>
+          <line x1="33" y1="75" x2="47" y2="75" stroke="rgba(40,120,196,.1)" stroke-width=".8"/>
+          <!-- Stress fracture crack -->
+          <path d="M40 27 L38 38 L42 48 L39 58 L43 68 L40 78" stroke="rgba(196,48,48,.5)" stroke-width="1.5" stroke-dasharray="3 2" fill="none"/>
+          <!-- Labels -->
+          <text x="100" y="25" fill="rgba(40,120,196,.4)" font-family="JetBrains Mono" font-size="5.5">皮质骨</text>
+          <text x="100" y="55" fill="rgba(40,120,196,.3)" font-family="JetBrains Mono" font-size="5.5">松质骨</text>
+          <text x="55" y="108" text-anchor="middle" fill="rgba(196,48,48,.5)" font-family="JetBrains Mono" font-size="6" font-weight="700">应力性骨折线</text>
+          <!-- Healing symbol -->
+          <circle cx="55" cy="55" r="12" fill="rgba(40,128,128,.08)" stroke="rgba(40,128,128,.2)" stroke-width="1"/>
+          <text x="55" y="59" text-anchor="middle" fill="rgba(40,128,128,.5)" font-family="JetBrains Mono" font-size="5.5">可愈合</text>
+        </svg>
+      </div>
+      <div class="cat-info">
+        <div class="cat-tag" style="color:var(--teal);border:1px solid rgba(40,128,128,.2);background:rgba(40,128,128,.04)">CATEGORY 04</div>
+        <h2 class="st" style="margin-bottom:.5rem">骨骼损伤</h2>
+        <p class="sd">骨骼是运动系统中修复能力最强的组织——骨折可以完全愈合。但应力性骨折很隐蔽。</p>
+      </div>
+    </div>
+
+    <div class="tw rv">
+      <table>
+        <thead><tr><th>损伤</th><th>机制</th><th>体感</th><th>恢复</th></tr></thead>
+        <tbody>
+          <tr><td class="hl3">应力性骨折</td><td>反复冲击累积（跑步/跳跃）</td><td>局部按压痛→活动痛→休息痛</td><td>6-12 周</td></tr>
+          <tr><td class="hl3">急性骨折</td><td>瞬间暴力</td><td>剧痛+变形+功能丧失</td><td>6-12 周</td></tr>
+          <tr><td class="hl3">骨裂（不完全骨折）</td><td>中等暴力</td><td>局部按压痛+活动加重</td><td>4-8 周</td></tr>
+          <tr><td class="hl3">骨挫伤</td><td>撞击/冲击</td><td>深部酸痛+压痛</td><td>2-4 周</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="silent-box rv">
+      <div class="alert-title">应力性骨折的隐蔽性</div>
+      <p>应力性骨折和软骨磨损类似——<strong>初期几乎无症状</strong>。先是运动后隐痛，然后运动中痛，最后日常行走也痛。典型位置：胫骨（小腿）、跖骨（脚掌）、股骨颈（髋部）。跑步者和跳跃类运动者高危。</p>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ══════════ CATEGORY 5: SPINAL ══════════ -->
+<section class="sec" id="spinal">
+  <div class="si">
+    <div class="cat-header rv">
+      <div class="cat-visual">
+        <svg viewBox="0 0 160 120" fill="none">
+          <!-- Vertebrae stack -->
+          <rect x="40" y="8" width="30" height="14" rx="3" fill="rgba(107,63,160,.06)" stroke="rgba(107,63,160,.2)" stroke-width="1"/>
+          <!-- Disc -->
+          <rect x="42" y="22" width="26" height="6" rx="2" fill="rgba(40,120,196,.12)" stroke="rgba(40,120,196,.2)" stroke-width="1"/>
+          <!-- Vertebra -->
+          <rect x="40" y="28" width="30" height="14" rx="3" fill="rgba(107,63,160,.06)" stroke="rgba(107,63,160,.2)" stroke-width="1"/>
+          <!-- Disc -->
+          <rect x="42" y="42" width="26" height="6" rx="2" fill="rgba(40,120,196,.12)" stroke="rgba(40,120,196,.2)" stroke-width="1"/>
+          <!-- Vertebra -->
+          <rect x="40" y="48" width="30" height="14" rx="3" fill="rgba(107,63,160,.06)" stroke="rgba(107,63,160,.2)" stroke-width="1"/>
+          <!-- Disc -->
+          <rect x="42" y="62" width="26" height="6" rx="2" fill="rgba(40,120,196,.12)" stroke="rgba(40,120,196,.2)" stroke-width="1"/>
+          <!-- Vertebra -->
+          <rect x="40" y="68" width="30" height="14" rx="3" fill="rgba(107,63,160,.06)" stroke="rgba(107,63,160,.2)" stroke-width="1"/>
+          <!-- Herniation -->
+          <ellipse cx="68" cy="65" rx="8" ry="5" fill="rgba(196,48,48,.1)" stroke="rgba(196,48,48,.35)" stroke-width="1"/>
+          <!-- Nerve -->
+          <path d="M68 65 Q80 65, 90 55 Q100 45, 110 50" stroke="rgba(196,48,48,.4)" stroke-width="1.5" fill="none"/>
+          <path d="M110 50 L125 48" stroke="rgba(196,48,48,.3)" stroke-width="1" stroke-dasharray="3 2"/>
+          <!-- Labels -->
+          <text x="105" y="22" fill="rgba(107,63,160,.3)" font-family="JetBrains Mono" font-size="5.5">椎体</text>
+          <text x="105" y="45" fill="rgba(40,120,196,.4)" font-family="JetBrains Mono" font-size="5.5">椎间盘</text>
+          <text x="80" y="80" fill="rgba(196,48,48,.5)" font-family="JetBrains Mono" font-size="5.5" font-weight="700">突出压迫神经</text>
+          <text x="115" y="62" fill="rgba(196,48,48,.4)" font-family="JetBrains Mono" font-size="5">放射痛</text>
+        </svg>
+      </div>
+      <div class="cat-info">
+        <div class="cat-tag" style="color:var(--purple);border:1px solid rgba(107,63,160,.2);background:rgba(107,63,160,.04)">CATEGORY 05</div>
+        <h2 class="st" style="margin-bottom:.5rem">脊柱损伤</h2>
+        <p class="sd">力量训练中最常受伤的区域。椎间盘和神经的关系决定了脊柱损伤的严重程度。</p>
+      </div>
+    </div>
+
+    <div class="tw rv">
+      <table>
+        <thead><tr><th>损伤</th><th>机制</th><th>体感</th><th>严重度</th></tr></thead>
+        <tbody>
+          <tr><td style="color:var(--purple);font-weight:600">椎间盘膨出</td><td>长期压缩+不良姿势</td><td>腰背僵硬/隐痛</td><td>轻</td></tr>
+          <tr><td style="color:var(--purple);font-weight:600">椎间盘突出</td><td>弯腰+负重（弓背硬拉）</td><td>腰痛→放射到腿（坐骨神经痛）</td><td>中-重</td></tr>
+          <tr><td style="color:var(--purple);font-weight:600">腰椎滑脱</td><td>反复过伸（挺腰推举）</td><td>腰痛+不稳定感</td><td>中-重</td></tr>
+          <tr><td style="color:var(--purple);font-weight:600">脊柱压缩性骨折</td><td>大重量+骨质疏松</td><td>急性剧痛</td><td>重</td></tr>
+          <tr><td style="color:var(--purple);font-weight:600">小关节面综合征</td><td>反复过伸/旋转</td><td>特定角度锐利痛</td><td>轻-中</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ══════════ CATEGORY 6: JOINT ENVIRONMENT ══════════ -->
+<section class="sec" id="joint-env">
+  <div class="si">
+    <div class="cat-header rv">
+      <div class="cat-visual">
+        <svg viewBox="0 0 160 120" fill="none">
+          <!-- Joint capsule -->
+          <ellipse cx="55" cy="55" rx="40" ry="35" fill="rgba(40,120,196,.03)" stroke="rgba(40,120,196,.2)" stroke-width="1.5" stroke-dasharray="4 3"/>
+          <!-- Bursa (small sac) -->
+          <ellipse cx="95" cy="40" rx="12" ry="8" fill="rgba(196,120,40,.1)" stroke="rgba(196,120,40,.3)" stroke-width="1"/>
+          <text x="120" y="43" fill="rgba(196,120,40,.5)" font-family="JetBrains Mono" font-size="5.5">滑囊</text>
+          <!-- Synovial membrane -->
+          <path d="M25 55 Q20 40, 30 30 Q45 20, 60 22 Q80 25, 90 35" stroke="rgba(40,128,128,.3)" stroke-width="1.5" fill="none"/>
+          <text x="120" y="30" fill="rgba(40,128,128,.4)" font-family="JetBrains Mono" font-size="5.5">滑膜</text>
+          <!-- Synovial fluid dots -->
+          <circle cx="45" cy="45" r="2" fill="rgba(40,120,196,.15)"/>
+          <circle cx="55" cy="65" r="2" fill="rgba(40,120,196,.15)"/>
+          <circle cx="65" cy="50" r="2" fill="rgba(40,120,196,.15)"/>
+          <circle cx="50" cy="70" r="1.5" fill="rgba(40,120,196,.12)"/>
+          <text x="55" y="82" text-anchor="middle" fill="rgba(40,120,196,.3)" font-family="JetBrains Mono" font-size="5">关节液</text>
+          <!-- Inflammation zone -->
+          <circle cx="30" cy="70" r="10" fill="rgba(196,48,48,.06)" stroke="rgba(196,48,48,.2)" stroke-width="1" stroke-dasharray="2 2"/>
+          <text x="30" y="73" text-anchor="middle" fill="rgba(196,48,48,.4)" font-family="JetBrains Mono" font-size="5">炎症</text>
+        </svg>
+      </div>
+      <div class="cat-info">
+        <div class="cat-tag" style="color:var(--teal);border:1px solid rgba(40,128,128,.2);background:rgba(40,128,128,.04)">CATEGORY 06</div>
+        <h2 class="st" style="margin-bottom:.5rem">关节环境损伤</h2>
+        <p class="sd">关节不只有骨头和软骨——滑膜、滑囊、关节液同样会出问题。</p>
+      </div>
+    </div>
+
+    <div class="tw rv">
+      <table>
+        <thead><tr><th>损伤</th><th>是什么</th><th>机制</th><th>体感</th></tr></thead>
+        <tbody>
+          <tr><td style="color:var(--teal);font-weight:600">滑膜炎</td><td>关节内膜发炎</td><td>反复刺激/过度使用</td><td>关节肿胀、发热、活动受限</td></tr>
+          <tr><td style="color:var(--teal);font-weight:600">滑囊炎</td><td>关节旁"减震垫"发炎</td><td>反复压迫（鹰嘴/髋/膝前）</td><td>关节旁局部肿痛</td></tr>
+          <tr><td style="color:var(--teal);font-weight:600">关节积液</td><td>关节内液体异常增多</td><td>滑膜炎的后果</td><td>关节肿胀、按压有波动感</td></tr>
+          <tr><td style="color:var(--teal);font-weight:600">关节游离体</td><td>关节内有碎骨/软骨碎片</td><td>软骨磨损脱落</td><td>关节突然"卡住"</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ══════════ CATEGORY 7: NERVE ══════════ -->
+<section class="sec" id="nerve">
+  <div class="si">
+    <div class="cat-header rv">
+      <div class="cat-visual">
+        <svg viewBox="0 0 160 120" fill="none">
+          <!-- Nerve cord -->
+          <path d="M20 60 Q40 50, 55 60 Q70 70, 85 60 Q100 50, 120 60" stroke="rgba(196,94,40,.4)" stroke-width="3" fill="none"/>
+          <!-- Branches -->
+          <path d="M55 60 L55 40" stroke="rgba(196,94,40,.25)" stroke-width="1.5"/>
+          <path d="M85 60 L85 80" stroke="rgba(196,94,40,.25)" stroke-width="1.5"/>
+          <!-- Compression point -->
+          <rect x="70" y="50" width="20" height="20" rx="4" fill="rgba(196,48,48,.08)" stroke="rgba(196,48,48,.3)" stroke-width="1.5"/>
+          <text x="80" y="63" text-anchor="middle" fill="rgba(196,48,48,.5)" font-family="JetBrains Mono" font-size="5" font-weight="700">压迫</text>
+          <!-- Tingling path -->
+          <path d="M85 60 L100 50 L120 45" stroke="rgba(196,48,48,.3)" stroke-width="1" stroke-dasharray="3 2" fill="none"/>
+          <circle cx="120" cy="45" r="4" fill="rgba(196,48,48,.08)" stroke="rgba(196,48,48,.2)" stroke-width="1"/>
+          <text x="132" y="48" fill="rgba(196,48,48,.4)" font-family="JetBrains Mono" font-size="5.5">麻木/刺痛</text>
+          <text x="80" y="100" text-anchor="middle" fill="rgba(196,94,40,.4)" font-family="JetBrains Mono" font-size="6">周围神经</text>
+        </svg>
+      </div>
+      <div class="cat-info">
+        <div class="cat-tag" style="color:var(--red);border:1px solid rgba(196,48,48,.2);background:rgba(196,48,48,.04)">CATEGORY 07</div>
+        <h2 class="st" style="margin-bottom:.5rem">神经压迫与损伤</h2>
+        <p class="sd">神经本身很少在运动中直接受伤，但会被周围结构"挤压"——椎间盘突出、肌肉紧张、姿势不良都是诱因。</p>
+      </div>
+    </div>
+
+    <div class="tw rv">
+      <table>
+        <thead><tr><th>损伤</th><th>压迫来源</th><th>症状</th><th>典型场景</th></tr></thead>
+        <tbody>
+          <tr><td style="color:var(--red);font-weight:600">坐骨神经痛</td><td>椎间盘突出/梨状肌紧张</td><td>臀→大腿后侧→小腿放射痛/麻木</td><td>弓背硬拉后</td></tr>
+          <tr><td style="color:var(--red);font-weight:600">腕管综合征</td><td>腕管内压力增高</td><td>手指麻木（拇指→中指）</td><td>大量握杠/弯举后</td></tr>
+          <tr><td style="color:var(--red);font-weight:600">胸廓出口综合征</td><td>锁骨下方神经受压</td><td>手指麻木+肩颈痛</td><td>大量过头动作</td></tr>
+          <tr><td style="color:var(--red);font-weight:600">尺神经卡压</td><td>肘管处压迫</td><td>无名指+小指麻木</td><td>肘部长期弯曲受压</td></tr>
+          <tr><td style="color:var(--red);font-weight:600">股外侧皮神经卡压</td><td>腹股沟韧带压迫</td><td>大腿外侧麻木</td><td>深蹲腰带过紧</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ══════════ CATEGORY 8: SYSTEMIC ══════════ -->
+<section class="sec" id="systemic">
+  <div class="si">
+    <div class="cat-header rv">
+      <div class="cat-visual">
+        <svg viewBox="0 0 160 120" fill="none">
+          <!-- Body outline -->
+          <circle cx="55" cy="22" r="12" fill="rgba(107,63,160,.06)" stroke="rgba(107,63,160,.2)" stroke-width="1"/>
+          <line x1="55" y1="34" x2="55" y2="75" stroke="rgba(107,63,160,.2)" stroke-width="2"/>
+          <line x1="55" y1="45" x2="35" y2="60" stroke="rgba(107,63,160,.15)" stroke-width="1.5"/>
+          <line x1="55" y1="45" x2="75" y2="60" stroke="rgba(107,63,160,.15)" stroke-width="1.5"/>
+          <line x1="55" y1="75" x2="40" y2="95" stroke="rgba(107,63,160,.15)" stroke-width="1.5"/>
+          <line x1="55" y1="75" x2="70" y2="95" stroke="rgba(107,63,160,.15)" stroke-width="1.5"/>
+          <!-- Warning signals -->
+          <circle cx="55" cy="55" r="18" fill="none" stroke="rgba(196,48,48,.2)" stroke-width="1.5" stroke-dasharray="4 3">
+            <animate attributeName="r" values="18;22;18" dur="2s" repeatCount="indefinite"/>
+            <animate attributeName="opacity" values="1;0.3;1" dur="2s" repeatCount="indefinite"/>
+          </circle>
+          <!-- Kidney (rhabdo) -->
+          <ellipse cx="95" cy="55" rx="10" ry="14" fill="rgba(196,48,48,.08)" stroke="rgba(196,48,48,.25)" stroke-width="1"/>
+          <text x="115" y="52" fill="rgba(196,48,48,.4)" font-family="JetBrains Mono" font-size="5">肾脏压力</text>
+          <text x="115" y="62" fill="rgba(196,48,48,.3)" font-family="JetBrains Mono" font-size="5">肌红蛋白</text>
+          <!-- Heart (cardiac) -->
+          <path d="M30 80 Q25 70, 35 72 Q45 70, 30 80" fill="rgba(196,48,48,.1)" stroke="rgba(196,48,48,.3)" stroke-width="1"/>
+          <text x="15" y="95" fill="rgba(196,48,48,.3)" font-family="JetBrains Mono" font-size="5">心脏负荷</text>
+        </svg>
+      </div>
+      <div class="cat-info">
+        <div class="cat-tag" style="color:var(--purple);border:1px solid rgba(107,63,160,.2);background:rgba(107,63,160,.04)">CATEGORY 08</div>
+        <h2 class="st" style="margin-bottom:.5rem">系统性风险</h2>
+        <p class="sd">不是某个部位的问题，而是整个身体系统被"练崩了"。低概率，但后果极其严重。</p>
+      </div>
+    </div>
+
+    <div class="alert-box rv">
+      <div class="alert-title">这些是真正的"急症"——需要立即就医</div>
+      <p>系统性运动损伤不同于关节/肌肉问题——它们不是"练出来的伤"，而是"练过了头的代价"。一旦发生，立即停止训练，不要扛。</p>
+    </div>
+
+    <div class="risk-grid rv">
+      <div class="risk-card red">
+        <div class="risk-card-name">横纹肌溶解症</div>
+        <div class="risk-card-desc">肌肉大量破坏→肌红蛋白入血→堵塞肾小管→急性肾衰竭。诱因：极端训练量、高温、脱水。信号：<strong>尿液变成酱油色</strong>。</div>
+        <div class="risk-card-stat"><span style="color:var(--red)">危险等级</span><span style="color:var(--red)">★★★★★</span></div>
+      </div>
+      <div class="risk-card red">
+        <div class="risk-card-name">心脏事件</div>
+        <div class="risk-card-desc">心律失常/心肌梗死/主动脉夹层。大重量训练时血压可瞬间飙升至 300+mmHg。信号：胸痛、异常气短、头晕、心悸。</div>
+        <div class="risk-card-stat"><span style="color:var(--red)">危险等级</span><span style="color:var(--red)">★★★★★</span></div>
+      </div>
+      <div class="risk-card orange">
+        <div class="risk-card-name">过度训练综合征</div>
+        <div class="risk-card-desc">长期训练量超过恢复能力。激素紊乱、免疫力下降、持续疲劳、失眠、情绪低落。比想象中常见得多。</div>
+        <div class="risk-card-stat"><span style="color:var(--orange)">危险等级</span><span style="color:var(--orange)">★★★</span></div>
+      </div>
+      <div class="risk-card orange">
+        <div class="risk-card-name">训练性贫血</div>
+        <div class="risk-card-desc">大运动量导致红细胞破坏加速（足部撞击/溶血）。信号：持续疲劳、面色苍白、运动能力莫名下降。</div>
+        <div class="risk-card-stat"><span style="color:var(--orange)">危险等级</span><span style="color:var(--orange)">★★</span></div>
+      </div>
+      <div class="risk-card purple">
+        <div class="risk-card-name">运动性低钠血症</div>
+        <div class="risk-card-desc">大量出汗+大量喝水→血液钠浓度被稀释→脑水肿。马拉松/铁三高发。信号：恶心、头痛、意识模糊。</div>
+        <div class="risk-card-stat"><span style="color:var(--purple)">危险等级</span><span style="color:var(--red)">★★★★</span></div>
+      </div>
+      <div class="risk-card purple">
+        <div class="risk-card-name">热射病</div>
+        <div class="risk-card-desc">核心体温超过 40°C → 中枢神经系统功能障碍。高温环境训练高发。信号：停止出汗、意识混乱、皮肤发红发热。</div>
+        <div class="risk-card-stat"><span style="color:var(--purple)">危险等级</span><span style="color:var(--red)">★★★★★</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ══════════ REPAIRABILITY COMPARISON ══════════ -->
+<section class="sec" id="repair">
+  <div class="si">
+    <div class="sh rv">
+      <div class="sl" style="color:var(--accent3);border-color:rgba(40,160,96,.2);background:rgba(40,160,96,.05)">修复能力 · Repairability</div>
+      <h2 class="st">不同组织的修复能力对比</h2>
+      <p class="sd">理解"什么能修、什么不能修"是风险认知的基础。</p>
+    </div>
+
+    <div class="cbar-group rv">
+      <h3 style="font-family:var(--fd);font-size:1.05rem;margin-bottom:1.2rem">组织修复能力排名</h3>
+      <div class="cbar-row">
+        <div class="cbar-label">骨骼</div>
+        <div class="cbar-track"><div class="cbar-fill accent2" data-width="95"></div></div>
+        <div class="cbar-val">可完全愈合</div>
+      </div>
+      <div class="cbar-row">
+        <div class="cbar-label">肌肉</div>
+        <div class="cbar-track"><div class="cbar-fill accent2" data-width="85"></div></div>
+        <div class="cbar-val">修复能力强</div>
+      </div>
+      <div class="cbar-row">
+        <div class="cbar-label">韧带</div>
+        <div class="cbar-track"><div class="cbar-fill orange" data-width="55"></div></div>
+        <div class="cbar-val">缓慢/不完全</div>
+      </div>
+      <div class="cbar-row">
+        <div class="cbar-label">肌腱</div>
+        <div class="cbar-track"><div class="cbar-fill orange" data-width="50"></div></div>
+        <div class="cbar-val">缓慢/可能瘢痕化</div>
+      </div>
+      <div class="cbar-row">
+        <div class="cbar-label">椎间盘</div>
+        <div class="cbar-track"><div class="cbar-fill red" data-width="30"></div></div>
+        <div class="cbar-val">极有限</div>
+      </div>
+      <div class="cbar-row">
+        <div class="cbar-label">关节软骨</div>
+        <div class="cbar-track"><div class="cbar-fill red" data-width="12"></div></div>
+        <div class="cbar-val">几乎不可修复</div>
+      </div>
+      <div class="cbar-row">
+        <div class="cbar-label">半月板内侧 2/3</div>
+        <div class="cbar-track"><div class="cbar-fill red" data-width="8"></div></div>
+        <div class="cbar-val">无血供，不修复</div>
+      </div>
+    </div>
+
+    <div class="verdict rv">
+      <div class="verdict-l">核心认知</div>
+      <div class="verdict-t"><strong>修复能力和血供直接相关。</strong>骨骼（血供丰富）可以完全愈合，软骨（无血供）几乎不能。这就是为什么软骨保护的优先级高于一切——肌肉拉伤了养几周就好，软骨磨掉了就是磨掉了。</div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ══════════ REVERSIBILITY MATRIX ══════════ -->
+<section class="sec" id="matrix">
+  <div class="si">
+    <div class="sh rv">
+      <div class="sl" style="color:var(--accent);border-color:rgba(196,94,40,.2);background:rgba(196,94,40,.05)">风险矩阵 · Risk Matrix</div>
+      <h2 class="st">按可感知性和可逆性分类</h2>
+    </div>
+
+    <div class="tw rv">
+      <table>
+        <thead>
+          <tr>
+            <th>损伤</th>
+            <th>可感知？</th>
+            <th>可逆？</th>
+            <th>预防难度</th>
+            <th>力量训练常见？</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td class="hl">软骨磨损</td><td style="color:var(--gold)">晚期才可感知</td><td style="color:var(--red)">不可逆</td><td style="color:var(--red)">最难预防</td><td>★★★★★</td></tr>
+          <tr><td class="hl">椎间盘退变</td><td style="color:var(--gold)">晚期才可感知</td><td style="color:var(--red)">不可逆</td><td style="color:var(--red)">极难</td><td>★★★★★</td></tr>
+          <tr><td class="hl">骨密度下降</td><td style="color:var(--gold)">无症状</td><td style="color:var(--orange)">可改善</td><td>中等</td><td>★</td></tr>
+          <tr><td class="hl">DOMS</td><td>立即可感知</td><td style="color:var(--accent3)">完全可逆</td><td style="color:var(--accent3)">不需要</td><td>★★★★★</td></tr>
+          <tr><td class="hl">肌肉拉伤</td><td>立即可感知</td><td style="color:var(--accent3)">完全可逆</td><td>中等</td><td>★★★</td></tr>
+          <tr><td class="hl">韧带撕裂</td><td>立即可感知</td><td style="color:var(--orange)">不完全</td><td>中等</td><td>★★</td></tr>
+          <tr><td class="hl">肌腱炎</td><td>逐渐感知</td><td style="color:var(--accent3)">可逆</td><td>中等</td><td>★★★</td></tr>
+          <tr><td class="hl">神经压迫</td><td>可感知（麻木/刺痛）</td><td style="color:var(--orange)">解除压迫后可逆</td><td>中等</td><td>★★★</td></tr>
+          <tr><td class="hl">横纹肌溶解</td><td>可感知（酱油色尿）</td><td style="color:var(--accent3)">可逆（需急救）</td><td style="color:var(--accent3)">容易</td><td>★</td></tr>
+          <tr><td class="hl">心脏事件</td><td>可感知</td><td>—</td><td>—</td><td>★</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ══════════ PREVENTION HIERARCHY ══════════ -->
+<section class="sec" id="prevention">
+  <div class="si">
+    <div class="sh rv">
+      <div class="sl" style="color:var(--accent3);border-color:rgba(40,160,96,.2);background:rgba(40,160,96,.05)">预防策略 · Prevention</div>
+      <h2 class="st">按优先级排列的预防措施</h2>
+      <p class="sd">不是每种损伤都需要同样的预防力度——优先保护"不可逆"的。</p>
+    </div>
+
+    <div class="param-grid rv">
+      <div class="param-card">
+        <div class="param-icon">
+          <svg width="36" height="36" viewBox="0 0 36 36" fill="none"><circle cx="18" cy="18" r="14" fill="none" stroke="var(--red)" stroke-width="2"/><text x="18" y="22" text-anchor="middle" fill="var(--red)" font-family="JetBrains Mono" font-size="14" font-weight="700">1</text></svg>
+        </div>
+        <div class="param-name">关节对位</div>
+        <div class="param-note">保护软骨和椎间盘。动作质量永远优先于重量。拍视频自查是唯一可靠的检测手段。</div>
+      </div>
+      <div class="param-card">
+        <div class="param-icon">
+          <svg width="36" height="36" viewBox="0 0 36 36" fill="none"><circle cx="18" cy="18" r="14" fill="none" stroke="var(--orange)" stroke-width="2"/><text x="18" y="22" text-anchor="middle" fill="var(--orange)" font-family="JetBrains Mono" font-size="14" font-weight="700">2</text></svg>
+        </div>
+        <div class="param-name">消除冲击载荷</div>
+        <div class="param-note">不借力、不甩重量、不弹跳。软骨怕的不是力大，而是力突然。控制节奏比加重量更重要。</div>
+      </div>
+      <div class="param-card">
+        <div class="param-icon">
+          <svg width="36" height="36" viewBox="0 0 36 36" fill="none"><circle cx="18" cy="18" r="14" fill="none" stroke="var(--gold)" stroke-width="2"/><text x="18" y="22" text-anchor="middle" fill="var(--gold)" font-family="JetBrains Mono" font-size="14" font-weight="700">3</text></svg>
+        </div>
+        <div class="param-name">控制训练量</div>
+        <div class="param-note">关节不是肌肉，不能靠堆积量变强。软骨修复速度远慢于磨损速度，留有余量是必须的。</div>
+      </div>
+      <div class="param-card">
+        <div class="param-icon">
+          <svg width="36" height="36" viewBox="0 0 36 36" fill="none"><circle cx="18" cy="18" r="14" fill="none" stroke="var(--accent2)" stroke-width="2"/><text x="18" y="22" text-anchor="middle" fill="var(--accent2)" font-family="JetBrains Mono" font-size="14" font-weight="700">4</text></svg>
+        </div>
+        <div class="param-name">疲劳管理</div>
+        <div class="param-note">疲劳时动作变形 + 本体感觉下降 = 双重打击。设"质量红线"，变形就停，不管剩几次。</div>
+      </div>
+      <div class="param-card">
+        <div class="param-icon">
+          <svg width="36" height="36" viewBox="0 0 36 36" fill="none"><circle cx="18" cy="18" r="14" fill="none" stroke="var(--teal)" stroke-width="2"/><text x="18" y="22" text-anchor="middle" fill="var(--teal)" font-family="JetBrains Mono" font-size="14" font-weight="700">5</text></svg>
+        </div>
+        <div class="param-name">热身与恢复</div>
+        <div class="param-note">关节液需要"挤压-释放"循环来给软骨输送营养。充足睡眠是修复效率的倍增器。</div>
+      </div>
+      <div class="param-card">
+        <div class="param-icon">
+          <svg width="36" height="36" viewBox="0 0 36 36" fill="none"><circle cx="18" cy="18" r="14" fill="none" stroke="var(--purple)" stroke-width="2"/><text x="18" y="22" text-anchor="middle" fill="var(--purple)" font-family="JetBrains Mono" font-size="14" font-weight="700">6</text></svg>
+        </div>
+        <div class="param-name">肌力平衡</div>
+        <div class="param-note">屈/伸平衡、前/后链平衡。不平衡 = 关节被单方向持续拉拽 = 磨损加速。面拉、手腕伸展是典型补强。</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ══════════ BOTTOM LINE ══════════ -->
+<section class="sec">
+  <div class="si">
+    <div class="verdict rv" style="border-left-color:var(--accent);background:linear-gradient(135deg,rgba(196,94,40,.04),rgba(40,120,196,.02))">
+      <div class="verdict-l">一句话总结</div>
+      <div class="verdict-t"><strong>运动中真正危险的损伤不是你马上能感觉到的急性伤——那些你会立即停下来。真正危险的是"沉默类"损伤：软骨磨损、椎间盘退变、骨密度下降。</strong>它们在你毫无感觉的情况下持续发展，等到有信号时往往已经不可逆。保护它们的唯一方法不是"等感觉到了再处理"，而是从源头控制——关节对位正确、消除冲击载荷、控制训练量、疲劳时及时停止。肌肉和骨骼受了伤能修，软骨和椎间盘磨了就是磨了。</div>
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <p class="footer-q">肌肉是消耗品，骨骼是建材，软骨是不可替代件。</p>
+  <p class="footer-s">运动身体风险分类全景图 · 2025</p>
+</footer>
+
+<script>
+const obs=new IntersectionObserver(e=>{e.forEach(x=>{if(x.isIntersecting){x.target.classList.add('vis');obs.unobserve(x.target)}})},{threshold:.08,rootMargin:'0px 0px -40px 0px'});
+document.querySelectorAll('.rv').forEach(el=>obs.observe(el));
+const barObs=new IntersectionObserver(e=>{e.forEach(x=>{if(x.isIntersecting){x.target.querySelectorAll('.cbar-fill').forEach((f,i)=>{setTimeout(()=>{f.style.transform='scaleX(1)';f.style.width=f.dataset.width+'%'},i*100)});barObs.unobserve(x.target)}})},{threshold:.2});
+document.querySelectorAll('.cbar-group').forEach(el=>barObs.observe(el));
+window.addEventListener('scroll',()=>{const s=window.scrollY,h=document.querySelector('.hero-c');if(h&&s<window.innerHeight){h.style.transform=`translateY(${s*.15}px)`;h.style.opacity=1-(s/window.innerHeight)*.6}},{passive:true});
+</script>
+</body>
+</html>

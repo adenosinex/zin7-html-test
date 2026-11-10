@@ -1,0 +1,1018 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>按用途选平台 — 社交·社区·资讯深度指南</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Noto+Sans+SC:wght@300;400;500;700&family=DM+Mono:wght@300;400;500&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#06060a;--bg2:#0a0a10;
+  --s1:#101018;--s2:#161622;--s3:#1e1e30;
+  --gold:#d4a843;--gold-b:#ecc050;--gold-d:#7a6430;
+  --txt:#e6e2d8;--txt2:#9a9488;--txt3:#5a5650;
+  --red:#c44840;--blue:#4888c0;--green:#3a9a58;
+  --purple:#8860b8;--cyan:#3aa8a8;--orange:#c87830;
+  --mono:'DM Mono','Courier New',monospace;
+  --sans:'Noto Sans SC','Helvetica Neue',sans-serif;
+  --serif:'Instrument Serif','Georgia',serif;
+  --display:'Playfair Display','Georgia',serif;
+}
+html{scroll-behavior:smooth;font-size:15px}
+body{
+  font-family:var(--sans);background:var(--bg);color:var(--txt);
+  line-height:1.8;overflow-x:hidden;
+}
+body::before{
+  content:'';position:fixed;inset:0;
+  background:
+    radial-gradient(ellipse at 20% 10%,rgba(212,168,67,.025) 0%,transparent 55%),
+    radial-gradient(ellipse at 80% 85%,rgba(72,136,192,.02) 0%,transparent 50%);
+  pointer-events:none;z-index:0;
+}
+
+/* ── NAV ── */
+.nav{
+  position:fixed;top:0;left:0;right:0;z-index:200;
+  background:rgba(6,6,10,.88);backdrop-filter:blur(20px);
+  border-bottom:1px solid rgba(212,168,67,.06);
+  padding:.6rem 1.2rem;
+  box-shadow:0 4px 18px rgba(0,0,0,0.4);
+}
+.nav-in{
+  max-width:1300px;margin:0 auto;
+  display:flex;align-items:center;gap:.6rem;overflow-x:auto;
+  scrollbar-width:none;
+}
+.nav-in::-webkit-scrollbar{display:none}
+.nav-logo{
+  font-family:var(--sans);font-weight:700;font-size:1.1rem;
+  color:var(--txt);margin-right:.8rem;white-space:nowrap;flex-shrink:0;
+  border-right:1px solid rgba(255,255,255,0.08);padding-right:12px;
+}
+.nav a{
+  font-family:var(--sans);font-size:.85rem;color:var(--txt2);
+  text-decoration:none;font-weight:500;
+  white-space:nowrap;padding:.4rem .8rem;border-radius:999px;
+  background:var(--s2);border:1px solid rgba(255,255,255,0.02);
+  transition:all .2s ease;flex-shrink:0;
+}
+.nav a:hover, .nav a.active{
+  color:#fff;background:var(--gold-d);border-color:var(--gold);transform:translateY(-1px);
+}
+.nav a.nav-table-btn {
+  background:linear-gradient(135deg,#2563eb,#4f46e5);color:#fff;
+  font-weight:600;box-shadow:0 4px 12px rgba(37,99,235,0.25);border:none;
+}
+.nav a.nav-table-btn:hover { background:linear-gradient(135deg,#3b82f6,#6366f1); }
+
+/* ── HERO ── */
+.hero{
+  min-height:55vh;display:flex;flex-direction:column;
+  justify-content:center;align-items:center;text-align:center;
+  padding:7rem 1.5rem 2.5rem;position:relative;
+}
+.hero-kicker{
+  font-family:var(--mono);font-size:.6rem;color:var(--gold-d);
+  letter-spacing:.3em;text-transform:uppercase;margin-bottom:.8rem;
+  opacity:0;animation:fadeUp .6s ease forwards .1s;
+}
+.hero h1{
+  font-family:var(--display);font-weight:700;font-style:italic;
+  font-size:clamp(2.2rem,5.5vw,4.2rem);
+  color:var(--txt);line-height:1.15;
+  opacity:0;animation:fadeUp .8s ease forwards .25s;
+}
+.hero h1 em{color:var(--gold);font-style:italic}
+.hero .sub{
+  font-size:.9rem;color:var(--txt2);max-width:520px;margin:1rem auto 0;
+  opacity:0;animation:fadeUp .7s ease forwards .45s;
+}
+.hero-line{
+  width:28px;height:2px;background:var(--gold);
+  margin:1.3rem auto;opacity:0;animation:fadeUp .5s ease forwards .6s;
+}
+.hero-stats{
+  display:flex;gap:2rem;
+  opacity:0;animation:fadeUp .6s ease forwards .7s;
+}
+.hero-stats .st{text-align:center}
+.hero-stats .sv{font-family:var(--display);font-weight:700;font-size:1.6rem;color:var(--gold)}
+.hero-stats .sl{font-family:var(--mono);font-size:.55rem;color:var(--txt3);letter-spacing:.1em;text-transform:uppercase}
+
+/* ── MAIN ── */
+main{position:relative;z-index:1;max-width:1080px;margin:0 auto;padding:0 1.2rem}
+
+/* ── SCENE ── */
+.scene{margin:4rem 0 2rem;position:relative}
+.scene-head{
+  display:flex;align-items:flex-end;gap:1rem;
+  margin-bottom:2rem;flex-wrap:wrap;
+}
+.sn{
+  font-family:var(--display);font-style:italic;font-weight:700;
+  font-size:3.8rem;line-height:.85;color:rgba(212,168,67,.1);
+  flex-shrink:0;
+}
+.stb{flex:1;min-width:180px}
+.sq{
+  font-family:var(--mono);font-size:.58rem;color:var(--gold-d);
+  letter-spacing:.2em;text-transform:uppercase;margin-bottom:.15rem;
+}
+.stitle{
+  font-family:var(--display);font-style:italic;font-weight:700;
+  font-size:clamp(1.3rem,3vw,2.1rem);color:var(--txt);line-height:1.25;
+}
+.salt{font-family:var(--mono);font-size:.62rem;color:var(--txt3);letter-spacing:.06em;margin-top:.2rem}
+.sline{
+  width:100%;height:1px;
+  background:linear-gradient(90deg,rgba(212,168,67,.12),transparent);
+  margin-top:.8rem;
+}
+
+/* ── PLAT CARD ── */
+a.plat, .plat{
+  display:block;background:var(--s1);
+  border:1px solid rgba(255,255,255,.035);border-radius:10px;
+  margin-bottom:1rem;overflow:hidden;
+  transition:border-color .3s,transform .25s,box-shadow .25s;
+  opacity:0;transform:translateY(20px);
+  text-decoration:none;color:inherit;cursor:pointer;
+}
+a.plat.revealed,.plat.revealed{opacity:1;transform:translateY(0);transition:opacity .5s ease,transform .5s ease,border-color .3s}
+a.plat:hover,.plat:hover{
+  border-color:rgba(212,168,67,.15);transform:translateY(-2px);
+  box-shadow:0 8px 30px rgba(0,0,0,.3);
+}
+
+.ph{display:flex;align-items:center;gap:.8rem;padding:1.2rem 1.5rem .8rem;flex-wrap:wrap}
+.pi{
+  width:42px;height:42px;border-radius:10px;
+  display:flex;align-items:center;justify-content:center;
+  font-weight:700;font-size:.95rem;color:#fff;
+  flex-shrink:0;position:relative;
+}
+.pi::after{
+  content:'';position:absolute;inset:-2px;border-radius:12px;
+  border:1px solid rgba(255,255,255,.05);
+}
+.pn{font-family:var(--display);font-style:italic;font-weight:700;font-size:1.35rem;color:var(--txt);line-height:1.1}
+.ps{font-family:var(--mono);font-size:.55rem;color:var(--txt3);letter-spacing:.06em;margin-top:.1rem}
+.pbs{margin-left:auto;display:flex;gap:.35rem;flex-wrap:wrap}
+.bg{
+  font-family:var(--mono);font-size:.5rem;letter-spacing:.05em;
+  text-transform:uppercase;padding:.15rem .4rem;border-radius:3px;
+}
+.bg-p{background:rgba(212,168,67,.1);color:var(--gold)}
+.bg-a{background:rgba(72,136,192,.1);color:var(--blue)}
+.bg-s{background:rgba(58,154,88,.08);color:var(--green)}
+.bg-r{background:rgba(196,72,64,.1);color:var(--red)}
+.bg-u{background:rgba(136,96,184,.08);color:var(--purple)}
+
+.pb{padding:0 1.5rem 1.4rem}
+.pt{font-size:.85rem;color:var(--txt2);line-height:1.8;margin-bottom:.6rem}
+.pt strong{color:var(--txt);font-weight:500}
+
+.feats{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
+  gap:.5rem;margin:.5rem 0;
+}
+.feat{
+  background:var(--s2);border-radius:5px;padding:.55rem .75rem;
+  border:1px solid rgba(255,255,255,.02);
+}
+.feat-l{
+  font-family:var(--mono);font-size:.5rem;color:var(--gold-d);
+  letter-spacing:.1em;text-transform:uppercase;margin-bottom:.1rem;
+}
+.feat-v{font-size:.78rem;color:var(--txt2)}
+
+.sbox{
+  background:var(--s2);border-left:3px solid var(--gold-d);
+  border-radius:0 6px 6px 0;padding:.8rem 1.2rem;margin-top:.6rem;
+}
+.sbox-t{
+  font-family:var(--mono);font-size:.55rem;color:var(--gold);
+  letter-spacing:.15em;text-transform:uppercase;margin-bottom:.2rem;
+}
+.sbox p{font-size:.8rem;color:var(--txt2);line-height:1.65}
+
+.alt{
+  background:rgba(72,136,192,.04);border-left:3px solid rgba(72,136,192,.18);
+  border-radius:0 6px 6px 0;padding:.7rem 1.1rem;margin-top:.4rem;
+}
+.alt-t{
+  font-family:var(--mono);font-size:.5rem;color:var(--blue);
+  letter-spacing:.1em;text-transform:uppercase;margin-bottom:.15rem;
+}
+.alt p{font-size:.78rem;color:var(--txt2);line-height:1.6}
+
+/* ── BRAND ICON GRADIENTS ── */
+.ic-wb{background:linear-gradient(135deg,#e64020,#a01810)}
+.ic-tt{background:linear-gradient(135deg,#282828,#181818)}
+.ic-zh{background:linear-gradient(135deg,#1888e0,#0c50a0)}
+.ic-gg{background:linear-gradient(135deg,#4888f0,#2858b0)}
+.ic-bi{background:linear-gradient(135deg,#40a0f0,#2068c0)}
+.ic-xhs{background:linear-gradient(135deg,#f04040,#c02020)}
+.ic-smzdm{background:linear-gradient(135deg,#e85020,#a83010)}
+.ic-db{background:linear-gradient(135deg,#30a838,#186820)}
+.ic-hp{background:linear-gradient(135deg,#e84028,#a82818)}
+.ic-zb8{background:linear-gradient(135deg,#2078c0,#104878)}
+.ic-36k{background:linear-gradient(135deg,#1080f0,#0848a0)}
+.ic-hx{background:linear-gradient(135deg,#f06020,#a03810)}
+.ic-sspai{background:linear-gradient(135deg,#d83030,#901818)}
+.ic-dy{background:linear-gradient(135deg,#181818,#000)}
+.ic-ks{background:linear-gradient(135deg,#f0a020,#c07010)}
+.ic-yt{background:linear-gradient(135deg,#f02020,#a01010)}
+.ic-ka{background:linear-gradient(135deg,#28a848,#187028)}
+.ic-ithome{background:linear-gradient(135deg,#d83820,#981010)}
+.ic-thepaper{background:linear-gradient(135deg,#2048a0,#102858)}
+.ic-rdhub{background:linear-gradient(135deg,#3080d0,#185088)}
+.ic-tb{background:linear-gradient(135deg,#4888f0,#2058b0)}
+.ic-v2ex{background:linear-gradient(135deg,#333,#1a1a1a)}
+.ic-ifanr{background:linear-gradient(135deg,#202020,#0a0a0a)}
+.ic-pw{background:linear-gradient(135deg,#6040a0,#302060)}
+.ic-default{background:linear-gradient(135deg,var(--gold-d),var(--s3))}
+
+/* ── TABLE ── */
+.qt{
+  margin:3.5rem 0 2rem;border:1px solid rgba(255,255,255,.04);
+  border-radius:10px;overflow:hidden;opacity:0;transform:translateY(18px);
+}
+.qt.revealed{opacity:1;transform:translateY(0);transition:opacity .5s ease,transform .5s ease}
+.qt-h{background:var(--s2);padding:1.2rem 1.5rem;border-bottom:1px solid rgba(255,255,255,.04)}
+.qt-h h2{font-family:var(--display);font-style:italic;font-weight:700;font-size:1.4rem;color:var(--gold)}
+.qt-h p{font-size:.78rem;color:var(--txt3);margin-top:.15rem}
+table{width:100%;border-collapse:collapse}
+thead th{
+  background:var(--s1);font-family:var(--mono);font-weight:400;
+  font-size:.58rem;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--gold-d);padding:.65rem 1.2rem;text-align:left;
+  border-bottom:1px solid rgba(255,255,255,.04);
+}
+tbody td{padding:.6rem 1.2rem;border-bottom:1px solid rgba(255,255,255,.02);font-size:.82rem;color:var(--txt2)}
+tbody tr{transition:background .2s}
+tbody tr:hover{background:rgba(212,168,67,.02)}
+td.sc{color:var(--txt);font-weight:500}
+td.pc{font-family:var(--mono);font-size:.75rem;display:flex;align-items:center;gap:.4rem}
+.pd{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+td.ac{font-family:var(--sans);font-size:.75rem;color:var(--txt2)}
+td.ac a{color:var(--gold);text-decoration:none;margin-right:6px}
+td.ac a:hover{text-decoration:underline}
+
+/* ── DIV ── */
+.div{display:flex;align-items:center;gap:1rem;margin:4rem 0 0}
+.div span{font-family:var(--mono);font-size:.52rem;color:var(--txt3);letter-spacing:.2em;text-transform:uppercase;white-space:nowrap}
+.div::before,.div::after{content:'';flex:1;height:1px;background:rgba(255,255,255,.04)}
+
+/* ── FOOTER ── */
+footer{
+  margin:3rem 0 0;padding:2.5rem 1.5rem;border-top:1px solid rgba(255,255,255,.04);text-align:center;
+  font-family:var(--mono);font-size:.6rem;color:var(--txt3);letter-spacing:.06em;
+}
+footer em{color:var(--gold-d);font-style:normal}
+
+/* ── BTT ── */
+.btt{
+  position:fixed;bottom:1.5rem;right:1.5rem;z-index:100;
+  width:36px;height:36px;border-radius:50%;
+  background:var(--s2);border:1px solid rgba(212,168,67,.1);
+  color:var(--gold);font-size:.9rem;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  opacity:0;transform:translateY(8px);transition:opacity .3s,transform .3s;
+}
+.btt.show{opacity:1;transform:translateY(0)}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+
+@media(max-width:768px){
+  .sn{font-size:2.5rem}
+  .ph{padding:1rem 1rem .6rem}
+  .pb{padding:0 1rem 1.2rem}
+  .feats{grid-template-columns:1fr}
+  .pbs{margin-left:0;margin-top:.3rem}
+  td.pc{font-size:.65rem}
+  thead th,tbody td{padding:.5rem .7rem}
+  .hero h1{font-size:1.8rem}
+  .hero-stats .sv{font-size:1.3rem}
+}
+</style>
+</head>
+<body>
+
+<!-- ════════ NAV (Dynamic Driven) ════════ -->
+<nav class="nav">
+  <div class="nav-in" id="dynamic-nav-container">
+    <span class="nav-logo">用途选平台</span>
+    <!-- JS 驱动生成导航锚点 -->
+  </div>
+</nav>
+
+<!-- ════════ HERO ════════ -->
+<div class="hero">
+  <div class="hero-kicker">Social · Community · Information</div>
+  <h1>你要做什么<br>就去<em>什么平台</em></h1>
+  <p class="sub">不是按品牌列清单，而是按「此刻你想干嘛」选平台。点击任意卡片直达官网。</p>
+  <div class="hero-line"></div>
+  <div class="hero-stats">
+    <div class="st"><div class="sv" id="stat-scenes">0</div><div class="sl">使用场景</div></div>
+    <div class="st"><div class="sv" id="stat-plats">0</div><div class="sl">平台收录</div></div>
+    <div class="st"><div class="sv">→</div><div class="sl">点击跳转</div></div>
+  </div>
+</div>
+
+<main id="dynamic-main-content">
+  <!-- JS 动态灌入每个场景及平台卡片流 -->
+</main>
+
+<!-- ════════ QUICK TABLE (Dynamic Driven) ════════ -->
+<main>
+  <div id="table" class="qt">
+    <div class="qt-h">
+      <h2>速查表：按需选择，不要贪全</h2>
+      <p>每一个平台都有它不可替代的使用场景。真正的问题不是「哪个平台最好」，而是「我现在想干什么」。</p>
+    </div>
+    <table>
+      <thead>
+        <tr><th>你想做的事</th><th>首选平台</th><th>补充 / 替代</th></tr>
+      </thead>
+      <tbody id="dynamic-table-body">
+        <!-- JS 动态提取并生成对应关系 -->
+      </tbody>
+    </table>
+  </div>
+</main>
+
+<footer>
+  <p><em>按用途选平台</em> · 社交·社区·资讯深度指南 · 共收录 <span id="footer-sc-count">8</span> 大场景 <span id="footer-pl-count">22</span> 个平台</p>
+  <p style="margin-top:.4rem">所有卡片可点击直达官网 · 数据基于公开资料 · 非商业排名</p>
+  <p style="margin-top:.6rem;color:var(--gold-d)">2026</p>
+</footer>
+
+<button class="btt" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+
+
+<!-- ══════════════════════════════════════════════════════════════
+     ⚡ CONFIGURATION ZONE (配置变量区域 - 修改、添加、删除都在这里)
+     ══════════════════════════════════════════════════════════════ -->
+<script>
+// 1. 顶部导航附加特殊控制项（如最后的速查表）
+const NAV_CONFIG = {
+  showTableBtn: true,
+  tableBtnText: "⚡ 速查表",
+  tableAnchor: "table"
+};
+
+// 2. 核心内容数据库：场景、分类、平台卡片、技术特性的多维嵌套数据结构
+const SCENES_DATA = [
+  {
+    id: "s1",
+    num: "01",
+    question: "我想知道——",
+    title: "今天全网在聊什么",
+    alt: "最新热点 · 公共讨论 · 实时资讯",
+    platforms: [
+      {
+        name: "微博",
+        url: "https://weibo.com",
+        iconClass: "ic-wb",
+        iconText: "微",
+        subText: "weibo.com",
+        badges: ["实时热搜", "舆论场"],
+        paragraphs: [
+          "如果你想在三分钟内知道<strong>此刻全国在聊什么</strong>，没有比微博更直接的选择。微博的实时热搜榜是中文互联网独一无二的公共议事厅——时政要闻、文娱八卦、体育赛事、社会事件——几乎所有重大话题的<strong>第一波讨论</strong>都发生在这里。 140字短文本门槛极低，发布即传播，一键转发实现裂变扩散。",
+          "核心不只是「看」，更是「追」。明星大V在这里发布动态，你可以直接@、评论、私信。 <strong>超话社区</strong>把兴趣相同的用户聚拢成圈子，从追星到体育到考研，各种垂直话题都有栖息地。"
+        ],
+        feats: [
+          { label: "信息形态", val: "140字短文本+图片/视频+转发链" },
+          { label: "核心机制", val: "实时热搜+超话+粉丝互动" },
+          { label: "用户特征", val: "女性略多，35岁以下年轻用户TGI高" }
+        ],
+        sbox: "上班路上快速扫一眼今天发生了什么；某个社会事件想看各方观点；追某部剧/综艺想参与实时讨论。",
+        isPrimary: true // 在速查表中作为首选显示
+      },
+      {
+        name: "今日头条",
+        url: "https://www.toutiao.com",
+        iconClass: "ic-tt",
+        iconText: "头",
+        subText: "toutiao.com",
+        badges: ["算法推荐", "资讯流"],
+        paragraphs: [
+          "如果你不需要「参与讨论」，只想<strong>高效获取资讯</strong>，今日头条是更安静的选择。它不做社交关系链，纯粹靠算法把新闻推给你。优势是覆盖面极广，从国际政治到本地民生到菜谱教程，什么都有；劣势是<strong>没有社区感</strong>——你看完就走，不会产生「在同一个广场」的感觉。[cite: 1]",
+          "适合的人群画像：不想被热搜绑架注意力，只想在碎片时间看点东西。头条的内容更像是一个<strong>个性化的报纸</strong>，而不是一个公共论坛。"
+        ],
+        altBox: {
+          title: "与微博的关键区别",
+          content: "微博是「公共广场」，你看到的内容和所有人一样（热搜），可以参与讨论；头条是「私人报纸」，你看到的内容由算法决定，几乎没有公共讨论空间。"
+        }
+      },
+     {
+    name: "Kalvo（设备参数）",
+    url: "https://zh.kalvo.com/",
+    iconClass: "ic-kalvo",
+    iconText: "K",
+    subText: "zh.kalvo.com · 手机平板参数数据库",
+    badges: ["参数对比", "设备数据库"],
+    paragraphs: [
+      "如果你的需求是<strong>快速查参数、型号差异、屏幕规格、SoC、重量尺寸</strong>，Kalvo 的效率远高于传统评测站。尤其适合购买前快速对比不同型号：比如同系列手机到底差在哪、全球版和国行规格区别、屏幕材质、电池容量、充电功率等。页面极简，没有大量营销内容，查阅速度非常快。"
+    ],
+    altBox: {
+      title: "Kalvo vs 传统评测站",
+      content: "传统评测站偏长文章和体验内容；Kalvo 更像设备参数数据库，适合快速横向对比和查规格，不适合看深度体验。"
+    }
+},
+      {
+        name: "IT之家",
+        url: "https://www.ithome.com",
+        iconClass: "ic-ithome",
+        iconText: "IT",
+        subText: "ithome.com",
+        badges: ["科技速报", "数码新闻"],
+        paragraphs: [
+          "<strong>科技资讯聚合的「报纸」</strong>——IT之家是中文科技资讯领域更新最快、覆盖最全的平台之一。从Windows更新到苹果发布会到国产手机新品到AI行业动态，几乎所有科技新闻都会在IT之家第一时间出现。它的评论区也相当活跃，用户的吐槽和讨论构成了独特的「IT之家风味」。",
+          "和酷安的区别：酷安更偏向「用户体验讨论」，IT之家更偏向「新闻报道」。如果你想快速了解科技行业今天发生了什么，IT之家的信息获取效率更高。"
+        ]
+      },
+      {
+        name: "澎湃新闻",
+        url: "https://www.thepaper.cn",
+        iconClass: "ic-thepaper",
+        iconText: "澎",
+        subText: "thepaper.cn",
+        badges: ["时政", "深度调查"],
+        paragraphs: [
+          "<strong>严肃新闻的首选</strong>——当微博上铺天盖地都是情绪化表达和未经证实的传言时，澎湃新闻提供了更冷静、更专业的视角。它的核心竞争力是<strong>时政报道和深度调查</strong>——政策解读、社会事件追踪、人物特写，内容严谨且有深度。",
+          "适合的人群：不满足于「知道发生了什么」，还想知道「官方怎么说、背景是什么、对普通人意味着什么」的读者。在重大公共事件中，澎湃新闻往往是最早提供权威信源的媒体之一。"
+        ]
+      },
+      {
+        name: "Readhub",
+        url: "https://readhub.cn",
+        iconClass: "ic-rdhub",
+        iconText: "R",
+        subText: "readhub.cn",
+        badges: ["聚合", "极简"],
+        paragraphs: [
+          "<strong>极简主义者的资讯神器</strong>——Readhub 把科技、商业、AI 领域的重要新闻聚合到一个页面上，每条新闻只有一句话摘要，点进去看原文。没有算法推荐，没有评论区，没有社交功能——就是纯粹的「发生了什么」。适合每天花5分钟快速扫描科技商业领域动态的人。"
+        ]
+      }
+    ]
+  },
+  {
+    id: "s2",
+    num: "02",
+    question: "我想弄明白——",
+    title: "一个复杂问题到底是怎么回事",
+    alt: "深度问答 · 多角度分析 · 知识沉淀",
+    platforms: [
+      {
+        name: "知乎",
+        url: "https://www.zhihu.com",
+        iconClass: "ic-zh",
+        iconText: "知",
+        subText: "zhihu.com",
+        badges: ["深度问答", "长文"],
+        paragraphs: [
+          "当你遇到一个「说不清楚但想弄明白」的问题——某个技术概念、某个行业的真实情况、某个复杂事件的前因后果——知乎是第一站。 它的问答机制看起来简单（提问→回答→投票排序），但背后有一套筛选逻辑：点赞数、评论数、专业领域认证共同决定内容的排序，让<strong>最有价值的回答浮到最前面</strong>。",
+          "知乎真正的价值在于<strong>多角度碰撞</strong>。同一个问题下，你经常能看到截然不同的观点，而且大多数回答者会认真阐述论据。 用过的人都有一个共同感受：知乎不只是找答案的地方，幕后更是帮你把<strong>模糊的直觉变成清晰认知</strong>的地方。"
+        ],
+        feats: [
+          { label: "信息形态", val: "长文问答+专栏+知乎Live+视频" },
+          { label: "核心机制", val: "问答排序+点赞筛选+专业认证" },
+          { label: "用户特征", val: "24岁以下34%，24-40岁60%；男性偏多" },
+          { label: "内容长尾", val: "百度等搜索引擎权重极高，适合长尾长跨度知识查询" }
+        ],
+        sbox: "想了解某个行业的真实面貌；遇到技术难题需要有经验的人指点；想看对同一事件的多元分析；想搜某个专业概念的通俗解释。",
+        isPrimary: true
+      },
+      {
+        name: "百度贴吧",
+        url: "https://tieba.baidu.com",
+        iconClass: "ic-tb",
+        iconText: "贴",
+        subText: "tieba.baidu.com",
+        badges: ["话题社区", "细分圈子"],
+        paragraphs: [
+          "<strong>中文互联网最古老的「兴趣论坛」</strong>——贴吧的核心逻辑是「一个关键词就是一个吧」。无论多冷门的兴趣——某部小说、某款游戏、某个城市、某种植物——几乎都能找到对应的贴吧。这种极度细分的社区结构让贴吧在某些特定问题上拥有其他平台无法替代的信息积累。十几年的帖子沉淀，很多问题的「过来人经验」只有在贴吧里才能找到。",
+          "贴吧的劣势在于产品老化和广告泛滥，社区氛围不如巅峰时期。但在<strong>冷门问题的深度讨论</strong>上，它仍然是中文互联网的重要资源。尤其是一些怀旧类、地方类、小众爱好类的话题，贴吧的存量内容远超其他平台。"
+        ],
+        altBox: {
+          title: "贴吧 vs 知乎",
+          content: "知乎适合「解释性」问题（为什么、怎么回事），回答通常有理有据；贴吧适合「经验性」问题（怎么弄、好不好用），回答来自真实的「老哥」经验，但质量参差不齐。"
+        }
+      },
+      {
+        name: "V2EX",
+        url: "https://www.v2ex.com",
+        iconClass: "ic-v2ex",
+        iconText: "V",
+        subText: "v2ex.com",
+        badges: ["技术社区", "创意工作者"],
+        paragraphs: [
+          "<strong>程序员和互联网人的「茶水间」</strong>——V2EX 是一个以技术讨论为核心、兼顾生活话题的社区。它的用户群高度集中在互联网从业者、程序员、设计师，讨论质量在中文技术社区中属于上乘。如果你的工作和互联网/技术相关，V2EX 上的很多讨论会让你觉得「终于有人把我想说的话说出来了」。",
+          "V2EX 的独特价值在于<strong>真实的职场讨论</strong>——薪资水平、公司评价、面试经验、工作吐槽，这些在某些平台上被监控或注水的内容，在V2EX上反而更接地气、更真实。"
+        ],
+        feats: [
+          { label: "核心价值", val: "技术讨论+职场真实经验+工具推荐" },
+          { label: "社区气质", val: "技术导向、务实、直接、有幽默感" }
+        ]
+      },
+      {
+        name: "Google / B站",
+        url: "https://www.google.com",
+        iconClass: "ic-gg",
+        iconText: "G",
+        subText: "替代选择",
+        badges: ["搜索", "视频讲解"],
+        paragraphs: [
+          "有些问题知乎上找不到好答案——要么太冷门，要么太新。这时候<strong>Google</strong>依然是最强大的信息检索工具，尤其当你需要英文资料、学术论文或技术文档时。而<strong>B站</strong>提供了一种完全不同的解题路径：很多复杂概念，看一个10分钟的讲解视频比读三篇长文更容易理解。B站的学习区有大量高质量的科普和教程内容。"
+        ],
+        altBox: {
+          title: "三者互补逻辑",
+          content: "知乎给你「观点碰撞」，Google给你「原始资料」，B站给你「直观理解」。最有效的做法是三者结合：先在B站看视频建立初步认知，再在知乎看不同观点，最后在Google查阅原始资料验证。"
+        }
+      }
+    ]
+  },
+  {
+    id: "s3",
+    num: "03",
+    question: "我想买点东西——",
+    title: "这个值不值得买，别人怎么评价",
+    alt: "消费决策 · 真实体验 · 种草拔草",
+    platforms: [
+      {
+        name: "小红书",
+        url: "https://www.xiaohongshu.com",
+        iconClass: "ic-xhs",
+        iconText: "红",
+        subText: "xiaohongshu.com",
+        badges: ["种草", "消费决策"],
+        paragraphs: [
+          "小红书的核心可以用两个词概括：<strong>种草和拔草</strong>。 用户分享真实的消费体验——一间餐厅、一款护肤品、一个旅行目的地——其他人看到后心生向往（种草），然后亲自去体验（拔草），再把自己的体验分享出来，形成循环。 这个机制让小红书的内容始终保持鲜活和可信，因为每一条笔记背后都是真实的到店、到手、到场景的体验。",
+          "小红书的独特之处在于追求<strong>「小众美」</strong>——那些在传统电商和大众媒体上得不到关注的细分领域好物，在小红书上往往能找到详尽的使用心得和推荐。 它的流量来源于搜索、关注和笔记推荐，用户通常带有明确的消费决策目的，因此流量较为精准。[cite: 1]"
+        ],
+        feats: [
+          { label: "信息形态", val: "图文笔记+短视频+搜索推荐" },
+          { label: "核心机制", val: "种草→搜索→拔草→分享 循环" },
+          { label: "用户特征", val: "女性68%，24-35岁46%；一二线城市[cite: 1]" },
+          { label: "流量逻辑", val: "搜索+推荐+关注[cite: 1]；精准消费决策流量" }
+        ],
+        sbox: "准备去某个城市旅行想知道本地人推荐什么；想买一款护肤品但不知道好不好用；想看别人怎么装修/穿搭/健身。",
+        isPrimary: true
+      },
+      {
+        name: "什么值得买",
+        url: "https://www.smzdm.com",
+        iconClass: "ic-smzdm",
+        iconText: "值",
+        subText: "smzdm.com",
+        badges: ["比价", "好价爆料"],
+        paragraphs: [
+          "如果小红书解决的是「买什么」的问题，那什么值得买解决的是<strong>「在哪买、什么时候买最便宜」</strong>。它的核心内容是用户爆料的好价信息——某款商品在哪个平台降价了、有没有隐藏优惠券、历史最低价是多少。对于有明确购买目标、追求性价比的用户来说，什么值得买的实用价值极高。"
+        ],
+        altBox: {
+          title: "两者的使用节奏",
+          content: "先在小红书上研究「买什么」——看评测、看体验、做决策；然后到什么值得买上研究「怎么买最划算」——比价、等好价、用优惠券。"
+        }
+      },
+      {
+        name: "酷安（数码）",
+        url: "https://www.coolapk.com",
+        iconClass: "ic-ka",
+        iconText: "酷",
+        subText: "coolapk.com · 数码产品评测",
+        badges: ["数码评测", "真实体验"],
+        paragraphs: [
+          "对于<strong>数码产品购买决策</strong>，酷安的价值甚至超过小红书。新手机到底好不好用？某个耳机值不值这个价？某款平板的实际体验怎么样？酷安上的用户评测通常更专业、更深入，而且讨论区的「老哥」们会毫不留情地指出产品的缺点——这种真实评价在其他平台上越来越稀缺。"
+        ],
+        altBox: {
+          title: "酷安 vs 小红书（数码领域）",
+          content: "小红书上的数码内容偏「种草风」，容易被营销内容影响；酷安上的数码讨论更偏「实用风」，用户更在意参数、实际体验和性价比。"
+        }
+      }
+    ]
+  },
+  {
+    id: "s4",
+    num: "04",
+    question: "我想找同好——",
+    title: "看完一部电影想找人聊聊，想评评分",
+    alt: "文艺评分 · 兴趣社区 · 线下活动",
+    platforms: [
+      {
+        name: "豆瓣",
+        url: "https://www.douban.com",
+        iconClass: "ic-db",
+        iconText: "豆",
+        subText: "douban.com · 唯一选择",
+        badges: ["评分标杆", "文艺社区"],
+        paragraphs: [
+          "豆瓣是中文互联网上最持久的<strong>「文化社区」</strong>。它的评分体系——豆瓣电影评分、豆瓣图书评分——至今仍是行业内公认最可信的参考标准。一部新电影上映，观众第一反应是「豆瓣几分」；一本新书出版，读者会先去豆瓣看看评价。这种公信力来源于豆瓣用户群的特质：偏文艺、偏理性、不太容易被营销内容带节奏。",
+          "除了评分，豆瓣的核心是<strong>「小组」</strong>和<strong>「同城」</strong>。豆瓣小组覆盖了你能想到的所有兴趣领域，从经典电影讨论到租房互助到各种冷门爱好，每个小组都是一个自洽的小社区。豆瓣同城则是发现线下活动的入口——讲座、展览、读书会、观影团，尤其适合在一二线城市的用户。"
+        ],
+        feats: [
+          { label: "核心价值", val: "影视书评分公信力+小组深度讨论+同城活动" },
+          { label: "社区气质", val: "文艺、理性、反营销、有独立判断力" }
+        ],
+        sbox: "看完一部电影想看深度影评；想找某个小众爱好的同好圈子；周末想找点有意思的线下活动；想给看过的书打个分记录一下。",
+        isPrimary: true
+      },
+      {
+        name: "百度贴吧（细分兴趣）",
+        url: "https://tieba.baidu.com",
+        iconClass: "ic-tb",
+        iconText: "贴",
+        subText: "tieba.baidu.com",
+        badges: ["古老论坛", "细分圈层"],
+        paragraphs: [
+          "贴吧同样能提供极度细分的同好抱团点。在贴吧，你可以找到专门讨论某一款上世纪老游戏、某本冷门科幻小说的吧。虽然在体面上不及豆瓣，但在野生极客内容、陈年资源和无下限闲聊方面，贴吧有着顽强的长尾生命力。"
+        ]
+      }
+    ]
+  },
+  {
+    id: "s5",
+    num: "05",
+    question: "我想看比赛——",
+    title: "和一群真正懂球的人聊比赛",
+    alt: "体育社区 · 赛事讨论 · 直播数据",
+    platforms: [
+      {
+        name: "虎扑",
+        url: "https://www.hupu.com",
+        iconClass: "ic-hp",
+        iconText: "虎",
+        subText: "hupu.com",
+        badges: ["篮球", "足球", "步行街"],
+        paragraphs: [
+          "虎扑是中文互联网上最大的体育社区，尤其在篮球和足球领域拥有<strong>无可替代的地位</strong>。NBA/五大联赛期间，虎扑的赛事讨论帖、球员打分、战术复盘帖的信息密度远超任何综合平台。但虎扑不仅仅是体育——它的<strong>「步行街」</strong>板块是一个泛生活讨论区，讨论氛围以直率、数据说话、直男式的自嘲幽默著称。"
+        ],
+        sbox: "NBA/足球赛季想看专业分析和实时赛后大乱斗；想找个数据逻辑强、不那么端着的地方聊聊直男生活话题。",
+        isPrimary: true
+      },
+      {
+        name: "直播吧",
+        url: "https://www.zhibo8.cc",
+        iconClass: "ic-zb8",
+        iconText: "吧",
+        subText: "zhibo8.cc",
+        badges: ["直播源", "赛程数据"],
+        paragraphs: [
+          "直播吧更偏向「看比赛」工具属性——赛程表、全网免费/付费直播链接聚合、实时文字滚动、比分和赛后最快战报，一站式解决「去哪看」的问题。它的讨论区相对水，但信息即时性极高。"
+        ],
+        altBox: {
+          title: "两者的使用节奏",
+          content: "比赛进行时：用直播吧看实时比分、找绿茵/地板流直播信号源；比赛吹哨结束：去虎扑看核心热评、球员评分以及战术长文大复盘。"
+        }
+      }
+    ]
+  },
+  {
+    id: "s6",
+    num: "06",
+    question: "我想看行业深度分析——",
+    title: "某个行业/领域最近发生了什么，为什么",
+    alt: "行业洞察 · 深度分析 · 效率工具",
+    platforms: [
+      {
+        name: "36氪",
+        url: "https://www.36kr.com",
+        iconClass: "ic-36k",
+        iconText: "36",
+        subText: "36kr.com",
+        badges: ["创投", "科技商业"],
+        paragraphs: [
+          "36氪聚焦创投和前沿科技行业，报道风格紧跟全球资本走向。如果你关注互联网大厂动态、AI商业化进程、新消费融资模式，36氪的信息流和特写是极优风向标。它会客观剖析某个新概念背后究竟是泡沫还是趋势。"
+        ],
+        sbox: "想系统复盘某个大厂的组织架构调整；想追踪最新的AI、硬科技融资清单；看新消费模式的解构分析。",
+        isPrimary: true
+      },
+      {
+        name: "虎嗅",
+        url: "https://www.huxiu.com",
+        iconClass: "ic-hx",
+        iconText: "虎",
+        subText: "huxiu.com",
+        badges: ["硬核评论", "产业分析"],
+        paragraphs: [
+          "虎嗅的特色是<strong>带有棱角的商业科技评论</strong>。不同于普通快讯，虎嗅喜欢输出“观点”，对上市公司的战略失误进行极其犀利的复盘，或者直戳某项新技术落地难的硬骨头。适合不满足于新闻快报、期望获得启发性行业洞察的读者。"
+        ]
+      },
+      {
+        name: "少数派",
+        url: "https://sspai.com",
+        iconClass: "ic-sspai",
+        iconText: "少",
+        subText: "sspai.com",
+        badges: ["效率工具", "深度评测"],
+        paragraphs: [
+          "少数派专注于<strong>数字工作流与效率方法论</strong>。它的核心生产力是App硬核深度教程、各类系统/设备配置调优技巧、高级生产力场景落地。文章逻辑严密、多图解排版，极少软文。[cite: 1] 适合重度数字化生存、热爱压榨软件设备潜能的发烧友。"
+        ]
+      },
+      {
+        name: "爱范儿",
+        url: "https://www.ifanr.com",
+        iconClass: "ic-ifanr",
+        iconText: "爱",
+        subText: "ifanr.com",
+        badges: ["消费科技", "产品体验"],
+        paragraphs: [
+          "爱范儿站在用户体验的视角来分析科技趋势。新发布硬件的真实工业设计如何、未来空间计算对普通人的影响，爱范儿会用兼具文字美感和产品洞察的长文娓娓道来。它更关心硬件产品设计和生活美学的交叉点。"
+        ]
+      },
+      {
+        name: "品玩",
+        url: "https://www.pingwest.com",
+        iconClass: "ic-pw",
+        iconText: "品",
+        subText: "pingwest.com",
+        badges: ["全球化", "科技文化"],
+        paragraphs: [
+          "提供极具全球化视角的科技文化观察。它是少数能够将硅谷前沿AI进展、全球科技出海物流阻力、中西地缘技术博弈讲得透彻深度的硬核科技媒体。"
+        ]
+      }
+    ]
+  },
+  {
+    id: "s7",
+    num: "07",
+    question: "我想看视频——",
+    title: "深度讲解、系统学习、沉浸式体验",
+    alt: "中长视频 · 弹幕文化 · UP主生态",
+    platforms: [
+      {
+        name: "哔哩哔哩",
+        url: "https://www.bilibili.com",
+        iconClass: "ic-bi",
+        iconText: "B",
+        subText: "bilibili.com",
+        badges: ["弹幕", "中长视频", "学习"],
+        paragraphs: [
+          "B站是目前中文互联网毫无争议的<strong>中长视频统治者</strong>。它的核心护城河是高度去中心化的优质PUGC创作者生态以及引发极强情感共鸣的弹幕机制。 大量UP主制作的高成本、15分钟以上的深度解析视频，在短视频平台完全无法生存。",
+          "<strong>「在B站上大学」</strong>是极佳的个人消费者直观感受。 无论是硬核代码教程、高等数学解析、小众历史复盘、还是数码深度拆解，B站都能提供全网最好的视频格式知识沉淀。24岁以下年轻用户占比达74%，用户黏性冠绝全网。"
+        ],
+        feats: [
+          { label: "信息形态", val: "中长视频（5-60分钟）+ 弹幕 + 动态" },
+          { label: "核心机制", val: "弹幕共鸣分发+高黏性创作者关注体系" },
+          { label: "用户特征", val: "24岁以下占74%；全网最高的互动心智与投币机制" },
+          { label: "内容深度", val: "以高质量PUGC深度叙事内容为主，长尾价值高" }
+        ],
+        sbox: "寻找半小时以上的系统性知识视频讲解；渴望在富有即时弹幕反馈的社区文化中消磨时间；寻找数码、汽车领域的硬核真实评测视频。",
+        isPrimary: true
+      },
+      {
+        name: "YouTube",
+        url: "https://www.youtube.com",
+        iconClass: "ic-yt",
+        iconText: "Yt",
+        subText: "youtube.com",
+        badges: ["全球最大", "英文生态"],
+        paragraphs: [
+          "全球顶级的视频海洋。其优势在于**英文以及全球高维创作者生态的纯粹降维打击**。不管是全球前沿科技博主的硬核极客评测、世界级工程类/经济类高品质纪录片，YouTube能提供极其广阔的全球视野。"
+        ],
+        altBox: {
+          title: "B站 vs YouTube",
+          content: "B站更具中文圈层文化的本土人情味，弹幕机制的陪伴感无可替代；YouTube则提供全球极值的内容深度、最成熟的广告分成催生的顶级工业化创作生态。二者相辅相成。"
+        }
+      }
+    ]
+  },
+  {
+    id: "s8",
+    num: "08",
+    question: "我想杀时间——",
+    title: "随手刷点什么，不用动脑",
+    alt: "短视频 · 算法推荐 · 碎片消费",
+    platforms: [
+      {
+        name: "抖音",
+        url: "https://www.douyin.com",
+        iconClass: "ic-dy",
+        iconText: "抖",
+        subText: "douyin.com",
+        badges: ["9.7亿MAU", "算法驱动"],
+        paragraphs: [
+          "中国公域流量的“宇宙总阀”。抖音代表了**全网最强的个性化推荐算法引擎**。[cite: 1] 你无需带着任何搜索目的，打开软件，系统就会在毫秒间捕捉你前3秒的视觉停留，从而高频投喂你最喜欢的内容。[cite: 1] 这构建了全网最沉浸、最容易成瘾的杀时间利器，一刷几小时无法自拔。[cite: 2]",
+          "无论高大上的高新科技，还是极度下沉的民生市井、快节奏短剧、货架直播间，全部在这个近10亿月活的公域洪流里并存。[cite: 1]"
+        ],
+        feats: [
+          { label: "信息形态", val: "全屏上下滑短视频+沉浸式直播+同城生活" },
+          { label: "核心算法", val: "极致兴趣个性化推荐，纯公域流量倾斜[cite: 1]" },
+          { label: "用户阶层", val: "9.7亿MAU[cite: 1]；真正的“老少咸宜”与全域覆盖[cite: 2]" }
+        ],
+        isPrimary: true
+      },
+      {
+        name: "快手",
+        url: "https://www.kuaishou.com",
+        iconClass: "ic-ks",
+        iconText: "快",
+        subText: "kuaishou.com",
+        badges: ["下沉信任", "真实烟火气"],
+        paragraphs: [
+          "快手代表了另一种下沉与信任纽带。[cite: 1] 相比抖音精心包装、迎合算法的精致短视频，快手更强调普通人生活的“真实感与粗粝感”。[cite: 1] 其算法底层更注重私域社交的普惠性，让三四线、中老年群体表现出极强的主播粉丝信任感，私域“老铁文化”极纯粹。[cite: 1]"
+        ],
+        altBox: {
+          title: "抖音 vs 快手",
+          content: "抖音属于“潮流精致广场”，重算法公域分发，一二线及泛娱乐穿透力强；快手属于“市井江湖”，强调私域留存，内容更接地气。[cite: 1]"
+        }
+      }
+    ]
+  }
+];
+
+
+// ══════════════════════════════════════════════════════════════
+// 🚀 DYNAMIC ENGINE (动态解析渲染引擎脚本，请保持其完整性)
+// ══════════════════════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', () => {
+  const navContainer = document.getElementById('dynamic-nav-container');
+  const mainContent = document.getElementById('dynamic-main-content');
+  const tableBody = document.getElementById('dynamic-table-body');
+  
+  let totalPlatsCount = 0;
+
+  // 渲染导航与主卡片流
+  SCENES_DATA.forEach((scene) => {
+    // 1. 生成导航锚点
+    const navLink = document.createElement('a');
+    navLink.href = `#${scene.id}`;
+    navLink.setAttribute('data-scene', scene.id);
+    navLink.textContent = `${scene.num} ${scene.title.split('—')[0] || scene.title}`;
+    navContainer.appendChild(navLink);
+
+    // 2. 生成场景块框架
+    const sceneSection = document.createElement('div');
+    sceneSection.id = scene.id;
+    sceneSection.className = 'scene';
+
+    let platsHTML = '';
+    scene.platforms.forEach((plat) => {
+      totalPlatsCount++;
+      
+      // 构建属性徽章
+      let badgesHTML = '';
+      if (plat.badges) {
+        plat.badges.forEach((b, idx) => {
+          const badgeClasses = ['bg-p', 'bg-a', 'bg-s', 'bg-r', 'bg-u'];
+          const bClass = badgeClasses[idx % badgeClasses.length];
+          badgesHTML += `<span class="bg ${bClass}">${b}</span>`;
+        });
+      }
+
+      // 构建段落
+      let parasHTML = '';
+      plat.paragraphs.forEach(p => {
+        parasHTML += `<div class="pt">${p}</div>`;
+      });
+
+      // 构建三维特征元
+      let featsHTML = '';
+      if (plat.feats) {
+        featsHTML += `<div class="feats">`;
+        plat.feats.forEach(f => {
+          featsHTML += `<div class="feat"><div class="feat-l">${f.label}</div><div class="feat-v">${f.val}</div></div>`;
+        });
+        featsHTML += `</div>`;
+      }
+
+      // 构建特别适合场景框
+      let sboxHTML = '';
+      if (plat.sbox) {
+        sboxHTML += `<div class="sbox"><div class="sbox-t">适合你的场景</div><p>${plat.sbox}</p></div>`;
+      }
+
+      // 构建横向对比框
+      let altHTML = '';
+      if (plat.altBox) {
+        altHTML += `<div class="alt"><div class="alt-t">${plat.altBox.title}</div><p>${plat.altBox.content}</p></div>`;
+      }
+
+      // 聚合卡片
+      platsHTML += `
+        <a class="plat" href="${plat.url}" target="_blank" rel="noopener">
+          <div class="ph">
+            <div class="pi ${plat.iconClass || 'ic-default'}">${plat.iconText || plat.name.charAt(0)}</div>
+            <div><div class="pn">${plat.name}</div><div class="ps">${plat.subText}</div></div>
+            <div class="pbs">${badgesHTML}</div>
+          </div>
+          <div class="pb">
+            ${parasHTML}
+            ${featsHTML}
+            ${sboxHTML}
+            ${altHTML}
+          </div>
+        </a>
+      `;
+    });
+
+    sceneSection.innerHTML = `
+      <div class="scene-head">
+        <div class="sn">${scene.num}</div>
+        <div class="stb">
+          <div class="sq">${scene.question}</div>
+          <h2 class="stitle">${scene.title}</h2>
+          <div class="salt">${scene.alt}</div>
+        </div>
+      </div>
+      <div class="sline"></div>
+      ${platsHTML}
+    `;
+    mainContent.appendChild(sceneSection);
+  });
+
+  // 3. 构建附加导航控制项
+  if (NAV_CONFIG.showTableBtn) {
+    const tableLink = document.createElement('a');
+    tableLink.href = `#${NAV_CONFIG.tableAnchor}`;
+    tableLink.setAttribute('data-scene', NAV_CONFIG.tableAnchor);
+    tableLink.className = 'nav-table-btn';
+    tableLink.textContent = NAV_CONFIG.tableBtnText;
+    navContainer.appendChild(tableLink);
+  }
+
+  // 4. 驱动表格速查表动态提取
+  SCENES_DATA.forEach((scene) => {
+    const row = document.createElement('tr');
+    
+    // 抓取标星首选平台
+    const primaryPlat = scene.platforms.find(p => p.isPrimary) || scene.platforms[0];
+    
+    // 收集辅助替代平台
+    const altPlatsList = scene.platforms.filter(p => p.name !== primaryPlat.name);
+    let altLinksHTML = altPlatsList.map(p => `<a href="${p.url}" target="_blank" rel="noopener">${p.name}</a>`).join(' / ');
+    if(!altLinksHTML) altLinksHTML = '<span style="color:var(--txt3)">暂无替代</span>';
+
+    // 提取对应颜色点
+    let dotColor = '#d4a843';
+    const cardEl = document.querySelector(`.${primaryPlat.iconClass}`);
+    if (cardEl) {
+      const computedBg = window.getComputedStyle(cardEl).background;
+      const rgbMatch = computedBg.match(/rgb\([^)]+\)/);
+      if (rgbMatch) dotColor = rgbMatch[0];
+    }
+
+    row.innerHTML = `
+      <td class="sc">${scene.title}</td>
+      <td class="pc"><span class="pd" style="background:${dotColor}"></span><a href="${primaryPlat.url}" target="_blank" rel="noopener" style="color:inherit;text-decoration:none">${primaryPlat.name}</a></td>
+      <td class="ac">${altLinksHTML}</td>
+    `;
+    tableBody.appendChild(row);
+  });
+
+  // 更新各种仪表盘统计数字
+  document.getElementById('stat-scenes').textContent = SCENES_DATA.length;
+  document.getElementById('stat-plats').textContent = totalPlatsCount;
+  document.getElementById('footer-sc-count').textContent = SCENES_DATA.length;
+  document.getElementById('footer-pl-count').textContent = totalPlatsCount;
+
+  // ════════ INTERSECTION OBSERVER & INTERACTION ════════
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('revealed');
+        const cards = e.target.querySelectorAll('.plat, a.plat');
+        cards.forEach((c, i) => { c.style.transitionDelay = `${i * .08}s`; c.classList.add('revealed') });
+      }
+    });
+  }, { threshold: .02, rootMargin: '0px 0px -10px 0px' });
+  document.querySelectorAll('.scene, .qt').forEach(el => obs.observe(el));
+
+  const navLinks = document.querySelectorAll('.nav a[data-scene]');
+  const sections = [];
+  navLinks.forEach(a => {
+    const id = a.getAttribute('data-scene');
+    const el = document.getElementById(id);
+    if (el) sections.push({ id, el, link: a });
+  });
+
+  const updateNav = () => {
+    const scrollY = window.scrollY + 100;
+    let current = '';
+    sections.forEach(s => { if (s.el.offsetTop <= scrollY) current = s.id });
+    navLinks.forEach(a => {
+      a.classList.toggle('active', a.getAttribute('data-scene') === current);
+    });
+  };
+  window.addEventListener('scroll', updateNav, { passive: true });
+  updateNav();
+
+  document.querySelectorAll('.nav a[href^="#"]').forEach(a => {
+    a.addEventListener('click', e => {
+      e.preventDefault();
+      const t = document.querySelector(a.getAttribute('href'));
+      if (t) { window.scrollTo({ top: t.getBoundingClientRect().top + window.scrollY - 65, behavior: 'smooth' }) }
+    });
+  });
+
+  const btt = document.querySelector('.btt');
+  window.addEventListener('scroll', () => { btt.classList.toggle('show', window.scrollY > 400) }, { passive: true });
+});
+</script>
+</body>
+</html>

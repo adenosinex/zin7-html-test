@@ -1,0 +1,1099 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>网红卡片展示器</title>
+<style>
+:root {
+  --bg:#0f1115; --card:#1a1d26; --border:#2a2f3a;
+  --text:#e8ecf1; --muted:#8b94a3; --accent:#6c5ce7;
+  --accent2:#a29bfe; --green:#00cec9; --orange:#fdcb6e;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,"Segoe UI","PingFang SC",sans-serif;min-height:100vh;line-height:1.6}
+
+/* Header */
+.header{padding:28px 40px 18px;max-width:1600px;margin:0 auto;border-bottom:1px solid var(--border)}
+.header h1{font-size:22px;font-weight:700;margin-bottom:4px}
+.header p{color:var(--muted);font-size:13px}
+
+/* Input Area */
+.input-section{max-width:1600px;margin:20px auto;padding:0 40px}
+.tabs{display:flex;gap:0;margin-bottom:-1px;position:relative;z-index:1}
+.tab{padding:10px 24px;font-size:14px;cursor:pointer;border:1px solid var(--border);
+  border-bottom:none;border-radius:10px 10px 0 0;background:transparent;color:var(--muted);transition:all .2s}
+.tab.active{background:var(--card);color:var(--text);border-color:var(--border)}
+.tab:hover:not(.active){color:var(--text)}
+
+.input-panel{background:var(--card);border:1px solid var(--border);border-radius:0 12px 12px 12px;padding:20px;display:none}
+.input-panel.active{display:block}
+
+textarea{width:100%;height:200px;background:var(--bg);border:1px solid var(--border);border-radius:10px;
+  padding:14px;color:var(--text);font-size:13px;font-family:"Cascadia Code","Fira Code",monospace;
+  resize:vertical;outline:none;line-height:1.7}
+textarea:focus{border-color:var(--accent)}
+textarea::placeholder{color:var(--muted);opacity:.5}
+
+.drop-area{border:2px dashed var(--border);border-radius:12px;padding:36px;text-align:center;
+  cursor:pointer;transition:all .2s}
+.drop-area:hover,.drop-area.dragover{border-color:var(--accent);background:rgba(108,92,231,.06)}
+.drop-area input{display:none}
+.drop-icon{font-size:32px;margin-bottom:8px}
+.drop-text{font-size:14px;color:var(--muted)}
+
+.action-row{display:flex;gap:10px;margin-top:14px;align-items:center;flex-wrap:wrap}
+.btn{padding:10px 24px;border-radius:10px;border:none;font-size:14px;font-weight:600;cursor:pointer;transition:all .15s}
+.btn-primary{background:linear-gradient(135deg,var(--accent),#7c5cff);color:#fff}
+.btn-primary:hover{opacity:.9}.btn-primary:active{transform:scale(.97)}
+.btn-ghost{background:transparent;border:1px solid var(--border);color:var(--muted)}
+.btn-ghost:hover{border-color:var(--accent);color:var(--text)}
+.parse-hint{font-size:12px;color:var(--muted);margin-left:auto}
+
+/* ===== 本地保存提示条 ===== */
+.local-tip{display:none;align-items:center;gap:8px;margin-top:12px;padding:9px 15px;
+  background:rgba(0,206,201,.07);border:1px solid rgba(0,206,201,.28);border-radius:10px;
+  font-size:12px;color:#8fd6d3}
+.local-tip.error{background:rgba(255,118,117,.07);border-color:rgba(255,118,117,.3);color:#ff9f9e}
+.local-tip .ico{font-size:14px;flex-shrink:0}
+.local-tip .local-clear{margin-left:auto;flex-shrink:0;background:transparent;
+  border:1px solid var(--border);color:var(--muted);border-radius:8px;padding:3px 12px;
+  font-size:11.5px;cursor:pointer;transition:all .15s;font-family:inherit}
+.local-tip .local-clear:hover{border-color:#ff7675;color:#ff7675}
+
+/* ===== 格式说明 ===== */
+.format-tips{margin-top:14px;background:var(--card);border:1px solid var(--border);
+  border-radius:12px;overflow:hidden}
+.format-tips summary{padding:12px 18px;cursor:pointer;font-size:13.5px;font-weight:600;
+  color:var(--accent2);user-select:none;list-style:none;display:flex;align-items:center;gap:8px;
+  transition:background .15s}
+.format-tips summary::-webkit-details-marker{display:none}
+.format-tips summary::before{content:'▸';display:inline-block;transition:transform .2s;
+  color:var(--muted);font-size:12px}
+.format-tips[open] summary::before{transform:rotate(90deg)}
+.format-tips summary:hover{background:rgba(108,92,231,.08)}
+.format-tips .badge{margin-left:auto;font-size:11px;font-weight:500;color:var(--muted);
+  background:var(--bg);border:1px solid var(--border);border-radius:99px;padding:2px 10px}
+
+.tips-body{padding:2px 18px 18px;font-size:12.5px;color:var(--muted);line-height:1.9;
+  border-top:1px solid var(--border);margin-top:0}
+.tips-body h4{font-size:12.5px;color:var(--text);font-weight:700;margin:16px 0 6px;
+  display:flex;align-items:center;gap:6px}
+.tips-body h4:first-child{margin-top:14px}
+.tips-body code{background:rgba(108,92,231,.15);color:var(--accent2);padding:1px 6px;
+  border-radius:5px;font-family:"Cascadia Code","Fira Code",monospace;font-size:11.5px}
+.tips-body pre{background:#0b0d11;border:1px solid var(--border);border-radius:8px;
+  padding:12px 14px;overflow-x:auto;font-size:12px;line-height:1.75;color:#c8d0dc;
+  font-family:"Cascadia Code","Fira Code",monospace;margin:8px 0 0}
+.tips-body pre .cm{color:#5d6673}
+
+.tip-scroll{overflow-x:auto;margin:8px 0 0}
+.tip-table{width:100%;border-collapse:collapse;font-size:12px;min-width:520px}
+.tip-table th,.tip-table td{border:1px solid var(--border);padding:7px 11px;text-align:left;vertical-align:top}
+.tip-table th{background:rgba(108,92,231,.1);color:var(--text);font-weight:600;white-space:nowrap}
+.tip-table td{color:var(--muted)}
+.tip-table .req{color:var(--orange);font-weight:600;white-space:nowrap}
+.tip-table .opt{color:#6b7484;white-space:nowrap}
+.tips-list{list-style:none;margin:6px 0 0}
+.tips-list li{position:relative;padding-left:18px;margin-bottom:3px}
+.tips-list li::before{content:'·';position:absolute;left:6px;color:var(--accent2);
+  font-weight:700;font-size:15px;line-height:1.5}
+
+/* Stats */
+.stats-bar{max-width:1600px;margin:16px auto;padding:0 40px;display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+.chip{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:5px 14px;font-size:12px}
+.chip b{color:var(--accent2);margin-right:3px}
+.img-status{margin-left:auto;font-size:12px;color:var(--muted)}
+.img-status.loading{color:var(--accent2)}
+.img-status.done{color:var(--green)}
+
+/* Grid */
+.grid-wrap{max-width:1600px;margin:0 auto;padding:0 40px 60px}
+.card-grid{display:grid;gap:18px;grid-template-columns:repeat(auto-fill,minmax(300px,1fr))}
+
+/* Card */
+.card{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;
+  display:flex;flex-direction:column;transition:transform .2s,border-color .2s;
+  contain:layout style}
+.card:hover{transform:translateY(-3px);border-color:var(--accent)}
+
+.card-top{display:flex;align-items:center;gap:14px;padding:16px 18px 12px}
+.avatar{position:relative;width:52px;height:52px;border-radius:50%;overflow:hidden;flex-shrink:0;background:#252830}
+.avatar img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .3s}
+.avatar img.loaded{opacity:1}
+.avatar .ph{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:22px;color:var(--border)}
+
+.card-info{flex:1;min-width:0}
+
+/* 可点击的网名 */
+.card-name{display:inline-flex;align-items:center;gap:4px;max-width:100%;
+  font-size:16px;font-weight:700;color:var(--text);text-decoration:none;
+  cursor:pointer;transition:color .15s;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.card-name .txt{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.card-name .go{flex-shrink:0;font-size:11px;color:var(--accent2);
+  opacity:0;transform:translateX(-3px);transition:all .18s}
+.card-name:hover{color:var(--accent2)}
+.card-name:hover .go{opacity:1;transform:translateX(0)}
+.card-name:active{opacity:.75}
+.card-name:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:5px}
+
+/* 徽标组 */
+.card-meta{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:5px}
+.card-count{display:inline-block;background:rgba(253,203,110,.15);color:var(--orange);
+  padding:2px 10px;border-radius:99px;font-size:11px;font-weight:600}
+.card-likes{display:inline-block;background:rgba(255,118,117,.15);color:#ff9f9e;
+  padding:2px 10px;border-radius:99px;font-size:11px;font-weight:600;
+  font-variant-numeric:tabular-nums}
+
+/* 日期范围 */
+.card-date{padding:0 18px 10px;font-size:11.5px;color:var(--muted);
+  font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+
+.card-desc{padding:0 18px 16px;font-size:13px;color:var(--muted);line-height:1.7;flex:1;
+  overflow-wrap:anywhere}
+.card-desc.clamp{display:-webkit-box;-webkit-line-clamp:5;-webkit-box-orient:vertical;overflow:hidden}
+
+.card-tags{padding:0 18px 14px;display:flex;flex-wrap:wrap;gap:5px}
+.tag{background:rgba(108,92,231,.12);color:var(--accent2);padding:2px 9px;border-radius:99px;font-size:11px}
+
+.empty{text-align:center;padding:80px 20px;color:var(--muted);font-size:14px}
+
+/* ===== 分页器 ===== */
+.pager{display:flex;gap:8px;align-items:center;justify-content:center;flex-wrap:wrap;margin-top:26px}
+.pg-btn{padding:7px 14px;border-radius:9px;border:1px solid var(--border);background:var(--card);
+  color:var(--text);font-size:13px;cursor:pointer;transition:all .15s;font-family:inherit}
+.pg-btn:hover:not(:disabled){border-color:var(--accent);color:var(--accent2)}
+.pg-btn:disabled{opacity:.32;cursor:not-allowed}
+.pg-info{font-size:13px;color:var(--muted);padding:0 10px;min-width:76px;text-align:center;font-variant-numeric:tabular-nums}
+.pg-select{background:var(--card);border:1px solid var(--border);color:var(--text);
+  border-radius:9px;padding:7px 10px;font-size:13px;font-family:inherit;cursor:pointer;outline:none}
+.pg-select:focus{border-color:var(--accent)}
+.pg-jump{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--muted)}
+.pg-jump input{width:64px;background:var(--card);border:1px solid var(--border);color:var(--text);
+  border-radius:9px;padding:7px 10px;font-size:13px;font-family:inherit;outline:none;
+  -moz-appearance:textfield}
+.pg-jump input::-webkit-outer-spin-button,
+.pg-jump input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.pg-jump input:focus{border-color:var(--accent)}
+
+/* ★ 新增：一键打开本页链接按钮 */
+.pg-btn.pg-open{background:linear-gradient(135deg,var(--accent),#7c5cff);border-color:transparent;
+  color:#fff;font-weight:600}
+.pg-btn.pg-open:hover:not(:disabled){border-color:transparent;color:#fff;opacity:.9}
+.pg-btn.pg-open:active:not(:disabled){transform:scale(.97)}
+
+@media(max-width:768px){
+  .header,.input-section,.stats-bar,.grid-wrap{padding-left:16px;padding-right:16px}
+  .card-grid{grid-template-columns:1fr}
+  textarea{height:160px}
+  .parse-hint{width:100%;margin-left:0;text-align:left}
+  .pg-jump{display:none}
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>🎴 网红卡片展示器</h1>
+  <p>粘贴 CSV / TSV 文本或上传文件 · 自动生成卡片与头像 · 点击网名跳转搜索 · 数据自动保存到本地，下次打开自动恢复</p>
+</div>
+
+<div class="input-section">
+  <div class="tabs">
+    <div class="tab active" data-tab="paste">📋 粘贴文本</div>
+    <div class="tab" data-tab="upload">📂 上传文件</div>
+  </div>
+
+  <div class="input-panel active" id="panel-paste">
+    <textarea id="csvText" placeholder='粘贴 CSV / TSV 内容，格式示例（逗号或制表符分隔均可）：&#10;"用户名","文案数量","总点赞","日期范围","标签","聚合文案"&#10;"兔子的朋友圈🐰","17","11133","2025-12-17 ~ 2026-08-25","#青花瓷, #浅跳一个","做个小胖子·1周前 #扭一扭 #慢摇"'></textarea>
+    <div class="action-row">
+      <button class="btn btn-primary" id="btnParse">解析并生成卡片</button>
+      <button class="btn btn-ghost" id="btnSample">填充示例</button>
+      <button class="btn btn-ghost" id="btnClear">清空</button>
+      <span class="parse-hint">支持逗号 / 制表符分隔 · Ctrl/⌘ + Enter 快速解析</span>
+    </div>
+  </div>
+
+  <div class="input-panel" id="panel-upload">
+    <div class="drop-area" id="dropArea">
+      <input type="file" id="fileInput" accept=".csv,.txt,.tsv">
+      <div class="drop-icon">📂</div>
+      <div class="drop-text">拖拽 CSV / TSV 文件到此处，或点击选择</div>
+    </div>
+    <div class="action-row">
+      <span class="parse-hint">表头需包含：用户名（或 网名）</span>
+    </div>
+  </div>
+
+  <!-- ===== 本地保存状态 ===== -->
+  <div class="local-tip" id="localTip">
+    <span class="ico">💾</span>
+    <span id="localTipText">已保存到本地</span>
+    <button class="local-clear" id="btnClearLocal" title="仅清除浏览器中的本地记录">清除本地记录</button>
+  </div>
+
+  <!-- ============ 格式说明 ============ -->
+  <details class="format-tips">
+    <summary>📖 CSV 格式说明<span class="badge">必读</span></summary>
+    <div class="tips-body">
+
+      <h4>① 文件结构</h4>
+      <p>第一行必须是<b>表头</b>，从第二行起为数据；至少需要 <code>1 行表头 + 1 行数据</code>。
+         编码建议使用 <code>UTF-8</code>，否则中文可能乱码。</p>
+      <p>分隔符支持 <b>英文半角逗号</b> <code>,</code> 与 <b>制表符</b> <code>Tab</code>（Excel 直接复制粘贴就是 Tab），程序会自动识别。</p>
+
+      <h4>② 字段要求</h4>
+      <p>列的顺序不限，字段名不区分大小写、忽略空格与引号。识别规则如下：</p>
+      <div class="tip-scroll">
+        <table class="tip-table">
+          <thead>
+            <tr><th>字段</th><th>是否必填</th><th>可识别的写法（别名）</th><th>说明</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>用户名</code></td>
+              <td class="req">必填</td>
+              <td>用户名 / 网名 / username / name / 昵称 / 账号 / 博主</td>
+              <td>为空的行会被自动跳过；同时用于生成头像；<b>点击卡片上的用户名</b>会新窗口打开 <code>http://192.168.31.124/?search=用户名</code></td>
+            </tr>
+            <tr>
+              <td><code>文案数量</code></td>
+              <td class="opt">可选</td>
+              <td>文案数量 / 文案数 / 数量 / count / posts / 作品数 / 视频数</td>
+              <td>非数字按 0 处理，用于统计与徽标显示</td>
+            </tr>
+            <tr>
+              <td><code>总点赞</code></td>
+              <td class="opt">可选</td>
+              <td>总点赞 / 点赞数 / 点赞 / 总赞 / 获赞 / likes / like</td>
+              <td>超大数值自动转为「万 / 亿 / 科学计数法」显示</td>
+            </tr>
+            <tr>
+              <td><code>日期范围</code></td>
+              <td class="opt">可选</td>
+              <td>日期范围 / 时间范围 / 日期 / 时间 / date / daterange / range</td>
+              <td>原样显示在卡片上，留空则不显示该行</td>
+            </tr>
+            <tr>
+              <td><code>标签</code></td>
+              <td class="opt">可选</td>
+              <td>标签 / 话题 / 话题标签 / tags / tag</td>
+              <td>按 <code>、</code> <code>，</code> <code>,</code> <code>；</code> <code>;</code> 拆分，自动去掉开头的 <code>#</code>（最多 6 个）</td>
+            </tr>
+            <tr>
+              <td><code>聚合文案</code></td>
+              <td class="opt">可选</td>
+              <td>聚合文案 / 聚合内容 / 文案 / 内容 / content / text</td>
+              <td>卡片正文，超过 5 行自动折叠，鼠标悬停可看全文</td>
+            </tr>
+            <tr>
+              <td><code>人物描述</code></td>
+              <td class="opt">可选</td>
+              <td>人物描述 / 描述 / 简介 / desc / description / bio</td>
+              <td>兼容旧格式；存在时优先作为卡片正文，并从中拆分标签</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h4>③ 示例内容（逗号分隔）</h4>
+      <pre><span class="cm"># 表头（必须）</span>
+"用户名","文案数量","总点赞","日期范围","标签","聚合文案"
+<span class="cm"># 数据行</span>
+"兔子的朋友圈🐰","17","11133","2025-12-17 ~ 2026-08-25","#青花瓷, #浅跳一个, #宅家自嗨舞蹈","做个小胖子·1周前 #扭一扭 #慢摇"
+"阿哲Vlog","28","86420","2024-03-01 ~ 2025-06-30","#数码测评, #旅行, #美食探店","新品开箱·3天前 #数码 #开箱"
+"深夜食堂的猫","7","5620","","#美食制作, #深夜放毒","治愈系晚餐·2周前 #美食"</pre>
+
+      <h4>④ 示例内容（Tab 分隔，Excel 复制粘贴常见）</h4>
+      <pre><span class="cm"># 制表符分隔，无需引号</span>
+用户名	文案数量	总点赞	日期范围	标签	聚合文案
+抖音库-最新点赞-new20230829	17	116178503683334389760		#扭一扭, #慢摇	做个小胖子·1周前 #扭一扭 #慢摇
+抖音库-最新点赞-new20230817	6	43271880847575582720			</pre>
+
+      <h4>⑤ 书写注意事项</h4>
+      <ul class="tips-list">
+        <li>字段内容包含 <b>逗号</b>、<b>换行</b> 或 <b>双引号</b> 时，请用双引号把整个字段包起来。</li>
+        <li>字段内的双引号需写成两个双引号转义，例如：<code>"他说""你好""就走了"</code>。</li>
+        <li>表头与数据行之间不要插入空行或注释行。</li>
+        <li>使用逗号分隔时请使用<b>英文半角</b>逗号 <code>,</code>（中文顿号、逗号只用于标签内部拆分）。</li>
+        <li>Excel 导出时选择「CSV UTF-8（逗号分隔）」，或直接在 Excel 中框选复制、粘贴到输入框（Tab 分隔）。</li>
+      </ul>
+
+      <h4>⑥ 跳转说明</h4>
+      <p>用户名会被 URL 编码后拼接到搜索链接，<code>空格 → %20</code>，<code>中文/Emoji</code> 也会自动编码，
+         因此含特殊字符的用户名同样可以正常跳转。</p>
+
+      <h4>⑦ 本地保存说明</h4>
+      <ul class="tips-list">
+        <li>每次成功解析后，原文会存入浏览器的 <code>localStorage</code>，<b>下次打开自动恢复</b>。</li>
+        <li>「解析并生成卡片」与「上传文件」都会自动保存，覆盖上一次的记录。</li>
+        <li>每页条数的偏好也会一并保存，下次打开沿用。</li>
+        <li>点「清空」会同时清除页面数据与本地记录；点「清除本地记录」只清除存储，不影响当前展示。</li>
+        <li>数据仅保存在<b>本机当前浏览器</b>中：换浏览器、换设备不会同步；清除浏览器数据会一并丢失。</li>
+        <li>浏览器 <code>localStorage</code> 通常只有 <b>约 5MB</b>，数据过大时会保存失败并给出提示。</li>
+      </ul>
+
+      <h4>⑧ 快速体验</h4>
+      <p>点击「<b>填充示例</b>」填入示例数据 → 「解析并生成卡片」→ 点击任意用户名试试跳转 →
+         刷新页面，数据会自动恢复。</p>
+
+    </div>
+  </details>
+</div>
+
+<div class="stats-bar" id="statsBar" style="display:none">
+  <div class="chip"><b id="totalCount">0</b>张卡片</div>
+  <div class="chip"><b id="totalPosts">0</b>篇文案</div>
+  <div class="chip"><b id="imgLoaded">0</b>本页头像已生成</div>
+  <div class="img-status" id="imgStatus">等待中…</div>
+</div>
+
+<div class="grid-wrap">
+  <div class="card-grid" id="cardGrid"></div>
+  <div class="empty" id="emptyState">暂无数据，请粘贴 CSV 文本或上传文件</div>
+
+  <!-- ===== 分页器 ===== -->
+  <div class="pager" id="pager" style="display:none">
+    <button class="pg-btn" id="pgFirst" title="第一页">«</button>
+    <button class="pg-btn" id="pgPrev" title="上一页">‹ 上一页</button>
+    <span class="pg-info" id="pgInfo">1 / 1</span>
+    <button class="pg-btn" id="pgNext" title="下一页">下一页 ›</button>
+    <button class="pg-btn" id="pgLast" title="最后一页">»</button>
+    <!-- ★ 新增按钮 -->
+    <button class="pg-btn pg-open" id="pgOpenAll" title="在新标签页中打开本页所有用户的搜索链接">🔗 打开本页链接</button>
+    <select class="pg-select" id="pageSize" title="每页条数">
+      <option value="12">12 条/页</option>
+      <option value="24" selected>24 条/页</option>
+      <option value="48">48 条/页</option>
+      <option value="96">96 条/页</option>
+    </select>
+    <label class="pg-jump">跳至 <input type="number" id="pgJump" min="1" placeholder="#"> 页</label>
+  </div>
+</div>
+
+<script>
+"use strict";
+const $  = s => document.querySelector(s);
+const $$ = s => Array.from(document.querySelectorAll(s));
+
+/* ========================================================= *
+ * ★ 跳转配置
+ * ========================================================= */
+const SEARCH_BASE = 'http://192.168.31.124/';
+const SEARCH_KEY  = 'search';
+
+function buildSearchUrl(username) {
+  const sep = SEARCH_BASE.includes('?') ? '&' : '?';
+  return `${SEARCH_BASE}${sep}${SEARCH_KEY}=${encodeURIComponent(username)}&v=1`;
+}
+
+/* ========================================================= *
+ * ★ 本地存储（原文 + 偏好）
+ * ========================================================= */
+const STORAGE_KEY = 'card_viewer_data_v1';
+const PREFS_KEY   = 'card_viewer_prefs_v1';
+const PAGE_SIZES  = [12, 24, 48, 96];
+
+const fmtTime = ts => {
+  const d = new Date(ts);
+  const p = n => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`;
+};
+
+function showLocalTip(ts, restored) {
+  const el = $('#localTip');
+  if (!el) return;
+  el.classList.remove('error');
+  el.querySelector('.ico').textContent = '💾';
+  $('#localTipText').textContent =
+    (restored ? '已从本地恢复' : '已保存到本地') + (ts ? ' · ' + fmtTime(ts) : '');
+  el.style.display = 'flex';
+}
+
+function showLocalError(msg) {
+  const el = $('#localTip');
+  if (!el) return;
+  el.classList.add('error');
+  el.querySelector('.ico').textContent = '⚠️';
+  $('#localTipText').textContent = msg;
+  el.style.display = 'flex';
+}
+
+function hideLocalTip() {
+  const el = $('#localTip');
+  if (el) el.style.display = 'none';
+}
+
+let saveTimer = null;
+/** 防抖保存，避免连续解析时反复同步写 localStorage 造成卡顿 */
+function scheduleSave(text) {
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => saveToLocal(text), 150);
+}
+
+function saveToLocal(text) {
+  try {
+    const ts = Date.now();
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ v: 1, text, savedAt: ts }));
+    showLocalTip(ts, false);
+  } catch (err) {
+    console.warn('本地保存失败：', err);
+    showLocalError('数据过大或存储被禁用，本次未保存到本地（当前页面仍可正常使用）');
+  }
+}
+
+function loadFromLocal() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return null;
+    const obj = JSON.parse(raw);
+    if (obj && typeof obj.text === 'string' && obj.text.trim()) return obj;
+  } catch (err) {
+    console.warn('本地读取失败：', err);
+  }
+  return null;
+}
+
+function clearLocal() {
+  try { localStorage.removeItem(STORAGE_KEY); } catch (err) { /* ignore */ }
+  hideLocalTip();
+}
+
+function loadPrefs() {
+  try { return JSON.parse(localStorage.getItem(PREFS_KEY)) || {}; }
+  catch (err) { return {}; }
+}
+function savePrefs(patch) {
+  try { localStorage.setItem(PREFS_KEY, JSON.stringify(Object.assign(loadPrefs(), patch))); }
+  catch (err) { /* ignore */ }
+}
+
+/* ========================================================= *
+ * 1. MD5（与 Python hashlib.md5(...).hexdigest() 一致）
+ * ========================================================= */
+const MD5 = (function () {
+  const S = [
+    7,12,17,22, 7,12,17,22, 7,12,17,22, 7,12,17,22,
+    5, 9,14,20, 5, 9,14,20, 5, 9,14,20, 5, 9,14,20,
+    4,11,16,23, 4,11,16,23, 4,11,16,23, 4,11,16,23,
+    6,10,15,21, 6,10,15,21, 6,10,15,21, 6,10,15,21
+  ];
+  const K = new Uint32Array(64);
+  for (let i = 0; i < 64; i++) {
+    K[i] = Math.floor(Math.abs(Math.sin(i + 1)) * 4294967296) >>> 0;
+  }
+  const hex32 = x => {
+    let s = '';
+    for (let i = 0; i < 4; i++) s += ((x >>> (i * 8)) & 0xff).toString(16).padStart(2, '0');
+    return s;
+  };
+
+  return function md5(str) {
+    const msg = new TextEncoder().encode(str);
+    const len = msg.length;
+    const bitLen = len * 8;
+    const totalLen = (((len + 9) + 63) >> 6) << 6;
+
+    const buf = new Uint8Array(totalLen);
+    buf.set(msg);
+    buf[len] = 0x80;
+    const view = new DataView(buf.buffer);
+    view.setUint32(totalLen - 8, bitLen >>> 0, true);
+    view.setUint32(totalLen - 4, Math.floor(bitLen / 4294967296), true);
+
+    let a0 = 0x67452301, b0 = 0xefcdab89, c0 = 0x98badcfe, d0 = 0x10325476;
+    const M = new Uint32Array(16);
+
+    for (let off = 0; off < totalLen; off += 64) {
+      for (let j = 0; j < 16; j++) M[j] = view.getUint32(off + j * 4, true);
+
+      let A = a0, B = b0, C = c0, D = d0;
+      for (let i = 0; i < 64; i++) {
+        let F, g;
+        if (i < 16)      { F = (B & C) | (~B & D); g = i; }
+        else if (i < 32) { F = (D & B) | (~D & C); g = (5 * i + 1) & 15; }
+        else if (i < 48) { F = B ^ C ^ D;          g = (3 * i + 5) & 15; }
+        else             { F = C ^ (B | ~D);       g = (7 * i) & 15; }
+
+        F = (F + A + K[i] + M[g]) >>> 0;
+        A = D; D = C; C = B;
+        B = (B + (((F << S[i]) | (F >>> (32 - S[i]))) >>> 0)) >>> 0;
+      }
+      a0 = (a0 + A) >>> 0; b0 = (b0 + B) >>> 0;
+      c0 = (c0 + C) >>> 0; d0 = (d0 + D) >>> 0;
+    }
+    return hex32(a0) + hex32(b0) + hex32(c0) + hex32(d0);
+  };
+})();
+
+/* ========================================================= *
+ * 2. 确定性头像生成
+ * ========================================================= */
+function generateAvatarSvg(username) {
+  const h = MD5(username);
+  const hue = parseInt(h.slice(0, 6), 16) % 360;
+  const bg = `hsl(${hue}, 60%, 50%)`;
+  const fg = `hsl(${(hue + 45) % 360}, 70%, 85%)`;
+
+  const cells = [];
+  for (let i = 0; i < 15; i++) {
+    if (parseInt(h[i + 6], 16) % 2 === 0) {
+      const x = i % 3, y = Math.floor(i / 3);
+      cells.push([x, y]);
+      cells.push([4 - x, y]);
+    }
+  }
+  const rects = cells
+    .map(([x, y]) => `<rect x="${x * 10}" y="${y * 10}" width="10" height="10" fill="${fg}"/>`)
+    .join('');
+
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 50">` +
+         `<rect width="50" height="50" fill="${bg}"/>${rects}</svg>`;
+}
+
+const avatarCache = new Map();
+function avatarDataUrl(username) {
+  let url = avatarCache.get(username);
+  if (url) return url;
+  url = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(generateAvatarSvg(username));
+  avatarCache.set(username, url);
+  return url;
+}
+
+/* ========================================================= *
+ * 3. 工具
+ * ========================================================= */
+const escapeHtml = s => String(s).replace(/[&<>"']/g, c => (
+  { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]
+));
+
+/* ---- 数字缩写显示 ---- */
+const SUP = { '0':'⁰','1':'¹','2':'²','3':'³','4':'⁴','5':'⁵','6':'⁶','7':'⁷','8':'⁸','9':'⁹' };
+const trimZero = s => s.replace(/\.0$/, '');
+
+/**
+ * 把大数字转成易读形式：
+ *   1234        -> 1234
+ *   12345       -> 1.2万
+ *   116178503   -> 1.2亿
+ *   1.16e20     -> 1.2×10²⁰
+ */
+function fmtNum(n) {
+  if (!isFinite(n) || n <= 0) return '0';
+  if (n >= 1e12) {
+    const s = n.toExponential(1);
+    const m = s.match(/^([\d.]+)e\+?(\d+)$/);
+    if (m) return m[1] + '×10' + m[2].split('').map(c => SUP[c] || c).join('');
+    return s;
+  }
+  if (n >= 1e8) return trimZero((n / 1e8).toFixed(1)) + '亿';
+  if (n >= 1e4) return trimZero((n / 1e4).toFixed(1)) + '万';
+  return String(Math.round(n));
+}
+
+const SAMPLE_CSV =
+`"用户名","文案数量","总点赞","日期范围","标签","聚合文案"
+"兔子的朋友圈🐰","17","11133","2025-12-17 ~ 2026-08-25","#青花瓷, #浅跳一个, #阿米嘎蒂朵喵喵手势舞, #随手拍的快乐, #宅家自嗨舞蹈, #日常","做个小胖子·1周前 #扭一扭 #慢摇"
+"阿哲Vlog","28","86420","2024-03-01 ~ 2025-06-30","#数码测评, #旅行, #美食探店","新品开箱·3天前 #数码 #开箱"
+"深夜食堂的猫","7","5620","","#美食制作, #深夜放毒, #治愈系","治愈系晚餐·2周前 #美食"
+"林小满Manman","45","210340","2025-01-05 ~ 2026-02-14","#美妆教程, #护肤心得, #好物推荐","秋冬妆容分享·1个月前 #美妆"
+"老陈说车","63","589100","2023-06-01 ~ 2026-01-20","#汽车评测, #用车知识, #行业资讯","新能源车横评·5天前 #汽车"`;
+
+/* ========================================================= *
+ * 4. 全局状态
+ * ========================================================= */
+const state = {
+  items: [],        // 全部数据（解析一次，常驻内存）
+  page: 1,          // 当前页（1-based）
+  pageSize: 24,     // 每页条数
+  totalPosts: 0
+};
+const avatarStats = { total: 0, loaded: 0 };
+
+/* ========================================================= *
+ * 5. Tab 切换
+ * ========================================================= */
+function activateTab(name) {
+  $$('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === name));
+  $$('.input-panel').forEach(p => p.classList.toggle('active', p.id === `panel-${name}`));
+}
+$$('.tab').forEach(tab => {
+  tab.addEventListener('click', () => activateTab(tab.dataset.tab));
+});
+
+/* ========================================================= *
+ * 6. CSV / TSV 解析（带结果缓存，同文本不重复解析）
+ *    返回：null = 格式错误；[] = 无有效数据；[...] = 解析结果
+ * ========================================================= */
+
+/** 自动识别分隔符：Tab / 逗号 / 分号 */
+function detectDelimiter(text) {
+  const firstLine = text.split(/\r?\n/, 1)[0] || '';
+  const nTab   = (firstLine.match(/\t/g) || []).length;
+  const nComma = (firstLine.match(/,/g)  || []).length;
+  const nSemi  = (firstLine.match(/;/g)  || []).length;
+  if (nTab > 0 && nTab >= nComma && nTab >= nSemi) return '\t';
+  if (nSemi > nComma) return ';';
+  return ',';
+}
+
+function parseCSVLine(line, delim) {
+  const result = [];
+  let cur = '', inQ = false;
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i];
+    if (ch === '"') {
+      if (inQ && line[i + 1] === '"') { cur += '"'; i++; }
+      else { inQ = !inQ; }
+    } else if (ch === delim && !inQ) {
+      result.push(cur.trim());
+      cur = '';
+    } else {
+      cur += ch;
+    }
+  }
+  result.push(cur.trim());
+  return result;
+}
+
+/* ---- 字段别名表 ---- */
+const ALIAS = {
+  name:    ['用户名','网名','username','name','昵称','账号','user','博主'],
+  count:   ['文案数量','文案数','数量','count','posts','作品数','视频数'],
+  likes:   ['总点赞','点赞数','点赞','总赞','获赞','likes','like','liked'],
+  date:    ['日期范围','时间范围','日期','时间','date','daterange','range'],
+  tags:    ['标签','话题','话题标签','tags','tag'],
+  content: ['聚合文案','聚合内容','文案','内容','content','text'],
+  desc:    ['人物描述','描述','简介','desc','description','bio']
+};
+
+const parseCache = { text: null, items: null };
+
+function parseCSV(text, silent) {
+  if (parseCache.text === text) return parseCache.items;
+
+  const lines = text.trim().split(/\r?\n/).filter(l => l.trim());
+  if (lines.length < 2) { parseCache.text = text; parseCache.items = []; return []; }
+
+  const delim = detectDelimiter(text);
+  const headers = parseCSVLine(lines[0], delim)
+    .map(h => h.toLowerCase().replace(/["'\s]/g, ''));
+
+  const pick = aliases => headers.findIndex(h => aliases.includes(h));
+
+  const idxName    = pick(ALIAS.name);
+  const idxCount   = pick(ALIAS.count);
+  const idxLikes   = pick(ALIAS.likes);
+  const idxDate    = pick(ALIAS.date);
+  const idxTags    = pick(ALIAS.tags);
+  const idxContent = pick(ALIAS.content);
+  const idxDesc    = pick(ALIAS.desc);
+
+  if (idxName === -1) {
+    parseCache.text = text;
+    parseCache.items = null;
+    if (!silent) {
+      alert('未找到「用户名 / 网名」字段！\n\n请确保第一行是表头，且包含：用户名 / 网名 / username / name / 昵称 / 账号\n（详见下方「CSV 格式说明」）');
+    }
+    return null;
+  }
+
+  const items = [];
+  for (let i = 1; i < lines.length; i++) {
+    const cols = parseCSVLine(lines[i], delim);
+    const username = (cols[idxName] || '').trim();
+    if (!username) continue;
+
+    const desc    = idxDesc    !== -1 ? (cols[idxDesc]    || '') : '';
+    const content = idxContent !== -1 ? (cols[idxContent] || '') : '';
+    const rawTags = idxTags    !== -1 ? (cols[idxTags]    || '') : '';
+
+    const tags = splitTags(rawTags);
+
+    items.push({
+      username,
+      count:     idxCount !== -1 ? (cols[idxCount] || '0') : '0',
+      likes:     idxLikes !== -1 ? (cols[idxLikes] || '0') : '0',
+      dateRange: idxDate  !== -1 ? (cols[idxDate]  || '')  : '',
+      tags:      tags.length ? tags : splitTags(desc),
+      desc,
+      content
+    });
+  }
+
+  parseCache.text = text;
+  parseCache.items = items;
+  return items;
+}
+
+/* ========================================================= *
+ * 7. 标签拆分（支持 # 前缀）
+ * ========================================================= */
+function splitTags(raw) {
+  if (!raw) return [];
+  return String(raw)
+    .split(/[、，,；;]/)
+    .map(s => s.trim().replace(/^#+\s*/, '').trim())
+    .filter(Boolean)
+    .slice(0, 6);
+}
+
+/* ========================================================= *
+ * 8. 单张卡片 → HTML 字符串
+ *    （批量字符串拼接后一次性 innerHTML，比逐个 createElement 快得多）
+ * ========================================================= */
+function cardHTML(item) {
+  const tagsHtml = item.tags.length
+    ? `<div class="card-tags">${item.tags.map(t => `<span class="tag">${escapeHtml(t)}</span>`).join('')}</div>`
+    : '';
+
+  const countNum = parseInt(item.count, 10) || 0;
+  const likesNum = parseFloat(String(item.likes).replace(/[,\s]/g, '')) || 0;
+
+  const nameEsc = escapeHtml(item.username);
+  const urlEsc  = escapeHtml(buildSearchUrl(item.username));
+
+  const bodyText = item.desc || item.content || '';
+  const bodyHtml = bodyText
+    ? `<div class="card-desc${bodyText.length > 80 ? ' clamp' : ''}" title="${escapeHtml(bodyText)}">${escapeHtml(bodyText)}</div>`
+    : `<div class="card-desc"></div>`;
+
+  const dateHtml = item.dateRange
+    ? `<div class="card-date">📅 ${escapeHtml(item.dateRange)}</div>`
+    : '';
+
+  const likesHtml = likesNum > 0
+    ? `<span class="card-likes" title="${escapeHtml(String(item.likes))}">❤️ ${fmtNum(likesNum)} 点赞</span>`
+    : '';
+
+  return `<div class="card">
+    <div class="card-top">
+      <div class="avatar">
+        <div class="ph">⏳</div>
+        <img data-user="${nameEsc}" alt="" decoding="async">
+      </div>
+      <div class="card-info">
+        <a class="card-name" href="${urlEsc}" target="_blank" rel="noopener noreferrer"
+           title="打开搜索：${nameEsc}">
+          <span class="txt">${nameEsc}</span><span class="go">↗</span>
+        </a>
+        <div class="card-meta">
+          <span class="card-count">📝 ${countNum} 篇文案</span>
+          ${likesHtml}
+        </div>
+      </div>
+    </div>
+    ${dateHtml}
+    ${bodyHtml}
+    ${tagsHtml}
+  </div>`;
+}
+
+/* ========================================================= *
+ * 9. 头像懒加载（IntersectionObserver）
+ *    只有进入视口（含 200px 预加载余量）才生成并解码头像
+ * ========================================================= */
+let avatarIO = null;
+
+function onAvatarLoad(e) {
+  const img = e.currentTarget;
+  img.classList.add('loaded');
+  const ph = img.parentElement && img.parentElement.querySelector('.ph');
+  if (ph) ph.style.display = 'none';
+  avatarStats.loaded++;
+  $('#imgLoaded').textContent = avatarStats.loaded;
+  updateImgStatus();
+}
+
+function onAvatarError(e) {
+  const img = e.currentTarget;
+  const ph = img.parentElement && img.parentElement.querySelector('.ph');
+  if (ph) ph.textContent = '❌';
+  avatarStats.loaded++;
+  $('#imgLoaded').textContent = avatarStats.loaded;
+  updateImgStatus();
+}
+
+function observeAvatars(imgs) {
+  if (avatarIO) { avatarIO.disconnect(); avatarIO = null; }
+  if (!imgs.length) { updateImgStatus(); return; }
+
+  avatarIO = new IntersectionObserver(entries => {
+    for (const entry of entries) {
+      if (!entry.isIntersecting) continue;
+      const img = entry.target;
+      avatarIO.unobserve(img);
+      img.src = avatarDataUrl(img.dataset.user);
+    }
+  }, { rootMargin: '200px 0px', threshold: 0 });
+
+  imgs.forEach(img => {
+    img.addEventListener('load', onAvatarLoad);
+    img.addEventListener('error', onAvatarError);
+    avatarIO.observe(img);
+  });
+
+  updateImgStatus();
+}
+
+function updateImgStatus() {
+  const st = $('#imgStatus');
+  const { total, loaded } = avatarStats;
+  if (!total) { st.textContent = '无卡片'; st.className = 'img-status'; return; }
+  if (loaded >= total) {
+    st.textContent = `✅ 头像完成 (${loaded}/${total})`;
+    st.className = 'img-status done';
+  } else {
+    st.textContent = `头像加载中 (${loaded}/${total})…`;
+    st.className = 'img-status loading';
+  }
+}
+
+/* ========================================================= *
+ * 10. 分页渲染
+ * ========================================================= */
+const pageCount = () => Math.max(1, Math.ceil(state.items.length / state.pageSize));
+
+function renderPage() {
+  const grid = $('#cardGrid');
+  const total = state.items.length;
+
+  // 空状态
+  if (!total) {
+    grid.innerHTML = '';
+    if (avatarIO) { avatarIO.disconnect(); avatarIO = null; }
+    $('#emptyState').style.display = 'block';
+    $('#statsBar').style.display   = 'none';
+    $('#pager').style.display      = 'none';
+    return;
+  }
+
+  $('#emptyState').style.display = 'none';
+  $('#statsBar').style.display   = 'flex';
+  $('#pager').style.display      = 'flex';
+
+  // 顶部统计（全量）
+  $('#totalCount').textContent = total;
+  $('#totalPosts').textContent = state.totalPosts;
+
+  // 截取当前页
+  const start = (state.page - 1) * state.pageSize;
+  const slice = state.items.slice(start, start + state.pageSize);
+
+  // 一次性渲染
+  grid.innerHTML = slice.map(cardHTML).join('');
+
+  // 头像状态重置 + 懒加载
+  avatarStats.total = slice.length;
+  avatarStats.loaded = 0;
+  $('#imgLoaded').textContent = 0;
+
+  observeAvatars(Array.from(grid.querySelectorAll('.avatar img')));
+
+  updatePagerUI();
+}
+
+function updatePagerUI() {
+  const max = pageCount();
+  const p = state.page;
+  $('#pgInfo').textContent = `${p} / ${max}`;
+  $('#pgFirst').disabled = $('#pgPrev').disabled = (p <= 1);
+  $('#pgLast').disabled  = $('#pgNext').disabled = (p >= max);
+  // ★ 有数据时才可点击「打开本页链接」
+  $('#pgOpenAll').disabled = state.items.length === 0;
+}
+
+function setPage(p, opts) {
+  const max = pageCount();
+  const next = Math.min(Math.max(1, p | 0), max);
+  if (next === state.page && !(opts && opts.force)) return;
+  state.page = next;
+  renderPage();
+  if (!(opts && opts.silent)) {
+    const wrap = document.querySelector('.grid-wrap');
+    const y = wrap.getBoundingClientRect().top + window.pageYOffset - 12;
+    window.scrollTo({ top: y, behavior: 'smooth' });
+  }
+}
+
+/** 设置全量数据并回到第一页 */
+function setItems(items) {
+  state.items = items;
+  state.page = 1;
+  state.totalPosts = items.reduce((s, it) => s + (parseInt(it.count, 10) || 0), 0);
+  renderPage();
+}
+
+/* ========================================================= *
+ * 11. 解析 + 渲染 + 保存（统一入口）
+ * ========================================================= */
+function parseAndRender(text, opts) {
+  const { silent = false, save = true, autoTab = false } = opts || {};
+  const items = parseCSV(text, silent);
+
+  if (items === null) return false;              // 格式错误，已提示
+  if (!items.length) {
+    if (!silent) alert('没有解析到有效数据，请检查是否有表头和数据行。');
+    return false;
+  }
+
+  if ($('#csvText').value !== text) $('#csvText').value = text;
+  if (autoTab) activateTab('paste');
+
+  setItems(items);
+  if (save) scheduleSave(text);
+  return true;
+}
+
+/* ========================================================= *
+ * 12. 事件绑定
+ * ========================================================= */
+$('#btnParse').addEventListener('click', () => {
+  const text = $('#csvText').value.trim();
+  if (!text) { alert('请先粘贴 CSV 内容'); return; }
+  parseAndRender(text);
+});
+
+$('#btnSample').addEventListener('click', () => {
+  $('#csvText').value = SAMPLE_CSV;
+  $('#csvText').focus();
+  $('#csvText').setSelectionRange(SAMPLE_CSV.length, SAMPLE_CSV.length);
+});
+
+$('#btnClear').addEventListener('click', () => {
+  $('#csvText').value = '';
+  setItems([]);
+  clearLocal();
+});
+
+$('#btnClearLocal').addEventListener('click', clearLocal);
+
+$('#csvText').addEventListener('keydown', e => {
+  if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') $('#btnParse').click();
+});
+
+/* ---- 分页事件 ---- */
+$('#pgFirst').addEventListener('click', () => setPage(1));
+$('#pgPrev').addEventListener('click',  () => setPage(state.page - 1));
+$('#pgNext').addEventListener('click',  () => setPage(state.page + 1));
+$('#pgLast').addEventListener('click',  () => setPage(pageCount()));
+
+/* ★ 新增：一键打开本页所有用户链接 ---- */
+$('#pgOpenAll').addEventListener('click', () => {
+  if (!state.items.length) return;
+
+  const start = (state.page - 1) * state.pageSize;
+  const list  = state.items.slice(start, start + state.pageSize);
+  if (!list.length) return;
+
+  if (!confirm(
+    `将在新标签页中打开本页 ${list.length} 个用户的搜索链接。\n\n` +
+    `浏览器可能会拦截多标签页弹出：\n` +
+    `若被拦截，请点击地址栏右侧的「弹出式窗口被拦截」图标，\n` +
+    `选择「始终允许 192.168.31.124 显示弹出式窗口」，然后重试。\n\n确定继续？`
+  )) return;
+
+  let opened = 0;
+  list.forEach(it => {
+    // 同一个用户手势内同步打开，避免被拦截
+    const w = window.open(buildSearchUrl(it.username), '_blank');
+    if (w) opened++;
+  });
+
+  if (opened < list.length) {
+    alert(
+      `已打开 ${opened} / ${list.length} 个链接。\n\n` +
+      `其余 ${list.length - opened} 个被浏览器拦截了。\n\n` +
+      `解决办法：点击地址栏右侧的弹窗拦截图标 → 允许本站弹出窗口，然后重试。`
+    );
+  }
+});
+
+$('#pageSize').addEventListener('change', e => {
+  const size = parseInt(e.target.value, 10);
+  state.pageSize = PAGE_SIZES.includes(size) ? size : 24;
+  state.page = 1;
+  savePrefs({ pageSize: state.pageSize });
+  renderPage();
+});
+
+$('#pgJump').addEventListener('keydown', e => {
+  if (e.key !== 'Enter') return;
+  const n = parseInt(e.target.value, 10);
+  if (n) setPage(n);
+  e.target.value = '';
+});
+
+// 方向键翻页（输入框内不触发）
+document.addEventListener('keydown', e => {
+  const tag = (e.target.tagName || '').toLowerCase();
+  if (tag === 'input' || tag === 'textarea' || tag === 'select') return;
+  if (e.key === 'ArrowLeft')  setPage(state.page - 1);
+  if (e.key === 'ArrowRight') setPage(state.page + 1);
+});
+
+/* ---- 文件上传 ---- */
+const dropArea  = $('#dropArea');
+const fileInput = $('#fileInput');
+
+dropArea.addEventListener('click', () => fileInput.click());
+
+async function handleFile(file) {
+  if (!file) return;
+  let text = '';
+  try {
+    text = await file.text();
+  } catch (err) {
+    alert('文件读取失败，请重试。');
+    return;
+  }
+  parseAndRender(text, { autoTab: true });
+}
+
+fileInput.addEventListener('change', async e => {
+  const file = e.target.files[0];
+  await handleFile(file);
+  fileInput.value = '';
+});
+
+dropArea.addEventListener('dragover', e => {
+  e.preventDefault();
+  dropArea.classList.add('dragover');
+});
+dropArea.addEventListener('dragleave', () => dropArea.classList.remove('dragover'));
+dropArea.addEventListener('drop', async e => {
+  e.preventDefault();
+  dropArea.classList.remove('dragover');
+  await handleFile(e.dataTransfer.files[0]);
+});
+
+/* ========================================================= *
+ * 13. 页面加载：恢复偏好 + 自动恢复本地数据
+ * ========================================================= */
+(function init() {
+  // 恢复每页条数偏好
+  const prefs = loadPrefs();
+  if (PAGE_SIZES.includes(prefs.pageSize)) {
+    state.pageSize = prefs.pageSize;
+    $('#pageSize').value = String(prefs.pageSize);
+  }
+
+  // 恢复数据
+  const saved = loadFromLocal();
+  if (!saved) return;
+
+  $('#csvText').value = saved.text;
+
+  const items = parseCSV(saved.text, true);
+  if (items && items.length) {
+    setItems(items);
+    showLocalTip(saved.savedAt, true);
+  } else {
+    // 本地数据已失效，清掉以免反复出错
+    clearLocal();
+  }
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,1006 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>跨学科核心模型与分析方法</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700;900&family=Noto+Sans+SC:wght@300;400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f6f2eb;
+    --bg-warm: #efe9df;
+    --surface: #ffffff;
+    --surface-alt: #faf8f4;
+    --border: #e2ddd4;
+    --border-strong: #d0c9bc;
+    --accent: #b8860b;
+    --accent-light: #d4a853;
+    --accent-bg: rgba(184,134,11,0.06);
+    --accent-border: rgba(184,134,11,0.15);
+    --text: #2c2824;
+    --text-secondary: #6b6358;
+    --text-muted: #9e9588;
+    --red: #b44040;
+    --red-bg: rgba(180,64,64,0.06);
+    --green: #3e7a50;
+    --green-bg: rgba(62,122,80,0.06);
+    --blue: #3a6b9e;
+    --blue-bg: rgba(58,107,158,0.06);
+    --purple: #7050a0;
+    --purple-bg: rgba(112,80,160,0.06);
+    --cyan: #2e8080;
+    --cyan-bg: rgba(46,128,128,0.06);
+    --orange: #a06830;
+    --orange-bg: rgba(160,104,48,0.06);
+    --rose: #a04060;
+    --rose-bg: rgba(160,64,96,0.06);
+    --lime: #5a8030;
+    --lime-bg: rgba(90,128,48,0.06);
+    --sky: #3a7090;
+    --sky-bg: rgba(58,112,144,0.06);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Noto Sans SC', 'PingFang SC', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.8;
+    font-size: 15.5px;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+
+  ::selection {
+    background: rgba(184,134,11,0.18);
+    color: var(--text);
+  }
+
+  /* ─── NAV ─── */
+  .nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    background: rgba(246,242,235,0.88);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 2rem;
+    display: flex; align-items: center;
+    height: 52px; font-size: 12.5px; gap: 1.2rem;
+    overflow-x: auto; scrollbar-width: none;
+  }
+  .nav::-webkit-scrollbar { display: none; }
+  .nav a {
+    color: var(--text-muted); text-decoration: none; white-space: nowrap;
+    transition: color 0.2s; font-weight: 500; letter-spacing: 0.03em; flex-shrink: 0;
+  }
+  .nav a:hover { color: var(--accent); }
+  .nav-brand {
+    color: var(--accent); font-family: 'Noto Serif SC', serif;
+    font-weight: 700; font-size: 14px; margin-right: 0.8rem; letter-spacing: 0.06em;
+  }
+
+  /* ─── LAYOUT ─── */
+  .wrapper {
+    position: relative; z-index: 1;
+    max-width: 900px; margin: 0 auto; padding: 0 2rem 6rem;
+  }
+
+  /* ─── HERO ─── */
+  .hero { padding-top: 120px; padding-bottom: 60px; text-align: center; }
+  .hero-label {
+    font-family: 'JetBrains Mono', monospace; font-size: 10.5px;
+    text-transform: uppercase; letter-spacing: 0.22em;
+    color: var(--accent); margin-bottom: 1.2rem;
+    opacity: 0; animation: fadeUp 0.5s 0.1s ease forwards;
+  }
+  .hero h1 {
+    font-family: 'Noto Serif SC', serif;
+    font-size: clamp(2rem, 4.5vw, 2.8rem);
+    font-weight: 900; line-height: 1.35; margin-bottom: 1.2rem;
+    color: var(--text);
+    opacity: 0; animation: fadeUp 0.5s 0.2s ease forwards;
+  }
+  .hero .lead {
+    font-size: 1rem; color: var(--text-secondary);
+    max-width: 600px; margin: 0 auto; line-height: 2;
+    opacity: 0; animation: fadeUp 0.5s 0.3s ease forwards;
+  }
+  .hero .lead em { color: var(--accent); font-style: normal; font-weight: 600; }
+
+  /* ─── FRAMEWORK BOX ─── */
+  .framework-box {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 2rem 2.5rem;
+    margin: 0 auto 3rem; max-width: 700px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    opacity: 0; animation: fadeUp 0.5s 0.45s ease forwards;
+  }
+  .framework-box h2 {
+    font-family: 'Noto Serif SC', serif; font-size: 1.15rem;
+    font-weight: 700; color: var(--accent); margin-bottom: 1rem;
+  }
+  .three-acts { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.8rem; margin-bottom: 1.4rem; }
+  .act-card {
+    background: var(--bg); border: 1px solid var(--border);
+    border-radius: 8px; padding: 1rem; text-align: center;
+  }
+  .act-num {
+    font-family: 'JetBrains Mono', monospace; font-size: 26px;
+    font-weight: 500; color: var(--accent); line-height: 1; margin-bottom: 0.4rem;
+  }
+  .act-title { font-weight: 700; font-size: 0.9rem; margin-bottom: 0.2rem; }
+  .act-desc { font-size: 0.78rem; color: var(--text-muted); }
+  .diff-list { display: grid; grid-template-columns: 1fr 1fr; gap: 0.4rem 1.5rem; padding-left: 0; list-style: none; }
+  .diff-list li { font-size: 0.85rem; color: var(--text-secondary); padding-left: 1rem; position: relative; }
+  .diff-list li::before { content: '—'; position: absolute; left: 0; color: var(--text-muted); }
+
+  /* ─── DIVIDER ─── */
+  .divider {
+    height: 1px; margin: 3.5rem 0;
+    background: linear-gradient(90deg, transparent, var(--border-strong), transparent);
+  }
+
+  /* ─── DISCIPLINE ─── */
+  .discipline { margin-bottom: 4rem; opacity: 0; transform: translateY(24px); }
+  .discipline.visible { animation: fadeUp 0.6s ease forwards; }
+
+  .disc-header { display: flex; align-items: baseline; gap: 0.8rem; margin-bottom: 0.4rem; }
+  .disc-number { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text-muted); letter-spacing: 0.08em; flex-shrink: 0; }
+  .disc-title { font-family: 'Noto Serif SC', serif; font-size: 1.55rem; font-weight: 700; line-height: 1.3; }
+  .disc-subtitle {
+    font-size: 0.9rem; color: var(--text-secondary);
+    margin-bottom: 1.8rem; padding-left: 2.8rem;
+    border-left: 2px solid var(--border); line-height: 1.85;
+  }
+  .disc-quote { display: block; font-family: 'Noto Serif SC', serif; font-size: 0.92rem; color: var(--accent); font-style: italic; margin-top: 0.3rem; }
+
+  /* ─── SUB SECTIONS ─── */
+  .sub-section { margin-bottom: 1.8rem; }
+  .sub-label {
+    font-family: 'JetBrains Mono', monospace; font-size: 10.5px;
+    text-transform: uppercase; letter-spacing: 0.14em;
+    color: var(--text-muted); margin-bottom: 0.7rem;
+    padding-bottom: 0.35rem; border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 0.4rem;
+  }
+  .sub-label .dot { width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; }
+
+  /* ─── CORE GRID ─── */
+  .core-grid { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+  .core-tag {
+    background: var(--bg); border: 1px solid var(--border);
+    border-radius: 5px; padding: 0.35rem 0.8rem;
+    font-size: 0.82rem; font-weight: 500; color: var(--text);
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .core-tag:hover { border-color: var(--border-strong); background: var(--surface); }
+
+  /* ─── METHODS ─── */
+  .method-list { display: flex; flex-direction: column; gap: 0.6rem; }
+  .method-item {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 8px; padding: 1rem 1.2rem;
+  }
+  .method-item h4 { font-size: 0.92rem; font-weight: 700; margin-bottom: 0.3rem; display: flex; align-items: center; gap: 0.4rem; }
+  .method-item h4 .num { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text-muted); }
+  .method-item p { font-size: 0.85rem; color: var(--text-secondary); line-height: 1.75; }
+  .method-item .ex-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; margin-top: 0.5rem; margin-bottom: 0.15rem; }
+  .method-item .example { font-size: 0.82rem; color: var(--text-muted); font-style: italic; padding-left: 0.7rem; border-left: 2px solid var(--border); }
+  .bullet-list { list-style: none; padding: 0; margin: 0.3rem 0; }
+  .bullet-list li { font-size: 0.85rem; color: var(--text-secondary); padding-left: 1rem; position: relative; line-height: 1.85; }
+  .bullet-list li::before { content: '·'; position: absolute; left: 0; color: var(--text-muted); font-weight: bold; font-size: 1.1em; }
+
+  /* ─── EXAMPLE BOX ─── */
+  .example-box {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .example-box-header {
+    padding: 0.85rem 1.2rem; border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 0.5rem;
+    background: var(--surface-alt);
+  }
+  .example-box-header .icon { font-size: 1rem; color: var(--accent); font-weight: 700; }
+  .example-box-header h4 { font-family: 'Noto Serif SC', serif; font-size: 0.95rem; font-weight: 600; }
+  .example-box-body { padding: 1.2rem; }
+  .example-box-body .q { font-weight: 600; font-size: 0.9rem; margin-bottom: 0.6rem; }
+  .example-box-body .analysis { font-size: 0.85rem; color: var(--text-secondary); line-height: 1.85; }
+  .example-box-body .key-point {
+    background: var(--accent-bg); border: 1px solid var(--accent-border);
+    border-radius: 6px; padding: 0.7rem 0.9rem; margin-top: 0.9rem;
+    font-size: 0.85rem; color: var(--accent); font-weight: 500; line-height: 1.7;
+  }
+
+  .var-list { display: flex; flex-wrap: wrap; gap: 0.3rem; margin: 0.5rem 0; }
+  .var-chip {
+    font-family: 'JetBrains Mono', monospace; font-size: 0.75rem;
+    background: var(--bg); border: 1px solid var(--border);
+    border-radius: 4px; padding: 0.15rem 0.5rem; color: var(--text-secondary);
+  }
+
+  .comparison-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; margin-top: 0.5rem; }
+  .comparison-card {
+    background: var(--bg); border: 1px solid var(--border);
+    border-radius: 6px; padding: 0.9rem;
+  }
+  .comparison-card h5 { font-size: 0.8rem; font-weight: 700; margin-bottom: 0.2rem; }
+  .comparison-card p { font-size: 0.8rem; color: var(--text-muted); line-height: 1.7; }
+
+  /* ─── CONSOLIDATED ─── */
+  .consolidated { margin-top: 4rem; opacity: 0; transform: translateY(24px); }
+  .consolidated.visible { animation: fadeUp 0.6s ease forwards; }
+  .consolidated h2 { font-family: 'Noto Serif SC', serif; font-size: 1.4rem; font-weight: 700; text-align: center; margin-bottom: 0.4rem; }
+  .consolidated .cons-sub { text-align: center; font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 2rem; }
+
+  .lens-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 0.6rem; }
+  .lens-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 8px; padding: 1rem 1.2rem;
+    border-left: 3px solid transparent;
+    transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s;
+  }
+  .lens-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.06); }
+  .lens-card h5 { font-family: 'JetBrains Mono', monospace; font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.2rem; }
+  .lens-word { font-size: 0.92rem; font-weight: 700; color: var(--text); margin-bottom: 0.3rem; }
+  .lens-card p { font-size: 0.8rem; color: var(--text-muted); line-height: 1.7; }
+
+  /* ─── COLOR CODING ─── */
+  .c-physics .dot { background: var(--red); }
+  .c-physics h5, .c-physics .sub-label { color: var(--red); }
+  .lens-card.c-physics { border-left-color: var(--red); }
+
+  .c-engineering .dot { background: var(--orange); }
+  .c-engineering h5, .c-engineering .sub-label { color: var(--orange); }
+  .lens-card.c-engineering { border-left-color: var(--orange); }
+
+  .c-biology .dot { background: var(--green); }
+  .c-biology h5, .c-biology .sub-label { color: var(--green); }
+  .lens-card.c-biology { border-left-color: var(--green); }
+
+  .c-economics .dot { background: var(--blue); }
+  .c-economics h5, .c-economics .sub-label { color: var(--blue); }
+  .lens-card.c-economics { border-left-color: var(--blue); }
+
+  .c-psychology .dot { background: var(--purple); }
+  .c-psychology h5, .c-psychology .sub-label { color: var(--purple); }
+  .lens-card.c-psychology { border-left-color: var(--purple); }
+
+  .c-cs .dot { background: var(--cyan); }
+  .c-cs h5, .c-cs .sub-label { color: var(--cyan); }
+  .lens-card.c-cs { border-left-color: var(--cyan); }
+
+  .c-cybernetics .dot { background: var(--rose); }
+  .c-cybernetics h5, .c-cybernetics .sub-label { color: var(--rose); }
+  .lens-card.c-cybernetics { border-left-color: var(--rose); }
+
+  .c-systems .dot { background: var(--lime); }
+  .c-systems h5, .c-systems .sub-label { color: var(--lime); }
+  .lens-card.c-systems { border-left-color: var(--lime); }
+
+  .c-stats .dot { background: var(--sky); }
+  .c-stats h5, .c-stats .sub-label { color: var(--sky); }
+  .lens-card.c-stats { border-left-color: var(--sky); }
+
+  /* ─── CONCLUSION BOX ─── */
+  .conclusion-box {
+    background: var(--surface); border: 1px solid var(--accent-border);
+    border-radius: 10px; padding: 1.8rem 2rem; margin-top: 2rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .conclusion-box h2 { font-family: 'Noto Serif SC', serif; font-size: 1.1rem; font-weight: 700; color: var(--accent); margin-bottom: 0.6rem; }
+  .conclusion-box p { font-size: 0.9rem; color: var(--text-secondary); line-height: 1.9; }
+  .conclusion-box strong { color: var(--text); font-weight: 600; }
+
+  /* ─── FOOTER ─── */
+  .footer {
+    text-align: center; margin-top: 4rem; padding-top: 2rem;
+    border-top: 1px solid var(--border);
+  }
+  .footer p { font-size: 0.82rem; color: var(--text-muted); line-height: 1.9; }
+  .footer .highlight { color: var(--accent); font-weight: 600; }
+
+  /* ─── ANIMATIONS ─── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(18px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ─── RESPONSIVE ─── */
+  @media (max-width: 700px) {
+    .framework-box { padding: 1.4rem 1.2rem; }
+    .three-acts { grid-template-columns: 1fr; }
+    .diff-list { grid-template-columns: 1fr; }
+    .comparison-row { grid-template-columns: 1fr; }
+    .disc-header { flex-direction: column; gap: 0.2rem; }
+    .disc-subtitle { padding-left: 1rem; }
+    .lens-grid { grid-template-columns: 1fr; }
+    .hero h1 { font-size: 1.7rem; }
+    .wrapper { padding: 0 1rem 3rem; }
+    .nav { padding: 0 1rem; gap: 0.8rem; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <span class="nav-brand">思维手术刀</span>
+  <a href="#physics">物理学</a>
+  <a href="#engineering">工程学</a>
+  <a href="#biology">生物学</a>
+  <a href="#economics">经济学</a>
+  <a href="#psychology">心理学</a>
+  <a href="#cs">计算机</a>
+  <a href="#cybernetics">控制论</a>
+  <a href="#systems">系统论</a>
+  <a href="#stats">统计学</a>
+  <a href="#consolidated">综合应用</a>
+</nav>
+
+<div class="wrapper">
+
+  <!-- ═══ HERO ═══ -->
+  <section class="hero">
+    <p class="hero-label">Cross-Disciplinary Thinking Framework</p>
+    <h1>不同学科的思维手术刀</h1>
+    <p class="lead">
+      很多学科表面差异巨大，但底层其实都在做三件事——<br>
+      <em>建模</em>、<em>找关键变量</em>、<em>预测与控制</em>。<br>
+      区别在于变量不同、可测量程度不同、是否允许实验不同、系统复杂度不同。
+    </p>
+  </section>
+
+  <!-- ═══ FRAMEWORK ═══ -->
+  <div class="framework-box">
+    <h2>所有学科的底层三件事</h2>
+    <div class="three-acts">
+      <div class="act-card">
+        <div class="act-num">1</div>
+        <div class="act-title">建模</div>
+        <div class="act-desc">抽象世界，构建简化映射</div>
+      </div>
+      <div class="act-card">
+        <div class="act-num">2</div>
+        <div class="act-title">找关键变量</div>
+        <div class="act-desc">哪些因素真正决定结果</div>
+      </div>
+      <div class="act-card">
+        <div class="act-num">3</div>
+        <div class="act-title">预测与控制</div>
+        <div class="act-desc">改变 X 会发生什么</div>
+      </div>
+    </div>
+    <ul class="diff-list">
+      <li>不同学科的"变量"不同</li>
+      <li>可测量程度不同</li>
+      <li>是否允许实验不同</li>
+      <li>系统复杂度不同</li>
+    </ul>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ═══ 01 PHYSICS ═══ -->
+  <section class="discipline c-physics" id="physics">
+    <div class="disc-header">
+      <span class="disc-number">01 / 09</span>
+      <h2 class="disc-title">物理学：寻找最底层约束</h2>
+    </div>
+    <div class="disc-subtitle">
+      用少量规律解释大量现象。
+      <span class="disc-quote">"找到真正控制系统的变量，而非凭直觉。"</span>
+    </div>
+
+    <div class="sub-section">
+      <div class="sub-label"><span class="dot"></span>核心模型</div>
+      <div class="core-grid">
+        <div class="core-tag">守恒律</div>
+        <div class="core-tag">相互作用</div>
+        <div class="core-tag">约束条件</div>
+        <div class="core-tag">动态变化</div>
+        <div class="core-tag">牛顿力学</div>
+        <div class="core-tag">热力学</div>
+        <div class="core-tag">电磁场</div>
+        <div class="core-tag">统计物理</div>
+      </div>
+    </div>
+
+    <div class="sub-section">
+      <div class="sub-label"><span class="dot"></span>分析方法</div>
+      <div class="method-list">
+        <div class="method-item">
+          <h4><span class="num">01</span> 建立理想模型</h4>
+          <p>忽略次要因素，抓主导变量。现实永远复杂，但先构建一个可解的简化版本。</p>
+          <div class="ex-label">例</div>
+          <div class="example">无空气阻力、刚体、点质量——先把问题简化到可解，再逐步引入复杂性。</div>
+        </div>
+        <div class="method-item">
+          <h4><span class="num">02</span> 找"守恒量"</h4>
+          <p>守恒意味着系统变化有硬边界——你不能凭空创造，也不能凭空消失。</p>
+          <ul class="bullet-list"><li>能量守恒</li><li>动量守恒</li><li>电荷守恒</li></ul>
+        </div>
+        <div class="method-item">
+          <h4><span class="num">03</span> 判断系统稳定性</h4>
+          <p>微小扰动后，系统回归还是偏离？摆回到最低点（稳定），球在山顶会滚落（不稳定）。</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="sub-section">
+      <div class="sub-label"><span class="dot"></span>实际运用</div>
+      <div class="example-box">
+        <div class="example-box-header"><span class="icon">▸</span><h4>为什么骑坡特别累？</h4></div>
+        <div class="example-box-body">
+          <p class="q">物理分析：核心不是"速度"，而是功率公式</p>
+          <p class="analysis"><strong>P = mgv sin θ</strong></p>
+          <div class="var-list">
+            <span class="var-chip">m 体重</span>
+            <span class="var-chip">g 重力</span>
+            <span class="var-chip">v 速度</span>
+            <span class="var-chip">θ 坡度</span>
+          </div>
+          <ul class="bullet-list">
+            <li>坡度增加一点，功率需求<strong>暴涨</strong>（正弦函数非线性）</li>
+            <li>低速高坡仍然极累——因为 mg sin θ 是恒定阻力</li>
+            <li>下坡几乎不耗能——重力反过来做功</li>
+          </ul>
+          <div class="key-point">物理学的方法论：找到真正控制系统的变量，而非凭直觉判断。</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- ═══ 02 ENGINEERING ═══ -->
+  <section class="discipline c-engineering" id="engineering">
+    <div class="disc-header">
+      <span class="disc-number">02 / 09</span>
+      <h2 class="disc-title">工程学：在约束下优化</h2>
+    </div>
+    <div class="disc-subtitle">
+      工程不是研究"真理"，而是在成本、时间、材料、风险下做出可运行的方案。
+      <span class="disc-quote">"工程师的核心能力是权衡（trade-off）。"</span>
+    </div>
+
+    <div class="sub-section">
+      <div class="sub-label"><span class="dot"></span>核心模型</div>
+      <div class="core-grid">
+        <div class="core-tag">Trade-off 权衡</div>
+        <div class="core-tag">鲁棒性</div>
+        <div class="core-tag">冗余设计</div>
+        <div class="core-tag">效率边界</div>
+        <div class="core-tag">约束理论</div>
+        <div class="core-tag">FMEA 失效分析</div>
+      </div>
+    </div>
+
+    <div class="sub-section">
+      <div class="sub-label"><span class="dot"></span>分析方法</div>
+      <div class="method-list">
+        <div class="method-item">
+          <h4><span class="num">01</span> 明确目标函数</h4>
+          <p>最省钱？最耐久？最轻？最快？不同目标得到完全不同的设计。</p>
+        </div>
+        <div class="method-item">
+          <h4><span class="num">02</span> 找瓶颈</h4>
+          <p>工程极度关注最弱环节和最大限制——<strong>不是平均水平</strong>，而是系统产出由瓶颈决定。</p>
+        </div>
+        <div class="method-item">
+          <h4><span class="num">03</span> 冗余与容错</h4>
+          <p>工程默认"东西一定会坏"，所以飞机有多套系统、电网有冗余、数据要备份。</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="sub-section">
+      <div class="sub-label"><span class="dot"></span>实际运用</div>
+      <div class="example-box">
+        <div class="example-box-header"><span class="icon">▸</span><h4>桥梁设计：物理 vs 工程的思维差异</h4></div>
+        <div class="example-box-body">
+          <div class="comparison-row">
+            <div class="comparison-card"><h5>物理学会问</h5><p>力如何传播？应力分布？共振频率？</p></div>
+            <div class="comparison-card"><h5>工程学会问</h5><p>多大车流？多久寿命？海风腐蚀？成本多少？极端天气呢？</p></div>
+          </div>
+          <div class="key-point">工程更现实——它考虑的不只是物理约束，还有时间、成本和风险。</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- ═══ 03 BIOLOGY ═══ -->
+  <section class="discipline c-biology" id="biology">
+    <div class="disc-header">
+      <span class="disc-number">03 / 09</span>
+      <h2 class="disc-title">生物学：演化与适应</h2>
+    </div>
+    <div class="disc-subtitle">
+      生物追求的不是"最佳"，而是"能活下来"。
+      <span class="disc-quote">"演化没有设计师，只有活下来的和没活下来的。"</span>
+    </div>
+
+    <div class="sub-section">
+      <div class="sub-label"><span class="dot"></span>核心模型</div>
+      <div class="core-grid">
+        <div class="core-tag">自然选择</div>
+        <div class="core-tag">适应</div>
+        <div class="core-tag">选择压力</div>
+        <div class="core-tag">能量分配</div>
+        <div class="core-tag">路径依赖</div>
+        <div class="core-tag">功能导向</div>
+      </div>
+    </div>
+
+    <div class="sub-section">
+      <div class="sub-label"><span class="dot"></span>分析方法</div>
+      <div class="method-list">
+        <div class="method-item">
+          <h4><span class="num">01</span> 功能导向：问"生存价值"</h4>
+          <p>疼痛、发热、疲劳、饥饿——很多不是 bug，而是保护机制。</p>
+          <div class="ex-label">思考方式</div>
+          <div class="example">不是问"为什么我会痛"，而是问"疼痛这个功能，在生存中保护了什么"。</div>
+        </div>
+        <div class="method-item">
+          <h4><span class="num">02</span> 历史路径依赖</h4>
+          <p>生物不是从零设计的，是在旧结构上不断修改。所以人体有大量"不优雅"结构（如视网膜反装）。</p>
+        </div>
+        <div class="method-item">
+          <h4><span class="num">03</span> 能量经济学</h4>
+          <p>生物极度节能：肌肉不用就退化，大脑高耗能，脂肪储备优先。</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="sub-section">
+      <div class="sub-label"><span class="dot"></span>实际运用</div>
+      <div class="example-box">
+        <div class="example-box-header"><span class="icon">▸</span><h4>为什么久坐后恢复运动会酸痛？</h4></div>
+        <div class="example-box-body">
+          <p class="analysis">肌肉损伤只是部分原因，更关键的是：</p>
+          <ul class="bullet-list">
+            <li><strong>神经适应缺失</strong>——长期不用，神经系统"忘记了"如何高效募集肌纤维</li>
+            <li><strong>能量系统不适应</strong>——无氧阈值下降，乳酸堆积更快</li>
+            <li><strong>炎症反应</strong>——微损伤触发免疫应答</li>
+            <li><strong>组织耐受不足</strong>——肌腱、韧带退化比肌肉更快</li>
+          </ul>
+          <div class="key-point">身体判断"这是异常高负荷"，于是启动保护机制。生物学看的是功能和适应，而非简单的机械损伤。</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- ═══ 04 ECONOMICS ═══ -->
+  <section class="discipline c-economics" id="economics">
+    <div class="disc-header">
+      <span class="disc-number">04 / 09</span>
+      <h2 class="disc-title">经济学：激励与资源分配</h2>
+    </div>
+    <div class="disc-subtitle">
+      经济学的核心假设：人会对激励做出反应。
+      <span class="disc-quote">"不要听人们说什么，看他们面对什么激励。"</span>
+    </div>
+
+    <div class="sub-section">
+      <div class="sub-label"><span class="dot"></span>核心模型</div>
+      <div class="core-grid">
+        <div class="core-tag">供需均衡</div>
+        <div class="core-tag">机会成本</div>
+        <div class="core-tag">博弈论</div>
+        <div class="core-tag">信息不对称</div>
+        <div class="core-tag">囚徒困境</div>
+        <div class="core-tag">外部性</div>
+      </div>
+    </div>
+
+    <div class="sub-section">
+      <div class="sub-label"><span class="dot"></span>分析方法</div>
+      <div class="method-list">
+        <div class="method-item">
+          <h4><span class="num">01</span> 看激励，不看口号</h4>
+          <p>经济学默认人会趋利避害。制度设计的好坏，取决于它产生的激励结构，而非表面意图。</p>
+        </div>
+        <div class="method-item">
+          <h4><span class="num">02</span> 看机会成本</h4>
+          <p>做 A 的真正成本 = 没做的最佳替代方案 B 的价值。学费只是显性成本，放弃的收入才是隐性大头。</p>
+        </div>
+        <div class="method-item">
+          <h4><span class="num">03</span> 看系统反馈</h4>
+          <p>政策可能产生副作用、套利空间和逆向激励。好意图不等于好结果。</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="sub-section">
+      <div class="sub-label"><span class="dot"></span>实际运用</div>
+      <div class="example-box">
+        <div class="example-box-header"><span class="icon">▸</span><h4>为什么免费停车反而让城市更堵？</h4></div>
+        <div class="example-box-body">
+          <p class="analysis">价格信号消失后的连锁反应：</p>
+          <ul class="bullet-list">
+            <li><strong>长时间占用</strong>——既然免费，停多久都不心疼</li>
+            <li><strong>无筛选机制</strong>——不区分真正的需求紧迫度</li>
+            <li><strong>需求爆炸</strong>——原本坐地铁的人也来抢车位</li>
+          </ul>
+          <div class="key-point">堵车不是"道德问题"，而是资源配置问题。经济学看的是激励结构和系统结果。</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- ═══ 05 PSYCHOLOGY ═══ -->
+  <section class="discipline c-psychology" id="psychology">
+    <div class="disc-header">
+      <span class="disc-number">05 / 09</span>
+      <h2 class="disc-title">心理学：认知偏差与行为机制</h2>
+    </div>
+    <div class="disc-subtitle">
+      人脑不是理性计算机，而是一个为了生存快速决策的近似系统。
+      <span class="disc-quote">"我们的大脑是为非洲草原设计的，不是为现代世界设计的。"</span>
+    </div>
+
+    <div class="sub-section">
+      <div class="sub-label"><span class="dot"></span>核心模型</div>
+      <div class="core-grid">
+        <div class="core-tag">系统1 / 系统2</div>
+        <div class="core-tag">锚定效应</div>
+        <div class="core-tag">损失厌恶</div>
+        <div class="core-tag">确认偏误</div>
+        <div class="core-tag">峰终定律</div>
+        <div class="core-tag">马斯洛需求层次</div>
+      </div>
+    </div>
+
+    <div class="sub-section">
+      <div class="sub-label"><span class="dot"></span>分析方法</div>
+      <div class="method-list">
+        <div class="method-item">
+          <h4><span class="num">01</span> 识别偏差</h4>
+          <p>确认偏误让你只看到支持自己的证据；损失厌恶让你对失去的恐惧两倍于获得的渴望。</p>
+        </div>
+        <div class="method-item">
+          <h4><span class="num">02</span> 区分情绪与事实</h4>
+          <p>很多决策是情绪先发生，理性后解释——大脑是个"合理化机器"。</p>
+        </div>
+        <div class="method-item">
+          <h4><span class="num">03</span> 看环境塑造</h4>
+          <p>行为很多不是"人格问题"，而是环境诱导。改变情境比改变人更有效。</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="sub-section">
+      <div class="sub-label"><span class="dot"></span>实际运用</div>
+      <div class="example-box">
+        <div class="example-box-header"><span class="icon">▸</span><h4>为什么短视频容易停不下来？</h4></div>
+        <div class="example-box-body">
+          <p class="analysis">核心机制是行为回路设计：</p>
+          <ul class="bullet-list">
+            <li><strong>高频奖励</strong>——每 15 秒就有一次新的刺激</li>
+            <li><strong>不确定反馈</strong>——你不知道下一条是无聊还是惊喜</li>
+            <li><strong>多巴胺强化</strong>——期待感比获得感更让人上瘾</li>
+          </ul>
+          <p class="analysis" style="margin-top:0.5rem;">本质与赌博机制相同：可变比率强化（variable ratio reinforcement）。心理学看的是行为回路，而非"意志力不够"。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- ═══ 06 CS ═══ -->
+  <section class="discipline c-cs" id="cs">
+    <div class="disc-header">
+      <span class="disc-number">06 / 09</span>
+      <h2 class="disc-title">计算机科学：信息与复杂度</h2>
+    </div>
+    <div class="disc-subtitle">
+      核心问题是：如何用有限资源处理信息。
+      <span class="disc-quote">"所有抽象的本质，是隐藏复杂性、暴露接口。"</span>
+    </div>
+
+    <div class="sub-section">
+      <div class="sub-label"><span class="dot"></span>核心模型</div>
+      <div class="core-grid">
+        <div class="core-tag">算法复杂度（大O）</div>
+        <div class="core-tag">分层抽象</div>
+        <div class="core-tag">分治法</div>
+        <div class="core-tag">有限状态机</div>
+        <div class="core-tag">数据结构</div>
+        <div class="core-tag">自动化</div>
+      </div>
+    </div>
+
+    <div class="sub-section">
+      <div class="sub-label"><span class="dot"></span>分析方法</div>
+      <div class="method-list">
+        <div class="method-item">
+          <h4><span class="num">01</span> 分层</h4>
+          <p>复杂系统必须拆层：硬件 → 操作系统 → 网络 → 应用。每层封装细节、暴露接口。</p>
+        </div>
+        <div class="method-item">
+          <h4><span class="num">02</span> 时间/空间复杂度</h4>
+          <p>重点不是"现在快不快"，而是<strong>规模扩大后是否崩溃</strong>。O(n²) 在小数据没问题，在大数据就是灾难。</p>
+        </div>
+        <div class="method-item">
+          <h4><span class="num">03</span> 输入输出分析</h4>
+          <p>垃圾输入 → 垃圾输出。系统再精妙，输入数据有问题，结果就不可信。</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="sub-section">
+      <div class="sub-label"><span class="dot"></span>实际运用</div>
+      <div class="example-box">
+        <div class="example-box-header"><span class="icon">▸</span><h4>为什么数据库加索引会快？</h4></div>
+        <div class="example-box-body">
+          <p class="analysis">本质是从"全表扫描"变成"建立结构化路径"：</p>
+          <div class="comparison-row">
+            <div class="comparison-card"><h5>没有索引</h5><p>翻整本书找一个关键词——O(n) 线性扫描。</p></div>
+            <div class="comparison-card"><h5>有了索引</h5><p>直接查目录定位页码——O(log n) 对数查找。</p></div>
+          </div>
+          <div class="key-point">计算机科学的精髓：用好的数据结构改变问题的复杂度等级。</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- ═══ 07 CYBERNETICS ═══ -->
+  <section class="discipline c-cybernetics" id="cybernetics">
+    <div class="disc-header">
+      <span class="disc-number">07 / 09</span>
+      <h2 class="disc-title">控制论：反馈系统</h2>
+    </div>
+    <div class="disc-subtitle">
+      非常核心但常被忽视的跨学科模型。世界的大量系统都符合"输入 → 输出 → 反馈"结构。
+      <span class="disc-quote">"理解反馈，就理解了大部分系统行为。"</span>
+    </div>
+
+    <div class="sub-section">
+      <div class="sub-label"><span class="dot"></span>核心模型</div>
+      <div class="core-grid">
+        <div class="core-tag">正反馈回路</div>
+        <div class="core-tag">负反馈回路</div>
+        <div class="core-tag">延迟效应</div>
+        <div class="core-tag">系统稳定性</div>
+        <div class="core-tag">自调节</div>
+      </div>
+    </div>
+
+    <div class="sub-section">
+      <div class="sub-label"><span class="dot"></span>分析方法</div>
+      <div class="method-list">
+        <div class="method-item">
+          <h4><span class="num">01</span> 正反馈：越变越强</h4>
+          <p>初始的微小变化被放大，形成滚雪球效应。</p>
+          <div class="ex-label">例子</div>
+          <div class="example">财富集中（钱生钱）、网络传播（爆款越爆）、雪崩（一点点雪引发山崩）。</div>
+        </div>
+        <div class="method-item">
+          <h4><span class="num">02</span> 负反馈：维持稳定</h4>
+          <p>偏差越大，纠偏力量越强，系统趋向目标值。</p>
+          <div class="ex-label">例子</div>
+          <div class="example">体温调节（热了出汗、冷了发抖）、血糖调控、巡航定速系统。</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sub-section">
+      <div class="sub-label"><span class="dot"></span>实际运用</div>
+      <div class="example-box">
+        <div class="example-box-header"><span class="icon">▸</span><h4>减肥为什么会遇到平台期？</h4></div>
+        <div class="example-box-body">
+          <p class="analysis">这是典型的<strong>负反馈稳定系统</strong>——身体发现能量下降后，自动启动反制：</p>
+          <ul class="bullet-list">
+            <li><strong>降低基础代谢</strong>——减少静息能量消耗</li>
+            <li><strong>提高饥饿信号</strong>——胃饥饿素上升，让你更想吃</li>
+            <li><strong>降低 NEAT</strong>——非运动性热量消耗下降（你不知不觉动得更少了）</li>
+          </ul>
+          <div class="key-point">身体不是"不想配合你"，而是在执行一个维持体重稳定的负反馈程序。平台期 = 反馈系统在对抗你的干预。</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- ═══ 08 SYSTEMS ═══ -->
+  <section class="discipline c-systems" id="systems">
+    <div class="disc-header">
+      <span class="disc-number">08 / 09</span>
+      <h2 class="disc-title">系统论：整体大于局部</h2>
+    </div>
+    <div class="disc-subtitle">
+      复杂系统不能只看单点，因为存在耦合、延迟和连锁反应。
+      <span class="disc-quote">"局部最优 ≠ 全局最优。"</span>
+    </div>
+
+    <div class="sub-section">
+      <div class="sub-label"><span class="dot"></span>核心模型</div>
+      <div class="core-grid">
+        <div class="core-tag">涌现</div>
+        <div class="core-tag">耦合</div>
+        <div class="core-tag">延迟效应</div>
+        <div class="core-tag">非线性</div>
+        <div class="core-tag">关键节点</div>
+        <div class="core-tag">诱导需求</div>
+      </div>
+    </div>
+
+    <div class="sub-section">
+      <div class="sub-label"><span class="dot"></span>分析方法</div>
+      <div class="method-list">
+        <div class="method-item">
+          <h4><span class="num">01</span> 找关键节点</h4>
+          <p>少数节点决定整体。帕累托法则在系统中无处不在——20% 的节点承担 80% 的连接。</p>
+        </div>
+        <div class="method-item">
+          <h4><span class="num">02</span> 看延迟效应</h4>
+          <p>很多问题的因果之间有巨大时间差。今天的教育政策，20 年后才看到人才结构的变化。</p>
+        </div>
+        <div class="method-item">
+          <h4><span class="num">03</span> 防止局部优化</h4>
+          <p>优化某个部门可能损害整体。把客服部门裁员降成本 → 服务变差 → 客户流失 → 总收入下降。</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="sub-section">
+      <div class="sub-label"><span class="dot"></span>实际运用</div>
+      <div class="example-box">
+        <div class="example-box-header"><span class="icon">▸</span><h4>为什么城市修路反而更堵？</h4></div>
+        <div class="example-box-body">
+          <p class="analysis">增加道路后的连锁反应：</p>
+          <ul class="bullet-list">
+            <li><strong>更多人选择开车</strong>——之前坐地铁的人觉得"路宽了可以开车"</li>
+            <li><strong>新需求出现</strong>——原本不来的车流涌入</li>
+            <li><strong>系统重新平衡</strong>——拥堵回到修路前的水平，甚至更差</li>
+          </ul>
+          <div class="key-point">这叫"诱导需求"（Induced Demand）。你不能只改一个变量，因为系统会重新调整所有变量。</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- ═══ 09 STATISTICS ═══ -->
+  <section class="discipline c-stats" id="stats">
+    <div class="disc-header">
+      <span class="disc-number">09 / 09</span>
+      <h2 class="disc-title">统计学：从噪声中提取规律</h2>
+    </div>
+    <div class="disc-subtitle">
+      现实充满随机性。统计学的核心：概率、分布、不确定性。
+      <span class="disc-quote">"没有统计学素养的人，在现代社会等于不会识字。"</span>
+    </div>
+
+    <div class="sub-section">
+      <div class="sub-label"><span class="dot"></span>核心模型</div>
+      <div class="core-grid">
+        <div class="core-tag">正态分布</div>
+        <div class="core-tag">贝叶斯定理</div>
+        <div class="core-tag">大数定律</div>
+        <div class="core-tag">相关 ≠ 因果</div>
+        <div class="core-tag">幸存者偏差</div>
+        <div class="core-tag">回归均值</div>
+      </div>
+    </div>
+
+    <div class="sub-section">
+      <div class="sub-label"><span class="dot"></span>分析方法</div>
+      <div class="method-list">
+        <div class="method-item">
+          <h4><span class="num">01</span> 区分信号和噪声</h4>
+          <p>一次结果不重要，看长期分布。单次涨跌是噪声，长期趋势才是信号。</p>
+        </div>
+        <div class="method-item">
+          <h4><span class="num">02</span> 防止误判因果</h4>
+          <p>相关 ≠ 因果。冰淇淋销量和溺水率高度相关，但两者都是"夏天"导致的。</p>
+        </div>
+        <div class="method-item">
+          <h4><span class="num">03</span> 看样本偏差</h4>
+          <p>很多"结论"只是样本有问题。只采访成功创业者 → 得出"辍学更容易成功"的荒谬结论。</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="sub-section">
+      <div class="sub-label"><span class="dot"></span>实际运用</div>
+      <div class="example-box">
+        <div class="example-box-header"><span class="icon">▸</span><h4>健身补剂真的有效吗？</h4></div>
+        <div class="example-box-body">
+          <p class="analysis">统计学会问一系列关键问题：</p>
+          <ul class="bullet-list">
+            <li><strong>对照组</strong>——有没有不服用补剂的对照？</li>
+            <li><strong>样本量</strong>——只有 15 个人的试验不可信</li>
+            <li><strong>安慰剂</strong>——吃糖丸的人觉得自己也变强了？</li>
+            <li><strong>显著性</strong>——p 值是多少？差异是真的还是随机波动？</li>
+            <li><strong>个体差异</strong>——平均有效 ≠ 对你有效</li>
+          </ul>
+          <div class="key-point">统计学的精髓：不看个案，看分布；不凭直觉，凭概率；不信巧合，追问因果。</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- ═══ CONSOLIDATED ═══ -->
+  <section class="consolidated" id="consolidated">
+    <h2>跨学科综合分析</h2>
+    <p class="cons-sub">高手同时调用多把"手术刀"，从不同角度切割同一个问题。</p>
+
+    <div class="sub-section">
+      <div class="sub-label" style="color:var(--accent)"><span class="dot" style="background:var(--accent)"></span>综合案例：为什么很多人减肥失败？</div>
+      <div class="lens-grid">
+        <div class="lens-card c-physics"><h5>物理学</h5><div class="lens-word">约束</div><p>热量守恒是硬约束——摄入 > 消耗，体重必然增加。没有捷径。</p></div>
+        <div class="lens-card c-biology"><h5>生物学</h5><div class="lens-word">适应</div><p>身体降低基础代谢、提高饥饿激素、优先储存脂肪——进化让你"节能"。</p></div>
+        <div class="lens-card c-psychology"><h5>心理学</h5><div class="lens-word">行为</div><p>奖励机制导致暴食——压力大时高糖食物带来即时多巴胺，理性决策退居二线。</p></div>
+        <div class="lens-card c-economics"><h5>经济学</h5><div class="lens-word">激励</div><p>高热量食品便宜又方便——炸鸡 10 分钟送到，健康沙拉要 40 块。机会成本失衡。</p></div>
+        <div class="lens-card c-systems"><h5>系统论</h5><div class="lens-word">连锁</div><p>睡眠差 → 食欲增加 → 更难运动 → 体重上升 → 睡眠更差……恶性循环。</p></div>
+        <div class="lens-card c-cybernetics"><h5>控制论</h5><div class="lens-word">反馈</div><p>减重触发负反馈——身体降低代谢、增强饥饿信号，把体重拉回"设定点"。</p></div>
+        <div class="lens-card c-engineering"><h5>工程学</h5><div class="lens-word">权衡</div><p>极端节食方案不可持续——工程思维要求方案必须"可长期运行"，而非短期暴烈。</p></div>
+        <div class="lens-card c-stats"><h5>统计学</h5><div class="lens-word">概率</div><p>个体差异巨大——基因、代谢率、肠道菌群都不同，"一个月瘦20斤"对大多数人是噪声。</p></div>
+      </div>
+
+      <div class="conclusion-box">
+        <h2>结论</h2>
+        <p>
+          减肥失败不是因为"意志力不够"——这是单维度的错误归因。真正的原因是<strong>物理学的约束</strong>、<strong>生物学的对抗</strong>、<strong>心理学的劫持</strong>、<strong>经济学的失衡</strong>、<strong>系统的恶性循环</strong>和<strong>反馈机制的反制</strong>同时作用。只有同时用多把手术刀分析，才能找到真正可行的方案。
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ FOOTER ═══ -->
+  <div class="footer">
+    <p>
+      核心不在于记住模型的名称，而在于面对问题时，<br>
+      能调用对应的<span class="highlight">镜片</span>去聚焦分析。
+    </p>
+  </div>
+
+</div>
+
+<script>
+  // Scroll-triggered fade in
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.06, rootMargin: '0px 0px -30px 0px' });
+
+  document.querySelectorAll('.discipline, .consolidated').forEach(el => observer.observe(el));
+
+  // Nav highlight on scroll
+  const navLinks = document.querySelectorAll('.nav a[href^="#"]');
+  const navObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const id = entry.target.id;
+        navLinks.forEach(link => {
+          link.style.color = link.getAttribute('href') === '#' + id ? 'var(--accent)' : '';
+        });
+      }
+    });
+  }, { threshold: 0.3 });
+
+  document.querySelectorAll('[id]').forEach(s => { if (s.classList.contains('discipline') || s.classList.contains('consolidated')) navObserver.observe(s); });
+</script>
+
+</body>
+</html>

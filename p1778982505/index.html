@@ -1,0 +1,1088 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>"张力"的软化效果 — 语言腐败的判定</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Mono:wght@300;400&family=Noto+Serif+SC:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0c0a09;
+    --bg-warm: #141110;
+    --surface: #1c1917;
+    --surface-raised: #292524;
+    --accent-red: #ef4444;
+    --accent-red-dim: #991b1b;
+    --accent-amber: #f59e0b;
+    --accent-amber-dim: #92400e;
+    --accent-teal: #2dd4bf;
+    --text-primary: #fafaf9;
+    --text-secondary: #d6d3d1;
+    --text-muted: #78716c;
+    --border: rgba(255,255,255,0.06);
+    --border-warm: rgba(245,158,11,0.12);
+    --glow-red: rgba(239,68,68,0.08);
+    --glow-amber: rgba(245,158,11,0.06);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text-primary);
+    font-family: 'Noto Serif SC', serif;
+    font-size: 17px;
+    line-height: 1.85;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+    opacity: 0.025;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  ::-webkit-scrollbar { width: 5px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--surface-raised); border-radius: 3px; }
+
+  .container {
+    max-width: 880px;
+    margin: 0 auto;
+    padding: 0 2rem;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ===== HERO ===== */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    position: relative;
+    padding: 4rem 2rem;
+  }
+
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: 20%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 600px;
+    height: 600px;
+    border-radius: 50%;
+    background: radial-gradient(circle, var(--glow-red), transparent 70%);
+    pointer-events: none;
+    animation: pulse-slow 8s ease infinite;
+  }
+
+  .hero-meta {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 3rem;
+    animation: fadeDown 0.8s ease forwards;
+    opacity: 0;
+  }
+
+  .hero-title {
+    font-family: 'Noto Serif SC', serif;
+    font-weight: 900;
+    font-size: clamp(2.8rem, 7vw, 5rem);
+    line-height: 1.15;
+    margin-bottom: 0.3rem;
+    animation: fadeUp 1s ease forwards;
+    animation-delay: 0.15s;
+    opacity: 0;
+  }
+
+  .hero-title .quote-mark {
+    font-family: 'Instrument Serif', serif;
+    font-weight: 400;
+    font-style: italic;
+    color: var(--accent-red);
+    opacity: 0.7;
+  }
+
+  .hero-title .underline-word {
+    position: relative;
+    display: inline-block;
+  }
+
+  .hero-title .underline-word::after {
+    content: '';
+    position: absolute;
+    bottom: 0.08em;
+    left: -4%;
+    width: 108%;
+    height: 0.12em;
+    background: var(--accent-red);
+    opacity: 0.25;
+    border-radius: 2px;
+  }
+
+  .hero-sub {
+    font-size: clamp(1.1rem, 2.5vw, 1.4rem);
+    font-weight: 300;
+    color: var(--text-secondary);
+    margin-top: 2rem;
+    max-width: 600px;
+    animation: fadeUp 1s ease forwards;
+    animation-delay: 0.35s;
+    opacity: 0;
+  }
+
+  .hero-sub strong {
+    color: var(--accent-red);
+    font-weight: 600;
+  }
+
+  .hero-divider {
+    width: 60px;
+    height: 3px;
+    background: var(--accent-red);
+    opacity: 0.4;
+    margin: 3rem auto 0;
+    animation: fadeUp 1s ease forwards;
+    animation-delay: 0.5s;
+    opacity: 0;
+  }
+
+  .hero-scroll {
+    position: absolute;
+    bottom: 2.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    color: var(--text-muted);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    animation: bounce 2.5s ease infinite;
+    opacity: 0;
+    animation-delay: 1s, 1s;
+  }
+
+  .hero-scroll::after {
+    content: '';
+    display: block;
+    width: 1px;
+    height: 32px;
+    background: linear-gradient(to bottom, var(--text-muted), transparent);
+    margin: 0.5rem auto 0;
+  }
+
+  /* ===== SECTION STYLING ===== */
+  section {
+    padding: 5rem 0;
+    position: relative;
+  }
+
+  .section-num {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    color: var(--accent-red);
+    opacity: 0.5;
+    margin-bottom: 0.8rem;
+    display: block;
+  }
+
+  .section-title {
+    font-family: 'Noto Serif SC', serif;
+    font-weight: 700;
+    font-size: clamp(1.6rem, 3.5vw, 2.2rem);
+    line-height: 1.35;
+    margin-bottom: 0.8rem;
+  }
+
+  .section-desc {
+    color: var(--text-muted);
+    font-size: 0.95rem;
+    font-weight: 300;
+    max-width: 600px;
+    margin-bottom: 3rem;
+  }
+
+  /* ===== DIAGRAM: SOFTENING CASCADE ===== */
+  .cascade-diagram {
+    margin: 3rem 0;
+    position: relative;
+  }
+
+  .cascade-diagram svg {
+    width: 100%;
+    display: block;
+    border-radius: 16px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+  }
+
+  /* ===== COMPARISON TABLE ===== */
+  .comparison-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 2rem 0;
+    font-size: 0.92rem;
+  }
+
+  .comparison-table thead th {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    padding: 1rem 1.2rem;
+    text-align: left;
+    border-bottom: 2px solid var(--border);
+    font-weight: 400;
+  }
+
+  .comparison-table tbody td {
+    padding: 1rem 1.2rem;
+    border-bottom: 1px solid var(--border);
+    color: var(--text-secondary);
+    vertical-align: top;
+  }
+
+  .comparison-table tbody tr:last-child td {
+    border-bottom: none;
+  }
+
+  .comparison-table tbody tr.highlight-row {
+    background: rgba(239,68,68,0.04);
+  }
+
+  .comparison-table tbody tr.highlight-row td {
+    color: var(--text-primary);
+    font-weight: 600;
+    border-bottom: 2px solid rgba(239,68,68,0.2);
+    border-top: 2px solid rgba(239,68,68,0.2);
+  }
+
+  .comparison-table .word-cell {
+    font-weight: 700;
+    font-size: 1rem;
+  }
+
+  .comparison-table .word-cell.red { color: var(--accent-red); }
+
+  .strength-bar {
+    display: inline-flex;
+    gap: 3px;
+    align-items: center;
+  }
+
+  .strength-bar .bar {
+    width: 18px;
+    height: 6px;
+    border-radius: 2px;
+    background: var(--surface-raised);
+  }
+
+  .strength-bar .bar.filled { background: var(--accent-amber); }
+  .strength-bar .bar.filled.weak { background: var(--text-muted); opacity: 0.4; }
+  .strength-bar .bar.filled.strong { background: var(--accent-red); }
+
+  .tag {
+    display: inline-block;
+    padding: 0.15rem 0.55rem;
+    border-radius: 4px;
+    font-size: 0.78rem;
+    font-weight: 600;
+  }
+
+  .tag.red { background: rgba(239,68,68,0.1); color: var(--accent-red); }
+  .tag.amber { background: rgba(245,158,11,0.1); color: var(--accent-amber); }
+  .tag.muted { background: rgba(120,113,108,0.1); color: var(--text-muted); }
+
+  /* ===== INSIGHT CARDS ===== */
+  .insight-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 2.2rem;
+    margin: 2rem 0;
+    position: relative;
+    overflow: hidden;
+    opacity: 0;
+    animation: fadeUp 0.7s ease forwards;
+  }
+
+  .insight-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+  }
+
+  .insight-card.red::before { background: var(--accent-red); }
+  .insight-card.amber::before { background: var(--accent-amber); }
+  .insight-card.teal::before { background: var(--accent-teal); }
+
+  .insight-card .card-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 0.8rem;
+  }
+
+  .insight-card.red .card-label { color: var(--accent-red); }
+  .insight-card.amber .card-label { color: var(--accent-amber); }
+  .insight-card.teal .card-label { color: var(--accent-teal); }
+
+  .insight-card h3 {
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin-bottom: 0.8rem;
+  }
+
+  .insight-card p {
+    color: var(--text-secondary);
+    font-weight: 300;
+    line-height: 1.8;
+  }
+
+  /* ===== FLOW DIAGRAM ===== */
+  .flow-wrapper {
+    margin: 2.5rem 0;
+    border-radius: 14px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    background: var(--surface);
+  }
+
+  .flow-wrapper svg {
+    width: 100%;
+    display: block;
+  }
+
+  /* ===== VERDICT BOX ===== */
+  .verdict-box {
+    background: linear-gradient(135deg, rgba(239,68,68,0.06), rgba(239,68,68,0.02));
+    border: 1px solid rgba(239,68,68,0.15);
+    border-radius: 16px;
+    padding: 2.5rem 3rem;
+    margin: 3rem 0;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .verdict-box::before {
+    content: '';
+    position: absolute;
+    top: -60%;
+    right: -15%;
+    width: 350px;
+    height: 350px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(239,68,68,0.06), transparent 70%);
+    pointer-events: none;
+  }
+
+  .verdict-box .verdict-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--accent-red);
+    margin-bottom: 1rem;
+  }
+
+  .verdict-box h3 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    line-height: 1.4;
+    margin-bottom: 1.5rem;
+    position: relative;
+  }
+
+  .verdict-box h3 em {
+    font-family: 'Instrument Serif', serif;
+    font-style: italic;
+    color: var(--accent-red);
+  }
+
+  .verdict-list {
+    list-style: none;
+    padding: 0;
+    position: relative;
+  }
+
+  .verdict-list li {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.8rem;
+    margin-bottom: 0.8rem;
+    color: var(--text-secondary);
+    font-weight: 300;
+  }
+
+  .verdict-list li .num {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--accent-red);
+    opacity: 0.5;
+    min-width: 1.2rem;
+    padding-top: 0.15rem;
+  }
+
+  /* ===== RENAME TABLE ===== */
+  .rename-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1rem;
+    margin: 2rem 0;
+  }
+
+  .rename-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.6rem;
+    opacity: 0;
+    animation: fadeUp 0.6s ease forwards;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .rename-card:nth-child(1) { animation-delay: 0.05s; }
+  .rename-card:nth-child(2) { animation-delay: 0.15s; }
+  .rename-card:nth-child(3) { animation-delay: 0.25s; }
+  .rename-card:nth-child(4) { animation-delay: 0.35s; }
+
+  .rename-card .rc-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.68rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 0.6rem;
+  }
+
+  .rename-card .rc-word {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--accent-amber);
+    margin-bottom: 0.4rem;
+  }
+
+  .rename-card .rc-desc {
+    font-size: 0.88rem;
+    color: var(--text-secondary);
+    font-weight: 300;
+    line-height: 1.6;
+  }
+
+  .rename-card::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent-amber), transparent);
+    opacity: 0.3;
+  }
+
+  /* ===== CRITERIA TABLE ===== */
+  .criteria-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 2rem 0;
+    font-size: 0.92rem;
+  }
+
+  .criteria-table thead th {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    padding: 1rem 1.2rem;
+    text-align: left;
+    border-bottom: 2px solid var(--border);
+    font-weight: 400;
+  }
+
+  .criteria-table tbody td {
+    padding: 1rem 1.2rem;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+
+  .criteria-table tbody tr:last-child td {
+    border-bottom: none;
+  }
+
+  .criteria-table .check {
+    color: var(--accent-red);
+    font-weight: 700;
+  }
+
+  .criteria-table .desc {
+    color: var(--text-secondary);
+    font-weight: 300;
+  }
+
+  /* ===== QUOTE BLOCK ===== */
+  .quote-block {
+    border-left: 3px solid var(--accent-amber);
+    padding: 1.5rem 2rem;
+    margin: 2.5rem 0;
+    background: rgba(245,158,11,0.03);
+    border-radius: 0 10px 10px 0;
+  }
+
+  .quote-block p {
+    font-size: 1.1rem;
+    font-weight: 600;
+    line-height: 1.6;
+    color: var(--text-primary);
+  }
+
+  .quote-block .attr {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-top: 0.8rem;
+    letter-spacing: 0.05em;
+  }
+
+  /* ===== ANALYSIS FLOW ===== */
+  .analysis-flow {
+    margin: 2.5rem 0;
+    position: relative;
+  }
+
+  .flow-step {
+    display: flex;
+    gap: 1.5rem;
+    margin-bottom: 0;
+    position: relative;
+  }
+
+  .flow-step .step-line {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 32px;
+    flex-shrink: 0;
+  }
+
+  .flow-step .step-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    border: 2px solid var(--accent-red);
+    background: var(--bg);
+    flex-shrink: 0;
+    margin-top: 0.5rem;
+    position: relative;
+    z-index: 1;
+  }
+
+  .flow-step .step-connector {
+    width: 1px;
+    flex: 1;
+    background: rgba(239,68,68,0.15);
+    min-height: 20px;
+  }
+
+  .flow-step .step-content {
+    padding-bottom: 2rem;
+    flex: 1;
+  }
+
+  .flow-step .step-content h4 {
+    font-size: 0.95rem;
+    font-weight: 700;
+    margin-bottom: 0.3rem;
+  }
+
+  .flow-step .step-content p {
+    font-size: 0.88rem;
+    color: var(--text-secondary);
+    font-weight: 300;
+  }
+
+  /* ===== CENTER VISUAL ===== */
+  .center-visual {
+    text-align: center;
+    margin: 3rem 0;
+  }
+
+  .center-visual svg {
+    max-width: 100%;
+    display: inline-block;
+  }
+
+  /* ===== FOOTER ===== */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 3rem 0;
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    font-family: 'DM Mono', monospace;
+    letter-spacing: 0.05em;
+  }
+
+  /* ===== ANIMATIONS ===== */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes fadeDown {
+    from { opacity: 0; transform: translateY(-12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes bounce {
+    0%, 100% { transform: translateX(-50%) translateY(0); opacity: 0.4; }
+    50% { transform: translateX(-50%) translateY(6px); opacity: 0.7; }
+  }
+
+  @keyframes pulse-slow {
+    0%, 100% { opacity: 0.3; }
+    50% { opacity: 0.6; }
+  }
+
+  @keyframes strikethrough {
+    from { width: 0; }
+    to { width: 100%; }
+  }
+
+  /* ===== RESPONSIVE ===== */
+  @media (max-width: 768px) {
+    .container { padding: 0 1.2rem; }
+    section { padding: 3.5rem 0; }
+    .verdict-box { padding: 2rem 1.5rem; }
+    .comparison-table { font-size: 0.82rem; }
+    .comparison-table thead th,
+    .comparison-table tbody td { padding: 0.7rem 0.8rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ============================== HERO ============================== -->
+<section class="hero">
+  <div class="hero-meta">语言分析 · 话语政治 · 批判写作</div>
+  <h1 class="hero-title">
+    <span class="quote-mark">"</span><span class="underline-word">张力</span><span class="quote-mark">"</span>的<br>软化效果
+  </h1>
+  <p class="hero-sub">
+    当一个中性词替代了道德判断，它完成的不是"客观分析"，<br>而是<strong>对权力的配合</strong>。
+  </p>
+  <div class="hero-divider"></div>
+  <div class="hero-scroll">scroll</div>
+</section>
+
+<!-- ============================== CASCADE VISUAL ============================== -->
+<section>
+  <div class="container">
+    <span class="section-num">01 — 替代表述的强度梯度</span>
+    <h2 class="section-title">从"欺骗"到"张力"：<br>一个词如何吞掉道德判断</h2>
+    <p class="section-desc">每一个替代表述都在降低批判强度，最终"张力"完成全部遮蔽。</p>
+
+    <div class="cascade-diagram">
+      <svg viewBox="0 0 880 420" style="background: var(--surface);">
+        <defs>
+          <linearGradient id="fadeRed" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stop-color="#ef4444" stop-opacity="0.6"/>
+            <stop offset="100%" stop-color="#ef4444" stop-opacity="0.08"/>
+          </linearGradient>
+          <linearGradient id="fadeAmber" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stop-color="#f59e0b" stop-opacity="0.4"/>
+            <stop offset="100%" stop-color="#f59e0b" stop-opacity="0.05"/>
+          </linearGradient>
+          <filter id="softGlow">
+            <feGaussianBlur stdDeviation="6" result="blur"/>
+            <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+        </defs>
+
+        <!-- Title -->
+        <text x="60" y="40" fill="#78716c" font-family="DM Mono" font-size="10" letter-spacing="2">SOFTENING CASCADE — 强度递减模型</text>
+
+        <!-- Row 1: 虚伪 -->
+        <rect x="40" y="65" width="170" height="60" rx="8" fill="rgba(239,68,68,0.08)" stroke="rgba(239,68,68,0.2)" stroke-width="1"/>
+        <text x="125" y="93" text-anchor="middle" fill="#fafaf9" font-family="Noto Serif SC" font-size="17" font-weight="700">虚伪</text>
+        <text x="125" y="113" text-anchor="middle" fill="#ef4444" font-family="DM Mono" font-size="9">明确否定 · 强</text>
+
+        <!-- Strength bar row 1 -->
+        <rect x="230" y="82" width="28" height="8" rx="2" fill="#ef4444"/>
+        <rect x="262" y="82" width="28" height="8" rx="2" fill="#ef4444"/>
+        <rect x="294" y="82" width="28" height="8" rx="2" fill="#ef4444"/>
+        <rect x="326" y="82" width="28" height="8" rx="2" fill="#ef4444" opacity="0.5"/>
+        <rect x="358" y="82" width="28" height="8" rx="2" fill="#292524"/>
+
+        <!-- Arrow -->
+        <text x="410" y="100" fill="#78716c" font-family="DM Mono" font-size="16" text-anchor="middle">→</text>
+        <text x="410" y="85" fill="#78716c" font-family="DM Mono" font-size="8" text-anchor="middle">稀释</text>
+
+        <!-- Effect label 1 -->
+        <rect x="440" y="75" width="160" height="38" rx="6" fill="rgba(239,68,68,0.04)" stroke="rgba(239,68,68,0.08)" stroke-width="1"/>
+        <text x="520" y="98" text-anchor="middle" fill="#78716c" font-family="Noto Serif SC" font-size="11">消除道德定性</text>
+
+        <!-- Row 2: 欺骗 -->
+        <rect x="40" y="140" width="170" height="60" rx="8" fill="rgba(239,68,68,0.06)" stroke="rgba(239,68,68,0.15)" stroke-width="1"/>
+        <text x="125" y="168" text-anchor="middle" fill="#fafaf9" font-family="Noto Serif SC" font-size="17" font-weight="700">欺骗</text>
+        <text x="125" y="188" text-anchor="middle" fill="#ef4444" font-family="DM Mono" font-size="9" opacity="0.7">明确否定 · 强</text>
+
+        <rect x="230" y="157" width="28" height="8" rx="2" fill="#ef4444"/>
+        <rect x="262" y="157" width="28" height="8" rx="2" fill="#ef4444"/>
+        <rect x="294" y="157" width="28" height="8" rx="2" fill="#ef4444"/>
+        <rect x="326" y="157" width="28" height="8" rx="2" fill="#292524"/>
+        <rect x="358" y="157" width="28" height="8" rx="2" fill="#292524"/>
+
+        <text x="410" y="175" fill="#78716c" font-family="DM Mono" font-size="16" text-anchor="middle">→</text>
+
+        <rect x="440" y="150" width="160" height="38" rx="6" fill="rgba(239,68,68,0.04)" stroke="rgba(239,68,68,0.08)" stroke-width="1"/>
+        <text x="520" y="173" text-anchor="middle" fill="#78716c" font-family="Noto Serif SC" font-size="11">去道德化</text>
+
+        <!-- Row 3: 冲突 -->
+        <rect x="40" y="215" width="170" height="60" rx="8" fill="rgba(245,158,11,0.06)" stroke="rgba(245,158,11,0.12)" stroke-width="1"/>
+        <text x="125" y="243" text-anchor="middle" fill="#fafaf9" font-family="Noto Serif SC" font-size="17" font-weight="700">冲突</text>
+        <text x="125" y="263" text-anchor="middle" fill="#f59e0b" font-family="DM Mono" font-size="9" opacity="0.7">暗示对立 · 中</text>
+
+        <rect x="230" y="232" width="28" height="8" rx="2" fill="#f59e0b" opacity="0.6"/>
+        <rect x="262" y="232" width="28" height="8" rx="2" fill="#f59e0b" opacity="0.4"/>
+        <rect x="294" y="232" width="28" height="8" rx="2" fill="#292524"/>
+        <rect x="326" y="232" width="28" height="8" rx="2" fill="#292524"/>
+        <rect x="358" y="232" width="28" height="8" rx="2" fill="#292524"/>
+
+        <text x="410" y="250" fill="#78716c" font-family="DM Mono" font-size="16" text-anchor="middle">→</text>
+
+        <rect x="440" y="225" width="160" height="38" rx="6" fill="rgba(245,158,11,0.04)" stroke="rgba(245,158,11,0.08)" stroke-width="1"/>
+        <text x="520" y="248" text-anchor="middle" fill="#78716c" font-family="Noto Serif SC" font-size="11">掩盖单向剥夺</text>
+
+        <!-- Row 4: 矛盾 -->
+        <rect x="40" y="290" width="170" height="60" rx="8" fill="rgba(120,113,108,0.06)" stroke="rgba(120,113,108,0.12)" stroke-width="1"/>
+        <text x="125" y="318" text-anchor="middle" fill="#fafaf9" font-family="Noto Serif SC" font-size="17" font-weight="700">矛盾</text>
+        <text x="125" y="338" text-anchor="middle" fill="#78716c" font-family="DM Mono" font-size="9">暗示需解决 · 中</text>
+
+        <rect x="230" y="307" width="28" height="8" rx="2" fill="#78716c" opacity="0.3"/>
+        <rect x="262" y="307" width="28" height="8" rx="2" fill="#292524"/>
+        <rect x="294" y="307" width="28" height="8" rx="2" fill="#292524"/>
+        <rect x="326" y="307" width="28" height="8" rx="2" fill="#292524"/>
+        <rect x="358" y="307" width="28" height="8" rx="2" fill="#292524"/>
+
+        <text x="410" y="325" fill="#78716c" font-family="DM Mono" font-size="16" text-anchor="middle">→</text>
+
+        <rect x="440" y="300" width="160" height="38" rx="6" fill="rgba(120,113,108,0.04)" stroke="rgba(120,113,108,0.08)" stroke-width="1"/>
+        <text x="520" y="323" text-anchor="middle" fill="#78716c" font-family="Noto Serif SC" font-size="11">稀释紧迫性</text>
+
+        <!-- ROW 5: 张力 (THE TARGET) -->
+        <rect x="40" y="365" width="170" height="45" rx="8" fill="rgba(239,68,68,0.12)" stroke="rgba(239,68,68,0.3)" stroke-width="2" filter="url(#softGlow)"/>
+        <text x="125" y="392" text-anchor="middle" fill="#ef4444" font-family="Noto Serif SC" font-size="18" font-weight="900">张力</text>
+
+        <rect x="230" y="378" width="28" height="8" rx="2" fill="#292524"/>
+        <rect x="262" y="378" width="28" height="8" rx="2" fill="#292524"/>
+        <rect x="294" y="378" width="28" height="8" rx="2" fill="#292524"/>
+        <rect x="326" y="378" width="28" height="8" rx="2" fill="#292524"/>
+        <rect x="358" y="378" width="28" height="8" rx="2" fill="#292524"/>
+
+        <text x="410" y="392" fill="#ef4444" font-family="DM Mono" font-size="18" text-anchor="middle">→</text>
+
+        <!-- Final effect: ALL -->
+        <rect x="440" y="360" width="160" height="50" rx="8" fill="rgba(239,68,68,0.08)" stroke="rgba(239,68,68,0.2)" stroke-width="1.5"/>
+        <text x="520" y="382" text-anchor="middle" fill="#ef4444" font-family="Noto Serif SC" font-size="12" font-weight="700">上述全部被遮蔽</text>
+        <text x="520" y="400" text-anchor="middle" fill="#78716c" font-family="DM Mono" font-size="9">ALL EFFECTS CONCEALED</text>
+
+        <!-- Right side: implications -->
+        <line x1="630" y1="65" x2="630" y2="400" stroke="rgba(239,68,68,0.08)" stroke-width="1" stroke-dasharray="4 4"/>
+
+        <text x="650" y="85" fill="#78716c" font-family="DM Mono" font-size="9" letter-spacing="1">"张力"暗示：</text>
+
+        <text x="650" y="115" fill="#d6d3d1" font-family="Noto Serif SC" font-size="12" font-weight="300">双方力量对等</text>
+        <text x="650" y="155" fill="#d6d3d1" font-family="Noto Serif SC" font-size="12" font-weight="300">互相拉扯</text>
+        <text x="650" y="195" fill="#d6d3d1" font-family="Noto Serif SC" font-size="12" font-weight="300">可长期共存</text>
+        <text x="650" y="235" fill="#d6d3d1" font-family="Noto Serif SC" font-size="12" font-weight="300">无所谓对错</text>
+
+        <line x1="640" y1="260" x2="840" y2="260" stroke="rgba(239,68,68,0.15)" stroke-width="1"/>
+
+        <text x="650" y="290" fill="#ef4444" font-family="DM Mono" font-size="9" letter-spacing="1">实际情况：</text>
+
+        <text x="650" y="320" fill="#fafaf9" font-family="Noto Serif SC" font-size="12" font-weight="700">话语是工具</text>
+        <text x="650" y="350" fill="#fafaf9" font-family="Noto Serif SC" font-size="12" font-weight="700">机制是目的</text>
+        <text x="650" y="380" fill="#fafaf9" font-family="Noto Serif SC" font-size="12" font-weight="700">消费者是被剥夺方</text>
+
+        <!-- Bottom label -->
+        <text x="650" y="405" fill="#ef4444" font-family="Noto Serif SC" font-size="11" font-weight="600">非"拉扯"——是单向支配</text>
+      </svg>
+    </div>
+  </div>
+</section>
+
+<!-- ============================== LANGUAGE CORRUPTION CRITERIA ============================== -->
+<section>
+  <div class="container">
+    <span class="section-num">02 — 语言腐败的判定标准</span>
+    <h2 class="section-title">四条判据，全部命中</h2>
+    <p class="section-desc">是否构成语言腐败，取决于是否同时满足以下条件。</p>
+
+    <table class="criteria-table">
+      <thead>
+        <tr>
+          <th style="width: 35%;">判据</th>
+          <th style="width: 15%;">判定</th>
+          <th>本案例情况</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="color: var(--text-primary); font-weight: 600;">是否掩盖权力不对等</td>
+          <td class="check">是 ✓</td>
+          <td class="desc">政府/国企 vs 消费者，非"对等博弈"</td>
+        </tr>
+        <tr>
+          <td style="color: var(--text-primary); font-weight: 600;">是否消除道德判断</td>
+          <td class="check">是 ✓</td>
+          <td class="desc">"欺骗/虚伪"被转化为"平衡难题"</td>
+        </tr>
+        <tr>
+          <td style="color: var(--text-primary); font-weight: 600;">是否将政治问题技术化</td>
+          <td class="check">是 ✓</td>
+          <td class="desc">利益分配问题变成"机制设计问题"</td>
+        </tr>
+        <tr>
+          <td style="color: var(--text-primary); font-weight: 600;">是否让受害者难以命名侵害</td>
+          <td class="check">是 ✓</td>
+          <td class="desc">"张力"让消费者无法定位"谁在剥夺我"</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="verdict-box">
+      <div class="verdict-label">结论</div>
+      <h3>用"张力"描述核心冲突，<em>确实是语言腐败</em>。</h3>
+      <p style="color: var(--text-secondary); font-weight: 300; margin-bottom: 1.5rem;">它完成的四项工作：</p>
+      <ul class="verdict-list">
+        <li><span class="num">01</span> 将"欺骗"降级为"平衡"</li>
+        <li><span class="num">02</span> 将"掠夺"降级为"取舍"</li>
+        <li><span class="num">03</span> 将"权力压迫"降级为"目标分歧"</li>
+        <li><span class="num">04</span> 让批判者获得"学术严肃感"，同时削弱批判效力</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ============================== ACADEMIC TRAP ============================== -->
+<section>
+  <div class="container">
+    <span class="section-num">03 — 学术话语的结构性陷阱</span>
+    <h2 class="section-title">"中性化"如何配合权力</h2>
+    <p class="section-desc">学术训练要求"客观分析"，但客观本身并非无立场。</p>
+
+    <div class="flow-wrapper">
+      <svg viewBox="0 0 880 260" style="background: var(--surface);">
+        <defs>
+          <marker id="arrowG" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+            <path d="M0,0 L8,3 L0,6" fill="none" stroke="#78716c" stroke-width="1"/>
+          </marker>
+        </defs>
+
+        <text x="60" y="30" fill="#78716c" font-family="DM Mono" font-size="9" letter-spacing="2">ACADEMIC NEUTRALIZATION PIPELINE</text>
+
+        <!-- Step boxes -->
+        <rect x="30" y="55" width="130" height="48" rx="8" fill="rgba(245,158,11,0.06)" stroke="rgba(245,158,11,0.15)"/>
+        <text x="95" y="78" text-anchor="middle" fill="#f59e0b" font-family="Noto Serif SC" font-size="12" font-weight="600">学术话语</text>
+        <text x="95" y="95" text-anchor="middle" fill="#78716c" font-family="DM Mono" font-size="8">ACADEMIC DISCOURSE</text>
+
+        <line x1="165" y1="79" x2="195" y2="79" stroke="#78716c" stroke-width="1" marker-end="url(#arrowG)"/>
+
+        <rect x="200" y="55" width="140" height="48" rx="8" fill="rgba(245,158,11,0.06)" stroke="rgba(245,158,11,0.15)"/>
+        <text x="270" y="78" text-anchor="middle" fill="#f59e0b" font-family="Noto Serif SC" font-size="12" font-weight="600">追求价值中立</text>
+        <text x="270" y="95" text-anchor="middle" fill="#78716c" font-family="DM Mono" font-size="8">VALUE NEUTRALITY</text>
+
+        <line x1="345" y1="79" x2="375" y2="79" stroke="#78716c" stroke-width="1" marker-end="url(#arrowG)"/>
+
+        <rect x="380" y="55" width="155" height="48" rx="8" fill="rgba(245,158,11,0.06)" stroke="rgba(245,158,11,0.15)"/>
+        <text x="457" y="78" text-anchor="middle" fill="#f59e0b" font-family="Noto Serif SC" font-size="12" font-weight="600">中性词替代道德词</text>
+        <text x="457" y="95" text-anchor="middle" fill="#78716c" font-family="DM Mono" font-size="8">NEUTRAL SUBSTITUTION</text>
+
+        <line x1="540" y1="79" x2="570" y2="79" stroke="#78716c" stroke-width="1" marker-end="url(#arrowG)"/>
+
+        <rect x="575" y="55" width="155" height="48" rx="8" fill="rgba(239,68,68,0.06)" stroke="rgba(239,68,68,0.15)"/>
+        <text x="652" y="78" text-anchor="middle" fill="#ef4444" font-family="Noto Serif SC" font-size="12" font-weight="600">批判强度被稀释</text>
+        <text x="652" y="95" text-anchor="middle" fill="#78716c" font-family="DM Mono" font-size="8">CRITICAL DILUTION</text>
+
+        <line x1="735" y1="79" x2="765" y2="79" stroke="#78716c" stroke-width="1" marker-end="url(#arrowG)"/>
+
+        <rect x="770" y="55" width="80" height="48" rx="8" fill="rgba(239,68,68,0.1)" stroke="rgba(239,68,68,0.25)"/>
+        <text x="810" y="78" text-anchor="middle" fill="#ef4444" font-family="Noto Serif SC" font-size="12" font-weight="700">配合</text>
+        <text x="810" y="95" text-anchor="middle" fill="#ef4444" font-family="DM Mono" font-size="8">POWER</text>
+
+        <!-- Bottom insight -->
+        <line x1="30" y1="135" x2="850" y2="135" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
+
+        <text x="60" y="170" fill="#d6d3d1" font-family="Noto Serif SC" font-size="13" font-weight="600">关键区分：</text>
+
+        <!-- Two scenarios -->
+        <rect x="30" y="190" width="400" height="50" rx="8" fill="rgba(45,212,191,0.04)" stroke="rgba(45,212,191,0.1)"/>
+        <text x="50" y="213" fill="#2dd4bf" font-family="DM Mono" font-size="9" letter-spacing="1">POWER-EQUAL CONTEXT</text>
+        <text x="50" y="230" fill="#d6d3d1" font-family="Noto Serif SC" font-size="12" font-weight="300">权力对等时 → 中性表述是真正的分析工具</text>
+
+        <rect x="450" y="190" width="400" height="50" rx="8" fill="rgba(239,68,68,0.04)" stroke="rgba(239,68,68,0.1)"/>
+        <text x="470" y="213" fill="#ef4444" font-family="DM Mono" font-size="9" letter-spacing="1">POWER-UNEQUAL CONTEXT</text>
+        <text x="470" y="230" fill="#d6d3d1" font-family="Noto Serif SC" font-size="12" font-weight="300">权力不对等时 → 是对弱者的二次剥夺</text>
+      </svg>
+    </div>
+
+    <div class="quote-block">
+      <p>语言不仅是描述现实的工具，也是利益分配的工具。中性化本身就是一种立场。</p>
+      <div class="attr">—— 语言政治的基本原理</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================== MORE ACCURATE NAMES ============================== -->
+<section>
+  <div class="container">
+    <span class="section-num">04 — 更准确的表述</span>
+    <h2 class="section-title">给事物以真名</h2>
+    <p class="section-desc">在不同层面上，应该使用的准确命名。</p>
+
+    <div class="rename-grid">
+      <div class="rename-card">
+        <div class="rc-label">话语与机制的关系</div>
+        <div class="rc-word">结构性虚伪</div>
+        <div class="rc-desc">刻意设计的话语-实践分离，不是"没做好"，而是"说的和做的本就不同"</div>
+      </div>
+      <div class="rename-card">
+        <div class="rc-label">机制的实质</div>
+        <div class="rc-word">制度性欺骗</div>
+        <div class="rc-desc">通过复杂规则掩盖单向利益转移，机制本身就是欺骗的载体</div>
+      </div>
+      <div class="rename-card">
+        <div class="rc-label">对消费者的后果</div>
+        <div class="rc-word">剥夺</div>
+        <div class="rc-desc">非博弈、非拉扯——是确定的、可计算的损失</div>
+      </div>
+      <div class="rename-card">
+        <div class="rc-label">政府的角色</div>
+        <div class="rc-word">俘获</div>
+        <div class="rc-desc">监管者与被监管者利益合一，"裁判"与"选手"同属一方</div>
+      </div>
+    </div>
+
+    <!-- Visual: old word crossed out → new word -->
+    <div class="center-visual">
+      <svg viewBox="0 0 700 160" style="max-width: 700px;">
+        <defs>
+          <marker id="arrowR" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+            <path d="M0,0 L10,3.5 L0,7" fill="none" stroke="#ef4444" stroke-width="1.5"/>
+          </marker>
+        </defs>
+
+        <!-- Old word -->
+        <text x="100" y="70" text-anchor="middle" fill="#78716c" font-family="Noto Serif SC" font-size="32" font-weight="900" opacity="0.3">张力</text>
+        <line x1="50" y1="70" x2="150" y2="70" stroke="#ef4444" stroke-width="2" opacity="0.5"/>
+        <line x1="50" y1="72" x2="150" y2="72" stroke="#ef4444" stroke-width="1" opacity="0.3"/>
+
+        <!-- Arrow -->
+        <line x1="180" y1="70" x2="280" y2="70" stroke="#ef4444" stroke-width="1.5" marker-end="url(#arrowR)"/>
+
+        <!-- New words -->
+        <text x="380" y="40" text-anchor="middle" fill="#f59e0b" font-family="Noto Serif SC" font-size="16" font-weight="700">结构性虚伪</text>
+        <text x="530" y="40" text-anchor="middle" fill="#f59e0b" font-family="Noto Serif SC" font-size="16" font-weight="700">制度性欺骗</text>
+        <text x="380" y="80" text-anchor="middle" fill="#ef4444" font-family="Noto Serif SC" font-size="16" font-weight="700">剥夺</text>
+        <text x="530" y="80" text-anchor="middle" fill="#ef4444" font-family="Noto Serif SC" font-size="16" font-weight="700">俘获</text>
+
+        <!-- Subtitle -->
+        <text x="450" y="120" text-anchor="middle" fill="#78716c" font-family="DM Mono" font-size="10" letter-spacing="1">ACCURATE NAMING REPLACES NEUTRAL EVASION</text>
+
+        <!-- Bracket -->
+        <path d="M290 30 L310 30 L310 95 L290 95" fill="none" stroke="rgba(245,158,11,0.3)" stroke-width="1"/>
+      </svg>
+    </div>
+  </div>
+</section>
+
+<!-- ============================== THE MECHANISM ============================== -->
+<section>
+  <div class="container">
+    <span class="section-num">05 — 语言腐败的运作机制</span>
+    <h2 class="section-title">"张力"完成了什么工作</h2>
+
+    <div class="insight-card red" style="animation-delay: 0.1s;">
+      <div class="card-label">核心遮蔽</div>
+      <h3>"张力"暗示双方力量对等</h3>
+      <p>在"张力"的隐喻中，存在两个方向的力——好像两边都在拉扯。但实际上，消费者没有任何反向施力的能力。话语是工具，机制是目的，消费者是确定的被剥夺方。这不是"拉扯"，是单向支配。</p>
+    </div>
+
+    <div class="insight-card amber" style="animation-delay: 0.2s;">
+      <div class="card-label">道德消解</div>
+      <h3>"张力"取消了谁该负责的追问</h3>
+      <p>说"存在张力"，就像说"天气有温差"——它是描述性的、不指向任何行动者。但"欺骗"和"虚伪"天然指向主体：谁在欺骗？谁在虚伪？"张力"把这个追问消解掉了。</p>
+    </div>
+
+    <div class="insight-card teal" style="animation-delay: 0.3s;">
+      <div class="card-label">批判者的自缚</div>
+      <h3>"学术严肃感"的代价</h3>
+      <p>使用"张力"的写作者，往往是为了显得"客观""不偏激"。但这种自我审查的效果是：批判者用中性词汇获得了学术合法性，同时交出了批判的刀刃。你获得了被引征的机会，但失去了改变现实的可能。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================== FINAL STATEMENT ============================== -->
+<section>
+  <div class="container">
+    <div class="verdict-box" style="background: linear-gradient(135deg, rgba(239,68,68,0.08), rgba(245,158,11,0.04)); border-color: rgba(239,68,68,0.2);">
+      <div class="verdict-label">直接回答</div>
+      <h3 style="font-size: 1.6rem;">用"张力"描述核心冲突，<em>确实是语言腐败</em>。</h3>
+      <p style="color: var(--text-secondary); font-weight: 300; line-height: 1.9; margin-bottom: 2rem; position: relative;">
+        这正是语言腐败的经典形态：<strong style="color: var(--text-primary);">用复杂的中性词汇，掩盖简单的道德事实。</strong>
+      </p>
+
+      <div style="position: relative; padding: 1.5rem; background: rgba(239,68,68,0.04); border-radius: 10px; border: 1px solid rgba(239,68,68,0.1);">
+        <p style="color: var(--text-secondary); font-weight: 300; font-size: 0.95rem; line-height: 1.8;">
+          这暴露了分析性写作中一个常见陷阱——在追求"客观"的名义下，实际上完成了对权力的配合。<br><br>
+          <strong style="color: var(--accent-amber);">感谢这个追问。</strong> 它证明了一点：对语言的审视不是吹毛求疵，而是抵抗的一部分。
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <p>"张力"的软化效果 · 语言腐败的判定</p>
+    <p style="opacity: 0.4; margin-top: 0.5rem;">对语言的审视是抵抗的一部分</p>
+  </div>
+</footer>
+
+<script>
+// Intersection Observer for scroll-triggered animations
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.style.animationPlayState = 'running';
+    }
+  });
+}, { threshold: 0.1 });
+
+document.querySelectorAll('.insight-card, .rename-card').forEach(el => {
+  el.style.animationPlayState = 'paused';
+  observer.observe(el);
+});
+</script>
+</body>
+</html>

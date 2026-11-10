@@ -1,0 +1,1661 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>中国路面常见车型全景图</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Source+Serif+4:ital,wght@0,300;0,400;0,600;0,700;1,300&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #08080a;
+  --surface: #101215;
+  --card: #161a1f;
+  --card-hover: #1c2128;
+  --accent: #d4a853;
+  --accent-dim: rgba(212,168,83,0.12);
+  --accent-glow: rgba(212,168,83,0.08);
+  --red: #e85454;
+  --green: #4eca8b;
+  --blue: #4e9de8;
+  --cyan: #4ecae8;
+  --orange: #e8a24e;
+  --text: #f0ece4;
+  --text-2: #9e978c;
+  --text-3: #5a554d;
+  --border: rgba(255,255,255,0.05);
+  --font-display: 'Playfair Display', serif;
+  --font-body: 'Source Serif 4', serif;
+  --font-mono: 'JetBrains Mono', monospace;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html { scroll-behavior: smooth; font-size: 16px; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-weight: 300;
+  line-height: 1.85;
+  overflow-x: hidden;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
+  opacity: 0.02;
+  pointer-events: none;
+  z-index: 9999;
+}
+
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 3px; }
+
+/* ── Animations ── */
+@keyframes fadeUp { from { opacity: 0; transform: translateY(35px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes barGrow { from { width: 0; } }
+@keyframes countUp { from { opacity: 0; transform: scale(0.8); } to { opacity: 1; transform: scale(1); } }
+@keyframes slideRight { from { opacity: 0; transform: translateX(-40px); } to { opacity: 1; transform: translateX(0); } }
+@keyframes pulse { 0%,100% { opacity: 0.6; } 50% { opacity: 1; } }
+@keyframes drive { from { transform: translateX(-120%); } to { transform: translateX(120vw); } }
+
+.reveal { opacity: 0; transform: translateY(35px); transition: opacity 0.7s ease, transform 0.7s ease; }
+.reveal.visible { opacity: 1; transform: translateY(0); }
+.reveal-d1 { transition-delay: 0.1s; }
+.reveal-d2 { transition-delay: 0.2s; }
+.reveal-d3 { transition-delay: 0.3s; }
+.reveal-d4 { transition-delay: 0.4s; }
+.reveal-d5 { transition-delay: 0.5s; }
+
+/* ── Hero ── */
+.hero {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: linear-gradient(180deg, #08080a 0%, #0c0e12 40%, #0a0c10 100%);
+}
+
+.hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at 20% 80%, rgba(212,168,83,0.06) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 20%, rgba(78,157,232,0.04) 0%, transparent 50%);
+}
+
+.hero-road {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 180px;
+  overflow: hidden;
+}
+
+.road-line {
+  position: absolute;
+  bottom: 40px;
+  height: 2px;
+  background: var(--text-3);
+  opacity: 0.15;
+}
+.road-line.top { bottom: 80px; width: 100%; }
+.road-line.bottom { bottom: 40px; width: 100%; }
+
+.road-dash {
+  position: absolute;
+  bottom: 58px;
+  width: 40px;
+  height: 3px;
+  background: rgba(212,168,83,0.2);
+  border-radius: 2px;
+  animation: drive 8s linear infinite;
+}
+
+.hero-content {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  padding: 2rem;
+  max-width: 900px;
+  animation: fadeIn 1.2s ease;
+}
+
+.hero-label {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 1.5rem;
+  opacity: 0.7;
+}
+
+.hero-title {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: clamp(2.2rem, 5.5vw, 4rem);
+  line-height: 1.15;
+  margin-bottom: 1.5rem;
+  color: var(--text);
+}
+
+.hero-title em {
+  font-style: italic;
+  color: var(--accent);
+}
+
+.hero-sub {
+  font-size: clamp(0.95rem, 1.8vw, 1.15rem);
+  color: var(--text-2);
+  max-width: 650px;
+  margin: 0 auto 2.5rem;
+  line-height: 1.9;
+}
+
+.hero-stats {
+  display: flex;
+  justify-content: center;
+  gap: 3rem;
+  flex-wrap: wrap;
+}
+
+.hero-stat {
+  text-align: center;
+}
+
+.hero-stat-num {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: 2.5rem;
+  color: var(--accent);
+  line-height: 1;
+}
+
+.hero-stat-label {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--text-3);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-top: 0.4rem;
+}
+
+.hero-scroll {
+  position: absolute;
+  bottom: 2.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2;
+  opacity: 0.3;
+  animation: pulse 2.5s ease-in-out infinite;
+}
+
+/* ── Section Common ── */
+.section { padding: 5rem 1.5rem; position: relative; }
+.section-inner { max-width: 1100px; margin: 0 auto; }
+
+.section-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--accent);
+  padding: 0.35rem 1rem;
+  border: 1px solid rgba(212,168,83,0.2);
+  border-radius: 100px;
+  background: var(--accent-dim);
+  margin-bottom: 1.2rem;
+}
+
+.section-title {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: clamp(1.6rem, 3.5vw, 2.5rem);
+  line-height: 1.25;
+  margin-bottom: 1rem;
+}
+
+.section-desc {
+  color: var(--text-2);
+  font-size: 1rem;
+  max-width: 600px;
+  line-height: 1.9;
+}
+
+.section-header { margin-bottom: 3rem; }
+
+.divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--border), transparent);
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+/* ── Camp Grid (Hero overview) ── */
+.camp-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.camp-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 1.5rem 1rem;
+  text-align: center;
+  transition: transform 0.3s, border-color 0.3s;
+}
+.camp-card:hover { transform: translateY(-4px); border-color: rgba(212,168,83,0.25); }
+
+.camp-icon { font-size: 2rem; margin-bottom: 0.6rem; }
+.camp-letter {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: var(--accent);
+  letter-spacing: 0.1em;
+  margin-bottom: 0.4rem;
+}
+.camp-name {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.95rem;
+  margin-bottom: 0.4rem;
+}
+.camp-cars {
+  font-size: 0.78rem;
+  color: var(--text-3);
+  line-height: 1.6;
+}
+.camp-user {
+  font-size: 0.72rem;
+  color: var(--text-2);
+  margin-top: 0.5rem;
+  font-style: italic;
+}
+
+/* ── Category Section ── */
+.cat-section {
+  border-top: 1px solid var(--border);
+}
+
+.cat-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 2rem;
+  margin-bottom: 2.5rem;
+  flex-wrap: wrap;
+}
+
+.cat-visual {
+  flex-shrink: 0;
+  width: 200px;
+  height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, rgba(212,168,83,0.04), transparent);
+  border: 1px solid rgba(212,168,83,0.08);
+  border-radius: 16px;
+}
+
+.cat-visual svg { width: 100%; height: 100%; }
+
+.cat-info { flex: 1; min-width: 280px; }
+
+.cat-letter-tag {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: var(--accent);
+  letter-spacing: 0.12em;
+  margin-bottom: 0.5rem;
+}
+
+.cat-title {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: clamp(1.3rem, 2.5vw, 1.8rem);
+  margin-bottom: 0.6rem;
+}
+
+.cat-subtitle {
+  color: var(--text-2);
+  font-size: 0.92rem;
+}
+
+/* ── Comparison Table ── */
+.comp-table-wrap {
+  overflow-x: auto;
+  margin: 2rem 0;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+}
+
+.comp-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+}
+
+.comp-table th {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent);
+  background: rgba(212,168,83,0.06);
+  padding: 0.9rem 1rem;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+
+.comp-table td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-2);
+  vertical-align: top;
+}
+
+.comp-table tr:last-child td { border-bottom: none; }
+
+.comp-table tr:hover td { background: rgba(255,255,255,0.02); }
+
+.comp-table .highlight-cell {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+/* ── Verdict Card ── */
+.verdict {
+  background: linear-gradient(135deg, rgba(212,168,83,0.06), rgba(212,168,83,0.02));
+  border: 1px solid rgba(212,168,83,0.12);
+  border-radius: 14px;
+  padding: 1.5rem 2rem;
+  margin: 2rem 0;
+  position: relative;
+  overflow: hidden;
+}
+
+.verdict::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 3px;
+  height: 100%;
+  background: var(--accent);
+}
+
+.verdict-label {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--accent);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 0.4rem;
+}
+
+.verdict-text {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  font-weight: 700;
+  line-height: 1.7;
+}
+
+/* ── Car Experience Cards ── */
+.exp-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.2rem;
+  margin: 2rem 0;
+}
+
+.exp-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 1.5rem;
+  transition: transform 0.3s, border-color 0.3s;
+  position: relative;
+  overflow: hidden;
+}
+.exp-card:hover { transform: translateY(-3px); border-color: rgba(212,168,83,0.2); }
+
+.exp-card-name {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.15rem;
+  margin-bottom: 0.8rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.exp-card-name .dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.exp-card p {
+  color: var(--text-2);
+  font-size: 0.88rem;
+  line-height: 1.8;
+}
+
+/* ── Bar Chart ── */
+.bar-chart {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  margin: 1.5rem 0;
+}
+
+.bar-item {
+  display: grid;
+  grid-template-columns: 90px 1fr 50px;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.bar-label {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--text-2);
+  text-align: right;
+  white-space: nowrap;
+}
+
+.bar-track {
+  height: 22px;
+  background: rgba(255,255,255,0.03);
+  border-radius: 6px;
+  overflow: hidden;
+  position: relative;
+}
+
+.bar-fill {
+  height: 100%;
+  border-radius: 6px;
+  transition: width 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+}
+
+.bar-fill.gold { background: linear-gradient(90deg, rgba(212,168,83,0.6), rgba(212,168,83,0.3)); }
+.bar-fill.silver { background: linear-gradient(90deg, rgba(180,180,180,0.4), rgba(180,180,180,0.2)); }
+.bar-fill.bronze { background: linear-gradient(90deg, rgba(205,127,50,0.4), rgba(205,127,50,0.2)); }
+.bar-fill.red { background: linear-gradient(90deg, rgba(232,84,84,0.5), rgba(232,84,84,0.2)); }
+.bar-fill.blue { background: linear-gradient(90deg, rgba(78,157,232,0.5), rgba(78,157,232,0.2)); }
+.bar-fill.green { background: linear-gradient(90deg, rgba(78,202,139,0.5), rgba(78,202,139,0.2)); }
+.bar-fill.cyan { background: linear-gradient(90deg, rgba(78,202,232,0.4), rgba(78,202,232,0.2)); }
+
+.bar-value {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+/* ── Cost Table ── */
+.cost-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.2rem;
+  margin: 2rem 0;
+}
+
+.cost-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 1.5rem;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+.cost-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+}
+
+.cost-card.best::before { background: var(--accent); }
+.cost-card.mid::before { background: var(--text-3); }
+.cost-card.worst::before { background: var(--red); }
+
+.cost-car {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.05rem;
+  margin-bottom: 1rem;
+}
+
+.cost-total {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+}
+.cost-card.best .cost-total { color: var(--accent); }
+.cost-card.mid .cost-total { color: var(--text-2); }
+.cost-card.worst .cost-total { color: var(--red); }
+
+.cost-label {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  color: var(--text-3);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 1rem;
+}
+
+.cost-breakdown {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  text-align: left;
+}
+
+.cost-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.8rem;
+  color: var(--text-3);
+}
+
+.cost-row-val { color: var(--text-2); font-family: var(--font-mono); font-size: 0.75rem; }
+
+/* ── Scene Cards ── */
+.scene-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.2rem;
+  margin: 2rem 0;
+}
+
+.scene-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 1.8rem;
+  transition: transform 0.3s, border-color 0.3s;
+}
+.scene-card:hover { transform: translateY(-3px); border-color: rgba(212,168,83,0.2); }
+
+.scene-title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1rem;
+  margin-bottom: 0.8rem;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.scene-title .scene-emoji { font-size: 1.2rem; }
+
+.scene-winner {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--accent);
+  background: var(--accent-dim);
+  display: inline-block;
+  padding: 0.3rem 0.8rem;
+  border-radius: 6px;
+  margin-bottom: 0.6rem;
+}
+
+.scene-reason {
+  font-size: 0.85rem;
+  color: var(--text-3);
+  line-height: 1.7;
+}
+
+/* ── One-liner Table ── */
+.oneliner-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1rem;
+  margin: 2rem 0;
+}
+
+.oneliner-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1.2rem 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  transition: transform 0.3s, border-color 0.3s;
+}
+.oneliner-card:hover { transform: translateX(6px); border-color: rgba(212,168,83,0.2); }
+
+.oneliner-car {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.95rem;
+  white-space: nowrap;
+  min-width: 80px;
+  color: var(--text);
+}
+
+.oneliner-quote {
+  font-size: 0.82rem;
+  color: var(--text-3);
+  font-style: italic;
+  border-left: 2px solid rgba(212,168,83,0.2);
+  padding-left: 0.8rem;
+}
+
+/* ── Footer ── */
+.footer {
+  text-align: center;
+  padding: 4rem 1.5rem;
+  border-top: 1px solid var(--border);
+}
+
+.footer-quote {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.3rem;
+  color: var(--text-2);
+  margin-bottom: 0.8rem;
+  line-height: 1.7;
+}
+
+.footer-sub {
+  font-size: 0.82rem;
+  color: var(--text-3);
+}
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+  .cat-header { flex-direction: column; }
+  .cat-visual { width: 100%; }
+  .hero-stats { gap: 1.5rem; }
+  .section { padding: 3.5rem 1rem; }
+  .bar-item { grid-template-columns: 70px 1fr 45px; }
+}
+
+/* ── Ranking tag ── */
+.rank-tag {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  margin-left: 0.4rem;
+  vertical-align: middle;
+}
+.rank-tag.first { background: rgba(212,168,83,0.15); color: var(--accent); }
+.rank-tag.last { background: rgba(232,84,84,0.12); color: var(--red); }
+
+/* ── Detail list ── */
+.detail-list {
+  list-style: none;
+  padding: 0;
+  margin: 1rem 0;
+}
+.detail-list li {
+  padding: 0.35rem 0;
+  font-size: 0.88rem;
+  color: var(--text-2);
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+.detail-list li::before {
+  content: '›';
+  color: var(--accent);
+  font-weight: 700;
+  flex-shrink: 0;
+  margin-top: 0.05rem;
+}
+
+/* ── Advantage comparison ── */
+.adv-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1rem;
+  margin: 1.5rem 0;
+}
+.adv-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1.3rem;
+  border-left: 3px solid transparent;
+}
+.adv-card.win { border-left-color: var(--green); }
+.adv-card.lose { border-left-color: var(--red); }
+.adv-card.draw { border-left-color: var(--text-3); }
+
+.adv-label {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 0.4rem;
+}
+.adv-card.win .adv-label { color: var(--green); }
+.adv-card.lose .adv-label { color: var(--red); }
+.adv-card.draw .adv-label { color: var(--text-3); }
+
+.adv-title { font-weight: 600; font-size: 0.95rem; margin-bottom: 0.3rem; }
+.adv-desc { font-size: 0.82rem; color: var(--text-3); line-height: 1.6; }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════ HERO ═══════════════ -->
+<section class="hero">
+  <div class="hero-road">
+    <div class="road-line top"></div>
+    <div class="road-line bottom"></div>
+    <div class="road-dash" style="animation-delay:0s;"></div>
+    <div class="road-dash" style="animation-delay:2.5s;"></div>
+    <div class="road-dash" style="animation-delay:5s;"></div>
+  </div>
+  <div class="hero-content">
+    <div class="hero-label">China Road Atlas · 2025</div>
+    <h1 class="hero-title">中国路面<br>常见车型<em>全景图</em></h1>
+    <p class="hero-sub">从 8 万国民家轿到 40 万豪华入门，用数据和体验拆解中国道路上最常见的每一台车。</p>
+    <div class="hero-stats">
+      <div class="hero-stat">
+        <div class="hero-stat-num">6</div>
+        <div class="hero-stat-label">大阵营</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-num">18</div>
+        <div class="hero-stat-label">核心车型</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-num">5-40</div>
+        <div class="hero-stat-label">万价格带</div>
+      </div>
+    </div>
+  </div>
+  <div class="hero-scroll">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--text-3)" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+  </div>
+</section>
+
+<!-- ═══════════════ OVERVIEW CAMPS ═══════════════ -->
+<section class="section" id="overview">
+  <div class="section-inner">
+    <div class="section-header reveal">
+      <div class="section-label">全景 · Overview</div>
+      <h2 class="section-title">六大阵营，覆盖 80% 路面</h2>
+      <p class="section-desc">根据销量数据，中国路面上最密集的车型可以分为六大阵营。每一类背后是不同的用户画像和消费逻辑。</p>
+    </div>
+    <div class="camp-grid">
+      <div class="camp-card reveal">
+        <div class="camp-icon">
+          <svg width="40" height="40" viewBox="0 0 40 40" fill="none"><rect x="5" y="18" width="30" height="10" rx="3" fill="rgba(212,168,83,0.2)" stroke="rgba(212,168,83,0.5)" stroke-width="1.2"/><circle cx="12" cy="28" r="4" fill="rgba(212,168,83,0.3)" stroke="rgba(212,168,83,0.5)" stroke-width="1"/><circle cx="28" cy="28" r="4" fill="rgba(212,168,83,0.3)" stroke="rgba(212,168,83,0.5)" stroke-width="1"/><path d="M10 18 Q12 10, 20 10 Q28 10, 30 18" fill="rgba(212,168,83,0.1)" stroke="rgba(212,168,83,0.4)" stroke-width="1"/></svg>
+        </div>
+        <div class="camp-letter">CAMP A</div>
+        <div class="camp-name">国民家轿</div>
+        <div class="camp-cars">轩逸 · 朗逸 · 卡罗拉</div>
+        <div class="camp-user">省心代步、家庭刚需</div>
+      </div>
+      <div class="camp-card reveal reveal-d1">
+        <div class="camp-icon">
+          <svg width="40" height="40" viewBox="0 0 40 40" fill="none"><rect x="5" y="18" width="30" height="10" rx="3" fill="rgba(78,202,139,0.2)" stroke="rgba(78,202,139,0.5)" stroke-width="1.2"/><circle cx="12" cy="28" r="4" fill="rgba(78,202,139,0.3)" stroke="rgba(78,202,139,0.5)" stroke-width="1"/><circle cx="28" cy="28" r="4" fill="rgba(78,202,139,0.3)" stroke="rgba(78,202,139,0.5)" stroke-width="1"/><path d="M10 18 Q12 10, 20 10 Q28 10, 30 18" fill="rgba(78,202,139,0.1)" stroke="rgba(78,202,139,0.4)" stroke-width="1"/><path d="M17 14 L20 8 L23 14" fill="none" stroke="rgba(78,202,139,0.5)" stroke-width="1" stroke-linecap="round"/></svg>
+        </div>
+        <div class="camp-letter">CAMP B</div>
+        <div class="camp-name">国产新贵</div>
+        <div class="camp-cars">秦PLUS · 海豚 · AION S</div>
+        <div class="camp-user">性价比、新能源尝鲜</div>
+      </div>
+      <div class="camp-card reveal reveal-d2">
+        <div class="camp-icon">
+          <svg width="40" height="40" viewBox="0 0 40 40" fill="none"><rect x="5" y="16" width="30" height="12" rx="3" fill="rgba(78,157,232,0.2)" stroke="rgba(78,157,232,0.5)" stroke-width="1.2"/><circle cx="12" cy="28" r="4" fill="rgba(78,157,232,0.3)" stroke="rgba(78,157,232,0.5)" stroke-width="1"/><circle cx="28" cy="28" r="4" fill="rgba(78,157,232,0.3)" stroke="rgba(78,157,232,0.5)" stroke-width="1"/><path d="M9 16 Q12 8, 20 8 Q28 8, 31 16" fill="rgba(78,157,232,0.1)" stroke="rgba(78,157,232,0.4)" stroke-width="1"/></svg>
+        </div>
+        <div class="camp-letter">CAMP C</div>
+        <div class="camp-name">德系中坚</div>
+        <div class="camp-cars">速腾 · 宝来 · 迈腾</div>
+        <div class="camp-user">品牌认知、质感偏好</div>
+      </div>
+      <div class="camp-card reveal reveal-d3">
+        <div class="camp-icon">
+          <svg width="40" height="40" viewBox="0 0 40 40" fill="none"><rect x="4" y="14" width="32" height="14" rx="4" fill="rgba(232,162,78,0.2)" stroke="rgba(232,162,78,0.5)" stroke-width="1.2"/><circle cx="12" cy="28" r="4.5" fill="rgba(232,162,78,0.3)" stroke="rgba(232,162,78,0.5)" stroke-width="1"/><circle cx="28" cy="28" r="4.5" fill="rgba(232,162,78,0.3)" stroke="rgba(232,162,78,0.5)" stroke-width="1"/><path d="M8 14 Q10 6, 20 6 Q30 6, 32 14" fill="rgba(232,162,78,0.1)" stroke="rgba(232,162,78,0.4)" stroke-width="1"/></svg>
+        </div>
+        <div class="camp-letter">CAMP D</div>
+        <div class="camp-name">日系 SUV</div>
+        <div class="camp-cars">CR-V · RAV4 · 逍客</div>
+        <div class="camp-user">家庭用车、空间需求</div>
+      </div>
+      <div class="camp-card reveal reveal-d4">
+        <div class="camp-icon">
+          <svg width="40" height="40" viewBox="0 0 40 40" fill="none"><rect x="3" y="13" width="34" height="16" rx="5" fill="rgba(232,84,84,0.15)" stroke="rgba(232,84,84,0.4)" stroke-width="1.2"/><circle cx="11" cy="29" r="5" fill="rgba(232,84,84,0.2)" stroke="rgba(232,84,84,0.4)" stroke-width="1"/><circle cx="29" cy="29" r="5" fill="rgba(232,84,84,0.2)" stroke="rgba(232,84,84,0.4)" stroke-width="1"/><path d="M7 13 Q10 4, 20 4 Q30 4, 33 13" fill="rgba(232,84,84,0.08)" stroke="rgba(232,84,84,0.3)" stroke-width="1"/></svg>
+        </div>
+        <div class="camp-letter">CAMP E</div>
+        <div class="camp-name">国产 SUV</div>
+        <div class="camp-cars">宋PLUS · H6 · CS75</div>
+        <div class="camp-user">大空间、高配置</div>
+      </div>
+      <div class="camp-card reveal reveal-d5">
+        <div class="camp-icon">
+          <svg width="40" height="40" viewBox="0 0 40 40" fill="none"><rect x="5" y="17" width="30" height="10" rx="3" fill="rgba(212,168,83,0.3)" stroke="rgba(212,168,83,0.7)" stroke-width="1.5"/><circle cx="12" cy="27" r="3.5" fill="rgba(212,168,83,0.4)" stroke="rgba(212,168,83,0.7)" stroke-width="1.2"/><circle cx="28" cy="27" r="3.5" fill="rgba(212,168,83,0.4)" stroke="rgba(212,168,83,0.7)" stroke-width="1.2"/><path d="M10 17 Q13 9, 20 8 Q27 9, 30 17" fill="rgba(212,168,83,0.15)" stroke="rgba(212,168,83,0.6)" stroke-width="1.2"/><line x1="18" y1="8" x2="22" y2="8" stroke="rgba(212,168,83,0.6)" stroke-width="1"/></svg>
+        </div>
+        <div class="camp-letter">CAMP F</div>
+        <div class="camp-name">豪华入门</div>
+        <div class="camp-cars">宝马3系 · A4L · C级</div>
+        <div class="camp-user">品牌、面子需求</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ═══════════════ CAMP A: 国民家轿 ═══════════════ -->
+<section class="section cat-section" id="camp-a">
+  <div class="section-inner">
+    <div class="cat-header reveal">
+      <div class="cat-visual">
+        <svg viewBox="0 0 200 120" fill="none">
+          <rect x="20" y="55" width="160" height="35" rx="8" fill="rgba(212,168,83,0.1)" stroke="rgba(212,168,83,0.4)" stroke-width="1.5"/>
+          <path d="M40 55 Q55 25, 100 22 Q145 25, 160 55" fill="rgba(212,168,83,0.06)" stroke="rgba(212,168,83,0.3)" stroke-width="1.2"/>
+          <circle cx="55" cy="90" r="12" fill="rgba(212,168,83,0.15)" stroke="rgba(212,168,83,0.4)" stroke-width="1.5"/>
+          <circle cx="55" cy="90" r="5" fill="rgba(212,168,83,0.25)"/>
+          <circle cx="145" cy="90" r="12" fill="rgba(212,168,83,0.15)" stroke="rgba(212,168,83,0.4)" stroke-width="1.5"/>
+          <circle cx="145" cy="90" r="5" fill="rgba(212,168,83,0.25)"/>
+          <line x1="68" y1="55" x2="68" y2="35" stroke="rgba(212,168,83,0.2)" stroke-width="1"/>
+          <line x1="132" y1="55" x2="132" y2="35" stroke="rgba(212,168,83,0.2)" stroke-width="1"/>
+          <rect x="70" y="30" width="60" height="25" rx="4" fill="rgba(212,168,83,0.04)" stroke="rgba(212,168,83,0.15)" stroke-width="0.8"/>
+        </svg>
+      </div>
+      <div class="cat-info">
+        <div class="cat-letter-tag">CAMP A · 国民家轿</div>
+        <h2 class="cat-title">轩逸 vs 朗逸 vs 卡罗拉</h2>
+        <p class="cat-subtitle">中国轿车销量榜常年前三，几乎每条路上都能看到。8-15 万价位，三种截然不同的"省心哲学"。</p>
+      </div>
+    </div>
+
+    <div class="comp-table-wrap reveal">
+      <table class="comp-table">
+        <thead>
+          <tr><th>对比项</th><th>轩逸</th><th>朗逸</th><th>卡罗拉</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>发动机</td><td>1.6L 自吸 122马力</td><td>1.5L 自吸 113马力</td><td>1.2T 116马力 / 1.8L混动</td></tr>
+          <tr><td>变速箱</td><td>CVT</td><td>6AT</td><td>CVT</td></tr>
+          <tr><td>0-100km/h</td><td>约12秒</td><td>约13秒</td><td>混动约10秒</td></tr>
+          <tr><td>油耗(L/百公里)</td><td>6.0-6.5</td><td>6.5-7.0</td><td class="highlight-cell">混动 4.0</td></tr>
+          <tr><td>后排空间</td><td class="highlight-cell">★★★★★ 极宽敞</td><td>★★★★ 宽敞</td><td>★★★ 中规中矩</td></tr>
+          <tr><td>座椅舒适度</td><td class="highlight-cell">★★★★★ 沙发厂</td><td>★★★ 偏硬</td><td>★★★ 中等</td></tr>
+          <tr><td>驾驶感</td><td>★★ 模糊松散</td><td>★★★ 中规中矩</td><td class="highlight-cell">★★★ 有韧性</td></tr>
+          <tr><td>保值率(3年)</td><td>约60%</td><td>约55%</td><td class="highlight-cell">约65%</td></tr>
+          <tr><td>新车价(万)</td><td>8-14</td><td>8-13</td><td>10-15</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="exp-grid reveal">
+      <div class="exp-card">
+        <div class="exp-card-name"><span class="dot" style="background:var(--green);"></span>轩逸</div>
+        <p>坐进去第一感觉是"沙发真软"，后排像小沙发，长途最舒服。但开起来像"开船"——转向模糊、底盘松散、急变道信心不足。</p>
+      </div>
+      <div class="exp-card">
+        <div class="exp-card-name"><span class="dot" style="background:var(--blue);"></span>朗逸</div>
+        <p>大众底盘调校功底在，高速稳定性比轩逸好一截。但内饰塑料感强，低配配置寒酸，纯粹是"大众标+代步"。</p>
+      </div>
+      <div class="exp-card">
+        <div class="exp-card-name"><span class="dot" style="background:var(--accent);"></span>卡罗拉</div>
+        <p>三台里开起来最"整"，底盘有整体感。但空间最小、隔音最差。混动版油耗是核心卖点——10年不用修。</p>
+      </div>
+    </div>
+
+    <div class="verdict reveal">
+      <div class="verdict-label">一句话</div>
+      <div class="verdict-text">轩逸赢在"坐"，朗逸赢在"开高速"，卡罗拉赢在"混动省油+不坏"</div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ═══════════════ CAMP B: 国产新贵 ═══════════════ -->
+<section class="section cat-section" id="camp-b">
+  <div class="section-inner">
+    <div class="cat-header reveal">
+      <div class="cat-visual">
+        <svg viewBox="0 0 200 120" fill="none">
+          <rect x="20" y="55" width="160" height="35" rx="8" fill="rgba(78,202,139,0.1)" stroke="rgba(78,202,139,0.4)" stroke-width="1.5"/>
+          <path d="M40 55 Q55 22, 100 18 Q145 22, 160 55" fill="rgba(78,202,139,0.06)" stroke="rgba(78,202,139,0.3)" stroke-width="1.2"/>
+          <circle cx="55" cy="90" r="12" fill="rgba(78,202,139,0.15)" stroke="rgba(78,202,139,0.4)" stroke-width="1.5"/>
+          <circle cx="55" cy="90" r="5" fill="rgba(78,202,139,0.25)"/>
+          <circle cx="145" cy="90" r="12" fill="rgba(78,202,139,0.15)" stroke="rgba(78,202,139,0.4)" stroke-width="1.5"/>
+          <circle cx="145" cy="90" r="5" fill="rgba(78,202,139,0.25)"/>
+          <!-- Lightning bolt for EV -->
+          <path d="M95 30 L100 20 L103 28 L108 16" stroke="rgba(78,202,139,0.6)" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div class="cat-info">
+        <div class="cat-letter-tag">CAMP B · 国产新贵</div>
+        <h2 class="cat-title">秦PLUS vs 海豚 vs AION S</h2>
+        <p class="cat-subtitle">新能源浪潮的直接受益者。7-16 万价位，三种新能源路径的典型代表。</p>
+      </div>
+    </div>
+
+    <div class="comp-table-wrap reveal">
+      <table class="comp-table">
+        <thead>
+          <tr><th>对比项</th><th>秦PLUS DM-i</th><th>海豚</th><th>AION S</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>动力形式</td><td>插电混动</td><td>纯电</td><td>纯电</td></tr>
+          <tr><td>动力参数</td><td>1.5L+电机 180马力</td><td>95/177马力</td><td>136/204马力</td></tr>
+          <tr><td>0-100km/h</td><td class="highlight-cell">7.3秒</td><td>10.9秒(低功)</td><td>7.9秒</td></tr>
+          <tr><td>能耗</td><td class="highlight-cell">亏电5.2L/百公里</td><td>11kWh/百公里</td><td>13kWh/百公里</td></tr>
+          <tr><td>续航</td><td>纯电55/120km+油</td><td>301-420km</td><td>410-510km</td></tr>
+          <tr><td>空间</td><td>★★★★</td><td>★★★ 小型车</td><td class="highlight-cell">★★★★ 接近B级</td></tr>
+          <tr><td>配置</td><td class="highlight-cell">★★★★★</td><td>★★★★</td><td>★★★★</td></tr>
+          <tr><td>新车价(万)</td><td class="highlight-cell">7.98-12.58</td><td>7.38-12.98</td><td>11-16</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="exp-grid reveal">
+      <div class="exp-card">
+        <div class="exp-card-name"><span class="dot" style="background:var(--green);"></span>秦PLUS</div>
+        <p>综合最均衡——"油电两用"没有焦虑。但底盘质感一般，过弯侧倾明显。本质是 8 万块的六边形战士。</p>
+      </div>
+      <div class="exp-card">
+        <div class="exp-card-name"><span class="dot" style="background:var(--cyan);"></span>海豚</div>
+        <p>城市代步神器——小巧灵活、停车方便、用车成本极低。但高速发飘、隔音差、空间仅够两人日常。</p>
+      </div>
+      <div class="exp-card">
+        <div class="exp-card-name"><span class="dot" style="background:var(--orange);"></span>AION S</div>
+        <p>网约车大量使用，耐用性和经济性被验证过。空间大、乘坐舒适，但品牌认知弱、保值率低。</p>
+      </div>
+    </div>
+
+    <div class="verdict reveal">
+      <div class="verdict-label">一句话</div>
+      <div class="verdict-text">秦PLUS 是"全能水桶车"，海豚是"城市精灵"，AION S 是"务实工具车"</div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ═══════════════ CAMP C: 德系中坚 ═══════════════ -->
+<section class="section cat-section" id="camp-c">
+  <div class="section-inner">
+    <div class="cat-header reveal">
+      <div class="cat-visual">
+        <svg viewBox="0 0 200 120" fill="none">
+          <rect x="15" y="50" width="170" height="38" rx="7" fill="rgba(78,157,232,0.1)" stroke="rgba(78,157,232,0.4)" stroke-width="1.5"/>
+          <path d="M35 50 Q50 18, 100 14 Q150 18, 165 50" fill="rgba(78,157,232,0.06)" stroke="rgba(78,157,232,0.3)" stroke-width="1.2"/>
+          <circle cx="52" cy="88" r="13" fill="rgba(78,157,232,0.15)" stroke="rgba(78,157,232,0.4)" stroke-width="1.5"/>
+          <circle cx="52" cy="88" r="5.5" fill="rgba(78,157,232,0.25)"/>
+          <circle cx="148" cy="88" r="13" fill="rgba(78,157,232,0.15)" stroke="rgba(78,157,232,0.4)" stroke-width="1.5"/>
+          <circle cx="148" cy="88" r="5.5" fill="rgba(78,157,232,0.25)"/>
+          <!-- Chrome bar for VW feel -->
+          <line x1="60" y1="50" x2="140" y2="50" stroke="rgba(78,157,232,0.25)" stroke-width="2"/>
+        </svg>
+      </div>
+      <div class="cat-info">
+        <div class="cat-letter-tag">CAMP C · 德系中坚</div>
+        <h2 class="cat-title">宝来 vs 速腾 vs 迈腾</h2>
+        <p class="cat-subtitle">大众在中国的产品力阶梯——从 9 万到 25 万，每多花 3 万，质感提升一个台阶。</p>
+      </div>
+    </div>
+
+    <div class="comp-table-wrap reveal">
+      <table class="comp-table">
+        <thead>
+          <tr><th>对比项</th><th>宝来</th><th>速腾</th><th>迈腾</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>定位</td><td>入门A级</td><td>A+级</td><td>B级</td></tr>
+          <tr><td>发动机</td><td>1.5L 113马力</td><td>1.4T 150马力</td><td class="highlight-cell">2.0T 186/220马力</td></tr>
+          <tr><td>0-100km/h</td><td>约13秒</td><td>约9秒</td><td class="highlight-cell">约8秒</td></tr>
+          <tr><td>底盘质感</td><td>★★★ 代步够用</td><td>★★★★ 紧致扎实</td><td class="highlight-cell">★★★★★ 高级感</td></tr>
+          <tr><td>高速稳定性</td><td>★★★</td><td>★★★★</td><td class="highlight-cell">★★★★★</td></tr>
+          <tr><td>隔音</td><td>★★★</td><td>★★★☆</td><td class="highlight-cell">★★★★</td></tr>
+          <tr><td>新车价(万)</td><td>9-13</td><td>12-17</td><td>18-25</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="exp-grid reveal">
+      <div class="exp-card">
+        <div class="exp-card-name"><span class="dot" style="background:var(--text-3);"></span>宝来</div>
+        <p>纯粹的"大众标+代步"，和朗逸几乎一样，选谁看价格和优惠。没有惊喜，也没有失望。</p>
+      </div>
+      <div class="exp-card">
+        <div class="exp-card-name"><span class="dot" style="background:var(--blue);"></span>速腾</div>
+        <p>比宝来/朗逸明显高一个档次——1.4T 动力充沛、底盘紧致、高速变道信心十足。"多花 3 万买质感"的典型。</p>
+      </div>
+      <div class="exp-card">
+        <div class="exp-card-name"><span class="dot" style="background:var(--accent);"></span>迈腾</div>
+        <p>进入"准 B 级"领域，2.0T 动力随叫随到、底盘厚重沉稳、隔音提升一个量级。20 万以内最有面子的 B 级车。</p>
+      </div>
+    </div>
+
+    <div class="verdict reveal">
+      <div class="verdict-label">一句话</div>
+      <div class="verdict-text">宝来是"能开"，速腾是"好开"，迈腾是"高级"</div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ═══════════════ CAMP D: 日系SUV ═══════════════ -->
+<section class="section cat-section" id="camp-d">
+  <div class="section-inner">
+    <div class="cat-header reveal">
+      <div class="cat-visual">
+        <svg viewBox="0 0 200 120" fill="none">
+          <rect x="10" y="42" width="180" height="42" rx="10" fill="rgba(232,162,78,0.1)" stroke="rgba(232,162,78,0.4)" stroke-width="1.5"/>
+          <path d="M30 42 Q50 10, 100 6 Q150 10, 170 42" fill="rgba(232,162,78,0.06)" stroke="rgba(232,162,78,0.3)" stroke-width="1.2"/>
+          <circle cx="50" cy="84" r="14" fill="rgba(232,162,78,0.15)" stroke="rgba(232,162,78,0.4)" stroke-width="1.5"/>
+          <circle cx="50" cy="84" r="6" fill="rgba(232,162,78,0.25)"/>
+          <circle cx="150" cy="84" r="14" fill="rgba(232,162,78,0.15)" stroke="rgba(232,162,78,0.4)" stroke-width="1.5"/>
+          <circle cx="150" cy="84" r="6" fill="rgba(232,162,78,0.25)"/>
+          <!-- Roof rack -->
+          <line x1="65" y1="12" x2="135" y2="12" stroke="rgba(232,162,78,0.25)" stroke-width="1.5"/>
+          <line x1="75" y1="12" x2="75" y2="8" stroke="rgba(232,162,78,0.2)" stroke-width="1"/>
+          <line x1="125" y1="12" x2="125" y2="8" stroke="rgba(232,162,78,0.2)" stroke-width="1"/>
+        </svg>
+      </div>
+      <div class="cat-info">
+        <div class="cat-letter-tag">CAMP D · 日系 SUV</div>
+        <h2 class="cat-title">逍客 vs CR-V vs RAV4</h2>
+        <p class="cat-subtitle">紧凑 SUV 市场的三极——便宜入门、空间为王、烂路能手。13-26 万价位。</p>
+      </div>
+    </div>
+
+    <div class="comp-table-wrap reveal">
+      <table class="comp-table">
+        <thead>
+          <tr><th>对比项</th><th>逍客</th><th>CR-V</th><th>RAV4</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>定位</td><td>紧凑入门</td><td>紧凑标杆</td><td>紧凑标杆</td></tr>
+          <tr><td>发动机</td><td>2.0L 151马力</td><td>1.5T 193马力/混动</td><td>2.0L 171马力/2.5L混动</td></tr>
+          <tr><td>油耗(百公里)</td><td>7.0-7.5</td><td class="highlight-cell">混动 5.0</td><td>混动 5.0</td></tr>
+          <tr><td>空间</td><td>★★★ 偏小</td><td class="highlight-cell">★★★★★ 同级最大</td><td>★★★★ 宽敞</td></tr>
+          <tr><td>通过性</td><td>★★★</td><td>★★★</td><td class="highlight-cell">★★★★ 四驱更好</td></tr>
+          <tr><td>保值率(3年)</td><td>约60%</td><td class="highlight-cell">约70%</td><td class="highlight-cell">约70%</td></tr>
+          <tr><td>新车价(万)</td><td class="highlight-cell">13-18</td><td>17-25</td><td>17-26</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="verdict reveal">
+      <div class="verdict-label">一句话</div>
+      <div class="verdict-text">逍客是"便宜的 SUV"，CR-V 是"空间最大的 SUV"，RAV4 是"最能跑烂路的城市 SUV"</div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ═══════════════ CAMP E: 国产SUV ═══════════════ -->
+<section class="section cat-section" id="camp-e">
+  <div class="section-inner">
+    <div class="cat-header reveal">
+      <div class="cat-visual">
+        <svg viewBox="0 0 200 120" fill="none">
+          <rect x="8" y="40" width="184" height="44" rx="12" fill="rgba(232,84,84,0.08)" stroke="rgba(232,84,84,0.35)" stroke-width="1.5"/>
+          <path d="M28 40 Q48 6, 100 3 Q152 6, 172 40" fill="rgba(232,84,84,0.04)" stroke="rgba(232,84,84,0.25)" stroke-width="1.2"/>
+          <circle cx="48" cy="84" r="15" fill="rgba(232,84,84,0.1)" stroke="rgba(232,84,84,0.35)" stroke-width="1.5"/>
+          <circle cx="48" cy="84" r="6.5" fill="rgba(232,84,84,0.2)"/>
+          <circle cx="152" cy="84" r="15" fill="rgba(232,84,84,0.1)" stroke="rgba(232,84,84,0.35)" stroke-width="1.5"/>
+          <circle cx="152" cy="84" r="6.5" fill="rgba(232,84,84,0.2)"/>
+          <!-- Chinese brand badge -->
+          <rect x="88" y="52" width="24" height="14" rx="3" fill="rgba(232,84,84,0.1)" stroke="rgba(232,84,84,0.25)" stroke-width="1"/>
+        </svg>
+      </div>
+      <div class="cat-info">
+        <div class="cat-letter-tag">CAMP E · 国产 SUV</div>
+        <h2 class="cat-title">哈弗H6 vs CS75 PLUS vs 宋PLUS DM-i</h2>
+        <p class="cat-subtitle">国产 SUV 的三张王牌——配置怪兽、性能猛兽、省油神兽。9-18 万价位。</p>
+      </div>
+    </div>
+
+    <div class="comp-table-wrap reveal">
+      <table class="comp-table">
+        <thead>
+          <tr><th>对比项</th><th>哈弗H6</th><th>CS75 PLUS</th><th>宋PLUS DM-i</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>动力</td><td>1.5T 150马力</td><td class="highlight-cell">2.0T 233马力</td><td>1.5L+电机 混动</td></tr>
+          <tr><td>0-100km/h</td><td>约10秒</td><td class="highlight-cell">2.0T 约7.5秒</td><td>约8秒</td></tr>
+          <tr><td>油耗(百公里)</td><td>8.0-9.0</td><td>7.5-9.0</td><td class="highlight-cell">亏电 5.0</td></tr>
+          <tr><td>配置</td><td>★★★★</td><td class="highlight-cell">★★★★★ 堆料最猛</td><td>★★★★</td></tr>
+          <tr><td>车机体验</td><td>★★★</td><td>★★★★</td><td class="highlight-cell">★★★★★ DiLink</td></tr>
+          <tr><td>保值率(3年)</td><td>约50%</td><td>约50%</td><td>约55%</td></tr>
+          <tr><td>新车价(万)</td><td>9-14</td><td>10-15</td><td>13-18</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="verdict reveal">
+      <div class="verdict-label">一句话</div>
+      <div class="verdict-text">H6 是"不会错的选择"，CS75 PLUS 是"配置最猛"，宋PLUS 是"最省油"</div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ═══════════════ CAMP F: 豪华入门 ═══════════════ -->
+<section class="section cat-section" id="camp-f">
+  <div class="section-inner">
+    <div class="cat-header reveal">
+      <div class="cat-visual">
+        <svg viewBox="0 0 200 120" fill="none">
+          <rect x="18" y="52" width="164" height="34" rx="6" fill="rgba(212,168,83,0.15)" stroke="rgba(212,168,83,0.55)" stroke-width="1.8"/>
+          <path d="M38 52 Q55 20, 100 16 Q145 20, 162 52" fill="rgba(212,168,83,0.08)" stroke="rgba(212,168,83,0.4)" stroke-width="1.4"/>
+          <circle cx="55" cy="86" r="12" fill="rgba(212,168,83,0.2)" stroke="rgba(212,168,83,0.55)" stroke-width="1.8"/>
+          <circle cx="55" cy="86" r="5" fill="rgba(212,168,83,0.35)"/>
+          <circle cx="145" cy="86" r="12" fill="rgba(212,168,83,0.2)" stroke="rgba(212,168,83,0.55)" stroke-width="1.8"/>
+          <circle cx="145" cy="86" r="5" fill="rgba(212,168,83,0.35)"/>
+          <!-- Star badge -->
+          <circle cx="100" cy="38" r="8" fill="rgba(212,168,83,0.15)" stroke="rgba(212,168,83,0.5)" stroke-width="1.2"/>
+          <path d="M100 32 L101.5 36 L106 36.5 L103 39 L104 43.5 L100 41 L96 43.5 L97 39 L94 36.5 L98.5 36Z" fill="rgba(212,168,83,0.4)"/>
+        </svg>
+      </div>
+      <div class="cat-info">
+        <div class="cat-letter-tag">CAMP F · 豪华入门</div>
+        <h2 class="cat-title">宝马3系 vs 奥迪A4L vs 奔驰C级</h2>
+        <p class="cat-subtitle">25-40 万价位的"德系三杰"——操控、科技、豪华，三选一。</p>
+      </div>
+    </div>
+
+    <div class="comp-table-wrap reveal">
+      <table class="comp-table">
+        <thead>
+          <tr><th>对比项</th><th>奥迪 A4L</th><th>宝马 3系</th><th>奔驰 C级</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>发动机</td><td>2.0T 150/190马力</td><td>2.0T 156/184马力</td><td>1.5T+48V 170/204马力</td></tr>
+          <tr><td>0-100km/h</td><td>约8-9秒</td><td>约8-9秒</td><td>约8-9秒</td></tr>
+          <tr><td>驾驶感</td><td>★★★★ 中性均衡</td><td class="highlight-cell">★★★★★ 运动标杆</td><td>★★★ 偏舒适</td></tr>
+          <tr><td>内饰质感</td><td>★★★★ 科技感</td><td>★★★★ 运动氛围</td><td class="highlight-cell">★★★★★ 豪华最强</td></tr>
+          <tr><td>隔音</td><td>★★★★</td><td>★★★☆</td><td class="highlight-cell">★★★★★</td></tr>
+          <tr><td>保值率(3年)</td><td>约60%</td><td class="highlight-cell">约65%</td><td>约60%</td></tr>
+          <tr><td>新车价(万)</td><td class="highlight-cell">25-35</td><td>27-38</td><td>28-40</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="exp-grid reveal">
+      <div class="exp-card">
+        <div class="exp-card-name"><span class="dot" style="background:var(--blue);"></span>A4L</div>
+        <p>最均衡——quattro 四驱版雨雪天信心十足。但"没有性格"，什么都好，什么都不突出。</p>
+      </div>
+      <div class="exp-card">
+        <div class="exp-card-name"><span class="dot" style="background:var(--accent);"></span>3系</div>
+        <p>转向手感、底盘沟通感三台里最好，"开宝马"口碑真实。但这一代向市场妥协，没有上一代纯粹。</p>
+      </div>
+      <div class="exp-card">
+        <div class="exp-card-name"><span class="dot" style="background:var(--text-2);"></span>C级</div>
+        <p>1.5T 被诟病"小马拉大车"，但内饰氛围碾压——64 色氛围灯、大屏、精致用料，坐进去就是"豪华"。</p>
+      </div>
+    </div>
+
+    <div class="verdict reveal">
+      <div class="verdict-label">一句话</div>
+      <div class="verdict-text">A4L 是"最稳妥的选择"，3系是"最好开的"，C级是"最好看/最好坐的"</div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ═══════════════ DATA VIZ: 10万级轿车 ═══════════════ -->
+<section class="section" id="data-10w">
+  <div class="section-inner">
+    <div class="section-header reveal">
+      <div class="section-label">数据可视化 · Data</div>
+      <h2 class="section-title">10 万级轿车核心对比</h2>
+      <p class="section-desc">把参数变成直觉——一眼看出每台车的强项和短板。</p>
+    </div>
+
+    <!-- 0-100 Bar Chart -->
+    <h3 style="font-family:var(--font-display);font-weight:700;font-size:1.1rem;margin-bottom:1rem;" class="reveal">
+      0-100km/h 加速
+      <span class="rank-tag first">越短越快</span>
+    </h3>
+    <div class="bar-chart reveal">
+      <div class="bar-item">
+        <div class="bar-label">秦PLUS</div>
+        <div class="bar-track"><div class="bar-fill gold" data-width="85"></div></div>
+        <div class="bar-value">7.3s</div>
+      </div>
+      <div class="bar-item">
+        <div class="bar-label">思域</div>
+        <div class="bar-track"><div class="bar-fill silver" data-width="72"></div></div>
+        <div class="bar-value">8.5s</div>
+      </div>
+      <div class="bar-item">
+        <div class="bar-label">卡罗拉</div>
+        <div class="bar-track"><div class="bar-fill bronze" data-width="55"></div></div>
+        <div class="bar-value">11s</div>
+      </div>
+      <div class="bar-item">
+        <div class="bar-label">轩逸</div>
+        <div class="bar-track"><div class="bar-fill red" data-width="45"></div></div>
+        <div class="bar-value">12s</div>
+      </div>
+      <div class="bar-item">
+        <div class="bar-label">朗逸</div>
+        <div class="bar-track"><div class="bar-fill red" data-width="40"></div></div>
+        <div class="bar-value">13s</div>
+      </div>
+    </div>
+
+    <!-- Fuel Cost Bar Chart -->
+    <h3 style="font-family:var(--font-display);font-weight:700;font-size:1.1rem;margin:2.5rem 0 1rem;" class="reveal">
+      年油费（1.5 万公里）
+      <span class="rank-tag first">越低越好</span>
+    </h3>
+    <div class="bar-chart reveal">
+      <div class="bar-item">
+        <div class="bar-label">秦(家充)</div>
+        <div class="bar-track"><div class="bar-fill gold" data-width="30"></div></div>
+        <div class="bar-value">3300</div>
+      </div>
+      <div class="bar-item">
+        <div class="bar-label">卡罗拉混动</div>
+        <div class="bar-track"><div class="bar-fill green" data-width="50"></div></div>
+        <div class="bar-value">4800</div>
+      </div>
+      <div class="bar-item">
+        <div class="bar-label">秦(亏电)</div>
+        <div class="bar-track"><div class="bar-fill cyan" data-width="65"></div></div>
+        <div class="bar-value">5700</div>
+      </div>
+      <div class="bar-item">
+        <div class="bar-label">轩逸</div>
+        <div class="bar-track"><div class="bar-fill bronze" data-width="78"></div></div>
+        <div class="bar-value">6750</div>
+      </div>
+      <div class="bar-item">
+        <div class="bar-label">朗逸</div>
+        <div class="bar-track"><div class="bar-fill red" data-width="80"></div></div>
+        <div class="bar-value">6900</div>
+      </div>
+      <div class="bar-item">
+        <div class="bar-label">思域</div>
+        <div class="bar-track"><div class="bar-fill red" data-width="85"></div></div>
+        <div class="bar-value">7200</div>
+      </div>
+    </div>
+
+    <!-- Comfort Ranking -->
+    <h3 style="font-family:var(--font-display);font-weight:700;font-size:1.1rem;margin:2.5rem 0 1rem;" class="reveal">
+      乘坐舒适度维度
+    </h3>
+    <div class="comp-table-wrap reveal">
+      <table class="comp-table">
+        <thead><tr><th>维度</th><th>最优</th><th>最差</th><th>差距</th></tr></thead>
+        <tbody>
+          <tr><td>座椅舒适度</td><td class="highlight-cell">轩逸</td><td>思域</td><td>轩逸"沙发感"明显，思域偏硬偏运动</td></tr>
+          <tr><td>后排空间</td><td class="highlight-cell">秦PLUS/轩逸</td><td>卡罗拉</td><td>秦PLUS轴距2718mm，空间更平整</td></tr>
+          <tr><td>隔音(NVH)</td><td class="highlight-cell">秦PLUS(纯电时)</td><td>思域</td><td>纯电行驶几乎无声</td></tr>
+          <tr><td>悬挂滤震</td><td class="highlight-cell">轩逸</td><td>思域</td><td>轩逸过减速带像"坐船"</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ═══════════════ 5年总成本 ═══════════════ -->
+<section class="section" id="cost">
+  <div class="section-inner">
+    <div class="section-header reveal">
+      <div class="section-label">长期账本 · 5-Year TCO</div>
+      <h2 class="section-title">5 年 / 7.5 万公里总持有成本</h2>
+      <p class="section-desc">买车不只看售价——油费、保养、保险、贬值，四笔账加起来才是真成本。</p>
+    </div>
+
+    <div class="cost-grid">
+      <div class="cost-card best reveal">
+        <div class="cost-car">卡罗拉混动</div>
+        <div class="cost-total">~6.5万</div>
+        <div class="cost-label">5年总成本 · 最低</div>
+        <div class="cost-breakdown">
+          <div class="cost-row"><span>油费</span><span class="cost-row-val">2.4万</span></div>
+          <div class="cost-row"><span>保养</span><span class="cost-row-val">0.6万</span></div>
+          <div class="cost-row"><span>保险</span><span class="cost-row-val">1.5万</span></div>
+          <div class="cost-row"><span>贬值</span><span class="cost-row-val">2.0万</span></div>
+        </div>
+      </div>
+
+      <div class="cost-card mid reveal reveal-d1">
+        <div class="cost-car">秦PLUS DM-i</div>
+        <div class="cost-total">~7.1万</div>
+        <div class="cost-label">5年总成本 · 家充条件</div>
+        <div class="cost-breakdown">
+          <div class="cost-row"><span>电费</span><span class="cost-row-val">1.7万</span></div>
+          <div class="cost-row"><span>保养</span><span class="cost-row-val">0.4万</span></div>
+          <div class="cost-row"><span>保险</span><span class="cost-row-val">1.5万</span></div>
+          <div class="cost-row"><span>贬值</span><span class="cost-row-val">3.5万</span></div>
+        </div>
+      </div>
+
+      <div class="cost-card mid reveal reveal-d2">
+        <div class="cost-car">轩逸</div>
+        <div class="cost-total">~8.2万</div>
+        <div class="cost-label">5年总成本</div>
+        <div class="cost-breakdown">
+          <div class="cost-row"><span>油费</span><span class="cost-row-val">3.4万</span></div>
+          <div class="cost-row"><span>保养</span><span class="cost-row-val">0.75万</span></div>
+          <div class="cost-row"><span>保险</span><span class="cost-row-val">1.5万</span></div>
+          <div class="cost-row"><span>贬值</span><span class="cost-row-val">2.5万</span></div>
+        </div>
+      </div>
+
+      <div class="cost-card worst reveal reveal-d3">
+        <div class="cost-car">思域</div>
+        <div class="cost-total">~8.4万</div>
+        <div class="cost-label">5年总成本 · 最高</div>
+        <div class="cost-breakdown">
+          <div class="cost-row"><span>油费</span><span class="cost-row-val">3.6万</span></div>
+          <div class="cost-row"><span>保养</span><span class="cost-row-val">0.9万</span></div>
+          <div class="cost-row"><span>保险</span><span class="cost-row-val">1.6万</span></div>
+          <div class="cost-row"><span>贬值</span><span class="cost-row-val">2.3万</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="verdict reveal">
+      <div class="verdict-label">结论</div>
+      <div class="verdict-text">卡罗拉混动 5 年总成本最低（保值率高 + 油耗低），秦PLUS 用车成本最低但贬值损失最大。省油和保值，是两条不同的省钱路径。</div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ═══════════════ 场景推荐 ═══════════════ -->
+<section class="section" id="scenarios">
+  <div class="section-inner">
+    <div class="section-header reveal">
+      <div class="section-label">场景匹配 · Scenarios</div>
+      <h2 class="section-title">不同场景下的最优选择</h2>
+      <p class="section-desc">没有"最好的车"，只有"最适合你的车"。</p>
+    </div>
+
+    <div class="scene-grid">
+      <div class="scene-card reveal">
+        <div class="scene-title"><span class="scene-emoji">⚡</span> 纯通勤（有充电桩）</div>
+        <div class="scene-winner">秦PLUS DM-i</div>
+        <div class="scene-reason">纯电成本碾压，百公里电费约 7 元。家充条件下年用车成本低至 3000 元。</div>
+      </div>
+      <div class="scene-card reveal">
+        <div class="scene-title"><span class="scene-emoji">🛣️</span> 纯通勤（无充电桩）</div>
+        <div class="scene-winner">卡罗拉混动 / 轩逸</div>
+        <div class="scene-reason">卡罗拉省油（4L/百公里），轩逸舒服。两者都不需要充电基础设施。</div>
+      </div>
+      <div class="scene-card reveal">
+        <div class="scene-title"><span class="scene-emoji">🏎️</span> 跑高速多</div>
+        <div class="scene-winner">思域</div>
+        <div class="scene-reason">1.5T 动力储备足，中段加速有力，超车有信心。底盘高速稳定性好。</div>
+      </div>
+      <div class="scene-card reveal">
+        <div class="scene-title"><span class="scene-emoji">👨‍👩‍👧</span> 经常载家人</div>
+        <div class="scene-winner">轩逸 / 秦PLUS</div>
+        <div class="scene-reason">后排空间和乘坐舒适优先。轩逸"大沙发"名不虚传，秦PLUS 空间也够用。</div>
+      </div>
+      <div class="scene-card reveal">
+        <div class="scene-title"><span class="scene-emoji">🔧</span> 开 5 年以上不修</div>
+        <div class="scene-winner">卡罗拉</div>
+        <div class="scene-reason">丰田可靠性经过几十年全球验证，混动系统成熟度极高。保值率也是最高的。</div>
+      </div>
+      <div class="scene-card reveal">
+        <div class="scene-title"><span class="scene-emoji">💰</span> 预算极紧（5 万内二手）</div>
+        <div class="scene-winner">朗逸 / 轩逸</div>
+        <div class="scene-reason">保有量大、配件便宜、维修方便。二手市场上选择多，价格透明。</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ═══════════════ 15万SUV对比 ═══════════════ -->
+<section class="section" id="data-15w">
+  <div class="section-inner">
+    <div class="section-header reveal">
+      <div class="section-label">SUV 横评 · SUV Battle</div>
+      <h2 class="section-title">15 万级 SUV 量化对比</h2>
+    </div>
+
+    <h3 style="font-family:var(--font-display);font-weight:700;font-size:1.1rem;margin-bottom:1rem;" class="reveal">
+      0-100km/h 加速
+    </h3>
+    <div class="bar-chart reveal">
+      <div class="bar-item">
+        <div class="bar-label">CS75 2.0T</div>
+        <div class="bar-track"><div class="bar-fill gold" data-width="88"></div></div>
+        <div class="bar-value">7.5s</div>
+      </div>
+      <div class="bar-item">
+        <div class="bar-label">宋PLUS</div>
+        <div class="bar-track"><div class="bar-fill green" data-width="80"></div></div>
+        <div class="bar-value">8s</div>
+      </div>
+      <div class="bar-item">
+        <div class="bar-label">CR-V 1.5T</div>
+        <div class="bar-track"><div class="bar-fill silver" data-width="70"></div></div>
+        <div class="bar-value">9s</div>
+      </div>
+      <div class="bar-item">
+        <div class="bar-label">哈弗H6</div>
+        <div class="bar-track"><div class="bar-fill bronze" data-width="60"></div></div>
+        <div class="bar-value">10s</div>
+      </div>
+      <div class="bar-item">
+        <div class="bar-label">逍客</div>
+        <div class="bar-track"><div class="bar-fill red" data-width="50"></div></div>
+        <div class="bar-value">11s</div>
+      </div>
+    </div>
+
+    <h3 style="font-family:var(--font-display);font-weight:700;font-size:1.1rem;margin:2.5rem 0 1rem;" class="reveal">
+      百公里油耗
+    </h3>
+    <div class="bar-chart reveal">
+      <div class="bar-item">
+        <div class="bar-label">宋PLUS</div>
+        <div class="bar-track"><div class="bar-fill gold" data-width="38"></div></div>
+        <div class="bar-value">5.0L</div>
+      </div>
+      <div class="bar-item">
+        <div class="bar-label">CR-V混动</div>
+        <div class="bar-track"><div class="bar-fill green" data-width="42"></div></div>
+        <div class="bar-value">5.0L</div>
+      </div>
+      <div class="bar-item">
+        <div class="bar-label">CS75 PLUS</div>
+        <div class="bar-track"><div class="bar-fill bronze" data-width="70"></div></div>
+        <div class="bar-value">7.5-9L</div>
+      </div>
+      <div class="bar-item">
+        <div class="bar-label">哈弗H6</div>
+        <div class="bar-track"><div class="bar-fill red" data-width="78"></div></div>
+        <div class="bar-value">8-9L</div>
+      </div>
+    </div>
+
+    <div class="comp-table-wrap reveal" style="margin-top:2rem;">
+      <table class="comp-table">
+        <thead><tr><th>维度</th><th>最强</th><th>最弱</th></tr></thead>
+        <tbody>
+          <tr><td>加速</td><td class="highlight-cell">CS75 PLUS 2.0T (7.5秒)</td><td>逍客 (11秒)</td></tr>
+          <tr><td>油耗</td><td class="highlight-cell">宋PLUS DM-i (亏电5.0L)</td><td>哈弗H6 (9.0L)</td></tr>
+          <tr><td>空间</td><td class="highlight-cell">CR-V</td><td>逍客</td></tr>
+          <tr><td>配置</td><td class="highlight-cell">CS75 PLUS</td><td>逍客</td></tr>
+          <tr><td>保值率</td><td class="highlight-cell">CR-V (70%)</td><td>国产SUV (50%)</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ═══════════════ 一句话总结 ═══════════════ -->
+<section class="section" id="oneliners">
+  <div class="section-inner">
+    <div class="section-header reveal">
+      <div class="section-label">一句话 · One-Liners</div>
+      <h2 class="section-title">每台车，一句话</h2>
+    </div>
+
+    <div class="oneliner-grid">
+      <div class="oneliner-card reveal">
+        <div class="oneliner-car">轩逸</div>
+        <div class="oneliner-quote">"买来坐的，不是开的"</div>
+      </div>
+      <div class="oneliner-card reveal">
+        <div class="oneliner-car">朗逸</div>
+        <div class="oneliner-quote">"大众信仰，没有惊喜也没有失望"</div>
+      </div>
+      <div class="oneliner-card reveal">
+        <div class="oneliner-car">卡罗拉</div>
+        <div class="oneliner-quote">"10年不用修的代步机器"</div>
+      </div>
+      <div class="oneliner-card reveal">
+        <div class="oneliner-car">思域</div>
+        <div class="oneliner-quote">"买菜车里的运动选手"</div>
+      </div>
+      <div class="oneliner-card reveal">
+        <div class="oneliner-car">秦PLUS</div>
+        <div class="oneliner-quote">"8万块的六边形战士"</div>
+      </div>
+      <div class="oneliner-card reveal">
+        <div class="oneliner-car">海豚</div>
+        <div class="oneliner-quote">"城市通勤的最优解"</div>
+      </div>
+      <div class="oneliner-card reveal">
+        <div class="oneliner-car">速腾</div>
+        <div class="oneliner-quote">"比朗逸多花3万，买的是质感"</div>
+      </div>
+      <div class="oneliner-card reveal">
+        <div class="oneliner-car">迈腾</div>
+        <div class="oneliner-quote">"20万以内最有面子的B级车"</div>
+      </div>
+      <div class="oneliner-card reveal">
+        <div class="oneliner-car">CR-V</div>
+        <div class="oneliner-quote">"空间最大的紧凑SUV"</div>
+      </div>
+      <div class="oneliner-card reveal">
+        <div class="oneliner-car">RAV4</div>
+        <div class="oneliner-quote">"最能跑烂路的城市SUV"</div>
+      </div>
+      <div class="oneliner-card reveal">
+        <div class="oneliner-car">宋PLUS</div>
+        <div class="oneliner-quote">"同级SUV油耗最低"</div>
+      </div>
+      <div class="oneliner-card reveal">
+        <div class="oneliner-car">CS75 PLUS</div>
+        <div class="oneliner-quote">"配置堆到溢出的性价比之王"</div>
+      </div>
+      <div class="oneliner-card reveal">
+        <div class="oneliner-car">宝马3系</div>
+        <div class="oneliner-quote">"同级最好开"</div>
+      </div>
+      <div class="oneliner-card reveal">
+        <div class="oneliner-car">奔驰C级</div>
+        <div class="oneliner-quote">"同级最好看/最好坐"</div>
+      </div>
+      <div class="oneliner-card reveal">
+        <div class="oneliner-car">奥迪A4L</div>
+        <div class="oneliner-quote">"最稳妥的选择"</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ FOOTER ═══════════════ -->
+<footer class="footer">
+  <p class="footer-quote">没有"最好的车"，只有"最适合你的车"。</p>
+  <p class="footer-sub">中国路面常见车型全景图 · 2025</p>
+</footer>
+
+<script>
+// ── Intersection Observer ──
+const obs = new IntersectionObserver((entries) => {
+  entries.forEach((entry) => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('visible');
+      obs.unobserve(entry.target);
+    }
+  });
+}, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
+
+document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+
+// ── Bar chart animation ──
+const barObs = new IntersectionObserver((entries) => {
+  entries.forEach((entry) => {
+    if (entry.isIntersecting) {
+      const fills = entry.target.querySelectorAll('.bar-fill');
+      fills.forEach((fill, i) => {
+        setTimeout(() => {
+          fill.style.width = fill.dataset.width + '%';
+        }, i * 120);
+      });
+      barObs.unobserve(entry.target);
+    }
+  });
+}, { threshold: 0.2 });
+
+document.querySelectorAll('.bar-chart').forEach(el => barObs.observe(el));
+
+// ── Hero parallax ──
+window.addEventListener('scroll', () => {
+  const s = window.scrollY;
+  const h = document.querySelector('.hero-content');
+  if (h && s < window.innerHeight) {
+    h.style.transform = `translateY(${s * 0.2}px)`;
+    h.style.opacity = 1 - (s / window.innerHeight) * 0.7;
+  }
+}, { passive: true });
+</script>
+</body>
+</html>

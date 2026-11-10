@@ -1,0 +1,888 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>⚙️ 负重突破专项 · AI 聚合研判报告</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,600;1,8..60,400&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #faf8f3;
+    --surface: #ffffff;
+    --surface-alt: #f3ede3;
+    --accent: #9a6b3a;
+    --accent-light: #c08a4e;
+    --accent-glow: rgba(154,107,58,0.06);
+    --green: #3e7a52;
+    --green-bg: #e8f2ec;
+    --green-border: rgba(62,122,82,0.16);
+    --blue: #3a6b8c;
+    --blue-bg: #e8f0f5;
+    --red: #a04040;
+    --red-bg: #f5eaea;
+    --amber: #8a6e24;
+    --amber-bg: #f5f0dc;
+    --purple: #6b5b8a;
+    --purple-bg: #f0ecf5;
+    --teal: #2e7a72;
+    --teal-bg: #e4f2ef;
+    --text-primary: #1a1714;
+    --text-body: #3d3630;
+    --text-muted: #8a7e72;
+    --text-subtle: #b5aa9e;
+    --border: #e6dfd5;
+    --border-light: #f0ebe3;
+    --shadow-sm: 0 1px 3px rgba(26,23,20,0.04), 0 1px 2px rgba(26,23,20,0.02);
+    --shadow-md: 0 4px 16px rgba(26,23,20,0.06), 0 2px 4px rgba(26,23,20,0.03);
+    --radius: 12px;
+    --radius-lg: 20px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Source Serif 4', 'Noto Serif SC', Georgia, serif;
+    background: var(--bg);
+    color: var(--text-body);
+    line-height: 1.8;
+    font-size: 16px;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      radial-gradient(ellipse at 10% 15%, rgba(154,107,58,0.025) 0%, transparent 50%),
+      radial-gradient(ellipse at 90% 85%, rgba(62,122,82,0.02) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .page {
+    position: relative;
+    z-index: 1;
+    max-width: 940px;
+    margin: 0 auto;
+    padding: 56px 24px 100px;
+  }
+
+  /* ── HEADER ── */
+  .hdr {
+    text-align: center;
+    margin-bottom: 64px;
+    padding-bottom: 44px;
+    border-bottom: 1px solid var(--border);
+    position: relative;
+  }
+  .hdr::after {
+    content: '';
+    position: absolute;
+    bottom: -1px; left: 50%;
+    transform: translateX(-50%);
+    width: 56px; height: 3px;
+    background: var(--accent);
+    border-radius: 2px;
+  }
+  .hdr-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 10.5px;
+    font-weight: 500;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 18px;
+    display: block;
+  }
+  .hdr h1 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(30px, 4.5vw, 48px);
+    font-weight: 700;
+    color: var(--text-primary);
+    line-height: 1.15;
+    margin-bottom: 14px;
+  }
+  .hdr-sub {
+    font-size: 16.5px;
+    color: var(--text-muted);
+    font-weight: 300;
+    max-width: 560px;
+    margin: 0 auto;
+    line-height: 1.7;
+  }
+  .hdr-meta {
+    display: flex;
+    justify-content: center;
+    gap: 28px;
+    margin-top: 24px;
+    flex-wrap: wrap;
+  }
+  .hdr-meta span {
+    font-family: 'DM Mono', monospace;
+    font-size: 10.5px;
+    color: var(--text-subtle);
+    letter-spacing: 0.06em;
+  }
+  .hdr-meta span strong { color: var(--text-muted); font-weight: 500; }
+
+  /* ── CONTEXT BAR ── */
+  .ctx {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--accent);
+    border-radius: var(--radius);
+    padding: 20px 26px;
+    margin-bottom: 56px;
+    box-shadow: var(--shadow-sm);
+  }
+  .ctx-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 8px;
+    display: block;
+  }
+  .ctx p {
+    font-size: 15px;
+    color: var(--text-primary);
+    line-height: 1.75;
+  }
+
+  /* ── SECTION ── */
+  .sec {
+    margin-bottom: 56px;
+    animation: fadeUp 0.55s ease both;
+  }
+  .sec:nth-child(2) { animation-delay: 0.06s; }
+  .sec:nth-child(3) { animation-delay: 0.12s; }
+  .sec:nth-child(4) { animation-delay: 0.18s; }
+  .sec:nth-child(5) { animation-delay: 0.24s; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .sec-num {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 6px;
+    display: block;
+  }
+  .sec h2 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(24px, 3.2vw, 32px);
+    font-weight: 700;
+    color: var(--text-primary);
+    line-height: 1.25;
+    margin-bottom: 20px;
+  }
+  .sec-lead {
+    font-size: 15.5px;
+    color: var(--text-body);
+    margin-bottom: 22px;
+    max-width: 760px;
+    line-height: 1.8;
+  }
+
+  /* ── DIVIDER ── */
+  .divider {
+    border: none;
+    height: 1px;
+    background: var(--border);
+    margin: 48px 0;
+    position: relative;
+  }
+  .divider::after {
+    content: '';
+    position: absolute;
+    left: 50%; top: 50%;
+    transform: translate(-50%,-50%);
+    width: 7px; height: 7px;
+    background: var(--accent);
+    border-radius: 50%;
+  }
+
+  /* ── CONSENSUS CARDS ── */
+  .c-grid { display: grid; gap: 14px; }
+  .c-card {
+    background: var(--surface);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius);
+    padding: 24px 28px;
+    box-shadow: var(--shadow-sm);
+    position: relative;
+    overflow: hidden;
+    transition: box-shadow 0.3s, transform 0.3s;
+  }
+  .c-card:hover { box-shadow: var(--shadow-md); transform: translateY(-1px); }
+  .c-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 4px; height: 100%;
+    border-radius: 4px 0 0 4px;
+  }
+  .c-card.t-dir::before { background: var(--accent); }
+  .c-card.t-acts::before { background: var(--green); }
+  .c-card.t-arr::before { background: var(--blue); }
+  .c-card.t-prin::before { background: var(--purple); }
+
+  .c-card .c-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 7px;
+    display: block;
+  }
+  .t-dir .c-tag { color: var(--accent); }
+  .t-acts .c-tag { color: var(--green); }
+  .t-arr .c-tag { color: var(--blue); }
+  .t-prin .c-tag { color: var(--purple); }
+
+  .c-card h3 {
+    font-family: 'Source Serif 4', serif;
+    font-size: 15.5px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 6px;
+    line-height: 1.4;
+  }
+  .c-card p {
+    font-size: 14.5px;
+    color: var(--text-body);
+    line-height: 1.72;
+  }
+  .priority-list {
+    list-style: none;
+    margin-top: 10px;
+    display: grid;
+    gap: 7px;
+  }
+  .priority-list li {
+    font-size: 14px;
+    color: var(--text-body);
+    line-height: 1.6;
+    padding-left: 20px;
+    position: relative;
+  }
+  .priority-list li::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 8px;
+    width: 8px; height: 8px;
+    border-radius: 2px;
+    border: 1.5px solid var(--green);
+    background: var(--green-bg);
+  }
+  .priority-list li strong { color: var(--text-primary); font-weight: 600; }
+
+  .pill {
+    display: inline-block;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    font-weight: 500;
+    padding: 2px 8px;
+    border-radius: 10px;
+    letter-spacing: 0.04em;
+  }
+  .pill-green { background: var(--green-bg); color: var(--green); }
+  .pill-amber { background: var(--amber-bg); color: var(--amber); }
+  .pill-blue { background: var(--blue-bg); color: var(--blue); }
+  .pill-red { background: var(--red-bg); color: var(--red); }
+  .pill-purple { background: var(--purple-bg); color: var(--purple); }
+
+  /* ── DIVERGENCE TABLE ── */
+  .div-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    background: var(--surface);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+    font-size: 14px;
+  }
+  .div-table thead th {
+    font-family: 'DM Mono', monospace;
+    font-size: 10.5px;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    background: var(--surface-alt);
+    padding: 14px 18px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+  }
+  .div-table tbody td {
+    padding: 16px 18px;
+    border-bottom: 1px solid var(--border-light);
+    vertical-align: top;
+    line-height: 1.7;
+  }
+  .div-table tbody tr:last-child td { border-bottom: none; }
+  .div-table tbody tr:hover { background: var(--accent-glow); }
+  .div-label {
+    font-family: 'Source Serif 4', serif;
+    font-weight: 600;
+    color: var(--text-primary);
+    display: block;
+    margin-bottom: 5px;
+  }
+  .model-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 9.5px;
+    font-weight: 500;
+    padding: 2px 8px;
+    border-radius: 10px;
+    background: var(--surface-alt);
+    color: var(--text-muted);
+    letter-spacing: 0.04em;
+    display: inline-block;
+    margin-bottom: 3px;
+  }
+
+  /* ── CREDIBILITY ── */
+  .cred-top {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 14px;
+    margin-top: 8px;
+    margin-bottom: 24px;
+  }
+  .cred-card {
+    background: var(--surface);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius);
+    padding: 22px;
+    text-align: center;
+    box-shadow: var(--shadow-sm);
+    transition: box-shadow 0.3s;
+  }
+  .cred-card:hover { box-shadow: var(--shadow-md); }
+  .cred-score {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 34px;
+    font-weight: 700;
+    color: var(--green);
+    line-height: 1;
+    margin-bottom: 3px;
+  }
+  .cred-lbl {
+    font-family: 'DM Mono', monospace;
+    font-size: 9.5px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+    display: block;
+  }
+  .cred-desc { font-size: 13px; color: var(--text-body); line-height: 1.6; }
+
+  .cred-detail {
+    display: grid;
+    gap: 14px;
+  }
+  .cred-item {
+    background: var(--surface);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius);
+    padding: 20px 24px;
+    box-shadow: var(--shadow-sm);
+    transition: box-shadow 0.3s;
+  }
+  .cred-item:hover { box-shadow: var(--shadow-md); }
+  .cred-item h4 {
+    font-family: 'Source Serif 4', serif;
+    font-size: 14.5px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 6px;
+  }
+  .cred-item p {
+    font-size: 13.5px;
+    color: var(--text-body);
+    line-height: 1.65;
+  }
+
+  /* ── PLAN TABLE ── */
+  .plan-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    background: var(--surface);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow: var(--shadow-md);
+  }
+  .plan-table thead th {
+    font-family: 'DM Mono', monospace;
+    font-size: 10.5px;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    background: var(--surface-alt);
+    padding: 16px 20px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+  }
+  .plan-table tbody td {
+    padding: 18px 20px;
+    border-bottom: 1px solid var(--border-light);
+    vertical-align: top;
+    line-height: 1.7;
+  }
+  .plan-table tbody tr:last-child td { border-bottom: none; }
+
+  .plan-table .phase-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 9.5px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    padding: 3px 10px;
+    border-radius: 10px;
+    display: inline-block;
+    margin-bottom: 4px;
+    white-space: nowrap;
+  }
+  .phase-tag.p1 { background: var(--red-bg); color: var(--red); }
+  .phase-tag.p2 { background: var(--blue-bg); color: var(--blue); }
+  .phase-tag.p3 { background: var(--green-bg); color: var(--green); }
+
+  .plan-table .exercise-name {
+    font-family: 'Source Serif 4', serif;
+    font-weight: 600;
+    color: var(--text-primary);
+    font-size: 15px;
+    display: block;
+    margin-bottom: 4px;
+  }
+  .plan-table .exercise-note {
+    font-size: 12.5px;
+    color: var(--text-muted);
+    line-height: 1.55;
+  }
+  .plan-table .exercise-rx {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-primary);
+    white-space: nowrap;
+  }
+
+  .plan-notes {
+    margin-top: 24px;
+    display: grid;
+    gap: 10px;
+  }
+  .plan-note {
+    background: var(--surface-alt);
+    border: 1px solid var(--border-light);
+    border-radius: 8px;
+    padding: 14px 18px;
+    font-size: 13.5px;
+    color: var(--text-body);
+    line-height: 1.65;
+  }
+  .plan-note strong {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+    display: block;
+    margin-bottom: 3px;
+  }
+
+  /* ── MINORITY ── */
+  .min-grid { display: grid; gap: 14px; }
+  .min-card {
+    background: var(--surface);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius);
+    padding: 24px 28px;
+    box-shadow: var(--shadow-sm);
+    position: relative;
+    transition: box-shadow 0.3s;
+  }
+  .min-card:hover { box-shadow: var(--shadow-md); }
+  .min-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 4px; height: 100%;
+    background: var(--text-subtle);
+    border-radius: 4px 0 0 4px;
+  }
+  .min-card .min-src {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-subtle);
+    margin-bottom: 7px;
+    display: block;
+  }
+  .min-card h3 {
+    font-family: 'Source Serif 4', serif;
+    font-size: 15.5px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 6px;
+    line-height: 1.4;
+  }
+  .min-card p {
+    font-size: 14px;
+    color: var(--text-body);
+    line-height: 1.72;
+  }
+  .min-card .use-when {
+    margin-top: 10px;
+    padding: 10px 14px;
+    background: var(--surface-alt);
+    border-radius: 8px;
+    font-size: 12.5px;
+    color: var(--text-muted);
+    line-height: 1.6;
+  }
+  .min-card .use-when strong {
+    font-family: 'DM Mono', monospace;
+    font-size: 9.5px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-subtle);
+    display: block;
+    margin-bottom: 2px;
+  }
+
+  /* ── FOOTER ── */
+  .foot {
+    text-align: center;
+    padding-top: 44px;
+    border-top: 1px solid var(--border);
+    margin-top: 60px;
+  }
+  .foot span {
+    font-family: 'DM Mono', monospace;
+    font-size: 10.5px;
+    color: var(--text-subtle);
+    letter-spacing: 0.1em;
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 700px) {
+    .page { padding: 32px 16px 64px; }
+    .hdr-meta { gap: 14px; }
+    .div-table { font-size: 13px; }
+    .div-table thead th,
+    .div-table tbody td { padding: 10px 12px; }
+    .plan-table thead th,
+    .plan-table tbody td { padding: 12px 14px; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- HEADER -->
+  <header class="hdr">
+    <span class="hdr-tag">AI Multi-Model Aggregation Report</span>
+    <h1>负重突破专项<br>聚合研判报告</h1>
+    <p class="hdr-sub">基于多份 AI 分析的系统性整合：自重平台期突破路径、核心动作优先级排序与负重训练方案设计</p>
+    <div class="hdr-meta">
+      <span><strong>模型</strong> DeepSeek · Qwen · GPT-OSS · 等多模型</span>
+      <span><strong>核心议题</strong> 自重平台期 · 负重突破 · 动作优先级</span>
+    </div>
+  </header>
+
+  <!-- CONTEXT -->
+  <div class="ctx">
+    <span class="ctx-label">Background</span>
+    <p>你已达到高阶自重训练水平（20 引体 / 30 双杠臂屈伸），目前面临数量瓶颈。需要通过引入负重训练，从"肌耐力"向"绝对力量"拓展，实现力量迁移，同时弥补自重训练对下肢和后链刺激不足的短板。</p>
+  </div>
+
+  <!-- ═══ 1. CONSENSUS ═══ -->
+  <section class="sec">
+    <span class="sec-num">01 · Consensus</span>
+    <h2>提炼共识</h2>
+    <p class="sec-lead">各模型在核心方向和关键项目上达成了高度一致——</p>
+
+    <div class="c-grid">
+      <div class="c-card t-dir">
+        <span class="c-tag">01 · 核心方向</span>
+        <h3>用"负重训练"突破自重平台期</h3>
+        <p>核心逻辑一致：从"肌耐力"向"绝对力量"拓展，实现力量迁移，弥补自重训练对下肢和后链刺激不足的短板。</p>
+      </div>
+
+      <div class="c-card t-acts">
+        <span class="c-tag">02 · 顶级优先级项目</span>
+        <h3>四项共识度 100% 的核心动作</h3>
+        <ul class="priority-list">
+          <li><strong>负重引体向上</strong> — 突破 20 次自重引体最直接、必做的专项动作</li>
+          <li><strong>负重双杠臂屈伸</strong> — 突破 30 次自重臂屈伸最直接、必做的专项动作</li>
+          <li><strong>杠铃硬拉</strong> — 强化后链、核心与全身力量，对悬垂举腿和预防伤病至关重要</li>
+          <li><strong>面拉（Face Pull）</strong> — 关键的肩袖强化和损伤预防动作</li>
+        </ul>
+      </div>
+
+      <div class="c-card t-arr">
+        <span class="c-tag">03 · 训练安排</span>
+        <h3>频率、顺序与原则共识</h3>
+        <p><span class="pill pill-blue">频率</span> 每周 1 次负重训练，替换掉一次自重训练。安排在精力充沛的前半段，与大强度自重日或骑行日间隔 48 小时以上。</p>
+        <p style="margin-top:6px;"><span class="pill pill-purple">原则</span> "渐进超负荷"逐步增加重量，"动作质量优先"确保持续进步与安全。</p>
+      </div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- ═══ 2. DIVERGENCE ═══ -->
+  <section class="sec">
+    <span class="sec-num">02 · Divergence</span>
+    <h2>分析分歧</h2>
+    <p class="sec-lead">大方向一致，但在训练逻辑侧重点和项目优先级排序上存在显著分歧——</p>
+
+    <table class="div-table">
+      <thead>
+        <tr>
+          <th style="width:22%">分歧点</th>
+          <th>不同观点</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>
+            <span class="div-label">核心训练逻辑</span>
+          </td>
+          <td>
+            <span class="pill pill-red">专项强化派</span><br>
+            <span class="model-tag">DeepSeek V4 Flash</span><br>
+            应"优先加强强项"，将负重引体、负重双杠等直接变式置于最高优先级，确保有限精力直接作用于目标。<br><br>
+            <span class="pill pill-blue">基础构建派</span><br>
+            <span class="model-tag">Qwen 3-235B</span> <span class="model-tag">GPT-OSS-120B</span><br>
+            应"优先弥补短板"，将杠铃深蹲、硬拉等全身大复合动作置于最高优先级，构建力量基础后再谈专项突破。
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <span class="div-label">下肢训练必要性</span>
+          </td>
+          <td>
+            <span class="pill pill-green">高度重视</span> 多数模型将杠铃深蹲列为高优先级——提升全身力量、骑行功率和激素反应的基础。<br><br>
+            <span class="pill pill-amber">降级处理</span> <span class="model-tag">DeepSeek V4 Flash</span> 将深蹲归于第三优先级，认为其对引体和双杠目标的直接迁移率较低，是为辅助骑行的可选项目。
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <span class="div-label">对用户水平的解读</span>
+          </td>
+          <td>
+            <span class="pill pill-purple">已达高阶</span> 部分模型强调应引入爆发力训练（如高翻）来突破神经适应极限。<br><br>
+            <span class="pill pill-blue">仍处中阶</span> 更多模型聚焦基础力量与肌肉量积累，认为先夯实硬拉、深蹲等基础动作模式更为稳妥。
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <hr class="divider">
+
+  <!-- ═══ 3. CREDIBILITY ═══ -->
+  <section class="sec">
+    <span class="sec-num">03 · Credibility</span>
+    <h2>判断可信度</h2>
+
+    <div class="cred-top">
+      <div class="cred-card">
+        <div class="cred-score">100%</div>
+        <span class="cred-lbl">核心动作共识度</span>
+        <p class="cred-desc">负重引体、负重双杠、硬拉——逻辑链清晰，全部模型一致认可</p>
+      </div>
+      <div class="cred-card">
+        <div class="cred-score">A+</div>
+        <span class="cred-lbl">科学准确性</span>
+        <p class="cred-desc">对力量训练原则、动作迁移率、肩关节健康的理解均符合运动科学共识</p>
+      </div>
+      <div class="cred-card">
+        <div class="cred-score">A</div>
+        <span class="cred-lbl">个性化匹配</span>
+        <p class="cred-desc">精准回应了高阶自重训练者向负重转型的具体需求与当前瓶颈</p>
+      </div>
+    </div>
+
+    <div class="cred-detail">
+      <div class="cred-item">
+        <h4><span class="pill pill-green">极高可信度</span> 负重引体、负重双杠、硬拉不可或缺</h4>
+        <p>这三个动作分别直接对应你的三项核心目标（引体、臂屈伸、核心/后链力量），逻辑链清晰，共识度 100%。</p>
+      </div>
+      <div class="cred-item">
+        <h4><span class="pill pill-amber">高可信度 · 有争议</span> 杠铃深蹲与卧推的重要性</h4>
+        <p>价值毋庸置疑，但分歧在于——对你当前的具体目标而言，它们是"必须先行的基础"还是"可以后补的短板"？<br>
+        <span class="pill pill-blue">判断依据</span> 如果做引体和双杠时感觉"身体发软、核心不稳"→ 基础派更可信；如果只是差最后几个拉不起来 → 专项派更高效。</p>
+      </div>
+      <div class="cred-item">
+        <h4><span class="pill pill-red">需谨慎对待</span> 爆发力动作（如高翻）</h4>
+        <p>技术复杂，在你已有高强度自行车和高阶自重训练的基础上，若没有专业教练指导，受伤风险高于收益，目前阶段不建议纳入。</p>
+      </div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- ═══ 4. FINAL PLAN ═══ -->
+  <section class="sec">
+    <span class="sec-num">04 · Final Plan</span>
+    <h2>最终综合方案</h2>
+    <p class="sec-lead">以专项突破为矛，以基础力量为盾。遵循"神经适应优先，结构基础跟进"的逻辑——并非简单折中，而是按一次训练的精力曲线编排优先级。</p>
+
+    <table class="plan-table">
+      <thead>
+        <tr>
+          <th style="width:18%">阶段 / 优先级</th>
+          <th style="width:24%">项目</th>
+          <th>推荐理由与执行要点</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- PHASE 1 -->
+        <tr>
+          <td rowspan="2">
+            <span class="phase-tag p1">第一阶段</span><br>
+            <span style="font-size:12px; color:var(--text-muted);">核心突破<br>（训练前半段）</span>
+          </td>
+          <td>
+            <span class="exercise-name">1. 负重引体向上</span>
+            <span class="exercise-rx">4–5 组 × 3–5 次</span>
+          </td>
+          <td>
+            <span class="exercise-note">神经适应最优先。先于精力最佳时进行。大重量突破为主（3–5 次），或力量积累（6–8 次）。直接对应引体数量突破目标。</span>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <span class="exercise-name">2. 负重双杠臂屈伸</span>
+            <span class="exercise-rx">4–5 组 × 6–10 次</span>
+          </td>
+          <td>
+            <span class="exercise-note">直接呼应臂屈伸突破目标。同步强化肱三头肌与胸肌下束。</span>
+          </td>
+        </tr>
+        <!-- PHASE 2 -->
+        <tr>
+          <td rowspan="1">
+            <span class="phase-tag p2">第二阶段</span><br>
+            <span style="font-size:12px; color:var(--text-muted);">基础力量<br>（有力补充）</span>
+          </td>
+          <td>
+            <span class="exercise-name">3. 杠铃硬拉</span>
+            <span class="exercise-rx">3–4 组 × 5 次</span>
+          </td>
+          <td>
+            <span class="exercise-note">强化全身力量链条，为悬垂举腿提供支柱。大重量，注重动作质量。<br><strong style="color:var(--text-muted); font-size:11.5px;">轮换选项：</strong> 若骑行时下肢力量成为瓶颈，可在此处轮换为杠铃深蹲 3–4×6–8。</span>
+          </td>
+        </tr>
+        <!-- PHASE 3 -->
+        <tr>
+          <td rowspan="2">
+            <span class="phase-tag p3">第三阶段</span><br>
+            <span style="font-size:12px; color:var(--text-muted);">伤病预防<br>（训练收尾）</span>
+          </td>
+          <td>
+            <span class="exercise-name">4. 面拉 Face Pull</span>
+            <span class="exercise-rx">3 组 × 15–20 次</span>
+          </td>
+          <td>
+            <span class="exercise-note">必做。对抗所有推拉动作和骑行姿态带来的肩部风险。保护后肩与肩袖外旋肌群。</span>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <span class="exercise-name">5. 农夫行走</span>
+            <span class="exercise-rx">3 组 × 30–45 秒</span>
+          </td>
+          <td>
+            <span class="exercise-note">必做。直接强化单臂悬挂必备的抓握力与核心稳定。放在最后以避免握力疲劳影响其他拉类动作。</span>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="plan-notes">
+      <div class="plan-note">
+        <strong>放弃卧推</strong>
+        你的肱三头肌和胸肌下束通过负重双杠已得到极强刺激，卧推对当前目标的直接优先级较低，舍弃以节省体能。
+      </div>
+      <div class="plan-note">
+        <strong>核心专项补充</strong>
+        你现有的悬垂举腿水平很高，可在自重训练日尝试夹轻哑铃的负重悬垂举腿来寻求突破。
+      </div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- ═══ 5. MINORITY VIEWS ═══ -->
+  <section class="sec">
+    <span class="sec-num">05 · Minority Views</span>
+    <h2>保留合理少数派观点</h2>
+    <p class="sec-lead">以下观点虽非主流，但有其独特价值，值得长期关注——</p>
+
+    <div class="min-grid">
+      <div class="min-card">
+        <span class="min-src">长期主义 · 多模型共识</span>
+        <h3>"优先构建基础"的长期价值</h3>
+        <p>如果你的目标不止于突破 23 个引体，而是希望在未来两年内具备解锁单臂引体的可能，那么将杠铃深蹲和杠铃卧推在某个训练周期提升到更高优先级，为你建立雄厚的全身肌肉量和力量储备，是一条更可持续的道路。</p>
+        <div class="use-when">
+          <strong>适用场景</strong>
+          当你短期引体/双杠目标达成，转向更宏大的长期体能目标时
+        </div>
+      </div>
+
+      <div class="min-card">
+        <span class="min-src">DeepSeek V4 Flash · 效率导向</span>
+        <h3>"专项动作直接强化"的极致高效</h3>
+        <p>如果你的唯一目标就是在最短时间内看到引体和双杠次数上升，那么将负重专项动作置于最高优先级的方案是最高效路径——但需警惕身体不平衡可能带来的长期损伤风险。</p>
+        <div class="use-when">
+          <strong>适用场景</strong>
+          短期内需要快速突破引体/双杠数量（如比赛备战），且身体无明显短板时
+        </div>
+      </div>
+
+      <div class="min-card">
+        <span class="min-src">细节补充 · 容易被忽视</span>
+        <h3>单臂悬挂所需的综合能力被低估</h3>
+        <p>单臂悬挂不仅需要握力，更需要极强的肩胛稳定性和抗旋转核心力量。单纯悬挂练习效率不高，应在训练中加入<strong>单臂农夫行走</strong>和抗旋转的<strong>帕洛夫推（Pallof Press）</strong>，这些是容易被忽视的关键细节。</p>
+        <div class="use-when">
+          <strong>适用场景</strong>
+          当你开始尝试单臂悬挂但发现频繁滑落时——问题可能不在握力，而在肩胛与抗旋转能力
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="foot">
+    <span>Multi-Model Analysis · Synthesized for Weighted Calisthenics Breakthrough</span>
+  </footer>
+
+</div>
+</body>
+</html>

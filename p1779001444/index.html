@@ -1,0 +1,943 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>三机对比 — Realme Neo8 · OnePlus Ace 6T · Xiaomi 15 Pro</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Noto+Sans+SC:wght@300;400;500;700&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#06060a;--s1:#0e0e16;--s2:#14141e;--s3:#1a1a28;
+  --gold:#d4a843;--gold-d:#7a6430;
+  --txt:#e6e2d8;--txt2:#9a9488;--txt3:#5a5650;
+  --c-realme:#f0a020;--c-oneplus:#e04040;--c-xiaomi:#f07030;
+  --green:#3a9a58;--red:#c44840;--blue:#4888c0;
+  --mono:'DM Mono','Courier New',monospace;
+  --sans:'Noto Sans SC','Helvetica Neue',sans-serif;
+  --serif:'Instrument Serif','Georgia',serif;
+}
+html{scroll-behavior:smooth;font-size:14px}
+body{
+  font-family:var(--sans);background:var(--bg);color:var(--txt);
+  line-height:1.7;overflow-x:hidden;
+}
+body::before{
+  content:'';position:fixed;inset:0;
+  background:
+    radial-gradient(ellipse at 15% 20%,rgba(240,160,32,.02) 0%,transparent 50%),
+    radial-gradient(ellipse at 85% 70%,rgba(224,64,64,.015) 0%,transparent 45%);
+  pointer-events:none;z-index:0;
+}
+
+/* NAV */
+.nav{
+  position:fixed;top:0;left:0;right:0;z-index:200;
+  background:rgba(6,6,10,.9);backdrop-filter:blur(20px);
+  border-bottom:1px solid rgba(212,168,67,.06);
+  padding:.55rem 1.2rem;
+}
+.nav-in{
+  max-width:1300px;margin:0 auto;
+  display:flex;align-items:center;gap:.4rem;overflow-x:auto;
+  scrollbar-width:none;
+}
+.nav-in::-webkit-scrollbar{display:none}
+.nav-logo{
+  font-family:var(--serif);font-style:italic;font-size:1rem;
+  color:var(--gold);margin-right:.6rem;white-space:nowrap;flex-shrink:0;
+}
+.nav a{
+  font-family:var(--mono);font-size:.55rem;color:var(--txt3);
+  text-decoration:none;letter-spacing:.08em;text-transform:uppercase;
+  white-space:nowrap;padding:.2rem .45rem;border-radius:3px;
+  transition:color .2s,background .2s;flex-shrink:0;
+}
+.nav a:hover,.nav a.active{color:var(--gold);background:rgba(212,168,67,.08)}
+
+/* HERO */
+.hero{
+  min-height:40vh;display:flex;flex-direction:column;
+  justify-content:center;align-items:center;text-align:center;
+  padding:5.5rem 1.5rem 2rem;position:relative;
+}
+.hero-kicker{
+  font-family:var(--mono);font-size:.58rem;color:var(--gold-d);
+  letter-spacing:.3em;text-transform:uppercase;margin-bottom:.6rem;
+  opacity:0;animation:fadeUp .6s ease forwards .1s;
+}
+.hero h1{
+  font-family:var(--serif);font-style:italic;
+  font-size:clamp(1.8rem,5vw,3.5rem);
+  color:var(--txt);line-height:1.15;
+  opacity:0;animation:fadeUp .8s ease forwards .25s;
+}
+.hero h1 em{color:var(--gold);font-style:italic}
+.hero .sub{
+  font-size:.85rem;color:var(--txt2);max-width:550px;margin:.8rem auto 0;
+  opacity:0;animation:fadeUp .7s ease forwards .4s;
+}
+.hero-line{
+  width:28px;height:2px;background:var(--gold);
+  margin:1.2rem auto;opacity:0;animation:fadeUp .5s ease forwards .55s;
+}
+.phones-row{
+  display:flex;gap:1.5rem;flex-wrap:wrap;justify-content:center;
+  opacity:0;animation:fadeUp .6s ease forwards .65s;
+}
+.phone-chip{
+  display:flex;align-items:center;gap:.5rem;
+  padding:.5rem 1rem;border-radius:20px;
+  border:1px solid rgba(255,255,255,.06);
+  background:var(--s1);
+}
+.phone-chip .dot{width:8px;height:8px;border-radius:50%}
+.phone-chip span{
+  font-family:var(--mono);font-size:.68rem;color:var(--txt2);
+  letter-spacing:.04em;
+}
+
+/* MAIN */
+main{position:relative;z-index:1;max-width:1300px;margin:0 auto;padding:0 1rem}
+
+/* NAV TABS */
+.section-nav{
+  position:sticky;top:42px;z-index:150;
+  background:rgba(6,6,10,.92);backdrop-filter:blur(16px);
+  padding:.6rem 0;margin-bottom:1.5rem;
+  display:flex;gap:.3rem;overflow-x:auto;
+  scrollbar-width:none;
+  border-bottom:1px solid rgba(255,255,255,.03);
+}
+.section-nav::-webkit-scrollbar{display:none}
+.section-nav a{
+  font-family:var(--mono);font-size:.58rem;color:var(--txt3);
+  text-decoration:none;letter-spacing:.06em;text-transform:uppercase;
+  white-space:nowrap;padding:.3rem .7rem;border-radius:4px;
+  transition:all .2s;flex-shrink:0;
+}
+.section-nav a:hover,.section-nav a.active{color:var(--gold);background:rgba(212,168,67,.08)}
+
+/* QUICK SPECS BAR */
+.qs-bar{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:.8rem;
+  margin-bottom:2rem;
+}
+.qs-card{
+  background:var(--s1);border:1px solid rgba(255,255,255,.04);
+  border-radius:10px;padding:1.2rem 1rem;text-align:center;
+  opacity:0;transform:translateY(16px);
+  transition:opacity .5s ease,transform .5s ease;
+  position:relative;overflow:hidden;
+}
+.qs-card.revealed{opacity:1;transform:translateY(0)}
+.qs-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:3px;
+}
+.qs-card.c-r::before{background:var(--c-realme)}
+.qs-card.c-o::before{background:var(--c-oneplus)}
+.qs-card.c-x::before{background:var(--c-xiaomi)}
+.qs-brand{
+  font-family:var(--mono);font-size:.52rem;letter-spacing:.15em;
+  text-transform:uppercase;margin-bottom:.15rem;
+}
+.qs-card.c-r .qs-brand{color:var(--c-realme)}
+.qs-card.c-o .qs-brand{color:var(--c-oneplus)}
+.qs-card.c-x .qs-brand{color:var(--c-xiaomi)}
+.qs-name{
+  font-family:var(--serif);font-style:italic;
+  font-size:1.3rem;color:var(--txt);margin-bottom:.5rem;
+}
+.qs-price{
+  font-family:var(--mono);font-size:1.4rem;font-weight:500;
+  margin-bottom:.3rem;
+}
+.qs-card.c-r .qs-price{color:var(--c-realme)}
+.qs-card.c-o .qs-price{color:var(--c-oneplus)}
+.qs-card.c-x .qs-price{color:var(--c-xiaomi)}
+.qs-date{font-family:var(--mono);font-size:.58rem;color:var(--txt3)}
+.qs-pills{
+  display:flex;flex-wrap:wrap;gap:.3rem;justify-content:center;margin-top:.6rem;
+}
+.qs-pill{
+  font-family:var(--mono);font-size:.5rem;padding:.15rem .45rem;
+  border-radius:3px;background:var(--s2);color:var(--txt3);
+  letter-spacing:.04em;
+}
+
+/* COMPARE TABLE */
+.cmp-wrap{
+  border:1px solid rgba(255,255,255,.04);
+  border-radius:10px;overflow:hidden;
+  margin-bottom:2rem;
+}
+.cmp-head{
+  padding:1rem 1.2rem;background:var(--s2);
+  border-bottom:1px solid rgba(255,255,255,.04);
+  display:flex;align-items:center;gap:.6rem;
+}
+.cmp-head-icon{
+  width:28px;height:28px;border-radius:6px;
+  display:flex;align-items:center;justify-content:center;
+  background:var(--s3);color:var(--gold);font-size:.85rem;flex-shrink:0;
+}
+.cmp-head h2{
+  font-family:var(--serif);font-style:italic;font-size:1.2rem;color:var(--gold);
+}
+table{width:100%;border-collapse:collapse}
+thead th{
+  background:var(--s1);font-family:var(--mono);font-weight:400;
+  font-size:.55rem;letter-spacing:.1em;text-transform:uppercase;
+  padding:.6rem .8rem;text-align:center;
+  border-bottom:1px solid rgba(255,255,255,.04);
+}
+thead th:first-child{text-align:left;color:var(--gold-d)}
+thead th.c-r{color:var(--c-realme)}
+thead th.c-o{color:var(--c-oneplus)}
+thead th.c-x{color:var(--c-xiaomi)}
+tbody td{
+  padding:.55rem .8rem;
+  border-bottom:1px solid rgba(255,255,255,.02);
+  font-size:.78rem;color:var(--txt2);text-align:center;
+  vertical-align:top;
+}
+tbody td:first-child{
+  text-align:left;font-family:var(--mono);font-size:.65rem;
+  color:var(--gold-d);letter-spacing:.06em;
+  background:rgba(212,168,67,.02);white-space:nowrap;
+}
+tbody tr{transition:background .2s}
+tbody tr:hover{background:rgba(212,168,67,.02)}
+tbody tr:hover td:first-child{background:rgba(212,168,67,.04)}
+
+/* Winner highlight */
+.w{position:relative}
+.w::after{
+  content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:var(--gold);opacity:.3;
+}
+
+/* Verdict badges */
+.v-badge{
+  display:inline-block;font-family:var(--mono);font-size:.48rem;
+  padding:.12rem .35rem;border-radius:2px;
+  letter-spacing:.06em;text-transform:uppercase;
+  margin-left:.3rem;vertical-align:middle;
+}
+.v-best{background:rgba(58,154,88,.12);color:var(--green)}
+.v-good{background:rgba(72,136,192,.1);color:var(--blue)}
+.v-weak{background:rgba(196,72,64,.08);color:var(--red)}
+
+/* Section label row */
+tbody tr.section-row td{
+  background:var(--s2);padding:.45rem .8rem;
+  font-family:var(--mono);font-size:.55rem;letter-spacing:.15em;
+  text-transform:uppercase;color:var(--gold-d);
+  border-bottom:1px solid rgba(212,168,67,.08);
+  text-align:left;
+}
+
+/* VERDICT */
+.verdict{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:.8rem;
+  margin:2.5rem 0;
+}
+.v-card{
+  background:var(--s1);border:1px solid rgba(255,255,255,.04);
+  border-radius:10px;padding:1.5rem 1.2rem;
+  opacity:0;transform:translateY(16px);
+  transition:opacity .5s ease,transform .5s ease;
+  position:relative;overflow:hidden;
+}
+.v-card.revealed{opacity:1;transform:translateY(0)}
+.v-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:3px;
+}
+.v-card.v-r::before{background:var(--c-realme)}
+.v-card.v-o::before{background:var(--c-oneplus)}
+.v-card.v-x::before{background:var(--c-xiaomi)}
+.v-card-brand{
+  font-family:var(--mono);font-size:.52rem;letter-spacing:.15em;
+  text-transform:uppercase;margin-bottom:.1rem;
+}
+.v-card.v-r .v-card-brand{color:var(--c-realme)}
+.v-card.v-o .v-card-brand{color:var(--c-oneplus)}
+.v-card.v-x .v-card-brand{color:var(--c-xiaomi)}
+.v-card h3{
+  font-family:var(--serif);font-style:italic;font-size:1.2rem;
+  color:var(--txt);margin-bottom:.8rem;
+}
+.v-card p{font-size:.82rem;color:var(--txt2);line-height:1.75}
+.v-card .v-score{
+  font-family:var(--mono);font-size:2rem;font-weight:500;
+  margin-top:.8rem;
+}
+.v-card.v-r .v-score{color:var(--c-realme)}
+.v-card.v-o .v-score{color:var(--c-oneplus)}
+.v-card.v-x .v-score{color:var(--c-xiaomi)}
+.v-card .v-score-label{
+  font-family:var(--mono);font-size:.52rem;color:var(--txt3);
+  letter-spacing:.1em;text-transform:uppercase;
+}
+
+/* REC BOX */
+.rec{
+  background:var(--s1);border:1px solid rgba(255,255,255,.04);
+  border-radius:10px;padding:2rem;margin:2rem 0;
+}
+.rec h2{
+  font-family:var(--serif);font-style:italic;font-size:1.4rem;
+  color:var(--gold);margin-bottom:1rem;
+}
+.rec-grid{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+  gap:.8rem;
+}
+.rec-item{
+  padding:1rem;background:var(--s2);border-radius:8px;
+  border-left:3px solid var(--gold-d);
+}
+.rec-item h4{
+  font-family:var(--mono);font-size:.62rem;color:var(--gold);
+  letter-spacing:.1em;text-transform:uppercase;margin-bottom:.3rem;
+}
+.rec-item p{font-size:.82rem;color:var(--txt2);line-height:1.65}
+
+/* FOOTER */
+footer{
+  margin:3rem 0 0;padding:2rem 1rem;
+  border-top:1px solid rgba(255,255,255,.04);
+  text-align:center;
+  font-family:var(--mono);font-size:.58rem;color:var(--txt3);
+  letter-spacing:.06em;
+}
+footer a{color:var(--gold-d);text-decoration:none}
+footer em{color:var(--gold-d);font-style:normal}
+
+/* BTT */
+.btt{
+  position:fixed;bottom:1.5rem;right:1.5rem;z-index:100;
+  width:34px;height:34px;border-radius:50%;
+  background:var(--s2);border:1px solid rgba(212,168,67,.1);
+  color:var(--gold);font-size:.85rem;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  opacity:0;transform:translateY(8px);transition:opacity .3s,transform .3s;
+}
+.btt.show{opacity:1;transform:translateY(0)}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+
+@media(max-width:768px){
+  .qs-bar,.verdict{grid-template-columns:1fr}
+  thead th,tbody td{padding:.45rem .4rem;font-size:.7rem}
+  tbody td:first-child{font-size:.6rem;min-width:70px}
+  .hero h1{font-size:1.6rem}
+  .phones-row{gap:.8rem}
+  .rec-grid{grid-template-columns:1fr}
+  table{display:block;overflow-x:auto}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-in">
+    <span class="nav-logo">三机对比</span>
+    <a href="#overview" data-s="overview">概览</a>
+    <a href="#screen" data-s="screen">屏幕</a>
+    <a href="#perf" data-s="perf">性能</a>
+    <a href="#camera" data-s="camera">影像</a>
+    <a href="#battery" data-s="battery">电池</a>
+    <a href="#connectivity" data-s="connectivity">连接</a>
+    <a href="#verdict" data-s="verdict">结论</a>
+  </div>
+</nav>
+
+<div class="hero">
+  <div class="hero-kicker">Phone Comparison · 2025/2026</div>
+  <h1>Realme Neo8 · OnePlus Ace 6T<br>vs <em>Xiaomi 15 Pro</em></h1>
+  <p class="sub">三台价位段不同、卖点各异的机器放在一起，看看到底差在哪。</p>
+  <div class="hero-line"></div>
+  <div class="phones-row">
+    <div class="phone-chip"><span class="dot" style="background:var(--c-realme)"></span><span>Realme Neo8</span></div>
+    <div class="phone-chip"><span class="dot" style="background:var(--c-oneplus)"></span><span>OnePlus Ace 6T</span></div>
+    <div class="phone-chip"><span class="dot" style="background:var(--c-xiaomi)"></span><span>Xiaomi 15 Pro</span></div>
+  </div>
+</div>
+
+<main>
+
+<!-- QUICK OVERVIEW -->
+<div id="overview" class="qs-bar">
+  <div class="qs-card c-r">
+    <div class="qs-brand">Realme</div>
+    <div class="qs-name">Neo8</div>
+    <div class="qs-price">€280</div>
+    <div class="qs-date">2026年1月 · 在售</div>
+    <div class="qs-pills">
+      <span class="qs-pill">SD 8 Gen 5</span>
+      <span class="qs-pill">8000mAh</span>
+      <span class="qs-pill">165Hz</span>
+      <span class="qs-pill">3× 长焦</span>
+      <span class="qs-pill">IP69</span>
+    </div>
+  </div>
+  <div class="qs-card c-o">
+    <div class="qs-brand">OnePlus</div>
+    <div class="qs-name">Ace 6T</div>
+    <div class="qs-price">€320</div>
+    <div class="qs-date">2025年12月 · 在售</div>
+    <div class="qs-pills">
+      <span class="qs-pill">SD 8 Gen 5</span>
+      <span class="qs-pill">8300mAh</span>
+      <span class="qs-pill">165Hz</span>
+      <span class="qs-pill">100W快充</span>
+      <span class="qs-pill">IP69K</span>
+    </div>
+  </div>
+  <div class="qs-card c-x">
+    <div class="qs-brand">Xiaomi</div>
+    <div class="qs-name">15 Pro</div>
+    <div class="qs-price">€690</div>
+    <div class="qs-date">2024年10月 · 在售</div>
+    <div class="qs-pills">
+      <span class="qs-pill">2K屏幕</span>
+      <span class="qs-pill">50W无线充</span>
+      <span class="qs-pill">徕卡影像</span>
+      <span class="qs-pill">5× 长焦</span>
+      <span class="qs-pill">卫星通信</span>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION NAV -->
+<div class="section-nav">
+  <a href="#screen" data-s="screen">屏幕</a>
+  <a href="#perf" data-s="perf">性能</a>
+  <a href="#camera" data-s="camera">影像</a>
+  <a href="#battery" data-s="battery">电池</a>
+  <a href="#connectivity" data-s="connectivity">连接</a>
+  <a href="#design" data-s="design">外观</a>
+  <a href="#verdict" data-s="verdict">总结</a>
+</div>
+
+<!-- SCREEN -->
+<div id="screen" class="cmp-wrap">
+  <div class="cmp-head"><div class="cmp-head-icon">📱</div><h2>屏幕显示</h2></div>
+  <table>
+    <thead>
+      <tr><th>参数</th><th class="c-r">Realme Neo8</th><th class="c-o">OnePlus Ace 6T</th><th class="c-x">Xiaomi 15 Pro</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>面板类型</td>
+        <td>AMOLED</td>
+        <td>AMOLED</td>
+        <td class="w">LTPO AMOLED <span class="v-badge v-best">LTPO</span></td>
+      </tr>
+      <tr>
+        <td>尺寸</td>
+        <td>6.78"</td>
+        <td class="w">6.83" <span class="v-badge v-best">最大</span></td>
+        <td>6.73"</td>
+      </tr>
+      <tr>
+        <td>分辨率</td>
+        <td>1272×2772</td>
+        <td>1272×2800</td>
+        <td class="w">1440×3200 <span class="v-badge v-best">2K</span></td>
+      </tr>
+      <tr>
+        <td>像素密度</td>
+        <td>450 ppi</td>
+        <td>450 ppi</td>
+        <td class="w">522 ppi <span class="v-badge v-best">最清晰</span></td>
+      </tr>
+      <tr>
+        <td>刷新率</td>
+        <td class="w">165 Hz</td>
+        <td class="w">165 Hz</td>
+        <td>120 Hz</td>
+      </tr>
+      <tr>
+        <td>峰值亮度</td>
+        <td class="w">6500 cd/m² <span class="v-badge v-best">最亮</span></td>
+        <td>3600 cd/m²</td>
+        <td>3200 cd/m²</td>
+      </tr>
+      <tr>
+        <td>色彩</td>
+        <td>10亿色</td>
+        <td>10亿色 · HDR10+ · HDR Vivid</td>
+        <td class="w">680亿色 · Dolby Vision · HDR10+ <span class="v-badge v-best">顶级</span></td>
+      </tr>
+      <tr>
+        <td>PWM调光</td>
+        <td>—</td>
+        <td>是</td>
+        <td class="w">1920Hz PWM</td>
+      </tr>
+      <tr>
+        <td>屏占比</td>
+        <td>≈ 90%</td>
+        <td>≈ 90.1%</td>
+        <td>≈ 89.7%</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- PERFORMANCE -->
+<div id="perf" class="cmp-wrap">
+  <div class="cmp-head"><div class="cmp-head-icon">⚡</div><h2>性能配置</h2></div>
+  <table>
+    <thead>
+      <tr><th>参数</th><th class="c-r">Realme Neo8</th><th class="c-o">OnePlus Ace 6T</th><th class="c-x">Xiaomi 15 Pro</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>芯片组</td>
+        <td class="w">Snapdragon 8 Gen 5</td>
+        <td class="w">Snapdragon 8 Gen 5</td>
+        <td>Snapdragon 8 Elite (Gen 4)</td>
+      </tr>
+      <tr>
+        <td>制程</td>
+        <td class="w">3 nm</td>
+        <td class="w">3 nm</td>
+        <td>3 nm</td>
+      </tr>
+      <tr>
+        <td>CPU主频</td>
+        <td class="w">3.8 GHz (Oryon V3)</td>
+        <td class="w">3.8 GHz (Oryon V3)</td>
+        <td>—</td>
+      </tr>
+      <tr>
+        <td>GPU</td>
+        <td class="w">Adreno 829</td>
+        <td class="w">Adreno 829</td>
+        <td>Adreno 830</td>
+      </tr>
+      <tr>
+        <td>RAM</td>
+        <td>12 / 16 GB</td>
+        <td>12 / 16 GB</td>
+        <td>12 / 16 GB</td>
+      </tr>
+      <tr>
+        <td>RAM类型</td>
+        <td>LPDDR5X</td>
+        <td>LPDDR5X</td>
+        <td>LPDDR5X</td>
+      </tr>
+      <tr>
+        <td>存储</td>
+        <td>256GB / 512GB / 1TB</td>
+        <td>256GB / 512GB / 1TB</td>
+        <td>256GB / 512GB / 1TB</td>
+      </tr>
+      <tr>
+        <td>存储类型</td>
+        <td class="w">UFS 4.1</td>
+        <td class="w">UFS 4.1</td>
+        <td>UFS 4.0</td>
+      </tr>
+      <tr>
+        <td>存储扩展</td>
+        <td>否</td>
+        <td>否</td>
+        <td>否</td>
+      </tr>
+      <tr>
+        <td>操作系统</td>
+        <td class="w">Android 16</td>
+        <td class="w">Android 16</td>
+        <td>Android 15</td>
+      </tr>
+      <tr>
+        <td>系统UI</td>
+        <td>Realme UI 7.0</td>
+        <td>ColorOS 16</td>
+        <td>HyperOS 2</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- CAMERA -->
+<div id="camera" class="cmp-wrap">
+  <div class="cmp-head"><div class="cmp-head-icon">📷</div><h2>影像系统</h2></div>
+  <table>
+    <thead>
+      <tr><th>参数</th><th class="c-r">Realme Neo8</th><th class="c-o">OnePlus Ace 6T</th><th class="c-x">Xiaomi 15 Pro</th></tr>
+    </thead>
+    <tbody>
+      <tr class="section-row"><td colspan="4">后置摄像头</td></tr>
+      <tr>
+        <td>配置</td>
+        <td>三摄</td>
+        <td>双摄</td>
+        <td>三摄</td>
+      </tr>
+      <tr>
+        <td>主摄</td>
+        <td>50MP ƒ/1.8 24mm<br>1/1.56" · OIS · PDAF</td>
+        <td>50MP ƒ/1.8 24mm<br>1/1.56" · OIS · PDAF</td>
+        <td class="w">50MP ƒ/1.4 23mm<br>1/1.31" · OIS · Dual-PD <span class="v-badge v-best">大底</span></td>
+      </tr>
+      <tr>
+        <td>长焦</td>
+        <td class="w">50MP ƒ/2.8 80mm<br>潜望式 · 3.5×光变 · OIS <span class="v-badge v-good">有长焦</span></td>
+        <td style="color:var(--red)">无长焦 <span class="v-badge v-weak">缺</span></td>
+        <td class="w">50MP ƒ/2.5 120mm<br>潜望式 · 5×光变 · OIS <span class="v-badge v-best">5×</span></td>
+      </tr>
+      <tr>
+        <td>超广角</td>
+        <td>8MP ƒ/2.2 16mm 112°<br>1/4.0"</td>
+        <td>8MP ƒ/2.2 16mm 112°<br>1/4.0"</td>
+        <td class="w">50MP ƒ/2.2 14mm 115°<br>AF <span class="v-badge v-best">高像素</span></td>
+      </tr>
+      <tr>
+        <td>影像品牌</td>
+        <td>—</td>
+        <td>—</td>
+        <td class="w">徕卡 <span class="v-badge v-best">Leica</span></td>
+      </tr>
+      <tr>
+        <td>闪光灯</td>
+        <td>LED</td>
+        <td>LED</td>
+        <td>双LED双色温</td>
+      </tr>
+      <tr class="section-row"><td colspan="4">视频能力</td></tr>
+      <tr>
+        <td>最高分辨率</td>
+        <td>4K@60fps</td>
+        <td>4K@120fps</td>
+        <td class="w">8K@30fps <span class="v-badge v-best">8K</span></td>
+      </tr>
+      <tr>
+        <td>慢动作</td>
+        <td>1080p@120fps</td>
+        <td>1080p@120fps</td>
+        <td class="w">720p@1920fps</td>
+      </tr>
+      <tr>
+        <td>EIS防抖</td>
+        <td>—</td>
+        <td>Gyro-EIS + OIS</td>
+        <td>Gyro-EIS + OIS</td>
+      </tr>
+      <tr class="section-row"><td colspan="4">前置摄像头</td></tr>
+      <tr>
+        <td>规格</td>
+        <td>16MP ƒ/2.4 23mm</td>
+        <td>16MP ƒ/2.4 23mm</td>
+        <td class="w">32MP ƒ/2.0 22mm <span class="v-badge v-best">高像素</span></td>
+      </tr>
+      <tr>
+        <td>前置视频</td>
+        <td>1080p@60fps</td>
+        <td>1080p@30fps</td>
+        <td class="w">4K@60fps</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- BATTERY -->
+<div id="battery" class="cmp-wrap">
+  <div class="cmp-head"><div class="cmp-head-icon">🔋</div><h2>电池与充电</h2></div>
+  <table>
+    <thead>
+      <tr><th>参数</th><th class="c-r">Realme Neo8</th><th class="c-o">OnePlus Ace 6T</th><th class="c-x">Xiaomi 15 Pro</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>电池类型</td>
+        <td>Si/C Li-Ion</td>
+        <td>Si/C Li-Ion</td>
+        <td>Si/C Li-Ion</td>
+      </tr>
+      <tr>
+        <td>容量</td>
+        <td>8000 mAh</td>
+        <td class="w">8300 mAh <span class="v-badge v-best">最大</span></td>
+        <td>6100 mAh</td>
+      </tr>
+      <tr>
+        <td>有线快充</td>
+        <td>80W</td>
+        <td class="w">100W <span class="v-badge v-best">最快</span></td>
+        <td>90W</td>
+      </tr>
+      <tr>
+        <td>充电速度</td>
+        <td>—</td>
+        <td class="w">23分钟充至50%</td>
+        <td>—</td>
+      </tr>
+      <tr>
+        <td>无线充电</td>
+        <td style="color:var(--red)">不支持</td>
+        <td style="color:var(--red)">不支持</td>
+        <td class="w">50W无线 <span class="v-badge v-best">唯一</span></td>
+      </tr>
+      <tr>
+        <td>反向充电</td>
+        <td>—</td>
+        <td>反向有线充电</td>
+        <td class="w">反向无线充电</td>
+      </tr>
+      <tr>
+        <td>旁路充电</td>
+        <td>—</td>
+        <td class="w">是 <span class="v-badge v-good">护电池</span></td>
+        <td>—</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- CONNECTIVITY -->
+<div id="connectivity" class="cmp-wrap">
+  <div class="cmp-head"><div class="cmp-head-icon">📡</div><h2>连接与接口</h2></div>
+  <table>
+    <thead>
+      <tr><th>参数</th><th class="c-r">Realme Neo8</th><th class="c-o">OnePlus Ace 6T</th><th class="c-x">Xiaomi 15 Pro</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>SIM</td>
+        <td>双Nano-SIM</td>
+        <td>双Nano-SIM</td>
+        <td>双Nano-SIM</td>
+      </tr>
+      <tr>
+        <td>5G</td>
+        <td>14频段</td>
+        <td>14频段</td>
+        <td class="w">23频段 <span class="v-badge v-best">最全</span></td>
+      </tr>
+      <tr>
+        <td>Wi-Fi</td>
+        <td>Wi-Fi 7</td>
+        <td>Wi-Fi 7</td>
+        <td class="w">Wi-Fi 7 · 三频</td>
+      </tr>
+      <tr>
+        <td>蓝牙</td>
+        <td class="w">v6.0 <span class="v-badge v-best">最新</span></td>
+        <td>v5.4</td>
+        <td>v5.4</td>
+      </tr>
+      <tr>
+        <td>USB</td>
+        <td>Type-C 2.0</td>
+        <td>Type-C 2.0 · OTG</td>
+        <td class="w">Type-C 3.2 Gen 2 · DP · OTG <span class="v-badge v-best">最快</span></td>
+      </tr>
+      <tr>
+        <td>NFC</td>
+        <td>是</td>
+        <td>是</td>
+        <td>是</td>
+      </tr>
+      <tr>
+        <td>定位</td>
+        <td>GPS/北斗/GLONASS<br>GALILEO/QZSS/NavIC</td>
+        <td>GPS/北斗/GLONASS<br>GALILEO/QZSS</td>
+        <td>GPS/北斗/GLONASS<br>GALILEO/QZSS</td>
+      </tr>
+      <tr>
+        <td>卫星通信</td>
+        <td style="color:var(--red)">不支持</td>
+        <td style="color:var(--red)">不支持</td>
+        <td class="w">双向卫星通信 <span class="v-badge v-best">独家</span></td>
+      </tr>
+      <tr>
+        <td>耳机接口</td>
+        <td>无</td>
+        <td>无</td>
+        <td>无</td>
+      </tr>
+      <tr>
+        <td>音频</td>
+        <td>立体声 · 24bit/192kHz</td>
+        <td>立体声</td>
+        <td class="w">立体声 · 24bit/192kHz · Snapdragon Sound</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- DESIGN -->
+<div id="design" class="cmp-wrap">
+  <div class="cmp-head"><div class="cmp-head-icon">✋</div><h2>外观与防护</h2></div>
+  <table>
+    <thead>
+      <tr><th>参数</th><th class="c-r">Realme Neo8</th><th class="c-o">OnePlus Ace 6T</th><th class="c-x">Xiaomi 15 Pro</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>尺寸</td>
+        <td>162×77.1×8.3mm</td>
+        <td>163.4×77×8.1mm</td>
+        <td>161.3×75.3×8.4mm</td>
+      </tr>
+      <tr>
+        <td>重量</td>
+        <td>215g</td>
+        <td class="w">211g <span class="v-badge v-good">最轻</span></td>
+        <td>213g</td>
+      </tr>
+      <tr>
+        <td>厚度</td>
+        <td>8.3mm</td>
+        <td class="w">8.1mm <span class="v-badge v-good">最薄</span></td>
+        <td>8.4mm</td>
+      </tr>
+      <tr>
+        <td>材质</td>
+        <td>玻璃后盖+铝框+玻璃前面</td>
+        <td>玻璃/玻纤后盖+铝框+Crystal Shield</td>
+        <td>—</td>
+      </tr>
+      <tr>
+        <td>颜色</td>
+        <td>灰 · 紫 · 白</td>
+        <td>黑 · 绿 · 紫</td>
+        <td>黑 · 绿 · 银 · 白</td>
+      </tr>
+      <tr>
+        <td>防护认证</td>
+        <td class="w">IP68 + IP69 <span class="v-badge v-best">高压水</span></td>
+        <td class="w">IP68 + IP69K <span class="v-badge v-best">最高</span></td>
+        <td>IP68</td>
+      </tr>
+      <tr>
+        <td>防水能力</td>
+        <td class="w">2米 / 72小时 <span class="v-badge v-best">最强</span></td>
+        <td>1.5米 / 30分钟</td>
+        <td>1.5米 / 30分钟</td>
+      </tr>
+      <tr>
+        <td>屏幕保护</td>
+        <td>—</td>
+        <td>Crystal Shield玻璃</td>
+        <td>防碎玻璃</td>
+      </tr>
+      <tr>
+        <td>指纹</td>
+        <td>屏下超声波</td>
+        <td>屏下超声波</td>
+        <td>屏下超声波</td>
+      </tr>
+      <tr>
+        <td>特色</td>
+        <td>背面RGB LED灯</td>
+        <td>陶瓷质感涂层</td>
+        <td>—</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- VERDICT -->
+<div id="verdict">
+  <div class="verdict">
+    <div class="v-card v-r">
+      <div class="v-card-brand">Realme</div>
+      <h3>Neo8</h3>
+      <p><strong style="color:var(--c-realme)">最具性价比的全能选手。</strong>€280拿到SD 8 Gen 5 + 8000mAh + 潜望长焦 + 6500nit + IP69，配置表几乎找不到短板。3.5×潜望长焦在这个价位段极为罕见，防水能力三台中最强。适合预算有限但追求全面配置的用户。</p>
+      <div class="v-score">9.0</div>
+      <div class="v-score-label">性价比评分</div>
+    </div>
+    <div class="v-card v-o">
+      <div class="v-card-brand">OnePlus</div>
+      <h3>Ace 6T</h3>
+      <p><strong style="color:var(--c-oneplus)">续航与快充的极致追求。</strong>8300mAh + 100W快充 + 旁路充电，是三台中续航最强、充电最快的选择。165Hz大屏+SD 8 Gen 5性能拉满。但<strong style="color:var(--red)">缺少长焦镜头</strong>是最大遗憾，影像系统相对单薄。适合重度使用、不在乎拍照的用户。</p>
+      <div class="v-score">8.5</div>
+      <div class="v-score-label">性价比评分</div>
+    </div>
+    <div class="v-card v-x">
+      <div class="v-card-brand">Xiaomi</div>
+      <h3>15 Pro</h3>
+      <p><strong style="color:var(--c-xiaomi)">全面旗舰，影像标杆。</strong>€690的价格换来了2K LTPO屏、徕卡三摄全焦段（含5×潜望）、50W无线充、卫星通信、USB 3.2 + DP输出。影像系统碾压另外两台，是唯一真正意义上的「旗舰体验」。但电池容量最小，且无165Hz高刷。</p>
+      <div class="v-score">8.8</div>
+      <div class="v-score-label">综合体验评分</div>
+    </div>
+  </div>
+</div>
+
+<!-- RECOMMENDATION -->
+<div class="rec">
+  <h2>选购建议：你该买哪台？</h2>
+  <div class="rec-grid">
+    <div class="rec-item">
+      <h4>💰 预算优先 → Realme Neo8</h4>
+      <p>€280买骁龙8 Gen 5 + 潜望长焦 + 8000mAh + 6500nit屏 + IP69，几乎是这个价位的「不可能三角」全部打破了。日常使用绝对够用，拍照也不差。性价比最高，没有之一。</p>
+    </div>
+    <div class="rec-item">
+      <h4>🔋 续航焦虑 → OnePlus Ace 6T</h4>
+      <p>8300mAh + 100W + 旁路充电，重度使用也能轻松撑一天。但要注意没有长焦镜头，如果你经常需要拍远景或人像特写，这台会让你失望。适合「手机是生产力工具而非创作工具」的用户。</p>
+    </div>
+    <div class="rec-item">
+      <h4>📷 影像体验 → Xiaomi 15 Pro</h4>
+      <p>徕卡全焦段三摄 + 8K视频 + 32MP自拍，影像能力碾压另外两台。2K LTPO屏+50W无线充+卫星通信也是独有的旗舰特性。如果你在乎拍照质量、屏幕精细度和全面体验，多花的€400值得。但续航和充电速度不如前两台。</p>
+    </div>
+  </div>
+</div>
+
+</main>
+
+<footer>
+  <p><em>三机对比</em> · Realme Neo8 · OnePlus Ace 6T · Xiaomi 15 Pro</p>
+  <p style="margin-top:.3rem">数据来源：<a href="https://zh.kalvo.com/" target="_blank" rel="noopener">zh.kalvo.com</a> · 参数以官方公布为准</p>
+  <p style="margin-top:.5rem;color:var(--gold-d)">2025</p>
+</footer>
+
+<button class="btt" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+
+<script>
+document.addEventListener('DOMContentLoaded',()=>{
+  const obs=new IntersectionObserver(entries=>{
+    entries.forEach(e=>{
+      if(e.isIntersecting){e.target.classList.add('revealed')}
+    });
+  },{threshold:.1,rootMargin:'0px 0px -20px 0px'});
+  document.querySelectorAll('.qs-card,.v-card').forEach(el=>obs.observe(el));
+
+  const navLinks=document.querySelectorAll('.nav a[data-s],.section-nav a[data-s]');
+  const secs=[];
+  navLinks.forEach(a=>{
+    const id=a.getAttribute('data-s');
+    const el=document.getElementById(id);
+    if(el)secs.push({id,el,link:a});
+  });
+  const updateNav=()=>{
+    const y=window.scrollY+90;
+    let cur='';
+    secs.forEach(s=>{if(s.el.offsetTop<=y)cur=s.id});
+    navLinks.forEach(a=>a.classList.toggle('active',a.getAttribute('data-s')===cur));
+  };
+  window.addEventListener('scroll',updateNav,{passive:true});
+  updateNav();
+
+  document.querySelectorAll('a[href^="#"]').forEach(a=>{
+    a.addEventListener('click',e=>{
+      e.preventDefault();
+      const t=document.querySelector(a.getAttribute('href'));
+      if(t)window.scrollTo({top:t.getBoundingClientRect().top+window.scrollY-80,behavior:'smooth'});
+    });
+  });
+
+  const btt=document.querySelector('.btt');
+  window.addEventListener('scroll',()=>btt.classList.toggle('show',window.scrollY>300),{passive:true});
+});
+</script>
+</body>
+</html>

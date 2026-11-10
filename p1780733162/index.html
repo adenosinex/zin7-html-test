@@ -1,0 +1,1863 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prompt Vault</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&family=DM+Mono:wght@300;400;500&family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #f5f1ea;
+            --bg-warm: #efe9df;
+            --surface: #ffffff;
+            --surface-alt: #faf8f5;
+            --border: #ddd6ca;
+            --border-light: #ebe5da;
+            --accent: #b8860b;
+            --accent-light: #daa520;
+            --accent-bg: rgba(184, 134, 11, 0.06);
+            --accent-bg-hover: rgba(184, 134, 11, 0.12);
+            --text-primary: #2c2825;
+            --text-secondary: #5a5349;
+            --text-muted: #9a9085;
+            --text-placeholder: #b5ad9f;
+            --danger: #c0392b;
+            --danger-bg: rgba(192, 57, 43, 0.06);
+            --success: #27ae60;
+            --success-bg: rgba(39, 174, 96, 0.08);
+            --shadow-sm: 0 1px 3px rgba(44, 40, 37, 0.04);
+            --shadow-md: 0 4px 16px rgba(44, 40, 37, 0.06);
+            --shadow-lg: 0 12px 40px rgba(44, 40, 37, 0.1);
+            --radius: 8px;
+            --radius-lg: 12px;
+            --transition: 0.2s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Sans SC', 'Source Serif 4', sans-serif;
+            background: var(--bg);
+            color: var(--text-primary);
+            min-height: 100vh;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background: radial-gradient(ellipse at 15% 20%, rgba(218, 165, 32, 0.04) 0%, transparent 50%),
+                radial-gradient(ellipse at 85% 80%, rgba(184, 134, 11, 0.03) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--text-muted);
+        }
+
+        .app {
+            position: relative;
+            z-index: 1;
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 48px 32px 80px;
+        }
+
+        .header {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            margin-bottom: 36px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .header h1 {
+            font-family: 'Instrument Serif', serif;
+            font-size: 44px;
+            font-weight: 400;
+            letter-spacing: -0.02em;
+            color: var(--text-primary);
+            line-height: 1;
+        }
+
+        .header h1 em {
+            color: var(--accent);
+            font-style: italic;
+        }
+
+        .header .subtitle {
+            font-family: 'DM Mono', monospace;
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 6px;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+
+        .btn {
+            font-family: 'DM Mono', monospace;
+            font-size: 12px;
+            font-weight: 400;
+            padding: 9px 16px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            background: var(--surface);
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all var(--transition);
+            letter-spacing: 0.03em;
+            white-space: nowrap;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: var(--shadow-sm);
+            user-select: none;
+            outline: none;
+        }
+
+        .btn:hover:not(:disabled) {
+            background: var(--surface-alt);
+            color: var(--text-primary);
+            border-color: var(--text-muted);
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn:active:not(:disabled) {
+            transform: scale(0.97);
+        }
+        .btn:focus-visible {
+            outline: 2px solid var(--accent);
+            outline-offset: 2px;
+        }
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: #fff;
+            border-color: var(--accent);
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            background: var(--accent-light);
+            border-color: var(--accent-light);
+            color: #fff;
+        }
+
+        .btn-ghost {
+            background: transparent;
+            border-color: transparent;
+            box-shadow: none;
+            padding: 6px 10px;
+            color: var(--text-muted);
+        }
+
+        .btn-ghost:hover:not(:disabled) {
+            background: var(--accent-bg);
+            color: var(--accent);
+            border-color: transparent;
+            box-shadow: none;
+        }
+
+        .btn-sm {
+            font-size: 11px;
+            padding: 5px 10px;
+            gap: 4px;
+        }
+
+        .btn-icon {
+            width: 34px;
+            height: 34px;
+            padding: 0;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+        }
+
+        .toolbar {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .search-box {
+            flex: 1;
+            min-width: 200px;
+            position: relative;
+        }
+
+        .search-box input {
+            width: 100%;
+            font-family: 'DM Mono', monospace;
+            font-size: 13px;
+            padding: 11px 14px 11px 38px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            color: var(--text-primary);
+            outline: none;
+            transition: all var(--transition);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .search-box input::placeholder {
+            color: var(--text-placeholder);
+        }
+
+        .search-box input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-bg);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            font-size: 15px;
+            pointer-events: none;
+            font-family: 'DM Mono', monospace;
+        }
+
+        .filter-group {
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+        }
+
+        .filter-tag {
+            font-family: 'DM Mono', monospace;
+            font-size: 11px;
+            padding: 7px 14px;
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            background: transparent;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all var(--transition);
+            letter-spacing: 0.03em;
+            user-select: none;
+            outline: none;
+        }
+
+        .filter-tag:hover {
+            border-color: var(--text-muted);
+            color: var(--text-secondary);
+            background: var(--surface);
+        }
+        .filter-tag:focus-visible {
+            outline: 2px solid var(--accent);
+            outline-offset: 2px;
+        }
+
+        .filter-tag.active {
+            background: var(--accent-bg-hover);
+            border-color: var(--accent);
+            color: var(--accent);
+            font-weight: 500;
+        }
+
+        .stats-bar {
+            font-family: 'DM Mono', monospace;
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            letter-spacing: 0.04em;
+        }
+
+        .sync-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            transition: color 0.3s;
+        }
+        .sync-status.synced {
+            color: var(--success);
+        }
+        .sync-status.syncing {
+            color: var(--accent);
+            animation: pulse 1.2s ease-in-out infinite;
+        }
+        .sync-status.offline {
+            color: var(--danger);
+        }
+
+        @keyframes pulse {
+            0%,
+            100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.4;
+            }
+        }
+
+        .prompt-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .prompt-card {
+            background: var(--surface);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius);
+            padding: 18px 20px;
+            cursor: pointer;
+            transition: all var(--transition);
+            box-shadow: var(--shadow-sm);
+            opacity: 0;
+            animation: fadeUp 0.35s ease forwards;
+            position: relative;
+        }
+
+        .prompt-card::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            border-radius: var(--radius) 0 0 var(--radius);
+            background: transparent;
+            transition: background var(--transition);
+        }
+
+        .prompt-card:hover {
+            border-color: var(--border);
+            box-shadow: var(--shadow-md);
+            transform: translateY(-1px);
+        }
+
+        .prompt-card:hover::before {
+            background: var(--accent);
+        }
+
+        .prompt-card:nth-child(1) {
+            animation-delay: 0s;
+        }
+        .prompt-card:nth-child(2) {
+            animation-delay: 0.025s;
+        }
+        .prompt-card:nth-child(3) {
+            animation-delay: 0.05s;
+        }
+        .prompt-card:nth-child(4) {
+            animation-delay: 0.075s;
+        }
+        .prompt-card:nth-child(5) {
+            animation-delay: 0.1s;
+        }
+        .prompt-card:nth-child(6) {
+            animation-delay: 0.125s;
+        }
+        .prompt-card:nth-child(7) {
+            animation-delay: 0.15s;
+        }
+        .prompt-card:nth-child(8) {
+            animation-delay: 0.175s;
+        }
+        .prompt-card:nth-child(9) {
+            animation-delay: 0.2s;
+        }
+        .prompt-card:nth-child(10) {
+            animation-delay: 0.225s;
+        }
+
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .card-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 12px;
+            margin-bottom: 6px;
+        }
+
+        .card-title {
+            font-weight: 700;
+            font-size: 15px;
+            color: var(--text-primary);
+            line-height: 1.4;
+        }
+
+        .card-badges {
+            display: flex;
+            gap: 5px;
+            flex-shrink: 0;
+            align-items: center;
+        }
+
+        .badge {
+            font-family: 'DM Mono', monospace;
+            font-size: 10px;
+            padding: 2px 9px;
+            border-radius: 10px;
+            background: var(--accent-bg);
+            color: var(--accent);
+            border: 1px solid rgba(184, 134, 11, 0.12);
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+        }
+
+        .card-preview {
+            font-family: 'DM Mono', monospace;
+            font-size: 12px;
+            color: var(--text-muted);
+            line-height: 1.6;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            margin-bottom: 10px;
+            word-break: break-word;
+        }
+
+        .card-bottom {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-date {
+            font-family: 'DM Mono', monospace;
+            font-size: 10px;
+            color: var(--text-muted);
+            letter-spacing: 0.04em;
+        }
+
+        .card-actions {
+            display: flex;
+            gap: 2px;
+            opacity: 0;
+            transition: opacity var(--transition);
+        }
+
+        .prompt-card:hover .card-actions {
+            opacity: 1;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 80px 20px;
+            color: var(--text-muted);
+        }
+
+        .empty-icon {
+            font-family: 'Instrument Serif', serif;
+            font-size: 56px;
+            color: var(--border);
+            margin-bottom: 12px;
+            font-style: italic;
+        }
+
+        .empty-state p {
+            font-family: 'DM Mono', monospace;
+            font-size: 13px;
+        }
+
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(44, 40, 37, 0.3);
+            z-index: 1000;
+            backdrop-filter: blur(6px);
+            animation: fadeIn 0.2s ease;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            padding-top: 8vh;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        .modal {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            width: 92%;
+            max-width: 600px;
+            max-height: 85vh;
+            overflow-y: auto;
+            animation: slideUp 0.25s ease;
+            box-shadow: var(--shadow-lg);
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(16px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .modal-head {
+            padding: 24px 28px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            background: var(--surface);
+            z-index: 5;
+            border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+        }
+
+        .modal-head h2 {
+            font-family: 'Instrument Serif', serif;
+            font-size: 26px;
+            font-weight: 400;
+            color: var(--text-primary);
+        }
+
+        .modal-body {
+            padding: 20px 28px 28px;
+        }
+
+        .field {
+            margin-bottom: 16px;
+        }
+
+        .field label {
+            display: block;
+            font-family: 'DM Mono', monospace;
+            font-size: 11px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 6px;
+        }
+
+        .field input,
+        .field select {
+            width: 100%;
+            font-family: 'DM Mono', monospace;
+            font-size: 13px;
+            padding: 10px 14px;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            color: var(--text-primary);
+            outline: none;
+            transition: all var(--transition);
+        }
+
+        .field input:focus,
+        .field textarea:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-bg);
+        }
+
+        .field textarea {
+            width: 100%;
+            font-family: 'DM Mono', monospace;
+            font-size: 13px;
+            padding: 12px 14px;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            color: var(--text-primary);
+            outline: none;
+            resize: vertical;
+            min-height: 200px;
+            line-height: 1.7;
+            transition: all var(--transition);
+        }
+
+        .field input::placeholder,
+        .field textarea::placeholder {
+            color: var(--text-placeholder);
+        }
+
+        .form-foot {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px;
+            padding-top: 16px;
+            border-top: 1px solid var(--border-light);
+            position: sticky;
+            bottom: 0;
+            background: var(--surface);
+            z-index: 5;
+        }
+
+        .form-foot-right {
+            display: flex;
+            gap: 8px;
+        }
+
+        .shortcut-hint {
+            font-family: 'DM Mono', monospace;
+            font-size: 11px;
+            color: var(--text-muted);
+            letter-spacing: 0.03em;
+        }
+
+        .kbd {
+            display: inline-block;
+            font-family: 'DM Mono', monospace;
+            font-size: 10px;
+            padding: 2px 6px;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            color: var(--text-muted);
+            margin: 0 2px;
+        }
+
+        .detail-category {
+            margin-bottom: 4px;
+        }
+
+        .detail-notes {
+            font-family: 'DM Mono', monospace;
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-bottom: 14px;
+            font-style: italic;
+        }
+
+        .detail-body {
+            font-family: 'DM Mono', monospace;
+            font-size: 13px;
+            line-height: 1.8;
+            color: var(--text-secondary);
+            background: var(--bg);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius);
+            padding: 16px 18px;
+            white-space: pre-wrap;
+            word-break: break-word;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .detail-foot {
+            display: flex;
+            gap: 8px;
+            margin-top: 16px;
+        }
+
+        .toast-box {
+            position: fixed;
+            bottom: 28px;
+            right: 28px;
+            z-index: 2000;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            pointer-events: none;
+        }
+
+        .toast {
+            font-family: 'DM Mono', monospace;
+            font-size: 12px;
+            padding: 10px 18px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            color: var(--text-primary);
+            animation: toastIn 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: var(--shadow-lg);
+            pointer-events: auto;
+        }
+
+        .toast.ok {
+            border-left: 3px solid var(--success);
+        }
+        .toast.err {
+            border-left: 3px solid var(--danger);
+        }
+
+        @keyframes toastIn {
+            from {
+                opacity: 0;
+                transform: translateX(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        #csvFile {
+            display: none;
+        }
+
+        .confirm-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(44, 40, 37, 0.3);
+            z-index: 1100;
+            backdrop-filter: blur(4px);
+            align-items: center;
+            justify-content: center;
+        }
+        .confirm-overlay.active {
+            display: flex;
+        }
+        .confirm-box {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 28px;
+            width: 360px;
+            text-align: center;
+            box-shadow: var(--shadow-lg);
+            animation: slideUp 0.2s ease;
+        }
+        .confirm-box p {
+            font-size: 15px;
+            color: var(--text-primary);
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+        .confirm-box .btns {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+        }
+
+        @media (max-width: 640px) {
+            .app {
+                padding: 24px 16px 60px;
+            }
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 14px;
+            }
+            .header h1 {
+                font-size: 34px;
+            }
+            .header-actions {
+                width: 100%;
+                flex-wrap: wrap;
+            }
+            .header-actions .btn {
+                flex: 1 1 auto;
+                justify-content: center;
+                min-width: 80px;
+            }
+            .toolbar {
+                flex-direction: column;
+            }
+            .search-box {
+                min-width: 100%;
+            }
+            .card-actions {
+                opacity: 1;
+            }
+            .modal {
+                width: 96%;
+                max-height: 90vh;
+            }
+            .modal-overlay.active {
+                padding-top: 4vh;
+            }
+            .toast-box {
+                right: 12px;
+                bottom: 16px;
+                left: 12px;
+                align-items: stretch;
+            }
+            .toast {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app">
+        <div class="header">
+            <div>
+                <h1>Prompt <em>Vault</em></h1>
+                <div class="subtitle">Online · Auto Sync · CSV Import</div>
+            </div>
+            <div class="header-actions">
+                <button class="btn" id="btnExport">↓ Export CSV</button>
+                <button class="btn" id="btnImport">↑ Import CSV</button>
+                <input type="file" id="csvFile" accept=".csv">
+                <button class="btn btn-primary" id="btnNew">+ New</button>
+            </div>
+        </div>
+
+        <div class="toolbar">
+            <div class="search-box">
+                <span class="search-icon">⌕</span>
+                <input type="text" id="searchInput" placeholder="Search prompts... (Ctrl+K)" autocomplete="off">
+            </div>
+            <div class="filter-group" id="filterGroup"></div>
+        </div>
+
+        <div class="stats-bar">
+            <span id="statsText">0 prompts</span>
+            <span id="storageInfo">
+                <span class="sync-status syncing" id="syncStatus">☁️ Syncing...</span>
+                <span id="localSize">0 KB</span>
+            </span>
+        </div>
+
+        <div class="prompt-grid" id="promptGrid"></div>
+    </div>
+
+    <div class="modal-overlay" id="editOverlay" role="dialog" aria-modal="true" aria-labelledby="editHeading">
+        <div class="modal">
+            <div class="modal-head">
+                <h2 id="editHeading">New Prompt</h2>
+                <button class="btn btn-icon btn-ghost" id="editClose" aria-label="关闭">✕</button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="fieldId" value="">
+                <div class="field">
+                    <label for="fieldTitle">Title</label>
+                    <input type="text" id="fieldTitle" placeholder="Prompt name..." autocomplete="off">
+                </div>
+                <div class="field">
+                    <label for="fieldCategory">Category</label>
+                    <input type="text" id="fieldCategory" placeholder="Writing, Code, Translation..." list="catList" autocomplete="off">
+                    <datalist id="catList"></datalist>
+                </div>
+                <div class="field">
+                    <label for="fieldContent">Content</label>
+                    <textarea id="fieldContent" placeholder="Paste your prompt here..."></textarea>
+                </div>
+                <div class="field">
+                    <label for="fieldNotes">Notes (optional)</label>
+                    <input type="text" id="fieldNotes" placeholder="Usage tips, model compatibility..." autocomplete="off">
+                </div>
+                <div class="form-foot">
+                    <span class="shortcut-hint"><kbd>Ctrl</kbd>+<kbd>Enter</kbd> to save</span>
+                    <div class="form-foot-right">
+                        <button class="btn" id="editCancel" type="button">Cancel</button>
+                        <button class="btn btn-primary" id="editSave" type="button">Save</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="detailOverlay" role="dialog" aria-modal="true" aria-labelledby="detailHeading">
+        <div class="modal">
+            <div class="modal-head">
+                <h2 id="detailHeading">Prompt</h2>
+                <button class="btn btn-icon btn-ghost" id="detailClose" aria-label="关闭">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="detail-category" id="detailCat"></div>
+                <div class="detail-notes" id="detailNotes"></div>
+                <div class="detail-body" id="detailBody"></div>
+                <div class="detail-foot">
+                    <button class="btn btn-primary" id="detailCopy">Copy</button>
+                    <button class="btn" id="detailEdit">Edit</button>
+                    <button class="btn" id="detailDelete" style="color:var(--danger);border-color:var(--danger-bg);">Delete</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="confirm-overlay" id="confirmOverlay" role="dialog" aria-modal="true">
+        <div class="confirm-box">
+            <p id="confirmText">Are you sure?</p>
+            <div class="btns">
+                <button class="btn" id="confirmNo" type="button">Cancel</button>
+                <button class="btn btn-primary" id="confirmYes" type="button" style="background:var(--danger);border-color:var(--danger);">Confirm</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast-box" id="toastBox"></div>
+
+    <script>
+        (function() {
+            'use strict';
+
+            var KEY = 'prompt_vault_data';
+            var CLOUD_URL = '/api2/kv/prompt_vault_backup';
+            var data = [];
+            var filter = 'All';
+            var detailId = null;
+            var confirmCb = null;
+            var isSaving = false;
+
+            // ---- 云端同步状态 ----
+            var _syncTimer = null;
+            var _syncInProgress = false;
+            var _pendingSync = false;
+            var _skipNextSync = false;
+            var SYNC_DEBOUNCE_MS = 400;
+
+            function setSyncStatus(status) {
+                var el = document.getElementById('syncStatus');
+                if (!el) return;
+                el.className = 'sync-status ' + status;
+                switch (status) {
+                    case 'synced':
+                        el.textContent = '☁️ Synced';
+                        break;
+                    case 'syncing':
+                        el.textContent = '☁️ Syncing...';
+                        break;
+                    case 'offline':
+                        el.textContent = '⚠️ Offline';
+                        break;
+                    default:
+                        el.textContent = '☁️ ' + status;
+                }
+            }
+
+            // ---- 工具函数 ----
+            function $(id) { return document.getElementById(id); }
+
+            function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 10); }
+
+            function esc(s) {
+                var d = document.createElement('div');
+                d.textContent = String(s);
+                return d.innerHTML;
+            }
+
+            function fmtDate(ts) {
+                var d = new Date(ts);
+                var pad = function(n) { return n < 10 ? '0' + n : '' + n; };
+                return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()) +
+                    ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes());
+            }
+
+            // ---- Toast ----
+            function toast(msg, ok) {
+                var el = document.createElement('div');
+                el.className = 'toast ' + (ok !== false ? 'ok' : 'err');
+                el.textContent = msg;
+                var box = $('toastBox');
+                box.appendChild(el);
+                var allToasts = box.querySelectorAll('.toast');
+                if (allToasts.length > 4) {
+                    var oldest = allToasts[0];
+                    oldest.style.opacity = '0';
+                    oldest.style.transition = '0.2s';
+                    setTimeout(function() { if (oldest.parentNode) oldest.parentNode.removeChild(oldest); }, 200);
+                }
+                setTimeout(function() {
+                    el.style.opacity = '0';
+                    el.style.transition = '0.3s';
+                    setTimeout(function() { if (el.parentNode) el.parentNode.removeChild(el); }, 300);
+                }, 2200);
+            }
+
+            // ---- 确认对话框 ----
+            function showConfirm(msg, cb) {
+                $('confirmText').textContent = msg;
+                confirmCb = cb;
+                $('confirmOverlay').classList.add('active');
+                setTimeout(function() { $('confirmNo').focus(); }, 100);
+            }
+
+            function hideConfirm() {
+                $('confirmOverlay').classList.remove('active');
+                confirmCb = null;
+            }
+
+            // ---- 存储操作 ----
+            function load() {
+                try {
+                    var r = localStorage.getItem(KEY);
+                    if (!r) { data = []; return; }
+                    var parsed = JSON.parse(r);
+                    if (Array.isArray(parsed)) {
+                        data = parsed;
+                    } else {
+                        data = [];
+                        if (typeof parsed === 'object' && parsed !== null) {
+                            var values = Object.values(parsed);
+                            if (values.length && Array.isArray(values[0])) { data = values[0]; }
+                        }
+                    }
+                } catch (e) {
+                    console.warn('Prompt Vault: 数据加载失败，已重置。', e);
+                    data = [];
+                    try { localStorage.removeItem(KEY); } catch (ex) {}
+                }
+                data = data.filter(function(item) {
+                    return item && typeof item === 'object' && typeof item.id === 'string' && typeof item
+                        .title === 'string';
+                });
+            }
+
+            function saveLocal() {
+                try {
+                    var json = JSON.stringify(data);
+                    localStorage.setItem(KEY, json);
+                    updateStorage();
+                    return true;
+                } catch (e) {
+                    console.error('Prompt Vault: 保存失败。', e);
+                    toast('Save failed! Storage may be full.', false);
+                    return false;
+                }
+            }
+
+            function save() {
+                var ok = saveLocal();
+                if (ok && !_skipNextSync) {
+                    scheduleCloudSync();
+                }
+                if (_skipNextSync) {
+                    _skipNextSync = false;
+                }
+                return ok;
+            }
+
+            function updateStorage() {
+                try {
+                    var raw = localStorage.getItem(KEY) || '';
+                    var kb = (new Blob([raw]).size / 1024).toFixed(1);
+                    var sizeEl = document.getElementById('localSize');
+                    if (sizeEl) sizeEl.textContent = 'Local: ' + kb + ' KB';
+                } catch (e) {
+                    var sizeEl = document.getElementById('localSize');
+                    if (sizeEl) sizeEl.textContent = 'Local: ? KB';
+                }
+            }
+
+            // ---- 云端同步 ----
+            function scheduleCloudSync() {
+                _pendingSync = true;
+                if (_syncTimer) clearTimeout(_syncTimer);
+                _syncTimer = setTimeout(function() {
+                    _syncTimer = null;
+                    executeCloudSync();
+                }, SYNC_DEBOUNCE_MS);
+            }
+
+            function executeCloudSync() {
+                if (_syncInProgress) {
+                    scheduleCloudSync();
+                    return;
+                }
+                _syncInProgress = true;
+                _pendingSync = false;
+                setSyncStatus('syncing');
+
+                var payload = JSON.stringify({ payload: data });
+                fetch(CLOUD_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: payload
+                    })
+                    .then(function(res) {
+                        if (!res.ok) throw new Error('HTTP ' + res.status);
+                        return res.json();
+                    })
+                    .then(function(res) {
+                        if (res && res.status === 'success') {
+                            setSyncStatus('synced');
+                        } else {
+                            throw new Error('Unexpected response');
+                        }
+                    })
+                    .catch(function(err) {
+                        console.warn('Prompt Vault: 云端同步失败。', err);
+                        setSyncStatus('offline');
+                        _pendingSync = true;
+                    })
+                    .finally(function() {
+                        _syncInProgress = false;
+                        if (_pendingSync && !_syncTimer) {
+                            _syncTimer = setTimeout(function() {
+                                _syncTimer = null;
+                                executeCloudSync();
+                            }, SYNC_DEBOUNCE_MS * 2);
+                        }
+                    });
+            }
+
+            function loadFromCloud() {
+                setSyncStatus('syncing');
+                return fetch(CLOUD_URL)
+                    .then(function(res) {
+                        if (!res.ok) throw new Error('No cloud data (HTTP ' + res.status + ')');
+                        return res.json();
+                    })
+                    .then(function(cloudData) {
+                        if (Array.isArray(cloudData) && cloudData.length > 0) {
+                            return cloudData;
+                        }
+                        throw new Error('Empty or invalid cloud data');
+                    })
+                    .catch(function(err) {
+                        console.warn('Prompt Vault: 云端加载失败，使用本地数据。', err.message);
+                        return null;
+                    });
+            }
+
+            function mergeData(localArr, cloudArr) {
+                if (!cloudArr || !Array.isArray(cloudArr) || cloudArr.length === 0) {
+                    return localArr.slice();
+                }
+                var map = {};
+                var i;
+
+                for (i = 0; i < localArr.length; i++) {
+                    var item = localArr[i];
+                    if (item && item.id) {
+                        map[item.id] = item;
+                    }
+                }
+
+                for (i = 0; i < cloudArr.length; i++) {
+                    var cItem = cloudArr[i];
+                    if (!cItem || !cItem.id) continue;
+                    if (!map[cItem.id]) {
+                        map[cItem.id] = cItem;
+                    } else {
+                        var localUpdated = map[cItem.id].updatedAt || map[cItem.id].createdAt || 0;
+                        var cloudUpdated = cItem.updatedAt || cItem.createdAt || 0;
+                        if (cloudUpdated > localUpdated) {
+                            map[cItem.id] = cItem;
+                        }
+                    }
+                }
+
+                var merged = [];
+                var keys = Object.keys(map);
+                for (i = 0; i < keys.length; i++) {
+                    merged.push(map[keys[i]]);
+                }
+                return merged;
+            }
+
+            function syncNow() {
+                if (_syncTimer) {
+                    clearTimeout(_syncTimer);
+                    _syncTimer = null;
+                }
+                _pendingSync = false;
+                executeCloudSync();
+            }
+
+            // ---- 分类 ----
+            function getCats() {
+                var s = {};
+                if (Array.isArray(data)) {
+                    data.forEach(function(p) {
+                        if (p && p.category && String(p.category).trim()) { s[String(p.category).trim()] =
+                            1; }
+                    });
+                }
+                var arr = Object.keys(s).sort();
+                arr.unshift('All');
+                return arr;
+            }
+
+            function renderFilters() {
+                var cats = getCats();
+                var html = '';
+                cats.forEach(function(c) {
+                    html += '<button class="filter-tag' + (c === filter ? ' active' : '') +
+                        '" data-cat="' + esc(c) + '" type="button">' + esc(c) + '</button>';
+                });
+                $('filterGroup').innerHTML = html;
+
+                var unique = cats.filter(function(c) { return c !== 'All'; });
+                var dl = '';
+                unique.forEach(function(c) { dl += '<option value="' + esc(c) + '">'; });
+                $('catList').innerHTML = dl;
+            }
+
+            // ---- 渲染列表 ----
+            function render() {
+                if (!Array.isArray(data)) { data = [];
+                    saveLocal(); }
+                var q = String($('searchInput').value || '').toLowerCase().trim();
+                var list = data.filter(function(p) {
+                    if (!p || typeof p !== 'object') return false;
+                    var mf = filter === 'All' || (p.category && String(p.category).trim() === filter);
+                    var ms = !q ||
+                        (p.title && String(p.title).toLowerCase().indexOf(q) >= 0) ||
+                        (p.content && String(p.content).toLowerCase().indexOf(q) >= 0) ||
+                        (p.notes && String(p.notes).toLowerCase().indexOf(q) >= 0);
+                    return mf && ms;
+                });
+
+                list.sort(function(a, b) { return (b.updatedAt || b.createdAt || 0) - (a.updatedAt || a.createdAt ||
+                        0); });
+                $('statsText').textContent = list.length + ' of ' + data.length + ' prompts';
+
+                if (list.length === 0) {
+                    $('promptGrid').innerHTML =
+                        '<div class="empty-state">' +
+                        '<div class="empty-icon">◇</div>' +
+                        '<p>' + (data.length === 0 ? 'No prompts yet — click "+ New" or import CSV' :
+                            'No matching prompts') + '</p>' +
+                        '</div>';
+                    return;
+                }
+
+                var html = '';
+                list.forEach(function(p) {
+                    html +=
+                        '<div class="prompt-card" data-id="' + esc(p.id) +
+                        '" tabindex="0" role="button" aria-label="查看: ' + esc(p.title) + '">' +
+                        '<div class="card-top">' +
+                        '<div class="card-title">' + esc(p.title || 'Untitled') + '</div>' +
+                        '<div class="card-badges">' +
+                        (p.category ? '<span class="badge">' + esc(p.category) + '</span>' : '') +
+                        '</div></div>' +
+                        '<div class="card-preview">' + esc(p.content || '') + '</div>' +
+                        '<div class="card-bottom">' +
+                        '<span class="card-date">' + fmtDate(p.updatedAt || p.createdAt || Date.now()) +
+                        '</span>' +
+                        '<div class="card-actions">' +
+                        '<button class="btn btn-sm btn-ghost act-copy" data-id="' + esc(p.id) +
+                        '" type="button">⎘ Copy</button>' +
+                        '<button class="btn btn-sm btn-ghost act-edit" data-id="' + esc(p.id) +
+                        '" type="button">✎ Edit</button>' +
+                        '<button class="btn btn-sm btn-ghost act-del" data-id="' + esc(p.id) +
+                        '" type="button" style="color:var(--danger)">✕</button>' +
+                        '</div></div></div>';
+                });
+                $('promptGrid').innerHTML = html;
+            }
+
+            // ---- 模态框操作 ----
+            function openEdit(p) {
+                if ($('editOverlay').classList.contains('active')) closeEdit();
+                $('fieldId').value = '';
+                $('fieldTitle').value = '';
+                $('fieldCategory').value = '';
+                $('fieldContent').value = '';
+                $('fieldNotes').value = '';
+                isSaving = false;
+
+                if (p && typeof p === 'object') {
+                    $('editHeading').textContent = 'Edit Prompt';
+                    $('fieldId').value = p.id || '';
+                    $('fieldTitle').value = p.title || '';
+                    $('fieldCategory').value = p.category || '';
+                    $('fieldContent').value = p.content || '';
+                    $('fieldNotes').value = p.notes || '';
+                } else {
+                    $('editHeading').textContent = 'New Prompt';
+                }
+
+                $('editOverlay').classList.add('active');
+                setTimeout(function() {
+                    var titleField = $('fieldTitle');
+                    if (titleField && $('editOverlay').classList.contains('active')) {
+                        titleField.focus();
+                        titleField.select();
+                    }
+                }, 120);
+            }
+
+            function closeEdit() {
+                $('editOverlay').classList.remove('active');
+                isSaving = false;
+            }
+
+            function doSave() {
+                if (isSaving) return;
+                isSaving = true;
+
+                var id = String($('fieldId').value || '').trim();
+                var title = String($('fieldTitle').value || '').trim();
+                var cat = String($('fieldCategory').value || '').trim();
+                var content = String($('fieldContent').value || '');
+                var notes = String($('fieldNotes').value || '').trim();
+
+                if (!title) { toast('Title is required', false);
+                    $('fieldTitle').focus();
+                    isSaving = false; return; }
+                if (!content.trim()) { toast('Content is required', false);
+                    $('fieldContent').focus();
+                    isSaving = false; return; }
+
+                var now = Date.now();
+
+                if (id) {
+                    var found = false;
+                    for (var i = 0; i < data.length; i++) {
+                        if (data[i].id === id) {
+                            data[i].title = title;
+                            data[i].category = cat;
+                            data[i].content = content;
+                            data[i].notes = notes;
+                            data[i].updatedAt = now;
+                            found = true;
+                            break;
+                        }
+                    }
+                    if (!found) {
+                        data.push({ id: uid(), title: title, category: cat, content: content, notes: notes,
+                            createdAt: now, updatedAt: now });
+                    }
+                    toast('Prompt updated ✓');
+                } else {
+                    data.push({ id: uid(), title: title, category: cat, content: content, notes: notes, createdAt: now,
+                        updatedAt: now });
+                    toast('Prompt saved ✓');
+                }
+
+                if (!Array.isArray(data)) data = [];
+                if (save()) { renderFilters();
+                    render();
+                    closeEdit(); }
+                isSaving = false;
+            }
+
+            function openDetail(id) {
+                var p = null;
+                for (var i = 0; i < data.length; i++) {
+                    if (data[i].id === id) { p = data[i]; break; }
+                }
+                if (!p) { toast('Prompt not found', false); return; }
+                detailId = id;
+                $('detailHeading').textContent = p.title || 'Untitled';
+                $('detailCat').innerHTML = p.category ? '<span class="badge">' + esc(p.category) + '</span>' : '';
+                $('detailNotes').textContent = p.notes ? 'Notes: ' + p.notes : '';
+                $('detailBody').textContent = p.content || '';
+                $('detailOverlay').classList.add('active');
+                setTimeout(function() { $('detailClose').focus(); }, 100);
+            }
+
+            function closeDetail() {
+                $('detailOverlay').classList.remove('active');
+                detailId = null;
+            }
+
+            function doCopy(id) {
+                var p = null;
+                for (var i = 0; i < data.length; i++) {
+                    if (data[i].id === id) { p = data[i]; break; }
+                }
+                if (!p || !p.content) { toast('Nothing to copy', false); return; }
+                try {
+                    if (navigator.clipboard && navigator.clipboard.writeText) {
+                        navigator.clipboard.writeText(p.content).then(function() { toast('Copied to clipboard ✓'); })
+                            .catch(function() { fallbackCopy(p.content); });
+                    } else { fallbackCopy(p.content); }
+                } catch (e) { fallbackCopy(p.content); }
+            }
+
+            function fallbackCopy(text) {
+                var ta = document.createElement('textarea');
+                ta.value = text;
+                ta.style.position = 'fixed';
+                ta.style.left = '-9999px';
+                ta.style.top = '-9999px';
+                ta.setAttribute('readonly', '');
+                document.body.appendChild(ta);
+                try {
+                    ta.focus();
+                    ta.select();
+                    ta.setSelectionRange(0, text.length);
+                    var success = document.execCommand('copy');
+                    if (success) toast('Copied to clipboard ✓');
+                    else toast('Copy failed. Please try again.', false);
+                } catch (e) { toast('Copy failed. Please try again.', false); }
+                document.body.removeChild(ta);
+            }
+
+            function doDelete(id) {
+                var target = null;
+                for (var i = 0; i < data.length; i++) {
+                    if (data[i].id === id) { target = data[i]; break; }
+                }
+                var name = target ? (target.title || 'Untitled') : 'this prompt';
+                showConfirm('Delete "' + name + '" permanently?', function() {
+                    data = data.filter(function(p) { return p.id !== id; });
+                    if (save()) {
+                        renderFilters();
+                        render();
+                        toast('Deleted ✓');
+                    } else {
+                        load();
+                        renderFilters();
+                        render();
+                    }
+                });
+            }
+
+            // ---- CSV ----
+            function csvEsc(s) {
+                if (s == null) return '';
+                s = String(s);
+                if (s.indexOf(',') >= 0 || s.indexOf('"') >= 0 || s.indexOf('\n') >= 0 || s.indexOf('\r') >= 0) {
+                    return '"' + s.replace(/"/g, '""') + '"';
+                }
+                return s;
+            }
+
+            function exportCSV() {
+                if (!Array.isArray(data) || !data.length) { toast('Nothing to export', false); return; }
+                var bom = '\uFEFF';
+                var rows = ['id,title,category,content,notes,createdAt,updatedAt'];
+                data.forEach(function(p) {
+                    rows.push([
+                        csvEsc(p.id), csvEsc(p.title || ''), csvEsc(p.category || ''), csvEsc(p.content || ''),
+                        csvEsc(p.notes || ''), p.createdAt || '', p.updatedAt || ''
+                    ].join(','));
+                });
+                var blob = new Blob([bom + rows.join('\n')], { type: 'text/csv;charset=utf-8;' });
+                var url = URL.createObjectURL(blob);
+                var a = document.createElement('a');
+                a.href = url;
+                var now = new Date();
+                var ds = '' + now.getFullYear() + String(now.getMonth() + 1).padStart(2, '0') + String(now.getDate()).padStart(
+                    2, '0');
+                a.download = 'prompts_' + ds + '.csv';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                setTimeout(function() { URL.revokeObjectURL(url); }, 200);
+                toast('Exported ' + data.length + ' prompts ✓');
+            }
+
+            function parseCSV(text) {
+                var rows = [],
+                    cur = [],
+                    field = '',
+                    inQ = false;
+                for (var i = 0; i < text.length; i++) {
+                    var ch = text[i],
+                        nx = text[i + 1];
+                    if (inQ) {
+                        if (ch === '"' && nx === '"') { field += '"';
+                            i++; } else if (ch === '"') { inQ = false; } else { field += ch; }
+                    } else {
+                        if (ch === '"') { inQ = true; } else if (ch === ',') { cur.push(field);
+                            field = ''; } else if (ch === '\n' || (ch === '\r' && nx === '\n')) {
+                            cur.push(field);
+                            field = '';
+                            if (cur.length > 0 || field) rows.push(cur);
+                            cur = [];
+                            if (ch === '\r') i++;
+                        } else if (ch === '\r') {
+                            cur.push(field);
+                            field = '';
+                            if (cur.length > 0 || field) rows.push(cur);
+                            cur = [];
+                        } else { field += ch; }
+                    }
+                }
+                if (field || cur.length) { cur.push(field);
+                    rows.push(cur); }
+                if (rows.length && rows[0].length) { rows[0][0] = String(rows[0][0]).replace(/^\uFEFF/, ''); }
+                return rows;
+            }
+
+            function importCSV(e) {
+                var file = e.target.files && e.target.files[0];
+                if (!file) return;
+                var reader = new FileReader();
+                reader.onload = function(ev) {
+                    try {
+                        var rows = parseCSV(ev.target.result);
+                        if (rows.length < 2) { toast('Empty or invalid CSV file', false); return; }
+                        var hdr = rows[0],
+                            idx = {};
+                        hdr.forEach(function(h, i) { idx[String(h).trim()] = i; });
+                        if (idx.title == null || idx.content == null) { toast(
+                                'CSV must have "title" and "content" columns', false); return; }
+                        var n = 0;
+                        for (var r = 1; r < rows.length; r++) {
+                            var c = rows[r];
+                            if (!c || c.length < 2) continue;
+                            var title = String(c[idx.title] || '').trim();
+                            var content = String(c[idx.content] || '').trim();
+                            if (!title || !content) continue;
+                            var id = (idx.id != null && c[idx.id]) ? String(c[idx.id]).trim() : uid();
+                            var category = idx.category != null ? String(c[idx.category] || '').trim() : '';
+                            var notes = idx.notes != null ? String(c[idx.notes] || '').trim() : '';
+                            var createdAt = idx.createdAt != null ? (parseInt(c[idx.createdAt]) || Date.now()) :
+                                Date.now();
+                            var updatedAt = idx.updatedAt != null ? (parseInt(c[idx.updatedAt]) || Date.now()) :
+                                Date.now();
+                            var found = -1;
+                            for (var j = 0; j < data.length; j++) { if (data[j].id === id) { found = j; break; } }
+                            var obj = { id: id, title: title, category: category, content: content, notes: notes,
+                                createdAt: createdAt, updatedAt: updatedAt };
+                            if (found >= 0) {
+                                if (updatedAt >= (data[found].updatedAt || 0)) data[found] = obj;
+                            } else { data.push(obj); }
+                            n++;
+                        }
+                        if (n === 0) { toast('No valid prompts found in CSV', false); return; }
+                        if (save()) { renderFilters();
+                            render();
+                            toast('Imported ' + n + ' prompts ✓'); }
+                    } catch (err) { toast('Parse error: ' + err.message, false); }
+                };
+                reader.onerror = function() { toast('Failed to read file', false); };
+                reader.readAsText(file, 'UTF-8');
+                e.target.value = '';
+            }
+
+            // ---- 事件绑定 ----
+            function bindEvents() {
+                $('btnNew').addEventListener('click', function(e) { e.preventDefault();
+                    openEdit(null); });
+                $('btnExport').addEventListener('click', function(e) { e.preventDefault();
+                    exportCSV(); });
+                $('btnImport').addEventListener('click', function(e) { e.preventDefault();
+                    $('csvFile').click(); });
+                $('csvFile').addEventListener('change', importCSV);
+
+                $('searchInput').addEventListener('input', render);
+
+                $('filterGroup').addEventListener('click', function(e) {
+                    var tag = e.target.closest('.filter-tag');
+                    if (!tag) return;
+                    filter = tag.getAttribute('data-cat') || 'All';
+                    renderFilters();
+                    render();
+                });
+
+                $('editClose').addEventListener('click', function(e) { e.preventDefault();
+                    closeEdit(); });
+                $('editCancel').addEventListener('click', function(e) { e.preventDefault();
+                    closeEdit(); });
+                $('editSave').addEventListener('click', function(e) { e.preventDefault();
+                    doSave(); });
+
+                $('detailClose').addEventListener('click', function(e) { e.preventDefault();
+                    closeDetail(); });
+                $('detailCopy').addEventListener('click', function(e) { e.preventDefault(); if (detailId) doCopy(
+                    detailId); });
+                $('detailEdit').addEventListener('click', function(e) {
+                    e.preventDefault();
+                    if (!detailId) return;
+                    var p = null;
+                    for (var i = 0; i < data.length; i++) { if (data[i].id === detailId) { p = data[i]; break; } }
+                    closeDetail();
+                    if (p) openEdit(p);
+                });
+                $('detailDelete').addEventListener('click', function(e) {
+                    e.preventDefault();
+                    if (!detailId) return;
+                    var id = detailId;
+                    closeDetail();
+                    doDelete(id);
+                });
+
+                $('confirmYes').addEventListener('click', function(e) {
+                    e.preventDefault();
+                    if (confirmCb && typeof confirmCb === 'function') {
+                        try { confirmCb(); } catch (err) {}
+                    }
+                    hideConfirm();
+                });
+                $('confirmNo').addEventListener('click', function(e) { e.preventDefault();
+                    hideConfirm(); });
+
+                $('promptGrid').addEventListener('click', function(e) {
+                    var copyBtn = e.target.closest('.act-copy');
+                    if (copyBtn) { e.stopPropagation();
+                        e.preventDefault();
+                        doCopy(copyBtn.getAttribute('data-id')); return; }
+                    var editBtn = e.target.closest('.act-edit');
+                    if (editBtn) {
+                        e.stopPropagation();
+                        e.preventDefault();
+                        var id = editBtn.getAttribute('data-id'),
+                            p = null;
+                        for (var i = 0; i < data.length; i++) { if (data[i].id === id) { p = data[i]; break; } }
+                        if (p) openEdit(p); return;
+                    }
+                    var delBtn = e.target.closest('.act-del');
+                    if (delBtn) { e.stopPropagation();
+                        e.preventDefault();
+                        doDelete(delBtn.getAttribute('data-id')); return; }
+                    var card = e.target.closest('.prompt-card');
+                    if (card) openDetail(card.getAttribute('data-id'));
+                });
+
+                $('promptGrid').addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        var card = e.target.closest('.prompt-card');
+                        if (card && !e.target.closest('button')) { e.preventDefault();
+                            openDetail(card.getAttribute('data-id')); }
+                    }
+                });
+
+                $('editOverlay').addEventListener('click', function(e) { if (e.target === $('editOverlay')) closeEdit
+                    (); });
+                $('detailOverlay').addEventListener('click', function(e) { if (e.target === $('detailOverlay'))
+                        closeDetail(); });
+                $('confirmOverlay').addEventListener('click', function(e) { if (e.target === $('confirmOverlay'))
+                        hideConfirm(); });
+
+                document.addEventListener('keydown', function(e) {
+                    var activeTag = document.activeElement && document.activeElement.tagName;
+                    var isInput = activeTag === 'INPUT' || activeTag === 'TEXTAREA';
+
+                    if (e.key === 'Escape') {
+                        if ($('confirmOverlay').classList.contains('active')) { e.preventDefault();
+                            hideConfirm(); return; }
+                        if ($('detailOverlay').classList.contains('active')) { e.preventDefault();
+                            closeDetail(); return; }
+                        if ($('editOverlay').classList.contains('active')) { e.preventDefault();
+                            closeEdit(); return; }
+                    }
+                    if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+                        if (!$('editOverlay').classList.contains('active') && !$('detailOverlay').classList.contains(
+                                'active') && !$('confirmOverlay').classList.contains('active')) {
+                            e.preventDefault();
+                            $('searchInput').focus();
+                            $('searchInput').select();
+                        }
+                    }
+                    if ((e.ctrlKey || e.metaKey) && e.key === 'n') {
+                        if (!$('editOverlay').classList.contains('active') && !$('detailOverlay').classList.contains(
+                                'active') && !$('confirmOverlay').classList.contains('active')) {
+                            e.preventDefault();
+                            openEdit(null);
+                        }
+                    }
+                    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                        if ($('editOverlay').classList.contains('active')) { e.preventDefault();
+                            doSave(); }
+                    }
+                });
+
+                window.addEventListener('beforeunload', function() {
+                    if (_pendingSync && !_syncInProgress) {
+                        if (_syncTimer) {
+                            clearTimeout(_syncTimer);
+                            _syncTimer = null;
+                        }
+                        _pendingSync = false;
+                        var payload = JSON.stringify({ payload: data });
+                        if (navigator.sendBeacon) {
+                            var blob = new Blob([payload], { type: 'application/json' });
+                            navigator.sendBeacon(CLOUD_URL, blob);
+                        } else {
+                            try {
+                                fetch(CLOUD_URL, {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: payload,
+                                    keepalive: true
+                                });
+                            } catch (ex) {}
+                        }
+                    }
+                });
+            }
+
+            // ---- 初始化 ----
+            function init() {
+                load();
+                if (!Array.isArray(data)) data = [];
+                var initialDataLen = data.length;
+                renderFilters();
+                render();
+                updateStorage();
+
+                loadFromCloud().then(function(cloudData) {
+                    if (cloudData && Array.isArray(cloudData) && cloudData.length > 0) {
+                        var merged = mergeData(data, cloudData);
+                        var changed = false;
+                        if (merged.length !== data.length) {
+                            changed = true;
+                        } else {
+                            for (var i = 0; i < merged.length; i++) {
+                                var mItem = merged[i];
+                                var found = false;
+                                for (var j = 0; j < data.length; j++) {
+                                    if (data[j].id === mItem.id) {
+                                        if ((mItem.updatedAt || mItem.createdAt || 0) !== (data[j].updatedAt || data[j]
+                                                .createdAt || 0)) {
+                                            changed = true;
+                                        }
+                                        found = true;
+                                        break;
+                                    }
+                                }
+                                if (!found) { changed = true; break; }
+                                if (changed) break;
+                            }
+                        }
+                        if (changed) {
+                            data = merged;
+                            _skipNextSync = true;
+                            saveLocal();
+                            renderFilters();
+                            render();
+                            setSyncStatus('synced');
+                        } else {
+                            setSyncStatus('synced');
+                        }
+                    } else {
+                        if (initialDataLen === 0) {
+                            var now = Date.now();
+                            data = [{
+                                id: uid(),
+                                title: '翻译助手',
+                                category: 'Translation',
+                                content: 'You are a professional translator. Translate the following text from {source_lang} to {target_lang}. Maintain the original tone and style. Only output the translation.',
+                                notes: '适用于 GPT-4, Claude',
+                                createdAt: now - 259200000,
+                                updatedAt: now - 259200000
+                            }, {
+                                id: uid(),
+                                title: 'Code Review',
+                                category: 'Code',
+                                content: 'Review the following code for potential bugs, performance issues, and best practices. Provide specific suggestions with code examples.\n\n1. Logic errors\n2. Security vulnerabilities\n3. Performance optimization\n4. Code readability\n\nCode:\n```\n{code}\n```',
+                                notes: '支持主流编程语言',
+                                createdAt: now - 172800000,
+                                updatedAt: now - 172800000
+                            }, {
+                                id: uid(),
+                                title: '周报生成器',
+                                category: 'Writing',
+                                content: '根据以下工作记录，生成一份简洁专业的周报。\n\n## 本周完成\n- 关键成果\n\n## 进行中\n- 当前进度\n\n## 下周计划\n- 优先事项\n\n工作记录：\n{notes}',
+                                notes: '每周五下午使用',
+                                createdAt: now - 86400000,
+                                updatedAt: now - 86400000
+                            }];
+                            saveLocal();
+                            renderFilters();
+                            render();
+                            scheduleCloudSync();
+                            setSyncStatus('synced');
+                        } else {
+                            setSyncStatus('synced');
+                            if (initialDataLen > 0) {
+                                scheduleCloudSync();
+                            }
+                        }
+                    }
+                }).catch(function() {
+                    if (initialDataLen === 0) {
+                        var now2 = Date.now();
+                        data = [{
+                            id: uid(),
+                            title: '翻译助手',
+                            category: 'Translation',
+                            content: 'You are a professional translator. Translate the following text from {source_lang} to {target_lang}. Maintain the original tone and style. Only output the translation.',
+                            notes: '适用于 GPT-4, Claude',
+                            createdAt: now2 - 259200000,
+                            updatedAt: now2 - 259200000
+                        }, {
+                            id: uid(),
+                            title: 'Code Review',
+                            category: 'Code',
+                            content: 'Review the following code for potential bugs, performance issues, and best practices. Provide specific suggestions with code examples.\n\n1. Logic errors\n2. Security vulnerabilities\n3. Performance optimization\n4. Code readability\n\nCode:\n```\n{code}\n```',
+                            notes: '支持主流编程语言',
+                            createdAt: now2 - 172800000,
+                            updatedAt: now2 - 172800000
+                        }, {
+                            id: uid(),
+                            title: '周报生成器',
+                            category: 'Writing',
+                            content: '根据以下工作记录，生成一份简洁专业的周报。\n\n## 本周完成\n- 关键成果\n\n## 进行中\n- 当前进度\n\n## 下周计划\n- 优先事项\n\n工作记录：\n{notes}',
+                            notes: '每周五下午使用',
+                            createdAt: now2 - 86400000,
+                            updatedAt: now2 - 86400000
+                        }];
+                        saveLocal();
+                        renderFilters();
+                        render();
+                    }
+                    setSyncStatus('offline');
+                });
+
+                bindEvents();
+            }
+
+            init();
+
+            window._promptVault = {
+                data: data,
+                reload: function() { load();
+                    renderFilters();
+                    render(); },
+                reset: function() {
+                    showConfirm('Reset ALL data? This cannot be undone!', function() {
+                        data = [];
+                        save();
+                        renderFilters();
+                        render();
+                        toast('All data cleared');
+                    });
+                },
+                getData: function() { return data; },
+                getStorageSize: function() {
+                    try { var raw = localStorage.getItem(KEY) || ''; return (new Blob([raw]).size / 1024).toFixed(
+                            1) + ' KB'; } catch (e) { return '? KB'; }
+                },
+                syncNow: syncNow,
+                getSyncStatus: function() {
+                    var el = document.getElementById('syncStatus');
+                    return el ? el.textContent : 'unknown';
+                }
+            };
+        })();
+    </script>
+</body>
+</html>

@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>🔍 生活决策系统 · 视觉速查</title>
+<style>
+:root {
+  --bg: #0b1220;
+  --panel: #131e32;
+  --panel2: #1b2940;
+  --fg: #eef4ff;
+  --muted: #a7b6cd;
+  --accent: #79d7d1;
+  --line: #31415b;
+  --gold: #f7cb76;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  background:
+    radial-gradient(ellipse at 80% -10%, #243c55, transparent 55%),
+    var(--bg);
+  font: 16px/1.6 system-ui, -apple-system,
+    "PingFang SC", "Microsoft YaHei", sans-serif;
+  color: var(--fg);
+}
+.wrap {
+  max-width: 1160px;
+  margin: auto;
+  padding: 36px 20px 90px;
+}
+header { text-align: center; padding: 35px 0 26px; }
+h1 {
+  font-size: clamp(32px, 5vw, 56px);
+  line-height: 1.18;
+  margin: 0 0 14px;
+}
+header p {
+  max-width: 850px;
+  margin: auto;
+  color: var(--muted);
+}
+.tag {
+  display: inline-block;
+  color: #091b23;
+  background: var(--accent);
+  font-weight: 800;
+  padding: 5px 14px;
+  border-radius: 100px;
+  margin-bottom: 20px;
+  font-size: 13px;
+}
+h2 {
+  font-size: 25px;
+  margin: 42px 0 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+h2:before {
+  content: "";
+  height: 24px;
+  width: 5px;
+  background: var(--accent);
+  border-radius: 10px;
+}
+.hero {
+  background: linear-gradient(125deg, #173446, #1c2542);
+  border: 1px solid #436171;
+  border-radius: 22px;
+  padding: 26px;
+  text-align: center;
+}
+.hero strong { font-size: clamp(20px, 3.5vw, 30px); }
+.hero .flow {
+  color: var(--gold);
+  margin-top: 12px;
+  font-weight: 700;
+  line-height: 2;
+}
+.layers {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+}
+.card {
+  border-radius: 18px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  padding: 20px;
+  break-inside: avoid;
+}
+.card .index {
+  color: var(--accent);
+  font-weight: 800;
+  font-size: 13px;
+}
+.card h3 { margin: 5px 0 7px; font-size: 20px; }
+.card p { margin: 0; color: var(--muted); font-size: 14px; }
+.card .theory {
+  color: var(--gold);
+  font-weight: 650;
+  margin: 10px 0;
+}
+.icon { font-size: 31px; }
+.principles {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+.principle {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 14px;
+}
+.principle .emoji { font-size: 26px; }
+.principle b { color: #fff; }
+.principle small {
+  display: block;
+  color: var(--muted);
+  margin-top: 2px;
+}
+.steps {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 7px;
+}
+.step {
+  background: var(--panel2);
+  padding: 14px 8px;
+  border: 1px solid var(--line);
+  border-radius: 13px;
+  text-align: center;
+}
+.step .num {
+  font-weight: 900;
+  color: var(--accent);
+  font-size: 21px;
+}
+.step b { display: block; font-size: 14px; }
+.step small {
+  display: block;
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.5;
+  margin-top: 5px;
+}
+.example {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 10px;
+}
+.example > div {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 13px;
+  padding: 14px;
+}
+.example b { color: var(--gold); font-size: 14px; }
+.example p {
+  font-size: 13px;
+  color: var(--muted);
+  margin: 7px 0 0;
+}
+.rules {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+}
+.rule {
+  background: linear-gradient(145deg, #20324b, #151e32);
+  border: 1px solid #455473;
+  border-radius: 16px;
+  padding: 20px;
+}
+.rule b { color: var(--gold); font-size: 19px; }
+.rule p { color: var(--muted); font-size: 14px; }
+.summary {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+.summary > div {
+  background: #182a39;
+  padding: 15px;
+  border-radius: 14px;
+  border: 1px solid #345264;
+  text-align: center;
+}
+.summary b {
+  display: block;
+  color: var(--accent);
+  font-size: 18px;
+}
+.summary span { color: var(--muted); font-size: 13px; }
+.quote {
+  border-left: 5px solid var(--accent);
+  background: #1b2d3d;
+  padding: 24px;
+  border-radius: 0 15px 15px 0;
+  font-size: clamp(19px, 2.5vw, 26px);
+  font-weight: 750;
+  margin: 32px 0;
+}
+.note { color: var(--muted); font-size: 13px; }
+.toolbar {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+button {
+  background: var(--accent);
+  color: #081922;
+  border: 0;
+  border-radius: 10px;
+  padding: 10px 16px;
+  font-weight: 800;
+  cursor: pointer;
+}
+button.secondary { background: #273e55; color: #fff; }
+.footer {
+  text-align: center;
+  color: var(--muted);
+  margin-top: 50px;
+  font-size: 13px;
+}
+@media(max-width:850px) {
+  .layers { grid-template-columns: repeat(2,1fr); }
+  .steps { grid-template-columns: repeat(2,1fr); }
+  .example { grid-template-columns: repeat(2,1fr); }
+  .rules { grid-template-columns: 1fr; }
+}
+@media(max-width:530px) {
+  .layers, .principles, .summary {
+    grid-template-columns: 1fr;
+  }
+  .example { grid-template-columns: 1fr; }
+  .wrap { padding: 16px 12px 60px; }
+  header { padding-top: 22px; }
+  .card { padding: 16px; }
+}
+@media print {
+  body {
+    background: #fff;
+    color: #142039;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .wrap { max-width: 100%; padding: 0 14px; }
+  .toolbar { display: none; }
+  header p, .note, .footer { color: #4f6179; }
+  .card, .principle, .step, .example > div, .rule {
+    background: #eaf1f8 !important;
+    color: #13223a;
+    border: 1px solid #d3dce7;
+  }
+  .card p, .principle small, .step small,
+  .example p, .rule p { color: #40546b; }
+  .card h3, .principle b { color: #13223a; }
+  .hero {
+    background: #daeef0 !important;
+    color: #142039;
+  }
+  .hero .flow, .card .theory,
+  .rule b, .example b { color: #86551c; }
+  .summary > div { background: #e5f1f3 !important; }
+  .summary span { color: #40546b; }
+  h2 { break-after: avoid; }
+}
+</style>
+</head>
+
+<body>
+<main class="wrap">
+
+<div class="toolbar">
+  <button onclick="window.print()">打印 / 保存 PDF</button>
+  <button class="secondary"
+    onclick="window.scrollTo({top:0,behavior:'smooth'})">
+    回到顶部 ↑
+  </button>
+</div>
+
+<header>
+  <span class="tag">一页逻辑 · 多场景复用</span>
+  <h1>生活决策系统<br>视觉速查图鉴</h1>
+  <p>
+    不要为每个人、每件事从零创造解释。
+    优先使用通用模型，依据证据识别偏离，
+    只在偏离影响决策时进行个性化分析。
+  </p>
+</header>
+
+<section class="hero">
+  <strong>最小充分模型 · 一个完整闭环</strong>
+  <div class="flow">
+    定义目标 → 建立先验 → 寻找机制 →
+    比较选择 → 考虑互动 → 小步试验 → 更新认知 ↻
+  </div>
+</section>
+
+<h2>01 · 六层框架：从理解到行动</h2>
+<section class="layers">
+
+<article class="card">
+  <div class="icon">🎯</div>
+  <div class="index">01 / 目标层</div>
+  <h3>什么值得追求？</h3>
+  <div class="theory">效用 · 价值排序 · 底线约束</div>
+  <p>先确定真正的目标，避免把收入、时长等指标当成最终价值。</p>
+</article>
+
+<article class="card">
+  <div class="icon">🔎</div>
+  <div class="index">02 / 认知层</div>
+  <h3>什么是真的？</h3>
+  <div class="theory">贝叶斯 · 奥卡姆 · 基础概率</div>
+  <p>从一般情况出发，以证据更新判断；不无故增加复杂假设。</p>
+</article>
+
+<article class="card">
+  <div class="icon">⚙️</div>
+  <div class="index">03 / 解释层</div>
+  <h3>为什么会这样？</h3>
+  <div class="theory">激励约束 · 有限理性 · 交易成本</div>
+  <p>先看收益、成本、资源、权限、信息与沟通阻力。</p>
+</article>
+
+<article class="card">
+  <div class="icon">⚖️</div>
+  <div class="index">04 / 选择层</div>
+  <h3>做什么更合算？</h3>
+  <div class="theory">机会成本 · 比较优势 · 边际分析</div>
+  <p>每个“要”都有“不要”；比较的是替代方案和相对代价。</p>
+</article>
+
+<article class="card">
+  <div class="icon">🤝</div>
+  <div class="index">05 / 互动层</div>
+  <h3>别人会怎么回应？</h3>
+  <div class="theory">博弈论 · 信息不对称 · 委托代理</div>
+  <p>考虑对方的激励、策略、信任、声誉以及规则设计。</p>
+</article>
+
+<article class="card">
+  <div class="icon">🔁</div>
+  <div class="index">06 / 进化层</div>
+  <h3>怎样越做越对？</h3>
+  <div class="theory">反馈 · 复利 · 实物期权 · 古德哈特</div>
+  <p>先低成本验证，再调整模型；重视长期后果和选择权。</p>
+</article>
+
+</section>
+
+<h2>02 · 九个高复用原理</h2>
+<section class="principles">
+
+<div class="principle">
+  <span class="emoji">🪒</span>
+  <div>
+    <b>奥卡姆剃刀</b>
+    <small>解释力相当时，少假设优先；不是永远选最简单的故事。</small>
+  </div>
+</div>
+
+<div class="principle">
+  <span class="emoji">📊</span>
+  <div>
+    <b>贝叶斯 + 基础概率</b>
+    <small>不要默认自己或眼前情况特殊；新证据来了就更新。</small>
+  </div>
+</div>
+
+<div class="principle">
+  <span class="emoji">⏳</span>
+  <div>
+    <b>稀缺性 + 机会成本</b>
+    <small>时间、精力、金钱都稀缺；问“放弃的最好选项是什么？”</small>
+  </div>
+</div>
+
+<div class="principle">
+  <span class="emoji">🧭</span>
+  <div>
+    <b>比较优势</b>
+    <small>不是谁绝对更强，而是谁做这件事的相对机会成本更低。</small>
+  </div>
+</div>
+
+<div class="principle">
+  <span class="emoji">💡</span>
+  <div>
+    <b>激励与约束</b>
+    <small>先看行为环境，再谈人品、性格和特殊动机。</small>
+  </div>
+</div>
+
+<div class="principle">
+  <span class="emoji">💬</span>
+  <div>
+    <b>交易成本 + 信息不对称</b>
+    <small>沟通、搜索、核实与协作都有成本；降摩擦常比讲道理有效。</small>
+  </div>
+</div>
+
+<div class="principle">
+  <span class="emoji">♟️</span>
+  <div>
+    <b>博弈与机制设计</b>
+    <small>行动会引起回应；优先创造让合作自然发生的规则。</small>
+  </div>
+</div>
+
+<div class="principle">
+  <span class="emoji">🌿</span>
+  <div>
+    <b>动态反馈 + 复利</b>
+    <small>一次有效不等于长期有效；关注累积、反作用和路径依赖。</small>
+  </div>
+</div>
+
+<div class="principle">
+  <span class="emoji">🛡️</span>
+  <div>
+    <b>选择权 + 风险管理</b>
+    <small>不确定且不可逆时，先用小试验买信息、留退路。</small>
+  </div>
+</div>
+
+</section>
+
+<h2>03 · 通用决策七问：遇事从这里开始</h2>
+<section class="steps">
+
+<div class="step">
+  <span class="num">01</span>
+  <b>目标是什么？</b>
+  <small>结果 / 指标 / 底线</small>
+</div>
+
+<div class="step">
+  <span class="num">02</span>
+  <b>一般会怎样？</b>
+  <small>基础概率 / 同类案例</small>
+</div>
+
+<div class="step">
+  <span class="num">03</span>
+  <b>最简解释？</b>
+  <small>少加特殊假设</small>
+</div>
+
+<div class="step">
+  <span class="num">04</span>
+  <b>驱动因素？</b>
+  <small>激励 / 约束 / 摩擦</small>
+</div>
+
+<div class="step">
+  <span class="num">05</span>
+  <b>代价与优势？</b>
+  <small>机会成本 / 替代方案</small>
+</div>
+
+<div class="step">
+  <span class="num">06</span>
+  <b>他人如何反应？</b>
+  <small>博弈 / 信任 / 二阶效应</small>
+</div>
+
+<div class="step">
+  <span class="num">07</span>
+  <b>如何验证？</b>
+  <small>小步试验 / 反馈更新</small>
+</div>
+
+</section>
+
+<h2>04 · 同一件小事，五个视角</h2>
+<p class="note">
+  例子：别人没有及时回复消息。不要立即解释成“针对我”。
+</p>
+
+<section class="example">
+  <div>
+    <b>① 简化解释</b>
+    <p>可能忙、忘了、优先级低；别先发明复杂心理剧。</p>
+  </div>
+  <div>
+    <b>② 基础概率</b>
+    <p>先用相似情境的常见原因作初始判断。</p>
+  </div>
+  <div>
+    <b>③ 激励约束</b>
+    <p>回复是否有收益？是否需要承担责任？有权限吗？</p>
+  </div>
+  <div>
+    <b>④ 降低摩擦</b>
+    <p>改成是/否问题，提供选项，降低回复成本。</p>
+  </div>
+  <div>
+    <b>⑤ 实验更新</b>
+    <p>降低成本后仍持续回避，再提高“不愿回应”的判断权重。</p>
+  </div>
+</section>
+
+<h2>05 · 三个防止“理性失控”的护栏</h2>
+<section class="rules">
+
+<div class="rule">
+  <b>⚠️ 古德哈特定律</b>
+  <p>
+    指标一旦变成追逐目标，就可能失真。
+    不要把收入、效率、数量误认为全部价值。
+  </p>
+  <p><strong>自问：</strong>我是在优化真正的结果，还是在刷指标？</p>
+</div>
+
+<div class="rule">
+  <b>🔐 实物期权</b>
+  <p>
+    信息不够、错误代价高时，
+    分阶段行动可保留未来选择权。
+  </p>
+  <p><strong>自问：</strong>能不能用更小、可逆的方式先试一次？</p>
+</div>
+
+<div class="rule">
+  <b>🌊 复杂系统</b>
+  <p>
+    局部最优可能伤害整体；
+    短期收益可能创造长期负反馈。
+  </p>
+  <p><strong>自问：</strong>如果把这个行为重复三年，会发生什么？</p>
+</div>
+
+</section>
+
+<h2>06 · 记住三个不同问题</h2>
+<section class="summary">
+  <div>
+    <b>什么是真的？</b>
+    <span>证据 / 先验 / 简化假设</span>
+  </div>
+  <div>
+    <b>为什么发生？</b>
+    <span>激励 / 约束 / 博弈 / 反馈</span>
+  </div>
+  <div>
+    <b>什么值得做？</b>
+    <span>价值 / 机会成本 / 风险</span>
+  </div>
+</section>
+
+<div class="quote">
+  结构性解释优先，个体差异作为增量，
+  特殊解释需要额外证据。
+</div>
+
+<p class="note">
+  使用边界：通用模型只是起点，不是拒绝例外的理由。
+  证据充分时要接受复杂解释；
+  价值取舍也不能单靠经济效率决定。
+</p>
+
+<div class="footer">
+  最小充分模型 · 先理解结构，再验证细节 · 可离线使用
+</div>
+
+</main>
+</body>
+</html>

@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>自行车碟刹系统厚度与寿命评估模型</title>
+    <style>
+        /* 全局样式复位 */
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: 'PingFang SC', 'Microsoft YaHei', -apple-system, sans-serif;
+            color: #262626;
+            line-height: 1.6;
+            background-color: #f1f5f9;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        /* 顶部横幅 */
+        .page-header {
+            background: linear-gradient(135deg, #0f172a, #334155);
+            color: #ffffff;
+            margin: -40px -40px 30px -40px;
+            padding: 35px 40px;
+            border-top-left-radius: 8px;
+            border-top-right-radius: 8px;
+            border-bottom: 4px solid #ef4444;
+        }
+
+        .page-header h1 {
+            margin: 0 0 10px 0;
+            font-size: 22pt;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        .page-header p {
+            margin: 0;
+            font-size: 11pt;
+            color: #94a3b8;
+        }
+
+        /* 核心警告框 */
+        .alert-box {
+            background-color: #fef2f2;
+            border-left: 4px solid #ef4444;
+            padding: 15px;
+            margin-bottom: 25px;
+            border-radius: 4px;
+        }
+        .alert-box strong {
+            color: #991b1b;
+            font-size: 11pt;
+        }
+
+        /* 标题样式 */
+        h2 {
+            font-size: 14pt;
+            color: #1e293b;
+            margin: 35px 0 15px 0;
+            padding-left: 10px;
+            border-left: 4px solid #475569;
+        }
+
+        h3 {
+            font-size: 11.5pt;
+            color: #334155;
+            margin: 20px 0 10px 0;
+        }
+
+        /* 刹车片三维解剖图模拟 */
+        .anatomy-container {
+            display: table;
+            width: 100%;
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .anatomy-visual {
+            display: table-cell;
+            width: 45%;
+            vertical-align: middle;
+            padding-right: 20px;
+        }
+
+        .anatomy-text {
+            display: table-cell;
+            width: 55%;
+            vertical-align: middle;
+            font-size: 10pt;
+            color: #475569;
+        }
+
+        .pad-layer {
+            text-align: center;
+            color: white;
+            font-weight: bold;
+            font-size: 10pt;
+            border-radius: 4px;
+            margin-bottom: 4px;
+            padding: 12px 0;
+        }
+        .layer-friction {
+            background: linear-gradient(90deg, #78350f, #b45309);
+            border: 1px solid #92400e;
+        }
+        .layer-backing {
+            background: linear-gradient(90deg, #475569, #64748b);
+            border: 1px solid #334155;
+        }
+
+        /* 统一表格样式 */
+        .standard-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+            font-size: 10pt;
+        }
+
+        .standard-table th {
+            background-color: #f8fafc;
+            color: #334155;
+            font-weight: bold;
+            text-align: left;
+            padding: 10px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        .standard-table td {
+            padding: 10px;
+            border-bottom: 1px solid #f1f5f9;
+            color: #475569;
+        }
+
+        /* 状态卡片设计 */
+        .status-card {
+            display: table;
+            width: 100%;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            padding: 14px;
+            margin-bottom: 12px;
+        }
+        .status-badge {
+            display: table-cell;
+            width: 25%;
+            vertical-align: middle;
+            text-align: center;
+            font-weight: bold;
+            font-size: 11pt;
+            border-radius: 4px;
+            padding: 10px 0;
+        }
+        .status-info {
+            display: table-cell;
+            width: 75%;
+            padding-left: 20px;
+            vertical-align: middle;
+            font-size: 10pt;
+            color: #334155;
+        }
+
+        .status-card.safe { border-left: 5px solid #10b981; }
+        .status-card.safe .status-badge { background-color: #d1fae5; color: #065f46; }
+
+        .status-card.warning { border-left: 5px solid #f59e0b; }
+        .status-card.warning .status-badge { background-color: #fef3c7; color: #92400e; }
+
+        .status-card.danger { border-left: 5px solid #ef4444; background-color: #fff1f2; }
+        .status-card.danger .status-badge { background-color: #fee2e2; color: #991b1b; }
+
+        /* 动态磨损演示条 */
+        .wear-timeline {
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .wear-row {
+            display: table;
+            width: 100%;
+            margin-bottom: 15px;
+        }
+        .wear-row:last-child { margin-bottom: 0; }
+        
+        .wear-label {
+            display: table-cell;
+            width: 25%;
+            font-size: 9.5pt;
+            font-weight: bold;
+            color: #334155;
+            vertical-align: middle;
+        }
+        .wear-bar-container {
+            display: table-cell;
+            width: 75%;
+            vertical-align: middle;
+        }
+        .bar-split {
+            height: 20px;
+            border-radius: 4px;
+            overflow: hidden;
+            width: 100%;
+        }
+        .split-f {
+            float: left;
+            height: 100%;
+            background-color: #b45309;
+            text-align: center;
+            color: white;
+            font-size: 8pt;
+            line-height: 20px;
+        }
+        .split-b {
+            float: left;
+            height: 100%;
+            background-color: #64748b;
+            text-align: center;
+            color: white;
+            font-size: 8pt;
+            line-height: 20px;
+        }
+
+        /* 实战技巧盒 */
+        .exp-box {
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            padding: 18px;
+            margin-top: 15px;
+        }
+        .exp-item {
+            margin-bottom: 10px;
+            font-size: 10pt;
+            color: #334155;
+        }
+        .exp-item:last-child { margin-bottom: 0; }
+
+        /* 总结框 */
+        .summary-quote {
+            background-color: #f8fafc;
+            border-top: 2px solid #e2e8f0;
+            border-bottom: 2px solid #e2e8f0;
+            padding: 15px;
+            text-align: center;
+            font-size: 11pt;
+            font-weight: bold;
+            color: #0f172a;
+            margin: 25px 0;
+        }
+
+        /* 行内公式 */
+        .math-inline {
+            font-family: 'Times New Roman', serif;
+            font-style: italic;
+            font-weight: bold;
+            color: #0f172a;
+            background-color: #f1f5f9;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- 头部 -->
+        <div class="page-header">
+            <h1>自行车碟刹系统厚度与寿命评估模型</h1>
+            <p>精确区分“总厚度”与“有效摩擦厚度”，拒绝因误判导致损伤刹车盘</p>
+        </div>
+
+        <!-- 核心警告 -->
+        <div class="alert-box">
+            <strong>⚠️ 核心误区提示：</strong> 许多车友在用卡尺测量刹车片时，误将不可磨损的金属外壳（钢背）一同计入。这种误判会导致在摩擦材料完全耗尽后仍未更换，造成金属直接刮盘的严重后果。
+        </div>
+
+        <!-- 一、刹车片结构 -->
+        <h2>一、 刹车片物理结构解剖</h2>
+        <p>评估寿命前，必须严格厘清碟刹刹车片的两个组成部分：</p>
+
+        <div class="anatomy-container">
+            <div class="anatomy-visual">
+                <div class="pad-layer layer-friction">有效摩擦材料层 (Pad Compound) - 真正消耗</div>
+                <div class="pad-layer layer-backing">金属钢背层 (Backing Plate) - 厚度恒定</div>
+            </div>
+            <div class="anatomy-text">
+                • <strong>摩擦材料（树脂/半金属/金属烧结）：</strong> 真正与刹车盘接触并提供制动力的部分，随制动里程增加而逐渐变薄。<br>
+                • <strong>钢背（金属底板）：</strong> 支撑摩擦材料并卡入夹器的钢片，属于硬质承载结构，不可磨损。<br>
+                <span style="color: #b45309; font-weight: bold;">&rarr; 核心逻辑：总厚度 = 钢背厚度 + 摩擦层厚度</span>
+            </div>
+        </div>
+
+        <!-- 二、典型厚度范围 -->
+        <h2>二、 典型全新刹车片厚度规格</h2>
+        <p>不同材质的刹车片初始厚度略有差异，但钢背规格基本一致：</p>
+
+        <table class="standard-table">
+            <thead>
+                <tr>
+                    <th>刹车片类型</th>
+                    <th>初始总厚度 (含钢背)</th>
+                    <th>标准钢背厚度 (固定)</th>
+                    <th>标准有效摩擦层厚度 (可变)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>树脂片 (Resin/Organic)</strong></td>
+                    <td>3.5 – 4.0 mm</td>
+                    <td>约 1.2 – 1.5 mm</td>
+                    <td>约 2.0 – 2.5 mm</td>
+                </tr>
+                <tr>
+                    <td><strong>半金属片 (Semi-Metal)</strong></td>
+                    <td>3.8 – 4.2 mm</td>
+                    <td>约 1.2 – 1.5 mm</td>
+                    <td>约 2.5 – 2.7 mm</td>
+                </tr>
+                <tr>
+                    <td><strong>金属烧结片 (Sintered/Metal)</strong></td>
+                    <td>4.0 – 4.5 mm</td>
+                    <td>约 1.2 – 1.5 mm</td>
+                    <td>约 2.5 – 3.0 mm</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- 三、关键指标 -->
+        <h2>三、 核心指标：摩擦层寿命状态评估</h2>
+        <p>进行卡尺测量或目测时，应当排除钢背，仅测算剩余摩擦材料厚度（定义为 <span class="math-inline">t_{friction}</span>）：</p>
+
+        <!-- 安全区 -->
+        <div class="status-card safe">
+            <div class="status-badge">🟢 安全使用区</div>
+            <div class="status-info">
+                <strong>摩擦材料 <span class="math-inline">t_{friction} \ge 1.5\text{ mm}</span></strong><br>
+                制动性能完全正常，热容量充足。无需特殊处理，可放心高强度骑行。
+            </div>
+        </div>
+
+        <!-- 临界区 -->
+        <div class="status-card warning">
+            <div class="status-badge">🟡 临界状态区</div>
+            <div class="status-info">
+                <strong>摩擦材料 <span class="math-inline">0.8\text{ mm} \le t_{friction} < 1.5\text{ mm}</span></strong><br>
+                刹车性能开始出现轻微热衰减。建议采购备件，准备在下一次保养中进行更换。
+            </div>
+        </div>
+
+        <!-- 危险区 -->
+        <div class="status-card danger">
+            <div class="status-badge">🔴 极限危险区</div>
+            <div class="status-info">
+                <strong>摩擦材料 <span class="math-inline">t_{friction} \le 0.5\text{ mm}</span></strong><br>
+                <strong>必须立即停止骑行并更换！</strong> 弹簧片可能已经开始接触碟盘，随时面临“金属刮盘”导致碟盘报废的风险。
+            </div>
+        </div>
+
+        <!-- 四、刹车盘厚度标准 -->
+        <h2>四、 刹车盘（碟片）生命线标准</h2>
+        <p>碟盘作为整体系统的另一侧，同样存在磨损极限（定义为 <span class="math-inline">t_{rotor}</span>）：</p>
+
+        <table class="standard-table">
+            <thead>
+                <tr>
+                    <th>碟片状态</th>
+                    <th>厚度标准值</th>
+                    <th>工艺与性能特征</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>全新盘片</strong></td>
+                    <td>1.8 mm – 2.0 mm</td>
+                    <td>1.8mm为市面主流标准；2.0mm通常为重力型（DH/E-Bike）加强碟盘。</td>
+                </tr>
+                <tr>
+                    <td><strong>正常使用区</strong></td>
+                    <td>&ge; 1.5 mm</td>
+                    <td>表面可允许有轻微摩擦条纹，整体强度与散热性能符合原厂设计。</td>
+                </tr>
+                <tr>
+                    <td><strong style="color: #ef4444;">必须更换红线</strong></td>
+                    <td><span class="math-inline" style="color: #b91c1c; background-color:#fee2e2;">t_{rotor} < 1.5\text{ mm}</span></td>
+                    <td>碟盘抗结构形变能力急剧下降，高负载下极易发生翘曲甚至高热开裂。</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- 五、为什么不能只看总厚度 -->
+        <h2>五、 厚度演变：为什么不能只看“总厚度”？</h2>
+        <p>以下模拟展示了在钢背恒定为 1.5 mm 的情况下，刹车片在生命周期中的真实结构消耗变化：</p>
+
+        <div class="wear-timeline">
+            <!-- 新 -->
+            <div class="wear-row">
+                <div class="wear-label">🆕 全新状态 (4.0mm)</div>
+                <div class="wear-bar-container">
+                    <div class="bar-split">
+                        <div class="split-f" style="width: 62.5%;">有效摩擦层 2.5 mm</div>
+                        <div class="split-b" style="width: 37.5%;">钢背 1.5 mm</div>
+                    </div>
+                </div>
+            </div>
+            <!-- 旧 -->
+            <div class="wear-row">
+                <div class="wear-label">🔄 中度磨损 (3.0mm)</div>
+                <div class="wear-bar-container">
+                    <div class="bar-split">
+                        <div class="split-f" style="width: 50%; background-color: #d97706;">摩擦层剩 1.5 mm</div>
+                        <div class="split-b" style="width: 50%;">钢背 1.5 mm</div>
+                    </div>
+                </div>
+            </div>
+            <!-- 极限 -->
+            <div class="wear-row">
+                <div class="wear-label">🚨 报废极限 (2.0mm)</div>
+                <div class="wear-bar-container">
+                    <div class="bar-split">
+                        <div class="split-f" style="width: 25%; background-color: #dc2626;">摩擦层仅 0.5 mm</div>
+                        <div class="split-b" style="width: 75%;">钢背 1.5 mm</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 六、实战经验与七、技巧 -->
+        <h2>六、 高频爬坡与长下坡实战建议</h2>
+        <div class="exp-box">
+            <div class="exp-item">
+                <strong>1. 针对长下坡（高热负荷场景）：</strong><br>
+                由于长距离控速会使卡钳积聚大量热量，摩擦材料越薄，热传导至活塞和刹车油的速度就越快。因此建议在 <strong>摩擦材料 &le; 1.0 mm 时即执行防御性更换</strong>，防止长坡出现突发性热衰减。
+            </div>
+            <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 12px 0;">
+            <div class="exp-item">
+                <strong>2. 泥沙与潮湿环境：</strong><br>
+                山地及雨天骑行时，沙粒附着在盘片上会变成高硬度磨料，此时磨损速度会飙升 2–3 倍，需缩短巡检周期。
+            </div>
+            <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 12px 0;">
+            <div class="exp-item">
+                <strong>3. 快速无工具目测技巧：</strong><br>
+                从夹器正上方或后方透光侧看：若摩擦层厚度能清晰看出一片独立于底座的“厚实外壳”，则安全；若看起来与金属底座几乎融为一体、呈现极薄的片状感，说明已逼近极限。
+            </div>
+        </div>
+
+        <!-- 八、总结 -->
+        <div class="summary-quote">
+            总结：刹车片寿命的核心不是看“整体剩多少”，而是看“剩余有效摩擦材料是否 &ge; 1.0 mm（保守建议 1.5 mm）”。
+        </div>
+
+    </div>
+
+</body>
+</html>

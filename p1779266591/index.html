@@ -1,0 +1,890 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>蛋白质来源搭配与热量效率</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700;900&family=Noto+Sans+SC:wght@300;400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f6f2eb;
+    --surface: #ffffff;
+    --surface-alt: #faf8f4;
+    --border: #e2ddd4;
+    --border-strong: #d0c9bc;
+    --accent: #b8860b;
+    --accent-light: #d4a853;
+    --accent-bg: rgba(184,134,11,0.06);
+    --accent-border: rgba(184,134,11,0.15);
+    --text: #2c2824;
+    --text-secondary: #6b6358;
+    --text-muted: #9e9588;
+    --green: #3e7a50;
+    --green-bg: rgba(62,122,80,0.06);
+    --green-border: rgba(62,122,80,0.15);
+    --red: #b44040;
+    --red-bg: rgba(180,64,64,0.06);
+    --red-border: rgba(180,64,64,0.15);
+    --blue: #3a6b9e;
+    --blue-bg: rgba(58,107,158,0.06);
+    --blue-border: rgba(58,107,158,0.15);
+    --purple: #7050a0;
+    --purple-bg: rgba(112,80,160,0.06);
+    --orange: #a06830;
+    --orange-bg: rgba(160,104,48,0.06);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Noto Sans SC', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.85;
+    font-size: 15.5px;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  ::selection { background: rgba(184,134,11,0.15); }
+
+  .wrapper {
+    max-width: 920px;
+    margin: 0 auto;
+    padding: 0 2rem 5rem;
+  }
+
+  /* ── NAV ── */
+  .nav {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(246,242,235,0.9);
+    backdrop-filter: blur(14px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 2rem;
+    display: flex; align-items: center;
+    height: 48px; font-size: 12.5px; gap: 1.2rem;
+    overflow-x: auto; scrollbar-width: none;
+  }
+  .nav::-webkit-scrollbar { display: none; }
+  .nav a {
+    color: var(--text-muted); text-decoration: none;
+    white-space: nowrap; transition: color 0.2s;
+    font-weight: 500; letter-spacing: 0.03em; flex-shrink: 0;
+  }
+  .nav a:hover { color: var(--accent); }
+  .nav-brand {
+    color: var(--accent); font-family: 'Noto Serif SC', serif;
+    font-weight: 700; font-size: 13.5px; margin-right: 0.6rem;
+  }
+
+  /* ── HERO ── */
+  .hero {
+    padding: 80px 0 40px;
+    text-align: center;
+    opacity: 0; animation: fadeUp 0.5s 0.1s ease forwards;
+  }
+  .hero h1 {
+    font-family: 'Noto Serif SC', serif;
+    font-size: clamp(1.6rem, 3.5vw, 2.2rem);
+    font-weight: 900; line-height: 1.35; margin-bottom: 0.8rem;
+    color: var(--text);
+  }
+  .hero .lead {
+    font-size: 0.95rem; color: var(--text-secondary);
+    max-width: 620px; margin: 0 auto; line-height: 1.9;
+  }
+
+  /* ── SECTION ── */
+  .section {
+    margin-bottom: 3.5rem;
+    opacity: 0; transform: translateY(20px);
+  }
+  .section.visible { animation: fadeUp 0.5s ease forwards; }
+
+  .section-title {
+    font-family: 'Noto Serif SC', serif;
+    font-size: 1.3rem; font-weight: 700;
+    margin-bottom: 0.3rem; color: var(--text);
+    display: flex; align-items: baseline; gap: 0.6rem;
+  }
+  .section-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; color: var(--text-muted);
+    letter-spacing: 0.08em;
+  }
+  .section-sub {
+    font-size: 0.9rem; color: var(--text-secondary);
+    margin-bottom: 1.4rem; line-height: 1.8;
+  }
+
+  /* ── DIVIDER ── */
+  .divider {
+    height: 1px; margin: 3rem 0;
+    background: linear-gradient(90deg, transparent, var(--border-strong), transparent);
+  }
+
+  /* ── TABLE ── */
+  .table-wrap {
+    overflow-x: auto; margin: 1rem 0;
+    border: 1px solid var(--border); border-radius: 8px;
+  }
+  table {
+    width: 100%; border-collapse: collapse;
+    font-size: 0.85rem;
+  }
+  thead { background: var(--surface-alt); }
+  th {
+    padding: 0.65rem 0.9rem; text-align: left;
+    font-weight: 600; color: var(--text-secondary);
+    font-size: 0.8rem; letter-spacing: 0.02em;
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+  }
+  td {
+    padding: 0.55rem 0.9rem;
+    border-bottom: 1px solid var(--border);
+    color: var(--text);
+  }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr:hover { background: var(--accent-bg); }
+  .num-r { text-align: right; font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; }
+  .highlight-row { background: var(--green-bg); }
+  .warn-row { background: var(--red-bg); }
+  .tag {
+    display: inline-block; font-size: 0.72rem;
+    padding: 0.1rem 0.45rem; border-radius: 3px;
+    font-weight: 500; vertical-align: middle;
+  }
+  .tag-good { background: var(--green-bg); color: var(--green); border: 1px solid var(--green-border); }
+  .tag-warn { background: var(--red-bg); color: var(--red); border: 1px solid var(--red-border); }
+  .tag-info { background: var(--blue-bg); color: var(--blue); border: 1px solid var(--blue-border); }
+  .tag-accent { background: var(--accent-bg); color: var(--accent); border: 1px solid var(--accent-border); }
+  .tag-purple { background: var(--purple-bg); color: var(--purple); }
+
+  /* ── CARD ── */
+  .card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 8px; padding: 1.2rem 1.4rem;
+    margin: 0.8rem 0;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+  }
+  .card h4 {
+    font-size: 0.95rem; font-weight: 700; margin-bottom: 0.4rem;
+    display: flex; align-items: center; gap: 0.4rem;
+  }
+  .card p, .card .desc {
+    font-size: 0.85rem; color: var(--text-secondary);
+    line-height: 1.8;
+  }
+  .card-grid {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 0.8rem; margin: 0.8rem 0;
+  }
+
+  /* ── BOX ── */
+  .box {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 8px; padding: 1rem 1.2rem; margin: 0.6rem 0;
+  }
+  .box-accent {
+    background: var(--accent-bg); border-color: var(--accent-border);
+  }
+  .box-green {
+    background: var(--green-bg); border-color: var(--green-border);
+  }
+  .box-blue {
+    background: var(--blue-bg); border-color: var(--blue-border);
+  }
+  .box-red {
+    background: var(--red-bg); border-color: var(--red-border);
+  }
+  .box-orange {
+    background: var(--orange-bg); border-color: var(--orange-border);
+  }
+  .box .box-title {
+    font-weight: 700; font-size: 0.88rem; margin-bottom: 0.3rem;
+  }
+  .box p {
+    font-size: 0.85rem; color: var(--text-secondary); line-height: 1.8;
+  }
+
+  /* ── FORMULA ── */
+  .formula {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.82rem; background: var(--surface-alt);
+    border: 1px solid var(--border); border-radius: 6px;
+    padding: 0.8rem 1rem; margin: 0.6rem 0;
+    line-height: 2; color: var(--text-secondary);
+  }
+  .formula strong { color: var(--text); }
+
+  /* ── BULLET ── */
+  .bullet-list { list-style: none; padding: 0; margin: 0.4rem 0; }
+  .bullet-list li {
+    font-size: 0.88rem; color: var(--text-secondary);
+    padding-left: 1.1rem; position: relative; line-height: 1.9;
+  }
+  .bullet-list li::before {
+    content: '·'; position: absolute; left: 0;
+    color: var(--text-muted); font-weight: bold; font-size: 1.1em;
+  }
+
+  /* ── COMPARE ── */
+  .compare-grid {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 0.8rem; margin: 0.8rem 0;
+  }
+  .compare-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 8px; padding: 1rem 1.2rem;
+  }
+  .compare-card h5 {
+    font-size: 0.82rem; font-weight: 700; margin-bottom: 0.3rem;
+  }
+  .compare-card p {
+    font-size: 0.82rem; color: var(--text-muted); line-height: 1.75;
+  }
+  .compare-card .metric {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 1.4rem; font-weight: 500;
+    margin: 0.3rem 0;
+  }
+  .compare-card .metric.green { color: var(--green); }
+  .compare-card .metric.red { color: var(--red); }
+
+  /* ── PLAN ── */
+  .plan-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 1.4rem 1.6rem;
+    margin: 1rem 0; position: relative;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .plan-header {
+    display: flex; justify-content: space-between; align-items: baseline;
+    margin-bottom: 0.8rem; flex-wrap: wrap; gap: 0.5rem;
+  }
+  .plan-title {
+    font-family: 'Noto Serif SC', serif;
+    font-size: 1.05rem; font-weight: 700;
+  }
+  .plan-meta {
+    display: flex; gap: 1rem; flex-wrap: wrap;
+  }
+  .plan-meta-item {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.78rem; color: var(--text-muted);
+  }
+  .plan-meta-item strong {
+    color: var(--accent); font-weight: 500;
+  }
+  .plan-items {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 0.5rem;
+  }
+  .plan-item {
+    background: var(--surface-alt); border: 1px solid var(--border);
+    border-radius: 6px; padding: 0.6rem 0.8rem;
+    font-size: 0.82rem;
+  }
+  .plan-item .food { font-weight: 600; margin-bottom: 0.15rem; }
+  .plan-item .detail { color: var(--text-muted); font-size: 0.78rem; }
+
+  /* ── BAR ── */
+  .bar-container { margin: 0.5rem 0; }
+  .bar-row {
+    display: flex; align-items: center; gap: 0.6rem;
+    margin-bottom: 0.35rem; font-size: 0.82rem;
+  }
+  .bar-label { width: 52px; text-align: right; font-weight: 500; color: var(--text-secondary); flex-shrink: 0; }
+  .bar-track {
+    flex: 1; height: 18px; background: var(--surface-alt);
+    border: 1px solid var(--border); border-radius: 3px;
+    overflow: hidden; display: flex;
+  }
+  .bar-fill {
+    height: 100%; display: flex; align-items: center;
+    justify-content: center; font-size: 0.7rem;
+    font-family: 'JetBrains Mono', monospace;
+    color: #fff; font-weight: 500;
+    transition: width 0.6s ease;
+  }
+  .bar-protein { background: var(--accent); }
+  .bar-carb { background: var(--blue); }
+  .bar-fat { background: var(--orange); }
+
+  /* ── ICON ── */
+  .icon { font-size: 0.9rem; opacity: 0.6; }
+
+  /* ── ANIMATION ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 700px) {
+    .wrapper { padding: 0 1rem 3rem; }
+    .card-grid, .compare-grid { grid-template-columns: 1fr; }
+    .plan-items { grid-template-columns: 1fr 1fr; }
+    .nav { padding: 0 1rem; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <span class="nav-brand">蛋白质搭配</span>
+  <a href="#verify">热量验证</a>
+  <a href="#efficiency">蛋白效率</a>
+  <a href="#ratio">理想比例</a>
+  <a href="#plans">不同目标方案</a>
+  <a href="#adjust">调整策略</a>
+  <a href="#practical">实操总结</a>
+</nav>
+
+<div class="wrapper">
+
+  <!-- ═══ HERO ═══ -->
+  <section class="hero">
+    <h1>豆干 · 鸡蛋 · 米饭<br>蛋白质搭配与热量效率</h1>
+    <p class="lead">
+      大豆 + 谷物互补是否真的热量爆炸？不同热量预算下如何调整蛋白来源？
+    </p>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- ═══ 01 验证 ═══ -->
+  <section class="section" id="verify">
+    <div class="section-title">
+      <span class="section-num">01</span> 2100 大卡只吃大米和大豆，80g 蛋白质够吗？
+    </div>
+    <p class="section-sub">先验算你的判断是否成立。</p>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>食物</th>
+            <th class="num-r">重量</th>
+            <th class="num-r">蛋白质</th>
+            <th class="num-r">热量</th>
+            <th class="num-r">蛋白/热量</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>干大米</td>
+            <td class="num-r">320g</td>
+            <td class="num-r">24g</td>
+            <td class="num-r">1120</td>
+            <td class="num-r">8.6%</td>
+          </tr>
+          <tr>
+            <td>干黄豆</td>
+            <td class="num-r">135g</td>
+            <td class="num-r">48.6g</td>
+            <td class="num-r">602</td>
+            <td class="num-r">32.3%</td>
+          </tr>
+          <tr>
+            <td>食用油</td>
+            <td class="num-r">少许</td>
+            <td class="num-r">0g</td>
+            <td class="num-r">~100</td>
+            <td class="num-r">—</td>
+          </tr>
+          <tr class="highlight-row">
+            <td><strong>合计</strong></td>
+            <td class="num-r"></td>
+            <td class="num-r"><strong>72.6g</strong></td>
+            <td class="num-r"><strong>~1822</strong></td>
+            <td class="num-r"><strong>15.9%</strong></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="box box-green">
+      <div class="box-title">结论：你的判断基本正确</div>
+      <p>不到 2000 大卡就能拿到 72g 蛋白质。如果把剩余热量分配给更多大豆（再加 60g 干黄豆 ≈ 270 kcal / 21.6g 蛋白），可以轻松达到 <strong>94g 蛋白 / 2092 大卡</strong>。</p>
+      <p style="margin-top:0.4rem;">大米 + 大豆在 2100 大卡内获得 80-90g 蛋白质，<strong>完全可行，热量并不超标</strong>。</p>
+    </div>
+
+    <div class="box box-accent">
+      <div class="box-title">但问题是：适口性差</div>
+      <p>135g 干黄豆 ≈ 煮熟后约 340g 黄豆，每天吃一大碗煮黄豆，胀气、豆腥、口感粗糙。这才是真正的问题——<strong>不是热量，而是你愿不愿意天天吃</strong>。</p>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- ═══ 02 效率对比 ═══ -->
+  <section class="section" id="efficiency">
+    <div class="section-title">
+      <span class="section-num">02</span> 每种蛋白质来源的热量效率
+    </div>
+    <p class="section-sub">在总热量有限的情况下，选择效率最高的来源至关重要。核心指标：<strong>每 100 大卡能获得多少克蛋白质</strong>。</p>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>食物</th>
+            <th class="num-r">蛋白质/100g</th>
+            <th class="num-r">热量/100g</th>
+            <th class="num-r">蛋白/100kcal</th>
+            <th>评价</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="highlight-row">
+            <td><strong>鸡蛋（1个≈50g）</strong></td>
+            <td class="num-r">6.5g</td>
+            <td class="num-r">72</td>
+            <td class="num-r"><strong>9.0g</strong></td>
+            <td><span class="tag tag-good">最优</span></td>
+          </tr>
+          <tr>
+            <td>豆腐干</td>
+            <td class="num-r">16g</td>
+            <td class="num-r">140</td>
+            <td class="num-r">11.4g</td>
+            <td><span class="tag tag-good">优</span></td>
+          </tr>
+          <tr>
+            <td>北豆腐</td>
+            <td class="num-r">12g</td>
+            <td class="num-r">80</td>
+            <td class="num-r">15.0g</td>
+            <td><span class="tag tag-good">极优</span></td>
+          </tr>
+          <tr>
+            <td>干黄豆</td>
+            <td class="num-r">36g</td>
+            <td class="num-r">446</td>
+            <td class="num-r">8.1g</td>
+            <td><span class="tag tag-info">中</span></td>
+          </tr>
+          <tr>
+            <td>鸡胸肉</td>
+            <td class="num-r">23g</td>
+            <td class="num-r">110</td>
+            <td class="num-r">20.9g</td>
+            <td><span class="tag tag-good">极优</span></td>
+          </tr>
+          <tr class="warn-row">
+            <td>干大米</td>
+            <td class="num-r">7.5g</td>
+            <td class="num-r">350</td>
+            <td class="num-r">2.1g</td>
+            <td><span class="tag tag-warn">极低</span></td>
+          </tr>
+          <tr class="warn-row">
+            <td>干面条</td>
+            <td class="num-r">10g</td>
+            <td class="num-r">350</td>
+            <td class="num-r">2.9g</td>
+            <td><span class="tag tag-warn">低</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card">
+      <h4><span class="icon">▸</span> 关键发现</h4>
+      <div class="desc">
+        <ul class="bullet-list">
+          <li><strong>鸡蛋</strong>的蛋白质热量比 ≈ 12.5%，与豆腐干相当，但适口性好、氨基酸完美、免烹调</li>
+          <li><strong>豆腐干</strong>的蛋白质热量比 ≈ 11.4%，且蛋氨酸短板正好被鸡蛋补足</li>
+          <li><strong>大米</strong>的蛋白质热量比仅 8.6%，它的蛋白质太"稀"了——吃够 80g 蛋白光靠米饭需要 930g 干米（3255 大卡），根本不可能</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="box box-red">
+      <div class="box-title">热量超标的真正原因</div>
+      <p>不是"豆制品热量高"，而是<strong>用大米补蛋氨酸的代价太大</strong>。大米每补 1g 蛋白质就附带 47 大卡的纯淀粉热量。用鸡蛋补蛋氨酸，每 1g 蛋白只附带 11 大卡。</p>
+      <p style="margin-top:0.3rem;"><strong>结论：用鸡蛋替代部分大米来补蛋氨酸，是控制热量的关键。</strong></p>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- ═══ 03 理想比例 ═══ -->
+  <section class="section" id="ratio">
+    <div class="section-title">
+      <span class="section-num">03</span> 豆干 + 鸡蛋 + 米饭的理想比例
+    </div>
+    <p class="section-sub">以 80g 蛋白质为目标，不同总热量下的最优搭配：</p>
+
+    <!-- 1500 kcal -->
+    <div class="plan-card">
+      <div class="plan-header">
+        <div class="plan-title">方案 A：减脂期 · 1500 大卡</div>
+        <div class="plan-meta">
+          <span class="plan-meta-item">蛋白 <strong>78g</strong></span>
+          <span class="plan-meta-item">占比 <strong>20.8%</strong></span>
+        </div>
+      </div>
+      <div class="plan-items">
+        <div class="plan-item"><div class="food">鸡蛋 3 个</div><div class="detail">19.5g 蛋白 · 216 kcal</div></div>
+        <div class="plan-item"><div class="food">豆干 200g</div><div class="detail">32g 蛋白 · 280 kcal</div></div>
+        <div class="plan-item"><div class="food">干大米 130g</div><div class="detail">9.8g 蛋白 · 455 kcal</div></div>
+        <div class="plan-item"><div class="food">蔬菜 + 油</div><div class="detail">— · ~549 kcal</div></div>
+      </div>
+      <div class="bar-container" style="margin-top:0.8rem;">
+        <div class="bar-row">
+          <span class="bar-label">蛋白质</span>
+          <div class="bar-track">
+            <div class="bar-fill bar-protein" style="width:20.8%">20.8%</div>
+          </div>
+        </div>
+        <div class="bar-row">
+          <span class="bar-label">碳水</span>
+          <div class="bar-track">
+            <div class="bar-fill bar-carb" style="width:45%">~45%</div>
+          </div>
+        </div>
+        <div class="bar-row">
+          <span class="bar-label">脂肪</span>
+          <div class="bar-track">
+            <div class="bar-fill bar-fat" style="width:34%">~34%</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 1800 kcal -->
+    <div class="plan-card">
+      <div class="plan-header">
+        <div class="plan-title">方案 B：维持期 · 1800 大卡</div>
+        <div class="plan-meta">
+          <span class="plan-meta-item">蛋白 <strong>81g</strong></span>
+          <span class="plan-meta-item">占比 <strong>18%</strong></span>
+        </div>
+      </div>
+      <div class="plan-items">
+        <div class="plan-item"><div class="food">鸡蛋 4 个</div><div class="detail">26g 蛋白 · 288 kcal</div></div>
+        <div class="plan-item"><div class="food">豆干 200g</div><div class="detail">32g 蛋白 · 280 kcal</div></div>
+        <div class="plan-item"><div class="food">干大米 200g</div><div class="detail">15g 蛋白 · 700 kcal</div></div>
+        <div class="plan-item"><div class="food">蔬菜 + 油</div><div class="detail">— · ~532 kcal</div></div>
+      </div>
+      <div class="bar-container" style="margin-top:0.8rem;">
+        <div class="bar-row">
+          <span class="bar-label">蛋白质</span>
+          <div class="bar-track">
+            <div class="bar-fill bar-protein" style="width:18%">18%</div>
+          </div>
+        </div>
+        <div class="bar-row">
+          <span class="bar-label">碳水</span>
+          <div class="bar-track">
+            <div class="bar-fill bar-carb" style="width:48%">~48%</div>
+          </div>
+        </div>
+        <div class="bar-row">
+          <span class="bar-label">脂肪</span>
+          <div class="bar-track">
+            <div class="bar-fill bar-fat" style="width:34%">~34%</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2100 kcal -->
+    <div class="plan-card" style="border-color: var(--accent-border);">
+      <div class="plan-header">
+        <div class="plan-title">方案 C：轻度增肌 · 2100 大卡</div>
+        <div class="plan-meta">
+          <span class="plan-meta-item">蛋白 <strong>85g</strong></span>
+          <span class="plan-meta-item">占比 <strong>16.2%</strong></span>
+        </div>
+      </div>
+      <div class="plan-items">
+        <div class="plan-item"><div class="food">鸡蛋 5 个</div><div class="detail">32.5g 蛋白 · 360 kcal</div></div>
+        <div class="plan-item"><div class="food">豆干 200g</div><div class="detail">32g 蛋白 · 280 kcal</div></div>
+        <div class="plan-item"><div class="food">干大米 250g</div><div class="detail">18.8g 蛋白 · 875 kcal</div></div>
+        <div class="plan-item"><div class="food">蔬菜 + 油</div><div class="detail">— · ~585 kcal</div></div>
+      </div>
+      <div class="bar-container" style="margin-top:0.8rem;">
+        <div class="bar-row">
+          <span class="bar-label">蛋白质</span>
+          <div class="bar-track">
+            <div class="bar-fill bar-protein" style="width:16.2%">16.2%</div>
+          </div>
+        </div>
+        <div class="bar-row">
+          <span class="bar-label">碳水</span>
+          <div class="bar-track">
+            <div class="bar-fill bar-carb" style="width:50%">~50%</div>
+          </div>
+        </div>
+        <div class="bar-row">
+          <span class="bar-label">脂肪</span>
+          <div class="bar-track">
+            <div class="bar-fill bar-fat" style="width:34%">~34%</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="box box-accent">
+      <div class="box-title">核心规律</div>
+      <p>三个方案中，<strong>鸡蛋 3-5 个 + 豆干 200g</strong>是稳定的蛋白质基础（约 52-65g），剩余蛋白质由米饭补充。总热量的变化主要靠调整米饭和油脂的量来实现，而非调整蛋白质来源。</p>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- ═══ 04 不同目标 ═══ -->
+  <section class="section" id="plans">
+    <div class="section-title">
+      <span class="section-num">04</span> 如果目标更高——120g 蛋白怎么办？
+    </div>
+    <p class="section-sub">当蛋白目标从 80g 提升到 120g，热量压力会明显增大。</p>
+
+    <div class="compare-grid">
+      <div class="compare-card">
+        <h5>80g 蛋白 · 纯素方案</h5>
+        <div class="metric red">~1800 kcal</div>
+        <p>豆干 250g + 鸡蛋 3个 + 米饭 200g。蛋白质占比约 18%，热量可控。</p>
+      </div>
+      <div class="compare-card">
+        <h5>120g 蛋白 · 纯素方案</h5>
+        <div class="metric red">~2500 kcal</div>
+        <p>豆干 350g + 鸡蛋 6个 + 米饭 250g。蛋白质占比约 19.2%，热量偏高。</p>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>蛋白质目标</th>
+            <th class="num-r">鸡蛋</th>
+            <th class="num-r">豆干</th>
+            <th class="num-r">干大米</th>
+            <th class="num-r">基础热量</th>
+            <th>说明</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>60g</strong></td>
+            <td class="num-r">2 个</td>
+            <td class="num-r">150g</td>
+            <td class="num-r">100g</td>
+            <td class="num-r">767</td>
+            <td><span class="tag tag-good">轻松</span> 剩余空间充足</td>
+          </tr>
+          <tr>
+            <td><strong>80g</strong></td>
+            <td class="num-r">4 个</td>
+            <td class="num-r">200g</td>
+            <td class="num-r">130g</td>
+            <td class="num-r">1015</td>
+            <td><span class="tag tag-good">合理</span> 1500-2100 均可</td>
+          </tr>
+          <tr>
+            <td><strong>100g</strong></td>
+            <td class="num-r">5 个</td>
+            <td class="num-r">250g</td>
+            <td class="num-r">150g</td>
+            <td class="num-r">1240</td>
+            <td><span class="tag tag-info">需规划</span> 需 1800+ 热量空间</td>
+          </tr>
+          <tr>
+            <td><strong>120g</strong></td>
+            <td class="num-r">6 个</td>
+            <td class="num-r">300g</td>
+            <td class="num-r">200g</td>
+            <td class="num-r">1555</td>
+            <td><span class="tag tag-warn">紧张</span> 需 2100+ 才有余量</td>
+          </tr>
+          <tr>
+            <td><strong>150g</strong></td>
+            <td class="num-r">8 个</td>
+            <td class="num-r">350g</td>
+            <td class="num-r">200g</td>
+            <td class="num-r">1875</td>
+            <td><span class="tag tag-warn">很难</span> 需 2400+，或加入鸡胸肉</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="box box-orange">
+      <div class="box-title">80g 和 120g 的本质区别</div>
+      <p><strong>80g 蛋白</strong>：豆干 + 鸡蛋 + 正常主食就够了，不需要刻意规划。这是普通成年人（60-70kg）的日常推荐量，大多数人正常饮食就能达到。</p>
+      <p style="margin-top:0.4rem;"><strong>120g+ 蛋白</strong>：进入了"纯靠植物蛋白来源热量会偏高"的区间。这时候要么接受热量略高，要么加入鸡胸肉/鱼肉这类蛋白质密度更高的来源。</p>
+    </div>
+
+    <div class="card">
+      <h4><span class="icon">▸</span> 你真正需要多少蛋白质？</h4>
+      <div class="desc">
+        <ul class="bullet-list">
+          <li><strong>普通成年人</strong>（不运动）：0.8g/kg → 60kg 的人只需 48g</li>
+          <li><strong>规律运动</strong>：1.2-1.6g/kg → 70kg 的人需要 84-112g</li>
+          <li><strong>增肌期</strong>：1.6-2.2g/kg → 70kg 的人需要 112-154g</li>
+        </ul>
+        <p style="margin-top:0.6rem;">如果你体重 60-70kg 且规律运动，80-100g 蛋白已经足够。豆干 + 鸡蛋 + 米饭在 2100 大卡内完全能覆盖。</p>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- ═══ 05 调整策略 ═══ -->
+  <section class="section" id="adjust">
+    <div class="section-title">
+      <span class="section-num">05</span> 不同热量下蛋白质来源的调整策略
+    </div>
+    <p class="section-sub">核心原则：总热量越低，越需要"蛋白质密度高"的来源。</p>
+
+    <div class="formula">
+      <strong>蛋白质密度 = 蛋白质克数 / 总热量</strong><br>
+      密度越高 → 同样热量获得更多蛋白 → 越适合低热量场景
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>场景</th>
+            <th class="num-r">总热量</th>
+            <th class="num-r">蛋白目标</th>
+            <th>策略</th>
+            <th>豆干</th>
+            <th>鸡蛋</th>
+            <th>米饭</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>严格减脂</td>
+            <td class="num-r">1200</td>
+            <td class="num-r">70-80g</td>
+            <td>最大化蛋/豆，最小化主食</td>
+            <td>200g</td>
+            <td>4 个</td>
+            <td>60g</td>
+          </tr>
+          <tr>
+            <td>温和减脂</td>
+            <td class="num-r">1500</td>
+            <td class="num-r">75-85g</td>
+            <td>蛋豆为主，适量主食</td>
+            <td>200g</td>
+            <td>3 个</td>
+            <td>130g</td>
+          </tr>
+          <tr class="highlight-row">
+            <td><strong>维持</strong></td>
+            <td class="num-r"><strong>1800</strong></td>
+            <td class="num-r"><strong>80-90g</strong></td>
+            <td><strong>均衡分配</strong></td>
+            <td><strong>200g</strong></td>
+            <td><strong>4 个</strong></td>
+            <td><strong>200g</strong></td>
+          </tr>
+          <tr>
+            <td>轻度增肌</td>
+            <td class="num-r">2100</td>
+            <td class="num-r">85-100g</td>
+            <td>蛋豆固定，主食上调</td>
+            <td>250g</td>
+            <td>5 个</td>
+            <td>250g</td>
+          </tr>
+          <tr>
+            <td>增肌期</td>
+            <td class="num-r">2400+</td>
+            <td class="num-r">110-130g</td>
+            <td>蛋豆最大量 + 鸡胸肉补充</td>
+            <td>250g</td>
+            <td>5 个</td>
+            <td>250g</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card">
+      <h4><span class="icon">▸</span> 调整的核心逻辑</h4>
+      <div class="desc">
+        <ul class="bullet-list">
+          <li><strong>热量从低到高</strong>：蛋白质来源（蛋 + 豆干）的量基本保持稳定，<strong>变化的主要是米饭和油脂的量</strong></li>
+          <li><strong>蛋白目标从低到高</strong>：先加鸡蛋（效率最高），再加豆干（饱腹感好），米饭只负责补蛋氨酸和提供碳水</li>
+          <li><strong>超过 120g</strong>：在蛋 + 豆干基础上，加入鸡胸肉 150-200g（额外 +34-46g 蛋白，仅 +165-220 kcal）</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- ═══ 06 实操 ═══ -->
+  <section class="section" id="practical">
+    <div class="section-title">
+      <span class="section-num">06</span> 实操总结
+    </div>
+    <p class="section-sub">你之前提出的几个问题，一个回答：</p>
+
+    <div class="card-grid">
+      <div class="card">
+        <h4>热量容易超吗？</h4>
+        <div class="desc">
+          <p><strong>80g 蛋白质不会超。</strong>豆干 + 鸡蛋 + 正常主食在 1500-2100 大卡范围内轻松覆盖。</p>
+          <p style="margin-top:0.3rem;">超过 120g 且总热量限制在 1800 以内时才有压力。此时需要加入鸡胸肉等高效来源。</p>
+        </div>
+      </div>
+      <div class="card">
+        <h4>适口性如何？</h4>
+        <div class="desc">
+          <p><strong>豆干 > 干黄豆 >> 蛋白粉。</strong></p>
+          <p style="margin-top:0.3rem;">豆干可炒、可卤、可凉拌，配米饭毫无违和。鸡蛋水煮、煎、蒸都行。日常操作和正常做饭没区别。</p>
+        </div>
+      </div>
+      <div class="card">
+        <h4>比例必须精确吗？</h4>
+        <div class="desc">
+          <p><strong>不需要。</strong>氨基酸池在体内混合，同一天摄入互补来源即可。你不需要每顿精确配比——今天多吃点豆腐少吃点蛋，明天反过来，都行。</p>
+        </div>
+      </div>
+      <div class="card">
+        <h4>最省心的日常做法？</h4>
+        <div class="desc">
+          <p>午餐：米饭 + 豆干炒菜 + 1 个鸡蛋</p>
+          <p>晚餐：米饭 + 豆腐汤 + 2 个鸡蛋</p>
+          <p>加餐：1 个水煮蛋 + 豆浆</p>
+          <p style="margin-top:0.3rem;">→ 自动互补，无需计算，约 80g 蛋白。</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="box box-green" style="margin-top:1.2rem;">
+      <div class="box-title">一句话结论</div>
+      <p><strong>豆干 200g + 鸡蛋 3-5 个 + 正常吃米饭</strong>，是一个在任何合理热量范围内都能自动满足蛋白质需求的组合。唯一需要调整的是米饭和油脂的量来匹配你的总热量目标。不需要精确计算，正常做饭就是最优解。</p>
+    </div>
+  </section>
+
+</div>
+
+<script>
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.06, rootMargin: '0px 0px -20px 0px' });
+
+  document.querySelectorAll('.section').forEach(el => observer.observe(el));
+</script>
+
+</body>
+</html>

@@ -1,0 +1,1723 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OpenRouter 用量仪表盘</title>
+<style>
+:root{
+  --bg:#f4f6fa; --card:#fff; --border:#e4e8ef; --text:#172033; --muted:#6b7280;
+  --primary:#2563eb; --primary-soft:#eff6ff;
+  --success:#059669; --danger:#dc2626; --warning:#b45309; --orange:#c2410c; --purple:#7c3aed;
+  --shadow:0 1px 2px rgba(15,23,42,.03),0 6px 18px rgba(15,23,42,.04);
+  --radius:14px; --radius-sm:10px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  background:var(--bg); color:var(--text); padding:18px; line-height:1.45; font-size:14px;
+}
+.container{max-width:1380px;margin:0 auto}
+
+.header{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin:4px 0 16px}
+.header h1{font-size:25px;letter-spacing:-.4px;font-weight:700}
+.subtitle{font-size:12px;color:var(--muted);margin-top:3px}
+
+.toolbar,.panel,.metric{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow)}
+
+.toolbar{padding:13px 15px;margin-bottom:14px}
+.key-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.key-label{font-size:13px;font-weight:650;white-space:nowrap}
+.key-input{flex:1;min-width:260px;height:36px;padding:0 11px;border:1px solid #cbd5e1;border-radius:8px;
+  font:13px ui-monospace,SFMono-Regular,Menlo,monospace;background:#fff}
+.key-input:focus,.rate-input:focus,.select-input:focus{outline:2px solid #dbeafe;border-color:var(--primary)}
+.select-input{height:30px;border:1px solid #cbd5e1;border-radius:7px;padding:0 6px;font-size:12px;background:#fff;color:#334155;cursor:pointer}
+.btn{height:36px;border:0;border-radius:8px;padding:0 13px;cursor:pointer;font-size:13px;font-weight:650;
+  transition:filter .15s;white-space:nowrap;display:inline-flex;align-items:center;gap:4px}
+.btn:hover{filter:brightness(.97)}
+.btn-primary{background:var(--primary);color:#fff}
+.btn-secondary{background:#eef2f7;color:#334155}
+.btn-danger{background:#fef2f2;color:#b91c1c}
+.btn-sm{height:30px;padding:0 10px;font-size:12px;border-radius:6px}
+.status{font-size:12px;color:var(--muted);margin-left:auto;white-space:nowrap}
+.rate-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:9px;color:var(--muted);font-size:12px}
+.rate-input{width:84px;height:30px;border:1px solid #cbd5e1;border-radius:7px;padding:0 8px;text-align:center}
+
+.notice,.error{padding:10px 12px;border-radius:10px;font-size:12px;margin-bottom:14px;white-space:pre-wrap;word-break:break-word}
+.notice{background:#fffbeb;border:1px solid #fde68a;color:#92400e}
+.error{background:#fef2f2;border:1px solid #fecaca;color:#991b1b;display:none}
+.error.visible{display:block}
+
+.debug{background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:9px 11px;margin-bottom:14px;font-size:11px;color:#64748b}
+.debug summary{cursor:pointer;font-weight:650;color:#475569}
+.debug pre{white-space:pre-wrap;word-break:break-word;margin-top:8px;max-height:300px;overflow:auto;
+  font:10px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace}
+
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:14px}
+.metric{padding:15px;min-height:110px}
+.metric.today{border-color:#bfdbfe;background:linear-gradient(180deg,#fff 0%,#f8fbff 100%)}
+.metric-title{font-size:12px;color:var(--muted);margin-bottom:7px;letter-spacing:.3px}
+.metric-value{font-size:26px;font-weight:760;letter-spacing:-.5px;line-height:1.2}
+.metric-sub{font-size:11px;color:var(--muted);margin-top:4px}
+.money{color:var(--success)}
+.today-label{display:inline-flex;align-items:center;gap:4px;color:var(--primary);font-weight:700}
+
+.section{margin-bottom:14px}
+.panel-header{padding:13px 15px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.panel-title{font-size:15px;font-weight:740}
+.panel-note{font-size:11px;color:var(--muted);margin-top:2px}
+.badge{display:inline-flex;align-items:center;height:22px;padding:0 8px;border-radius:99px;
+  background:var(--primary-soft);color:var(--primary);font-size:11px;font-weight:650}
+
+.recent{overflow:hidden}
+.tab-bar{display:flex;gap:6px;padding:10px 14px 0;border-bottom:1px solid var(--border)}
+.tab{padding:8px 14px;font-size:13px;font-weight:600;cursor:pointer;border-radius:8px 8px 0 0;
+  background:#f1f5f9;color:var(--muted);border:1px solid transparent;border-bottom:none}
+.tab.active{background:#fff;color:var(--primary);border-color:var(--border);position:relative;top:1px}
+
+.request-list{padding:2px 0}
+.request-card{padding:13px 15px;border-bottom:1px solid #edf0f4;transition:background .12s ease}
+.request-card:last-child{border-bottom:0}
+.request-card:hover{background:#fbfdff}
+.request-card.newest{background:#fbfdff}
+.request-main{display:grid;grid-template-columns:165px minmax(240px,1fr) 130px auto;gap:14px;align-items:center}
+.request-time{font:600 12px ui-monospace,SFMono-Regular,Menlo,monospace;white-space:nowrap}
+.request-model{min-width:0}
+.model-name{font-size:13px;font-weight:720;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.provider{font-size:11px;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.request-output{text-align:right;font-size:14px;font-weight:700;white-space:nowrap}
+.request-sub{display:flex;gap:12px;flex-wrap:wrap;margin-top:7px;padding-left:179px;font-size:11px;color:var(--muted)}
+.request-sub span strong{color:#475569;font-weight:650}
+
+.model-link{cursor:pointer;transition:color .12s ease,opacity .12s ease}
+.model-link:hover{color:var(--primary);text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:2px}
+.model-link:active{opacity:.7}
+
+.request-price-main{display:inline-flex;align-items:center;justify-content:flex-end;gap:4px;font-size:16px;font-weight:760;line-height:1.15}
+.request-price-icon{font-size:13px;line-height:1}
+.request-price-per-fen{font-size:10px;font-weight:500;color:#94a3b8;margin-left:2px}
+.request-price-exact{margin-top:3px;font-size:9px;line-height:1;color:#a8b0bd;font-weight:400}
+.price-ultra-low .request-price-main{color:#0f766e}
+.price-low .request-price-main{color:#0284c7}
+.price-below .request-price-main{color:#64748b}
+.price-high .request-price-main{color:#b45309}
+.price-very-high .request-price-main{color:#ea580c}
+.price-extreme .request-price-main{color:#dc2626}
+.price-neutral .request-price-main{color:#64748b}
+
+.request-reason{display:inline-flex;align-items:center;gap:3px;font-size:11px;white-space:nowrap}
+.request-reason strong{font-weight:650}
+.reason-count{color:#a8b0bd;font-weight:400}
+.reason-normal{color:#94a3b8}
+.reason-normal strong{color:#64748b}
+.reason-warning{color:var(--warning)}
+.reason-warning strong{color:var(--warning);font-weight:750}
+.reason-error{color:var(--danger)}
+.reason-error strong{color:var(--danger);font-weight:750}
+.reason-blocked{color:var(--orange)}
+.reason-blocked strong{color:var(--orange);font-weight:750}
+.reason-cancelled{color:#64748b}
+.reason-cancelled strong{color:#475569}
+
+.source-badge{display:inline-block;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:600}
+.source-local{color:#047857;background:#ecfdf5}
+.source-analytics{color:#1d4ed8;background:#eff6ff}
+.source-detail{color:#7c3aed;background:#f5f3ff}
+
+.request-toggle{padding:11px 15px;text-align:center;border-top:1px solid #edf0f4;background:#fbfdff}
+.request-toggle .btn{min-width:170px;justify-content:center}
+
+.empty{padding:30px 14px;text-align:center;color:#94a3b8;font-size:12px}
+
+.chart-wrap{position:relative;padding:12px 14px 4px}
+.chart-svg{width:100%;height:auto;display:block;overflow:visible}
+.chart-tip{position:absolute;pointer-events:none;background:rgba(15,23,42,.95);color:#fff;
+  font-size:11px;line-height:1.5;padding:7px 9px;border-radius:8px;transform:translate(-50%,-112%);
+  white-space:nowrap;opacity:0;transition:opacity .1s;z-index:9}
+.chart-tip.on{opacity:1}
+.chart-tip b{font-weight:700}
+.tip-row{display:flex;align-items:center;gap:6px}
+.tip-dot{width:7px;height:7px;border-radius:2px;flex:0 0 auto}
+.tip-title{font-weight:700;margin-bottom:3px;opacity:.8}
+.chart-legend{display:flex;flex-wrap:wrap;gap:6px;padding:6px 14px 13px}
+.legend-item{display:inline-flex;align-items:center;gap:5px;height:24px;padding:0 9px;border-radius:99px;
+  border:1px solid var(--border);background:#fff;color:#475569;font-size:11px;font-weight:600;
+  cursor:pointer;transition:opacity .12s,background .12s;max-width:220px}
+.legend-item:hover{background:#f8fafc}
+.legend-item.off{opacity:.4;text-decoration:line-through}
+.legend-item .swatch{width:9px;height:9px;border-radius:3px;flex:0 0 auto}
+.legend-item .legend-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.chart-summary{display:flex;gap:16px;flex-wrap:wrap;padding:0 14px 12px;font-size:11px;color:var(--muted)}
+.chart-summary strong{color:#334155;font-weight:700}
+
+.grid-2{display:grid;grid-template-columns:1.15fr 1fr;gap:14px}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:12px 14px}
+.stat{border:1px solid var(--border);border-radius:10px;padding:11px 12px}
+.stat-label{font-size:11px;color:var(--muted)}
+.stat-value{font-size:20px;font-weight:740;margin-top:2px}
+.rank-list{padding:12px 14px}
+.rank-item{margin-bottom:13px}
+.rank-item:last-child{margin-bottom:0}
+.rank-line{display:flex;justify-content:space-between;gap:10px;font-size:12px}
+.rank-name{font-weight:680;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rank-cost{font-weight:720;color:var(--success);white-space:nowrap}
+.bar{height:6px;background:#e9edf3;border-radius:99px;overflow:hidden;margin-top:5px}
+.bar-inner{height:100%;background:var(--primary);border-radius:99px}
+.rank-meta{font-size:10px;color:#94a3b8;margin-top:3px}
+.daily-list{padding:12px 14px}
+.daily-row{display:grid;grid-template-columns:80px 1fr 85px 65px;gap:9px;align-items:center;margin-bottom:8px;font-size:11px}
+.daily-row:last-child{margin-bottom:0}
+.daily-cost{text-align:right;color:var(--success);font-weight:700}
+.daily-req{text-align:right;color:var(--muted)}
+
+.table-wrap{overflow-x:auto}
+.table{width:100%;border-collapse:collapse;min-width:760px}
+.table th{background:#f8fafc;color:var(--muted);font-weight:650;font-size:11px;text-align:left;
+  padding:8px 10px;border-bottom:1px solid var(--border);white-space:nowrap}
+.table td{font-size:11px;padding:9px 10px;border-bottom:1px solid #eef1f5;white-space:nowrap}
+.table tr:last-child td{border-bottom:0}
+
+.footer{padding:17px 0 6px;text-align:center;color:#94a3b8;font-size:10px}
+.auto-status{display:inline-flex;align-items:center;gap:5px}
+.dot{width:7px;height:7px;border-radius:50%;background:#22c55e;display:inline-block}
+
+@media (max-width:1050px){
+  .metrics{grid-template-columns:repeat(2,1fr)}
+  .request-main{grid-template-columns:145px minmax(180px,1fr) 110px}
+  .request-output{display:none}
+  .request-sub{padding-left:159px}
+  .grid-2{grid-template-columns:1fr}
+  .stats{grid-template-columns:repeat(2,1fr)}
+}
+@media (max-width:640px){
+  body{padding:10px}
+  .header{display:block}
+  .header h1{font-size:21px}
+  .metrics{grid-template-columns:1fr 1fr}
+  .metric-value{font-size:21px}
+  .key-row{align-items:stretch;flex-direction:column}
+  .key-input{min-width:0;width:100%}
+  .status{margin-left:0}
+  .request-main{grid-template-columns:1fr auto}
+  .request-time{grid-column:1/-1}
+  .request-sub{padding-left:0}
+  .request-price-main{font-size:14px}
+  .request-price-exact{font-size:8px}
+  .daily-row{grid-template-columns:66px 1fr 72px 48px}
+  .stats{grid-template-columns:1fr 1fr}
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="header">
+    <div>
+      <h1>OpenRouter 用量</h1>
+      <div class="subtitle">今日实时 → 最近请求 → 今日消费 → Token → 30 天趋势</div>
+    </div>
+  </div>
+
+  <div class="toolbar">
+    <div class="key-row">
+      <span class="key-label">Management Key</span>
+      <input id="apiKey" class="key-input" type="password" placeholder="输入 sk-or-mgmt-..." autocomplete="off">
+      <button class="btn btn-secondary" onclick="App.saveKey()">💾 保存</button>
+      <button class="btn btn-secondary" onclick="App.clearKey()">🗑️ 清除</button>
+      <button class="btn btn-primary" onclick="App.loadData()">🔄 查询</button>
+      <span id="status" class="status">就绪</span>
+    </div>
+    <div class="rate-row">
+      <span>💱 汇率</span>
+      <input id="usdCny" class="rate-input" type="number" step="0.0001" value="6.72">
+      <span>CNY / USD</span>
+      <button class="btn btn-secondary btn-sm" onclick="App.saveRate()">保存汇率</button>
+
+      <span style="margin-left:12px">🕛 今日起点</span>
+      <select id="dayBoundary" class="select-input" onchange="App.saveDayBoundary()">
+        <option value="local">本地 00:00</option>
+        <option value="utc">UTC 00:00</option>
+      </select>
+      <span style="font-size:11px;color:#94a3b8">若「今日消费」对不上，切换此项试试</span>
+    </div>
+  </div>
+
+  <div class="notice">
+    ⚠️ 使用 <strong>Management Key</strong>（<code>sk-or-mgmt-...</code>）。
+    今日数据按上方所选「今日起点」统计；已获取的逐请求记录会自动写入本地历史，下次打开页面可立即看到缓存内容。
+  </div>
+
+  <div id="errorBox" class="error"></div>
+  <div id="dateRangeNotice" style="font-size:11px;color:#6b7280;margin-bottom:8px;"></div>
+
+  <details class="debug">
+    <summary>调试信息：Analytics / Meta</summary>
+    <pre id="debugBox">尚未查询</pre>
+  </details>
+
+  <div class="metrics">
+    <div class="metric">
+      <div class="metric-title">💰 当前余额</div>
+      <div id="balanceCny" class="metric-value money">—</div>
+      <div id="balanceUsd" class="metric-sub">—</div>
+    </div>
+    <div class="metric today">
+      <div class="metric-title"><span class="today-label">🔥 今日消费</span></div>
+      <div id="todayUsageCny" class="metric-value money">—</div>
+      <div id="todayUsageMeta" class="metric-sub">— 次 · — Token</div>
+    </div>
+    <div class="metric today">
+      <div class="metric-title"><span class="today-label">⚡ 今日请求</span></div>
+      <div id="todayRequestCount" class="metric-value">—</div>
+      <div id="todayRequestMeta" class="metric-sub">实时 Analytics</div>
+    </div>
+    <div class="metric today">
+      <div class="metric-title"><span class="today-label">📤 今日输出 Token</span></div>
+      <div id="todayOutputTokens" class="metric-value">—</div>
+      <div id="todayOutputMeta" class="metric-sub">输入 — · 总量 —</div>
+    </div>
+  </div>
+
+  <div class="section panel recent">
+    <div class="panel-header">
+      <div>
+        <div class="panel-title">⚡ 最近请求</div>
+        <div class="panel-note">默认折叠，点击展开全部 · 30 秒自动刷新 · 最新优先</div>
+      </div>
+      <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
+        <span class="badge"><span class="auto-status"><span class="dot"></span>自动刷新</span></span>
+        <span id="realtimeAge" class="badge">等待刷新</span>
+        <span id="historyBadge" class="badge">0 条</span>
+        <button class="btn btn-primary btn-sm" onclick="App.refreshRealtime(true)">🔄 刷新</button>
+        <button class="btn btn-danger btn-sm" onclick="App.clearHistory()">清除本地历史</button>
+      </div>
+    </div>
+    <div class="tab-bar">
+      <div id="tabRealtime" class="tab active" onclick="App.switchTab('realtime')">⚡ 今日实时</div>
+      <div id="tabLocal" class="tab" onclick="App.switchTab('local')">💾 本地历史</div>
+    </div>
+    <div id="requestList" class="request-list">
+      <div class="empty">等待查询…</div>
+    </div>
+  </div>
+
+  <div class="section panel">
+    <div class="panel-header">
+      <div>
+        <div class="panel-title">📈 30 天消费趋势</div>
+        <div class="panel-note">点击下方图例可显示 / 隐藏任意模型曲线（含低频模型）</div>
+      </div>
+      <span id="chartBadge" class="badge">—</span>
+    </div>
+    <div id="spendChart"></div>
+  </div>
+
+  <div class="section panel">
+    <div class="panel-header">
+      <div>
+        <div class="panel-title">📊 最近 30 天汇总</div>
+        <div class="panel-note">Activity 历史数据；自动刷新时不重复请求</div>
+      </div>
+      <span id="activityBadge" class="badge">0 项</span>
+    </div>
+    <div class="stats">
+      <div class="stat"><div class="stat-label">请求</div><div id="requestCount" class="stat-value">—</div></div>
+      <div class="stat"><div class="stat-label">Token</div><div id="tokenCount" class="stat-value">—</div></div>
+      <div class="stat"><div class="stat-label">平均每次</div><div id="avgRequestCost" class="stat-value">—</div></div>
+      <div class="stat"><div class="stat-label">每 1000 Token</div><div id="avgTokenCost" class="stat-value">—</div></div>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-title">🏆 模型消费排行</div>
+        <span class="panel-note">最近 30 天</span>
+      </div>
+      <div id="modelRanking" class="rank-list"><div class="empty">暂无数据</div></div>
+    </div>
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-title">📅 每日消费</div>
+        <span class="panel-note">最近 30 天</span>
+      </div>
+      <div id="dailyChart" class="daily-list"><div class="empty">暂无数据</div></div>
+    </div>
+  </div>
+
+  <div class="section panel">
+    <div class="panel-header">
+      <div>
+        <div class="panel-title">🔐 API Key 用量</div>
+        <div class="panel-note">管理接口返回的数据</div>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>名称</th><th>状态</th><th>累计</th><th>今日</th><th>本周</th>
+            <th>本月</th><th>额度</th><th>剩余</th><th>重置</th>
+          </tr>
+        </thead>
+        <tbody id="keyTable"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="footer">
+    今日数据优先；Analytics 用于聚合；Generation Detail 用于最近请求的详细信息。
+  </div>
+
+</div>
+
+<script>
+/* ================================================================
+   JS MODULE 00: Config
+   ================================================================ */
+const CONFIG = {
+  apiBase: 'https://openrouter.ai/api/v1',
+  storage: {
+    key: 'openrouter_management_key',
+    rate: 'openrouter_usd_cny',
+    history: 'openrouter_request_history',
+    analyticsMeta: 'openrouter_analytics_meta',
+    dayBoundary: 'openrouter_day_boundary'
+  },
+  historyLimit: 800,
+  recentDisplayLimit: 60,
+  recentCollapsedLimit: 6,
+  recentDetailLimit: 20,
+  todayAnalyticsLimit: 1000,
+  activityDays: 30,
+  refreshInterval: 30 * 1000
+};
+
+/* ================================================================
+   JS MODULE 01: State
+   ================================================================ */
+const State = {
+  currentRate: 6.72,
+  dayBoundary: 'local',
+  credits: {},
+  keys: [],
+  activities: [],
+  realtimeRequests: [],
+  localRequests: [],
+  activeTab: 'realtime',
+  requestExpanded: false,
+  refreshing: false,
+  refreshTimer: null,
+  lastRefresh: null,
+  analyticsError: '',
+  analyticsMeta: null,
+  debug: {},
+  today: {
+    cost: 0, requests: 0,
+    promptTokens: 0, completionTokens: 0,
+    reasoningTokens: 0, totalTokens: 0
+  }
+};
+
+/* ================================================================
+   JS MODULE 02: DOM
+   ================================================================ */
+const DOM = {
+  get(id){ return document.getElementById(id); },
+  setText(id, value){ const n=this.get(id); if(n) n.textContent=value; }
+};
+
+/* ================================================================
+   JS MODULE 03: Storage
+   ================================================================ */
+const Storage = {
+  getKey(){ return localStorage.getItem(CONFIG.storage.key) || ''; },
+  setKey(v){ localStorage.setItem(CONFIG.storage.key, v); },
+  clearKey(){ localStorage.removeItem(CONFIG.storage.key); },
+
+  getRate(){
+    const v = Number(localStorage.getItem(CONFIG.storage.rate));
+    return (Number.isFinite(v) && v>0) ? v : 6.72;
+  },
+  setRate(v){ localStorage.setItem(CONFIG.storage.rate, String(v)); },
+
+  getDayBoundary(){
+    return localStorage.getItem(CONFIG.storage.dayBoundary) === 'utc' ? 'utc' : 'local';
+  },
+  setDayBoundary(v){ localStorage.setItem(CONFIG.storage.dayBoundary, v); },
+
+  getHistory(){
+    try{
+      const raw = JSON.parse(localStorage.getItem(CONFIG.storage.history) || '[]');
+      return Array.isArray(raw) ? raw : [];
+    }catch{ return []; }
+  },
+  saveHistory(list){
+    try{
+      localStorage.setItem(CONFIG.storage.history,
+        JSON.stringify(list.slice(0, CONFIG.historyLimit)));
+    }catch(e){
+      console.warn('本地历史写入失败，尝试截断', e);
+      try{
+        localStorage.setItem(CONFIG.storage.history,
+          JSON.stringify(list.slice(0, Math.floor(CONFIG.historyLimit/2))));
+      }catch(_){}
+    }
+  }
+};
+
+/* ================================================================
+   JS MODULE 04: Format
+   ================================================================ */
+const Format = {
+  escapeHtml(v){
+    if(v===null||v===undefined) return '';
+    return String(v)
+      .replaceAll('&','&amp;').replaceAll('<','&lt;')
+      .replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'",'&#039;');
+  },
+  num(v){ const n=Number(v); return Number.isFinite(n)?n:0; },
+  pad2(v){ return String(v).padStart(2,'0'); },
+  date(v){ if(!v) return null; const d=new Date(v); return Number.isNaN(d.getTime())?null:d; },
+  dayKey(d){ return d.getFullYear()+'-'+this.pad2(d.getMonth()+1)+'-'+this.pad2(d.getDate()); },
+  dayKeyFromValue(v){
+    if(!v) return null;
+    const t = String(v).trim();
+    const m = t.match(/^(\d{4})-(\d{2})-(\d{2})/);
+    if(m) return m[1]+'-'+m[2]+'-'+m[3];
+    const d = this.date(v);
+    return d ? this.dayKey(d) : null;
+  },
+  dateSecond(v){
+    const d = this.date(v); if(!d) return '—';
+    return d.getFullYear()+'-'+this.pad2(d.getMonth()+1)+'-'+this.pad2(d.getDate())
+      +' '+this.pad2(d.getHours())+':'+this.pad2(d.getMinutes())+':'+this.pad2(d.getSeconds());
+  },
+  time(v){
+    const d = this.date(v); if(!d) return '—';
+    return this.pad2(d.getHours())+':'+this.pad2(d.getMinutes())+':'+this.pad2(d.getSeconds());
+  },
+  number(v){ return this.num(v).toLocaleString('zh-CN'); },
+  token(v){
+    const n = this.num(v);
+    if(n>=100000000) return (n/100000000).toFixed(2).replace(/\.00$/,'')+' 亿';
+    if(n>=10000) return (n/10000).toFixed(2).replace(/\.00$/,'')+' 万';
+    return this.number(n);
+  },
+  usd(v){ return '$'+this.num(v).toFixed(6); },
+  cnyExact(v){
+    const n = this.num(v)*State.currentRate;
+    if(n===0) return '¥0';
+    if(Math.abs(n)>=1) return '¥'+n.toFixed(2);
+    if(Math.abs(n)>=0.1) return '¥'+n.toFixed(4);
+    if(Math.abs(n)>=0.01) return '¥'+n.toFixed(5);
+    if(Math.abs(n)>=0.001) return '¥'+n.toFixed(6);
+    return '¥'+n.toFixed(8);
+  },
+  cnySimple(v){
+    const n = this.num(v)*State.currentRate;
+    if(n===0) return '¥0';
+    if(Math.abs(n)>=1) return '¥'+n.toFixed(2);
+    if(Math.abs(n)>=0.1) return Number((n*10).toFixed(2))+'毛';
+    if(Math.abs(n)>=0.01) return Number((n*100).toFixed(2))+'分';
+    return '<1分';
+  },
+  axisCny(v){
+    const cny = this.num(v)*State.currentRate;
+    if(cny===0) return '0';
+    if(cny>=1000) return '¥'+(cny/1000).toFixed(1)+'k';
+    if(cny>=100) return '¥'+cny.toFixed(0);
+    if(cny>=10) return '¥'+cny.toFixed(1);
+    if(cny>=1) return '¥'+cny.toFixed(2);
+    if(cny>=0.01) return '¥'+cny.toFixed(3);
+    return '¥'+cny.toFixed(5);
+  },
+  modelUrl(model){
+    const slug = String(model||'').trim();
+    if(!slug || !slug.includes('/')) return null;
+    const encoded = slug.split('/').map(p=>encodeURIComponent(p)).join('/');
+    return 'https://openrouter.ai/' + encoded;
+  },
+  reset(v){
+    if(!v) return '—';
+    return String(v).replace('T',' ').replace('Z','');
+  }
+};
+
+/* ================================================================
+   JS MODULE 05: API
+   ================================================================ */
+const API = {
+  async fetch(path, key, options={}){
+    const response = await fetch(CONFIG.apiBase+path, {
+      method: options.method || 'GET',
+      headers: {
+        Authorization: 'Bearer '+key,
+        Accept: 'application/json',
+        ...(options.body ? {'Content-Type':'application/json'} : {})
+      },
+      body: options.body ? JSON.stringify(options.body) : undefined
+    });
+
+    let data;
+    try{ data = await response.json(); }
+    catch{ throw new Error(response.status+'：服务器返回的数据无法解析'); }
+
+    if(!response.ok){
+      const message = data?.error?.message || data?.message || JSON.stringify(data);
+      throw new Error(response.status+'：'+message);
+    }
+    return data;
+  }
+};
+
+/* ================================================================
+   JS MODULE 06: Usage Normalizer
+   ================================================================ */
+const Usage = {
+  normalize(input){
+    const usage = input?.usage || input || {};
+    const prompt = Format.num(usage.prompt_tokens ?? usage.tokens_prompt ?? usage.input_tokens);
+    const completion = Format.num(usage.completion_tokens ?? usage.tokens_completion ?? usage.output_tokens);
+    const reasoning = Format.num(usage.reasoning_tokens ?? usage.native_tokens_reasoning ?? usage.reasoning_tokens_details?.tokens);
+    const total = Format.num(usage.total_tokens) || Format.num(usage.tokens_total) || (prompt+completion+reasoning);
+    const cost = Format.num(usage.cost ?? usage.total_cost ?? usage.total_usage ?? usage.usage);
+    return { promptTokens:prompt, completionTokens:completion, reasoningTokens:reasoning, totalTokens:total, cost };
+  }
+};
+
+/* ================================================================
+   JS MODULE 07: Analytics
+   ================================================================ */
+const Analytics = {
+  rows(response){
+    if(Array.isArray(response?.data?.data)) return response.data.data;
+    if(Array.isArray(response?.data)) return response.data;
+    if(Array.isArray(response)) return response;
+    return [];
+  },
+
+  async meta(key){
+    try{
+      const response = await API.fetch('/analytics/meta', key);
+      State.analyticsMeta = response?.data || response || null;
+      State.debug.meta = State.analyticsMeta;
+      UI.Debug.render();
+      return State.analyticsMeta;
+    }catch(e){
+      console.warn('Analytics meta:', e);
+      return null;
+    }
+  },
+
+  todayRange(){
+    const now = new Date();
+    let start;
+    if(State.dayBoundary === 'utc'){
+      start = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 0,0,0,0));
+    }else{
+      start = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0,0,0,0);
+    }
+    return { start: start.toISOString(), end: now.toISOString() };
+  },
+
+  async todaySummary(key){
+    const range = this.todayRange();
+    const response = await API.fetch('/analytics/query', key, {
+      method: 'POST',
+      body: {
+        metrics: ['request_count','total_usage','tokens_total','tokens_prompt','tokens_completion','reasoning_tokens'],
+        granularity: 'day',
+        time_range: { start: range.start, end: range.end },
+        limit: 100
+      }
+    });
+    const rows = this.rows(response);
+    State.debug.todayRange = range;
+    State.debug.todaySummary = rows;
+
+    return rows.reduce((result, row) => {
+      result.cost += Format.num(row.total_usage ?? row.total_cost ?? row.usage ?? row.cost);
+      result.requests += Format.num(row.request_count ?? row.requests);
+      result.promptTokens += Format.num(row.tokens_prompt ?? row.prompt_tokens ?? row.input_tokens);
+      result.completionTokens += Format.num(row.tokens_completion ?? row.completion_tokens ?? row.output_tokens);
+      result.reasoningTokens += Format.num(row.reasoning_tokens);
+      result.totalTokens += Format.num(row.tokens_total ?? row.total_tokens) ||
+        (Format.num(row.tokens_prompt ?? row.prompt_tokens ?? row.input_tokens) +
+         Format.num(row.tokens_completion ?? row.completion_tokens ?? row.output_tokens) +
+         Format.num(row.reasoning_tokens));
+      return result;
+    }, { cost:0, requests:0, promptTokens:0, completionTokens:0, reasoningTokens:0, totalTokens:0 });
+  },
+
+  async todayRequests(key, dimensions){
+    const range = this.todayRange();
+    const response = await API.fetch('/analytics/query', key, {
+      method: 'POST',
+      body: {
+        metrics: ['request_count','total_usage','tokens_total','tokens_prompt','tokens_completion','reasoning_tokens'],
+        dimensions,
+        granularity: 'hour',
+        time_range: { start: range.start, end: range.end },
+        limit: CONFIG.todayAnalyticsLimit,
+        group_limit: CONFIG.todayAnalyticsLimit
+      }
+    });
+    return this.rows(response);
+  }
+};
+
+/* ================================================================
+   JS MODULE 08: Generation
+   ================================================================ */
+const Generation = {
+  async detail(key, generationId){
+    if(!generationId) return null;
+    try{
+      const response = await API.fetch('/generation?id='+encodeURIComponent(generationId), key);
+      return response?.data || response || null;
+    }catch(e){
+      console.warn('Generation detail:', generationId, e);
+      return null;
+    }
+  }
+};
+
+/* ================================================================
+   JS MODULE 09: Request Data Builder
+   ================================================================ */
+const RequestData = {
+  build(modelRows, providerRows){
+    const map = new Map();
+
+    for(const row of modelRows){
+      const id = row.generation_id || row.generationId;
+      if(!id) continue;
+      map.set(id, {
+        id,
+        model: row.model || row.model_permaslug || '未知模型',
+        provider: '',
+        cost: Format.num(row.total_usage ?? row.total_cost ?? row.usage ?? row.cost),
+        promptTokens: Format.num(row.tokens_prompt ?? row.prompt_tokens ?? row.input_tokens),
+        completionTokens: Format.num(row.tokens_completion ?? row.completion_tokens ?? row.output_tokens),
+        reasoningTokens: Format.num(row.reasoning_tokens),
+        totalTokens: Format.num(row.tokens_total ?? row.total_tokens),
+        bucketTime: row.date__hour || row.date__minute || row.date || row.created_at || null,
+        timestamp: null,
+        finish_reason: row.finish_reason || null,
+        native_finish_reason: row.native_finish_reason || null,
+        cancelled: row.cancelled === true,
+        status: 'analytics'
+      });
+    }
+
+    for(const row of providerRows){
+      const id = row.generation_id || row.generationId;
+      if(!id) continue;
+      const existing = map.get(id);
+      if(!existing){
+        map.set(id, {
+          id,
+          model: '未知模型',
+          provider: row.provider || row.provider_name || '',
+          cost: Format.num(row.total_usage ?? row.total_cost ?? row.usage ?? row.cost),
+          promptTokens: Format.num(row.tokens_prompt ?? row.prompt_tokens ?? row.input_tokens),
+          completionTokens: Format.num(row.tokens_completion ?? row.completion_tokens ?? row.output_tokens),
+          reasoningTokens: Format.num(row.reasoning_tokens),
+          totalTokens: Format.num(row.tokens_total ?? row.total_tokens),
+          bucketTime: row.date__hour || row.date__minute || row.date || row.created_at || null,
+          timestamp: null,
+          finish_reason: row.finish_reason || null,
+          native_finish_reason: row.native_finish_reason || null,
+          cancelled: row.cancelled === true,
+          status: 'analytics'
+        });
+      }else{
+        existing.provider = row.provider || row.provider_name || existing.provider;
+      }
+    }
+
+    for(const request of map.values()){
+      if(!request.totalTokens){
+        request.totalTokens = request.promptTokens + request.completionTokens + request.reasoningTokens;
+      }
+    }
+    return Array.from(map.values());
+  },
+
+  async enrich(key, requests){
+    const sorted = [...requests].sort((a,b)=>this.timeValue(b)-this.timeValue(a));
+    const target = sorted.slice(0, CONFIG.recentDetailLimit);
+
+    const details = await Promise.all(target.map(async request => {
+      const detail = await Generation.detail(key, request.id);
+      if(!detail) return request;
+      const usage = Usage.normalize(detail);
+      return {
+        ...request,
+        timestamp: detail.created_at || detail.created || detail.timestamp || request.timestamp,
+        model: detail.model || request.model,
+        provider: detail.provider_name || detail.provider || request.provider,
+        promptTokens: usage.promptTokens || request.promptTokens,
+        completionTokens: usage.completionTokens || request.completionTokens,
+        reasoningTokens: usage.reasoningTokens || request.reasoningTokens,
+        totalTokens: usage.totalTokens || request.totalTokens,
+        cost: usage.cost || request.cost,
+        finish_reason: detail.finish_reason ?? request.finish_reason ?? null,
+        native_finish_reason: detail.native_finish_reason ?? request.native_finish_reason ?? null,
+        cancelled: detail.cancelled === true,
+        error_message: detail.error?.message || detail.error_message || null,
+        raw_status: detail.status || null,
+        status: 'detail'
+      };
+    }));
+
+    const detailMap = new Map(details.map(it => [it.id, it]));
+    return requests.map(r => detailMap.get(r.id) || r);
+  },
+
+  timeValue(request){
+    const exact = Format.date(request.timestamp);
+    if(exact) return exact.getTime();
+    const bucket = Format.date(request.bucketTime);
+    return bucket ? bucket.getTime() : 0;
+  }
+};
+
+/* ================================================================
+   JS MODULE 10: Chart
+   ================================================================ */
+const Chart = {
+  palette: ['#2563eb','#059669','#dc2626','#7c3aed','#c2410c','#0891b2',
+            '#db2777','#65a30d','#d97706','#4f46e5','#0d9488','#be185d'],
+  totalColor: '#1e293b',
+  totalKey: '__total__',
+  data: null,
+  hidden: {},
+
+  build(activities){
+    const days = [];
+    const now = new Date();
+    const base = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    for(let i=CONFIG.activityDays-1; i>=0; i--){
+      const d = new Date(base.getFullYear(), base.getMonth(), base.getDate()-i);
+      days.push({
+        key: Format.dayKey(d),
+        short: Format.pad2(d.getMonth()+1)+'/'+Format.pad2(d.getDate())
+      });
+    }
+
+    const indexOf = new Map();
+    days.forEach((d,i)=>indexOf.set(d.key, i));
+
+    const totals = new Array(days.length).fill(0);
+    const requests = new Array(days.length).fill(0);
+    const modelMap = new Map();
+
+    for(const item of activities){
+      const key = Format.dayKeyFromValue(item.date ?? item.created_at);
+      if(!key) continue;
+      const i = indexOf.get(key);
+      if(i === undefined) continue;
+
+      const cost = Format.num(item.usage ?? item.total_usage ?? item.cost ?? item.total_cost);
+      const req = Format.num(item.requests ?? item.request_count);
+
+      totals[i] += cost;
+      requests[i] += req;
+
+      const name = item.model ?? item.model_permaslug ?? '未知模型';
+      let entry = modelMap.get(name);
+      if(!entry){
+        entry = { name, values: new Array(days.length).fill(0),
+                  requests: new Array(days.length).fill(0), total: 0 };
+        modelMap.set(name, entry);
+      }
+      entry.values[i] += cost;
+      entry.requests[i] += req;
+      entry.total += cost;
+    }
+
+    const series = [...modelMap.values()].sort((a,b)=>b.total-a.total);
+    series.forEach((s,i)=>{ s.color = this.palette[i % this.palette.length]; });
+
+    this.data = {
+      days, totals, requests, series,
+      grand: totals.reduce((a,b)=>a+b, 0),
+      grandRequests: requests.reduce((a,b)=>a+b, 0)
+    };
+    return this.data;
+  },
+
+  toggle(key){
+    this.hidden[key] = !this.hidden[key];
+    this.render();
+  },
+
+  render(){
+    const container = DOM.get('spendChart');
+    const badge = DOM.get('chartBadge');
+    const data = this.data;
+
+    if(!data || !data.series.length){
+      container.innerHTML = '<div class="empty">暂无历史数据（需先查询成功一次）</div>';
+      if(badge) badge.textContent = '0 项';
+      return;
+    }
+    if(badge) badge.textContent = data.series.length + ' 个模型';
+
+    const W = 760, H = 250;
+    const padL = 58, padR = 16, padT = 14, padB = 28;
+    const innerW = W-padL-padR, innerH = H-padT-padB;
+    const n = data.days.length;
+    const step = n>1 ? innerW/(n-1) : 0;
+
+    const showTotal = !this.hidden[this.totalKey];
+    const visibleSeries = data.series.filter(s => !this.hidden[s.name]);
+
+    const pool = [];
+    if(showTotal) pool.push(...data.totals);
+    visibleSeries.forEach(s => pool.push(...s.values));
+    const maxValue = Math.max(...pool, 0);
+    const yMax = this.niceCeil(maxValue);
+
+    const x = i => (n>1 ? padL+i*step : padL+innerW/2);
+    const y = v => padT+innerH - (v/yMax)*innerH;
+
+    let grid = '';
+    for(let g=0; g<=4; g++){
+      const value = yMax*g/4;
+      const yy = y(value);
+      grid += `<line x1="${padL}" y1="${yy}" x2="${W-padR}" y2="${yy}" stroke="#eef2f7" stroke-width="1"/>`;
+      grid += `<text x="${padL-8}" y="${yy+3.5}" text-anchor="end" font-size="10" fill="#94a3b8">${Format.axisCny(value)}</text>`;
+    }
+
+    const labelEvery = Math.max(1, Math.ceil(n/8));
+    let xLabels = '';
+    data.days.forEach((d,i)=>{
+      if(i % labelEvery !== 0 && i !== n-1) return;
+      xLabels += `<text x="${x(i)}" y="${H-8}" text-anchor="middle" font-size="10" fill="#94a3b8">${d.short}</text>`;
+    });
+
+    let paths = '';
+    if(showTotal){
+      const points = data.totals.map((v,i)=>[x(i), y(v)]);
+      const area = `M ${points[0][0].toFixed(2)} ${(padT+innerH).toFixed(2)} `
+        + points.map(p=>`L ${p[0].toFixed(2)} ${p[1].toFixed(2)}`).join(' ')
+        + ` L ${points[points.length-1][0].toFixed(2)} ${(padT+innerH).toFixed(2)} Z`;
+      paths += `<path d="${area}" fill="url(#chartFill)" stroke="none"/>`;
+      paths += `<path d="${this.linePath(points)}" fill="none" stroke="${this.totalColor}" `
+             + `stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/>`;
+    }
+    visibleSeries.forEach(s=>{
+      const points = s.values.map((v,i)=>[x(i), y(v)]);
+      paths += `<path d="${this.linePath(points)}" fill="none" stroke="${s.color}" `
+             + `stroke-width="1.6" opacity="0.92" stroke-linejoin="round" stroke-linecap="round"/>`;
+    });
+
+    const svg = `
+      <svg class="chart-svg" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">
+        <defs>
+          <linearGradient id="chartFill" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#2563eb" stop-opacity="0.16"/>
+            <stop offset="100%" stop-color="#2563eb" stop-opacity="0"/>
+          </linearGradient>
+        </defs>
+        ${grid}
+        ${xLabels}
+        ${paths}
+      </svg>`;
+
+    let legend = `
+      <div class="chart-legend">
+        <button class="legend-item ${showTotal?'':'off'}" onclick="Chart.toggle('${this.totalKey}')">
+          <span class="swatch" style="background:${this.totalColor}"></span>
+          <span class="legend-name">每日总花费</span>
+        </button>`;
+
+    data.series.forEach(s=>{
+      const off = this.hidden[s.name] ? 'off' : '';
+      const safe = Format.escapeHtml(s.name).replace(/'/g,'&#039;');
+      legend += `
+        <button class="legend-item ${off}" title="${Format.escapeHtml(s.name)}"
+                onclick="Chart.toggle('${safe}')">
+          <span class="swatch" style="background:${s.color}"></span>
+          <span class="legend-name">${Format.escapeHtml(s.name)}</span>
+        </button>`;
+    });
+    legend += `</div>`;
+
+    const summary = `
+      <div class="chart-summary">
+        <span>30 天合计 <strong>${Format.cnyExact(data.grand)}</strong></span>
+        <span>请求 <strong>${Format.number(data.grandRequests)}</strong> 次</span>
+        <span>模型 <strong>${data.series.length}</strong> 个</span>
+        <span style="color:#a8b0bd">点击图例可切换曲线</span>
+      </div>`;
+
+    container.innerHTML = `
+      <div class="chart-wrap">
+        ${svg}
+        <div class="chart-tip" id="chartTip"></div>
+      </div>
+      ${legend}
+      ${summary}`;
+
+    this.bindHover(container, { W, padL, padT, n, step, data, showTotal, visibleSeries });
+  },
+
+  bindHover(container, ctx){
+    const svg = container.querySelector('.chart-svg');
+    const tip = container.querySelector('.chart-tip');
+    const wrap = container.querySelector('.chart-wrap');
+    if(!svg || !tip || !wrap) return;
+
+    const { W, padL, n, step, data, showTotal, visibleSeries } = ctx;
+
+    svg.addEventListener('mousemove', event => {
+      const rect = svg.getBoundingClientRect();
+      if(!rect.width) return;
+      const scale = W / rect.width;
+      const pointerX = (event.clientX - rect.left) * scale;
+
+      let index = step > 0 ? Math.round((pointerX - padL)/step) : 0;
+      index = Math.max(0, Math.min(n-1, index));
+
+      let html = `<div class="tip-title">${data.days[index].key}</div>`;
+
+      if(showTotal){
+        html += `<div class="tip-row">`
+             + `<span class="tip-dot" style="background:${this.totalColor}"></span>`
+             + `<span>总花费</span>&nbsp;<b>${Format.cnyExact(data.totals[index])}</b>`
+             + `</div>`;
+      }
+      visibleSeries.slice(0,8).forEach(s=>{
+        if(!s.values[index]) return;
+        html += `<div class="tip-row">`
+             + `<span class="tip-dot" style="background:${s.color}"></span>`
+             + `<span>${Format.escapeHtml(s.name)}</span>&nbsp;`
+             + `<b>${Format.cnyExact(s.values[index])}</b>`
+             + `</div>`;
+      });
+
+      tip.innerHTML = html;
+      tip.classList.add('on');
+
+      const wrapRect = wrap.getBoundingClientRect();
+      tip.style.left = (event.clientX - wrapRect.left) + 'px';
+      tip.style.top  = (event.clientY - wrapRect.top) + 'px';
+    });
+
+    svg.addEventListener('mouseleave', ()=>tip.classList.remove('on'));
+  },
+
+  linePath(points){
+    if(!points.length) return '';
+    return 'M ' + points.map(p=>p[0].toFixed(2)+' '+p[1].toFixed(2)).join(' L ');
+  },
+
+  niceCeil(value){
+    if(!(value>0)) return 1;
+    const exponent = Math.floor(Math.log10(value));
+    const base = Math.pow(10, exponent);
+    const norm = value/base;
+    let step;
+    if(norm<=1) step=1;
+    else if(norm<=2) step=2;
+    else if(norm<=2.5) step=2.5;
+    else if(norm<=5) step=5;
+    else step=10;
+    return step*base;
+  }
+};
+
+/* ================================================================
+   JS MODULE 11: UI
+   ================================================================ */
+const UI = {
+
+  Request: {
+    priceTiers: [
+      { maxRatio:0.25, icon:'🫧', label:'极低', className:'price-ultra-low' },
+      { maxRatio:0.50, icon:'💧', label:'低',   className:'price-low' },
+      { maxRatio:1.00, icon:'🪙', label:'较低', className:'price-below' },
+      { maxRatio:2.00, icon:'💰', label:'较高', className:'price-high' },
+      { maxRatio:4.00, icon:'🔥', label:'高',   className:'price-very-high' },
+      { maxRatio:Infinity, icon:'💎', label:'极高', className:'price-extreme' }
+    ],
+
+    openModel(event, model){
+      event.stopPropagation();
+      const url = Format.modelUrl(model);
+      if(!url) return;
+      window.open(url, '_blank', 'noopener,noreferrer');
+    },
+
+    medianCost(requests){
+      const values = requests
+        .map(r => Format.num(r.cost)*State.currentRate)
+        .filter(v => v>0 && Number.isFinite(v))
+        .sort((a,b)=>a-b);
+      if(!values.length) return 0;
+      const mid = Math.floor(values.length/2);
+      if(values.length % 2) return values[mid];
+      return (values[mid-1]+values[mid])/2;
+    },
+
+    classify(cost, median){
+      const exact = Format.num(cost)*State.currentRate;
+      if(!median || !exact){
+        return { icon:'·', label:'—', className:'price-neutral', ratio:null };
+      }
+      const ratio = exact/median;
+      const tier = this.priceTiers.find(it => ratio <= it.maxRatio);
+      return { icon:tier.icon, label:tier.label, className:tier.className, ratio };
+    },
+
+    priceHTML(request, median){
+      const price = this.classify(request.cost, median);
+      const simple = Format.cnySimple(request.cost);
+      const exact = Format.cnyExact(request.cost);
+      const cny = Format.num(request.cost)*State.currentRate;
+
+      let perFenText = '';
+      if(cny>0 && cny<0.01) perFenText = this.formatPerFenCount(0.01/cny);
+
+      const relativeText = price.ratio===null
+        ? '无法计算相对价格'
+        : price.ratio<1
+          ? '约为当前请求中位价的 '+Math.round(price.ratio*100)+'%'
+          : '约为当前请求中位价的 '+price.ratio.toFixed(1)+' 倍';
+
+      return `
+        <div class="request-price ${price.className}" title="${Format.escapeHtml(relativeText)}">
+          <div class="request-price-main">
+            <span class="request-price-icon">${price.icon}</span>
+            <span>${simple}</span>
+            ${perFenText ? `<span class="request-price-per-fen">${perFenText}</span>` : ''}
+          </div>
+          <div class="request-price-exact">${exact}</div>
+        </div>`;
+    },
+
+    formatPerFenCount(count){
+      if(count>=1000000) return '≈'+(count/1000000).toFixed(1).replace(/\.0$/,'')+'百万次/分';
+      if(count>=10000)   return '≈'+(count/10000).toFixed(1).replace(/\.0$/,'')+'万次/分';
+      if(count>=1000)    return '≈'+Math.round(count).toLocaleString('zh-CN')+'次/分';
+      if(count>=100)     return '≈'+Math.round(count)+'次/分';
+      if(count>=10)      return '≈'+count.toFixed(1)+'次/分';
+      return '≈'+count.toFixed(2)+'次/分';
+    },
+
+    friendlyStatus(request){
+      const finish = String(request.finish_reason ?? '').toLowerCase().trim();
+      const native = String(request.native_finish_reason ?? '').toLowerCase().trim();
+      const status = String(request.raw_status ?? '').toLowerCase().trim();
+      const message = String(request.error_message ?? '').toLowerCase();
+
+      if(request.cancelled === true)
+        return { text:'已取消', className:'reason-cancelled', raw:'cancelled' };
+
+      if(finish==='timeout' || native==='timeout' || message.includes('timeout') || message.includes('timed out'))
+        return { text:'超时', className:'reason-error', raw: finish||native||'timeout' };
+
+      if(finish.includes('block')||finish.includes('filter')||finish.includes('content_filter')||
+         native.includes('block')||native.includes('filter')||native.includes('content_filter')||
+         status.includes('block')||status.includes('filter')||
+         message.includes('blocked')||message.includes('content filter'))
+        return { text:'拦截', className:'reason-blocked', raw: finish||native||status };
+
+      if(finish.includes('no_provider')||finish.includes('no_available_provider')||
+         native.includes('no_provider')||native.includes('no_available_provider'))
+        return { text:'无可用模型', className:'reason-error', raw: finish||native };
+
+      if(status==='error'||status==='failed'||finish==='error'||finish==='failed'||native==='error'||native==='failed')
+        return { text:'失败', className:'reason-error', raw: finish||native||status };
+
+      if(finish==='tool_calls'||native==='tool_calls')
+        return { text:'工具调用', className:'reason-normal', raw: finish||native };
+
+      if(finish==='length'||native==='length'||finish.includes('max_tokens')||native.includes('max_tokens'))
+        return { text:'长度限制', className:'reason-warning', raw: finish||native };
+
+      if(finish==='stop'||native==='stop'||(!finish&&!native&&!status))
+        return { text:'正常', className:'reason-normal', raw: finish||native||'stop' };
+
+      return { text:'其他', className:'reason-warning', raw: finish||native||status||'unknown' };
+    },
+
+    reasonHTML(request){
+      const result = this.friendlyStatus(request);
+      const reasoning = Format.token(request.reasoningTokens);
+      return `
+        <span class="request-reason ${result.className}"
+              title="${result.raw ? Format.escapeHtml('原始状态：'+result.raw) : ''}">
+          <strong>${Format.escapeHtml(result.text)}</strong>
+          ${Format.num(request.reasoningTokens)>0
+            ? `<span class="reason-count">· Reason ${reasoning}</span>` : ''}
+        </span>`;
+    },
+
+    tooltip(request){
+      const reason = this.friendlyStatus(request);
+      const lines = [];
+      if(request.id) lines.push('Generation ID：'+request.id);
+      if(request.status){
+        lines.push('数据来源：' + (
+          request.status==='detail' ? 'Analytics + Generation Detail'
+          : request.status==='analytics' ? 'Analytics' : '本地记录'
+        ));
+      }
+      if(reason.raw) lines.push('原始状态：'+reason.raw);
+      if(request.timestamp) lines.push('Generation 时间：'+Format.dateSecond(request.timestamp));
+      return lines.join('\n');
+    },
+
+    card(request, median, index){
+      const exactTime  = request.timestamp ? Format.dateSecond(request.timestamp) : null;
+      const bucketTime = request.bucketTime ? Format.dateSecond(request.bucketTime) : null;
+      const displayTime = exactTime || bucketTime || '—';
+
+      const sourceClass = request.status==='detail' ? 'source-detail'
+                        : request.status==='analytics' ? 'source-analytics' : 'source-local';
+      const sourceText  = request.status==='detail' ? '详情'
+                        : request.status==='analytics' ? '聚合' : '本地';
+
+      const tooltip = this.tooltip(request);
+
+      return `
+        <div class="request-card ${index===0?'newest':''}" title="${Format.escapeHtml(tooltip)}">
+          <div class="request-main">
+            <div class="request-time">${Format.escapeHtml(displayTime)}</div>
+            <div class="request-model">
+              <div class="model-name model-link"
+                   title="点击打开 OpenRouter 模型页面"
+                   data-model="${Format.escapeHtml(request.model)}"
+                   onclick="UI.Request.openModel(event, this.dataset.model)">
+                ${Format.escapeHtml(request.model)}
+              </div>
+              <div class="provider">${Format.escapeHtml(request.provider||'Provider 未提供')}</div>
+            </div>
+            <div>${this.priceHTML(request, median)}</div>
+            <div class="request-output">${Format.token(request.completionTokens)} 输出</div>
+          </div>
+          <div class="request-sub">
+            <span><strong>输入</strong>${Format.token(request.promptTokens)}</span>
+            <span><strong>输出</strong>${Format.token(request.completionTokens)}</span>
+            <span><strong>总量</strong>${Format.token(request.totalTokens)}</span>
+            ${this.reasonHTML(request)}
+            <span class="source-badge ${sourceClass}">${sourceText}</span>
+          </div>
+        </div>`;
+    },
+
+    render(){
+      const container = DOM.get('requestList');
+      const badge = DOM.get('historyBadge');
+
+      const list = State.activeTab==='realtime' ? State.realtimeRequests : State.localRequests;
+      badge.textContent = list.length + ' 条';
+
+      if(!list.length){
+        container.innerHTML = `
+          <div class="empty">
+            ${ State.activeTab==='realtime'
+               ? (State.analyticsError ? '⚠️ '+Format.escapeHtml(State.analyticsError) : '今日暂无逐请求数据')
+               : '暂无本地逐请求历史' }
+          </div>`;
+        return;
+      }
+
+      const sorted = [...list].sort((a,b)=>RequestData.timeValue(b)-RequestData.timeValue(a));
+      const top = sorted.slice(0, CONFIG.recentDisplayLimit);
+      const median = this.medianCost(top);
+
+      const expanded = State.requestExpanded;
+      const visible = expanded ? top : top.slice(0, CONFIG.recentCollapsedLimit);
+      const hiddenCount = top.length - visible.length;
+
+      let html = visible.map((r,i)=>this.card(r, median, i)).join('');
+
+      if(top.length > CONFIG.recentCollapsedLimit){
+        html += `
+          <div class="request-toggle">
+            <button class="btn btn-secondary btn-sm" onclick="App.toggleRequests()">
+              ${expanded ? '收起 ▲' : `展开剩余 ${hiddenCount} 条 ▼`}
+            </button>
+          </div>`;
+      }
+
+      container.innerHTML = html;
+    }
+  },
+
+  Debug: {
+    render(){
+      const node = DOM.get('debugBox');
+      try{ node.textContent = JSON.stringify(State.debug, null, 2); }
+      catch{ node.textContent = String(State.debug); }
+    }
+  },
+
+  Dashboard: {
+    renderToday(){
+      DOM.setText('todayUsageCny', Format.cnySimple(State.today.cost));
+      DOM.setText('todayUsageMeta',
+        Format.number(State.today.requests)+' 次 · '+Format.token(State.today.totalTokens)+' Token');
+      DOM.setText('todayRequestCount', Format.number(State.today.requests));
+      DOM.setText('todayRequestMeta',
+        State.realtimeRequests.length
+          ? '已加载最近 '+Format.number(State.realtimeRequests.length)+' 条'
+          : '暂无逐请求记录');
+      DOM.setText('todayOutputTokens', Format.token(State.today.completionTokens));
+      DOM.setText('todayOutputMeta',
+        '输入 '+Format.token(State.today.promptTokens)+' · 总量 '+Format.token(State.today.totalTokens));
+    },
+
+    renderBalance(){
+      const totalCredits = Format.num(State.credits.total_credits);
+      const totalUsage = Format.num(State.credits.total_usage);
+      const balance = totalCredits - totalUsage;
+      DOM.setText('balanceCny', Format.cnySimple(balance));
+      DOM.setText('balanceUsd', Format.usd(balance));
+    },
+
+    renderActivitySummary(){
+      let cost=0, requests=0, tokens=0;
+      for(const item of State.activities){
+        cost += Format.num(item.usage ?? item.total_usage ?? item.cost ?? item.total_cost);
+        requests += Format.num(item.requests ?? item.request_count);
+        tokens += Format.num(item.total_tokens ?? item.tokens_total) ||
+          (Format.num(item.prompt_tokens ?? item.tokens_prompt) +
+           Format.num(item.completion_tokens ?? item.tokens_completion) +
+           Format.num(item.reasoning_tokens));
+      }
+      DOM.setText('requestCount', Format.number(requests));
+      DOM.setText('tokenCount', Format.token(tokens));
+      DOM.setText('avgRequestCost', requests ? Format.cnySimple(cost/requests) : '—');
+      DOM.setText('avgTokenCost', tokens ? Format.cnySimple(cost/tokens*1000) : '—');
+      DOM.setText('activityBadge', State.activities.length+' 项');
+    },
+
+    renderModelRanking(){
+      const container = DOM.get('modelRanking');
+      const map = {};
+      for(const item of State.activities){
+        const model = item.model ?? item.model_permaslug ?? '未知模型';
+        if(!map[model]) map[model] = { cost:0, requests:0, tokens:0 };
+        map[model].cost += Format.num(item.usage ?? item.total_usage ?? item.cost ?? item.total_cost);
+        map[model].requests += Format.num(item.requests ?? item.request_count);
+        map[model].tokens += Format.num(item.total_tokens ?? item.tokens_total);
+      }
+      const ranking = Object.entries(map).sort((a,b)=>b[1].cost-a[1].cost).slice(0,10);
+      if(!ranking.length){
+        container.innerHTML = '<div class="empty">暂无历史数据</div>';
+        return;
+      }
+      const max = ranking[0][1].cost;
+      container.innerHTML = ranking.map(([model, data], index)=>{
+        const width = max>0 ? (data.cost/max*100) : 0;
+        return `
+          <div class="rank-item">
+            <div class="rank-line">
+              <span class="rank-name">${index+1}. ${Format.escapeHtml(model)}</span>
+              <span class="rank-cost">${Format.cnySimple(data.cost)}</span>
+            </div>
+            <div class="bar"><div class="bar-inner" style="width:${width.toFixed(1)}%"></div></div>
+            <div class="rank-meta">${Format.number(data.requests)} 次 · ${Format.token(data.tokens)} Token</div>
+          </div>`;
+      }).join('');
+    },
+
+    renderDaily(){
+      const container = DOM.get('dailyChart');
+      const map = {};
+      for(const item of State.activities){
+        const key = Format.dayKeyFromValue(item.date ?? item.created_at);
+        if(!key) continue;
+        if(!map[key]) map[key] = { cost:0, requests:0 };
+        map[key].cost += Format.num(item.usage ?? item.total_usage ?? item.cost ?? item.total_cost);
+        map[key].requests += Format.num(item.requests ?? item.request_count);
+      }
+      const rows = Object.entries(map).sort((a,b)=>b[0].localeCompare(a[0])).slice(0, CONFIG.activityDays);
+      if(!rows.length){
+        container.innerHTML = '<div class="empty">暂无数据</div>';
+        return;
+      }
+      const max = Math.max(...rows.map(r=>r[1].cost), 0);
+      container.innerHTML = rows.map(([date, data])=>{
+        const width = max>0 ? (data.cost/max*100) : 0;
+        const shown = date.slice(5).replace('-', '月')+'日';
+        return `
+          <div class="daily-row">
+            <div>${Format.escapeHtml(shown)}</div>
+            <div class="bar"><div class="bar-inner" style="width:${width.toFixed(1)}%"></div></div>
+            <div class="daily-cost">${Format.cnySimple(data.cost)}</div>
+            <div class="daily-req">${Format.number(data.requests)} 次</div>
+          </div>`;
+      }).join('');
+    },
+
+    renderKeys(){
+      const table = DOM.get('keyTable');
+      if(!State.keys.length){
+        table.innerHTML = `<tr><td colspan="9"><div class="empty">暂无 API Key 数据</div></td></tr>`;
+        return;
+      }
+      table.innerHTML = State.keys.map(key=>{
+        const usage = Format.num(key.usage);
+        const daily = Format.num(key.usage_daily);
+        const weekly = Format.num(key.usage_weekly);
+        const monthly = Format.num(key.usage_monthly);
+        const limit = key.limit==null ? null : Format.num(key.limit);
+        const remain = key.limit_remaining==null ? null : Format.num(key.limit_remaining);
+        return `
+          <tr>
+            <td><strong>${Format.escapeHtml(key.name ?? key.label ?? '未命名 Key')}</strong></td>
+            <td>${ key.disabled
+                 ? '<span style="color:#dc2626">已禁用</span>'
+                 : '<span style="color:#059669">正常</span>' }</td>
+            <td class="money">${Format.cnySimple(usage)}</td>
+            <td>${Format.cnySimple(daily)}</td>
+            <td>${Format.cnySimple(weekly)}</td>
+            <td>${Format.cnySimple(monthly)}</td>
+            <td>${ limit===null ? '无限' : Format.cnySimple(limit) }</td>
+            <td>${ remain===null ? '—' : Format.cnySimple(remain) }</td>
+            <td>${Format.escapeHtml(Format.reset(key.limit_reset))}</td>
+          </tr>`;
+      }).join('');
+    },
+
+    renderAll(){
+      this.renderBalance();
+      this.renderToday();
+      this.renderActivitySummary();
+      this.renderModelRanking();
+      this.renderDaily();
+      this.renderKeys();
+      UI.Request.render();
+      UI.Debug.render();
+    }
+  }
+};
+
+/* ================================================================
+   JS MODULE 12: App
+   ================================================================ */
+const App = {
+
+  async refreshRealtime(manual=false){
+    if(State.refreshing) return;
+
+    let key = DOM.get('apiKey').value.trim();
+    if(!key) key = Storage.getKey();
+    if(!key){
+      this.error('请先输入 Management Key');
+      this.status('缺少 API Key', true);
+      return;
+    }
+
+    DOM.get('apiKey').value = key;
+    Storage.setKey(key);
+
+    State.refreshing = true;
+    if(manual) this.status('正在刷新今日数据...');
+    this.clearError();
+
+    const range = Analytics.todayRange();
+    DOM.setText('dateRangeNotice',
+      '今日实时范围（'+(State.dayBoundary==='utc'?'UTC':'本地')+'）：'
+      + Format.dateSecond(range.start) + ' ～ ' + Format.dateSecond(range.end));
+
+    try{
+      const [today, modelRows, providerRows] = await Promise.all([
+        Analytics.todaySummary(key),
+        Analytics.todayRequests(key, ['generation_id','model']),
+        Analytics.todayRequests(key, ['generation_id','provider'])
+      ]);
+
+      State.today = today;
+
+      let requests = RequestData.build(modelRows, providerRows);
+      requests = await RequestData.enrich(key, requests);
+      requests.sort((a,b)=>RequestData.timeValue(b)-RequestData.timeValue(a));
+
+      State.realtimeRequests = requests;
+
+      /* ★ 合并到本地历史 */
+      this.mergeRealtimeIntoLocal(requests);
+
+      State.analyticsError = '';
+      State.lastRefresh = new Date();
+
+      DOM.setText('realtimeAge', '更新 '+Format.time(State.lastRefresh));
+
+      UI.Dashboard.renderToday();
+      UI.Request.render();
+      UI.Debug.render();
+
+      this.status('实时数据已更新');
+    }catch(e){
+      console.error(e);
+      State.analyticsError = e.message || 'Analytics 查询失败';
+      this.error(State.analyticsError);
+      UI.Request.render();
+      this.status('实时查询失败', true);
+    }finally{
+      State.refreshing = false;
+    }
+  },
+
+  mergeRealtimeIntoLocal(requests){
+    if(!requests || !requests.length) return;
+    const history = Storage.getHistory();
+    const seen = new Set();
+    for(const item of history){
+      if(item && item.id) seen.add('id:'+item.id);
+      if(item && item.timestamp){
+        seen.add('ts:'+item.timestamp+'|'+(item.model||'')+'|'+Format.num(item.cost).toFixed(10));
+      }
+    }
+    let added = 0;
+    for(const r of requests){
+      if(!r || !r.id) continue;
+      const idKey = 'id:'+r.id;
+      if(seen.has(idKey)) continue;
+      const fallbackKey = 'ts:'+(r.timestamp||r.bucketTime||'')+'|'+(r.model||'')+'|'+Format.num(r.cost).toFixed(10);
+      if(seen.has(fallbackKey)) continue;
+
+      history.unshift({
+        id: r.id,
+        timestamp: r.timestamp || r.bucketTime || null,
+        model: r.model || '未知模型',
+        provider: r.provider || '',
+        promptTokens: Format.num(r.promptTokens),
+        completionTokens: Format.num(r.completionTokens),
+        reasoningTokens: Format.num(r.reasoningTokens),
+        totalTokens: Format.num(r.totalTokens),
+        cost: Format.num(r.cost),
+        finish_reason: r.finish_reason || null,
+        native_finish_reason: r.native_finish_reason || null,
+        cancelled: r.cancelled === true,
+        error_message: r.error_message || null,
+        status: r.status || 'analytics'
+      });
+      seen.add(idKey);
+      seen.add(fallbackKey);
+      added++;
+    }
+    if(added>0){
+      Storage.saveHistory(history);
+      State.localRequests = Storage.getHistory();
+    }
+  },
+
+  async fetchHistory(key){
+    const [creditsResponse, activitiesResponse, keysResponse] = await Promise.all([
+      API.fetch('/credits', key),
+      API.fetch('/activity', key),
+      API.fetch('/keys', key)
+    ]);
+
+    State.credits = creditsResponse?.data || creditsResponse || {};
+
+    State.activities = Array.isArray(activitiesResponse?.data)
+      ? activitiesResponse.data
+      : Array.isArray(activitiesResponse) ? activitiesResponse : [];
+
+    State.keys = Array.isArray(keysResponse?.data)
+      ? keysResponse.data
+      : Array.isArray(keysResponse) ? keysResponse : [];
+
+    State.localRequests = Storage.getHistory();
+
+    /* 构建折线图数据 */
+    Chart.build(State.activities);
+  },
+
+  async loadData(){
+    let key = DOM.get('apiKey').value.trim();
+    if(!key) key = Storage.getKey();
+    if(!key){
+      this.error('请输入 Management Key');
+      this.status('缺少 API Key', true);
+      return;
+    }
+
+    Storage.setKey(key);
+
+    Analytics.meta(key);  /* 不阻塞 */
+
+    await this.refreshRealtime(true);
+
+    try{
+      this.status('今日数据完成，正在加载历史...');
+      await this.fetchHistory(key);
+      UI.Dashboard.renderAll();
+      Chart.render();
+      this.status('查询成功');
+    }catch(e){
+      console.error(e);
+      this.error('历史数据加载失败：'+(e.message || '未知错误'));
+      this.status('今日实时成功，历史加载失败', true);
+    }
+  },
+
+  switchTab(tab){
+    State.activeTab = tab;
+    DOM.get('tabRealtime').classList.toggle('active', tab==='realtime');
+    DOM.get('tabLocal').classList.toggle('active', tab==='local');
+    UI.Request.render();
+  },
+
+  toggleRequests(){
+    State.requestExpanded = !State.requestExpanded;
+    UI.Request.render();
+  },
+
+  saveKey(){
+    const key = DOM.get('apiKey').value.trim();
+    if(!key){ this.error('请输入 API Key'); return; }
+    Storage.setKey(key);
+    this.status('API Key 已保存');
+  },
+
+  clearKey(){
+    Storage.clearKey();
+    DOM.get('apiKey').value = '';
+    this.status('Key 已清除');
+  },
+
+  saveRate(){
+    const rate = Number(DOM.get('usdCny').value);
+    if(!Number.isFinite(rate) || rate<=0){
+      this.error('请输入有效汇率');
+      return;
+    }
+    State.currentRate = rate;
+    Storage.setRate(rate);
+    UI.Dashboard.renderAll();
+    if(Chart.data) Chart.render();
+    this.status('汇率已更新');
+  },
+
+  saveDayBoundary(){
+    const value = DOM.get('dayBoundary').value;
+    State.dayBoundary = value==='utc' ? 'utc' : 'local';
+    Storage.setDayBoundary(State.dayBoundary);
+    this.status('今日起点已切换为 '
+      + (State.dayBoundary==='utc' ? 'UTC 00:00' : '本地 00:00')
+      + '，请点查询刷新');
+  },
+
+  clearHistory(){
+    if(!confirm('清除全部本地逐请求历史？')) return;
+    localStorage.removeItem(CONFIG.storage.history);
+    State.localRequests = [];
+    UI.Request.render();
+  },
+
+  status(text, error=false){
+    DOM.setText('status', text);
+    DOM.get('status').style.color = error ? '#dc2626' : '#6b7280';
+  },
+
+  error(message){
+    const node = DOM.get('errorBox');
+    node.textContent = '❌ ' + message;
+    node.classList.add('visible');
+  },
+
+  clearError(){
+    const node = DOM.get('errorBox');
+    node.classList.remove('visible');
+    node.textContent = '';
+  },
+
+  startAutoRefresh(){
+    if(State.refreshTimer) clearInterval(State.refreshTimer);
+    State.refreshTimer = setInterval(async ()=>{
+      const key = Storage.getKey();
+      if(!key) return;
+      await this.refreshRealtime(false);
+    }, CONFIG.refreshInterval);
+  },
+
+  async init(){
+    State.currentRate = Storage.getRate();
+    DOM.get('usdCny').value = State.currentRate;
+
+    State.dayBoundary = Storage.getDayBoundary();
+    DOM.get('dayBoundary').value = State.dayBoundary;
+
+    const key = Storage.getKey();
+    if(key) DOM.get('apiKey').value = key;
+
+    State.localRequests = Storage.getHistory();
+    UI.Request.render();
+
+    if(key){
+      await this.loadData();
+    }else{
+      this.status('请输入 Key');
+    }
+
+    DOM.get('apiKey').addEventListener('keydown', e=>{
+      if(e.key === 'Enter') this.loadData();
+    });
+
+    this.startAutoRefresh();
+  }
+};
+
+/* ================================================================
+   JS MODULE 13: Compatibility
+   ================================================================ */
+window.recordOpenRouterRequest = function(input, meta){
+  const usage = Usage.normalize(input);
+  const record = {
+    id: meta?.requestId || meta?.id || input?.id || null,
+    timestamp: meta?.timestamp || input?.created_at || new Date().toISOString(),
+    model: meta?.model || input?.model || '未知模型',
+    provider: meta?.provider || input?.provider || input?.provider_name || '',
+    promptTokens: usage.promptTokens,
+    completionTokens: usage.completionTokens,
+    reasoningTokens: usage.reasoningTokens,
+    totalTokens: usage.totalTokens,
+    cost: usage.cost,
+    finish_reason: input?.finish_reason || null,
+    native_finish_reason: input?.native_finish_reason || null,
+    cancelled: input?.cancelled === true,
+    status: meta?.status || 'success'
+  };
+
+  const history = Storage.getHistory();
+  const duplicate = history.some(item=>{
+    if(record.id && item.id) return record.id === item.id;
+    return record.timestamp === item.timestamp &&
+           record.model === item.model &&
+           Math.abs(Format.num(record.cost)-Format.num(item.cost)) < 1e-12;
+  });
+  if(duplicate) return false;
+
+  history.unshift(record);
+  Storage.saveHistory(history);
+  State.localRequests = Storage.getHistory();
+  UI.Request.render();
+  return true;
+};
+
+window.addOpenRouterRequest = window.recordOpenRouterRequest;
+window.openrouterRecordRequest = window.recordOpenRouterRequest;
+
+/* ================================================================
+   JS MODULE 14: Start
+   ================================================================ */
+window.App = App;
+window.UI = UI;
+window.Chart = Chart;
+
+App.init();
+</script>
+</body>
+</html>

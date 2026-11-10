@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>以巫山为圆心 · 全国山野路线指南</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Mono:wght@300;400;500&family=Noto+Serif+SC:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#090d13;--bg2:#0d1320;--s1:#111a28;--s2:#182436;--s3:#1f3048;
+  --ac:#e8943a;--ac2:#f0b868;--ac-d:rgba(232,148,58,0.1);--ac-b:rgba(232,148,58,0.18);
+  --tl:#3acfb0;--tl-d:rgba(58,207,176,0.1);
+  --bl:#4a8fe7;--bl-d:rgba(74,143,231,0.1);
+  --gn:#5ac76a;--gn-d:rgba(90,199,106,0.1);
+  --rd:#e05a4a;--rd-d:rgba(224,90,74,0.1);
+  --yl:#e0c040;--yl-d:rgba(224,192,64,0.1);
+  --vt:#9a7aea;--vt-d:rgba(154,122,234,0.1);
+  --t1:#eee8dc;--t2:#c4bdb0;--t3:#7a756c;--t4:#4a4640;
+  --b1:rgba(255,255,255,0.05);--b2:rgba(255,255,255,0.09);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--t1);font-family:'Noto Serif SC',serif;font-size:15px;line-height:1.8;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");opacity:0.015;pointer-events:none;z-index:0}
+::-webkit-scrollbar{width:5px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--s2);border-radius:3px}
+.wrap{max-width:1120px;margin:0 auto;padding:0 2rem;position:relative;z-index:1}
+
+/* HERO */
+.hero{min-height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;position:relative;padding:4rem 2rem;overflow:hidden}
+.hero::before{content:'';position:absolute;top:12%;left:50%;transform:translateX(-50%);width:900px;height:900px;border-radius:50%;background:radial-gradient(circle,rgba(232,148,58,0.03),transparent 60%);pointer-events:none;animation:pulse 14s ease infinite}
+.hero-mtn{position:absolute;bottom:0;left:0;width:100%;z-index:0;opacity:0.25}
+.hero-fade{position:absolute;bottom:0;left:0;right:0;height:50%;background:linear-gradient(to top,var(--bg),transparent);z-index:1;pointer-events:none}
+.hero-c{position:relative;z-index:2}
+.hero-badge{display:inline-flex;align-items:center;gap:0.5rem;background:var(--ac-d);border:1px solid var(--ac-b);color:var(--ac);padding:0.3rem 1rem;border-radius:100px;font-family:'DM Mono',monospace;font-size:0.66rem;letter-spacing:0.12em;text-transform:uppercase;margin-bottom:2rem;opacity:0;animation:fd .8s .1s ease forwards}
+.hero h1{font-size:clamp(2.2rem,6vw,4rem);font-weight:900;line-height:1.12;margin-bottom:0.8rem;opacity:0;animation:fu 1s .2s ease forwards}
+.hero h1 .th{font-weight:300;color:var(--t2)}
+.hero h1 .hl{background:linear-gradient(135deg,var(--ac),var(--ac2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero-sub{font-size:0.98rem;color:var(--t3);max-width:620px;margin:0 auto;font-weight:300;opacity:0;animation:fu 1s .4s ease forwards}
+.hero-stats{display:flex;justify-content:center;gap:2.5rem;margin-top:2.5rem;flex-wrap:wrap;opacity:0;animation:fu 1s .6s ease forwards}
+.hero-stat .v{font-family:'DM Mono',monospace;font-size:1.5rem;font-weight:500;color:var(--ac)}
+.hero-stat .l{font-family:'DM Mono',monospace;font-size:0.6rem;color:var(--t3);letter-spacing:0.1em;text-transform:uppercase}
+.hero-scroll{position:absolute;bottom:2rem;left:50%;transform:translateX(-50%);z-index:2;font-family:'DM Mono',monospace;font-size:0.56rem;color:var(--t3);letter-spacing:0.12em;text-transform:uppercase;opacity:0;animation:fu 1s .8s ease forwards}
+.hero-scroll::after{content:'';display:block;width:1px;height:20px;background:linear-gradient(to bottom,var(--t3),transparent);margin:0.3rem auto 0}
+
+section{padding:5rem 0;position:relative}
+.sn{font-family:'DM Mono',monospace;font-size:0.6rem;letter-spacing:0.18em;color:var(--ac);opacity:0.5;margin-bottom:0.4rem;display:block}
+.st{font-size:clamp(1.4rem,3.5vw,2rem);font-weight:700;line-height:1.3;margin-bottom:0.4rem}
+.sd{color:var(--t3);font-size:0.85rem;font-weight:300;max-width:640px;margin-bottom:2.5rem}
+
+/* MAP */
+.map-wrap{background:var(--s1);border:1px solid var(--b1);border-radius:16px;overflow:hidden;margin:2.5rem 0}
+.map-wrap svg{width:100%;display:block}
+
+/* TABS */
+.tabs{display:flex;gap:0.5rem;margin-bottom:2rem;flex-wrap:wrap}
+.tab{display:flex;align-items:center;gap:0.4rem;padding:0.5rem 1.1rem;border-radius:10px;border:1px solid var(--b1);background:var(--s1);font-weight:600;font-size:0.88rem;cursor:default}
+.tab.on{border-color:var(--ac);background:var(--ac-d)}
+.tab .tc{font-family:'DM Mono',monospace;font-size:0.6rem;color:var(--t3);background:var(--s2);padding:0.1rem 0.4rem;border-radius:4px}
+
+/* DRIVE BANNER */
+.drv{display:flex;align-items:center;gap:0.8rem;padding:0.7rem 1.1rem;background:linear-gradient(135deg,var(--ac-d),rgba(232,148,58,0.02));border:1px solid var(--ac-b);border-radius:10px;margin:1.5rem 2rem 0}
+.drv-i{width:34px;height:34px;border-radius:8px;background:rgba(232,148,58,0.1);display:flex;align-items:center;justify-content:center;font-size:0.95rem;flex-shrink:0}
+.drv-t{font-family:'DM Mono',monospace;font-size:0.58rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--t3)}
+.drv-v{font-family:'DM Mono',monospace;font-size:1.1rem;font-weight:500;color:var(--ac)}
+.drv-v .u{font-size:0.65rem;color:var(--t3);margin-left:0.1rem}
+.drv-r{font-size:0.75rem;color:var(--t3);font-weight:300;margin-top:0.1rem;line-height:1.4}
+
+/* ROUTE CARD */
+.rc{background:var(--s1);border:1px solid var(--b1);border-radius:14px;overflow:hidden;margin-bottom:1.8rem;opacity:0;animation:fu .55s ease forwards;transition:border-color .3s,transform .3s}
+.rc:hover{border-color:var(--b2);transform:translateY(-2px)}
+.rc:nth-child(1){animation-delay:.03s}
+.rc:nth-child(2){animation-delay:.08s}
+.rc:nth-child(3){animation-delay:.13s}
+.rc:nth-child(4){animation-delay:.18s}
+.rc:nth-child(5){animation-delay:.23s}
+.rc:nth-child(6){animation-delay:.28s}
+.rc:nth-child(7){animation-delay:.33s}
+.rc:nth-child(8){animation-delay:.38s}
+.rc:nth-child(9){animation-delay:.43s}
+.rc:nth-child(10){animation-delay:.48s}
+.rc:nth-child(11){animation-delay:.53s}
+
+.rc-hd{display:flex;gap:1.2rem;padding:1.5rem 1.8rem 0;flex-wrap:wrap;align-items:flex-start}
+.rc-n{font-family:'Instrument Serif',serif;font-size:2.4rem;color:var(--t4);line-height:1;opacity:0.3;min-width:2rem}
+.rc-inf{flex:1;min-width:200px}
+.rc-nm{font-size:1.25rem;font-weight:700;margin-bottom:0.1rem}
+.rc-sub{font-family:'DM Mono',monospace;font-size:0.68rem;color:var(--t3);letter-spacing:0.03em}
+.rc-loc{display:flex;align-items:center;gap:0.35rem;font-size:0.78rem;color:var(--t2);margin-top:0.3rem}
+.rc-loc svg{width:13px;height:13px;stroke:var(--ac);flex-shrink:0}
+
+.rc-bg{display:flex;flex-wrap:wrap;gap:0.3rem;margin-top:0.6rem;padding:0 1.8rem}
+.bg{display:inline-flex;align-items:center;gap:0.2rem;padding:0.15rem 0.55rem;border-radius:4px;font-family:'DM Mono',monospace;font-size:0.6rem;font-weight:500}
+.bg-g{background:var(--gn-d);color:var(--gn);border:1px solid rgba(90,199,106,0.1)}
+.bg-y{background:var(--yl-d);color:var(--yl);border:1px solid rgba(224,192,64,0.1)}
+.bg-r{background:var(--rd-d);color:var(--rd);border:1px solid rgba(224,90,74,0.1)}
+.bg-b{background:var(--bl-d);color:var(--bl);border:1px solid rgba(74,143,231,0.1)}
+.bg-v{background:var(--vt-d);color:var(--vt);border:1px solid rgba(154,122,234,0.1)}
+.bg-a{background:var(--ac-d);color:var(--ac);border:1px solid rgba(232,148,58,0.1)}
+
+.rc-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:0;padding:1rem 1.8rem;border-top:1px solid var(--b1);margin-top:1rem}
+.dc{padding:0.6rem 0.5rem;border-right:1px solid var(--b1)}
+.dc:last-child{border-right:none}
+.dc .dl{font-family:'DM Mono',monospace;font-size:0.55rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--t3);margin-bottom:0.15rem}
+.dc .dv{font-family:'DM Mono',monospace;font-size:1rem;font-weight:500;color:var(--t1)}
+.dc .du{font-size:0.6rem;color:var(--t3);margin-left:0.08rem}
+.dc .ds{font-size:0.62rem;color:var(--t3);margin-top:0.05rem}
+
+.rc-body{padding:0.8rem 1.8rem 1.5rem}
+.rc-body h4{font-size:0.78rem;font-weight:700;margin:1rem 0 0.3rem;display:flex;align-items:center;gap:0.35rem}
+.rc-body h4 .hd{width:4px;height:4px;border-radius:50%;background:var(--ac);opacity:0.5}
+.rc-body p{color:var(--t2);font-size:0.84rem;font-weight:300;line-height:1.7}
+.rc-body ul{list-style:none;padding:0}
+.rc-body ul li{position:relative;padding-left:1.1rem;margin-bottom:0.25rem;color:var(--t2);font-size:0.82rem;font-weight:300}
+.rc-body ul li::before{content:'';position:absolute;left:0;top:0.5em;width:4px;height:4px;border-radius:50%;background:var(--ac);opacity:0.3}
+
+/* COMPARE TABLE */
+.cmp-w{overflow-x:auto;margin:2rem 0;border-radius:12px;border:1px solid var(--b1);background:var(--s1)}
+.cmp{width:100%;border-collapse:collapse;font-size:0.78rem;min-width:1050px}
+.cmp th{font-family:'DM Mono',monospace;font-size:0.58rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--t3);padding:0.7rem 0.7rem;text-align:left;border-bottom:2px solid var(--b1);font-weight:400;background:rgba(0,0,0,0.2);white-space:nowrap}
+.cmp td{padding:0.55rem 0.7rem;border-bottom:1px solid var(--b1);color:var(--t2);vertical-align:middle}
+.cmp tr:last-child td{border-bottom:none}
+.cmp tr:hover{background:rgba(232,148,58,0.01)}
+.cmp .rn{font-weight:700;color:var(--t1);white-space:nowrap}
+.cmp .rnm{color:var(--ac);font-family:'DM Mono',monospace;font-size:0.8rem}
+.cmp .dc-c{font-family:'DM Mono',monospace;color:var(--ac);font-weight:500}
+.sec-r td{color:var(--ac);font-weight:700;font-family:'DM Mono',monospace;font-size:0.68rem;letter-spacing:0.1em;padding:0.4rem 0.7rem;background:rgba(232,148,58,0.02)}
+.sec-r-tl td{color:var(--tl)}
+
+/* TIPS */
+.tg{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:1rem;margin:2rem 0}
+.tc2{background:var(--s1);border:1px solid var(--b1);border-radius:12px;padding:1.3rem;opacity:0;animation:fu .5s ease forwards}
+.tc2:nth-child(1){animation-delay:.05s}
+.tc2:nth-child(2){animation-delay:.12s}
+.tc2:nth-child(3){animation-delay:.19s}
+.tc2:nth-child(4){animation-delay:.26s}
+.tc2 .ti{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;margin-bottom:0.6rem;font-size:0.9rem}
+.tc2 h4{font-size:0.88rem;font-weight:700;margin-bottom:0.3rem}
+.tc2 p{font-size:0.78rem;color:var(--t3);font-weight:300;line-height:1.5}
+
+.v-box{background:linear-gradient(135deg,rgba(232,148,58,0.04),rgba(58,207,176,0.02));border:1px solid rgba(232,148,58,0.1);border-radius:14px;padding:2.2rem;margin:3rem 0;text-align:center}
+.v-box h3{font-size:1.15rem;font-weight:700;margin-bottom:0.6rem}
+.v-box p{color:var(--t2);font-weight:300;max-width:700px;margin:0 auto;font-size:0.86rem}
+
+footer{border-top:1px solid var(--b1);padding:3rem 0;text-align:center;color:var(--t3);font-size:0.7rem;font-family:'DM Mono',monospace;letter-spacing:0.04em}
+
+@keyframes fu{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fd{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pulse{0%,100%{opacity:.2}50%{opacity:.5}}
+
+@media(max-width:768px){
+  .wrap{padding:0 1.2rem}section{padding:3.5rem 0}
+  .rc-hd{padding:1.2rem 1.3rem 0}.rc-grid{padding:0.8rem 1.3rem}.rc-body{padding:0.6rem 1.3rem 1.2rem}
+  .drv{margin:1rem 1.3rem 0}.rc-bg{padding:0 1.3rem}
+  .hero-stats{gap:1.5rem}.dc{border-right:none;border-bottom:1px solid var(--b1);padding:0.4rem 0.5rem}
+}
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<section class="hero">
+  <svg class="hero-mtn" viewBox="0 0 1440 460" preserveAspectRatio="xMidYMax slice">
+    <defs>
+      <linearGradient id="hG1" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#1a2840" stop-opacity="0.5"/><stop offset="100%" stop-color="#090d13" stop-opacity="0"/></linearGradient>
+      <linearGradient id="hG2" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#141c28"/><stop offset="100%" stop-color="#090d13"/></linearGradient>
+    </defs>
+    <path d="M0 320 L100 220 L220 280 L360 140 L500 250 L620 110 L760 220 L900 130 L1040 240 L1180 150 L1320 230 L1440 170 L1440 460 L0 460Z" fill="url(#hG1)" opacity="0.35"/>
+    <path d="M0 390 L130 310 L280 360 L440 240 L580 330 L740 220 L880 310 L1020 250 L1160 320 L1320 260 L1440 300 L1440 460 L0 460Z" fill="url(#hG2)" opacity="0.65"/>
+    <path d="M0 430 L170 360 L340 400 L500 330 L660 380 L820 330 L980 370 L1140 340 L1300 380 L1440 360 L1440 460 L0 460Z" fill="#0d1320"/>
+    <circle cx="720" cy="190" r="5" fill="rgba(232,148,58,0.5)"/>
+    <circle cx="720" cy="190" r="50" fill="rgba(232,148,58,0.02)"><animate attributeName="r" values="40;65;40" dur="8s" repeatCount="indefinite"/></circle>
+    <text x="720" y="178" text-anchor="middle" fill="rgba(232,148,58,0.35)" font-family="DM Mono" font-size="8" letter-spacing="2">WUSHAN</text>
+  </svg>
+  <div class="hero-fade"></div>
+  <div class="hero-c">
+    <div class="hero-badge">
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="10" r="3"/><path d="M12 21.7C17.3 17 20 13 20 10a8 8 0 1 0-16 0c0 3 2.7 7 8 11.7z"/></svg>
+      以巫山为圆心 · 辐射全国
+    </div>
+    <h1><span class="th">从三峡之巅出发</span><br><span class="hl">抵达每一座值得的山</span></h1>
+    <p class="hero-sub">华中、西南、华东、西北——22条精选路线，每条标注从巫山驾车距离。按距离从近到远，规划你的下一次出发。</p>
+    <div class="hero-stats">
+      <div class="hero-stat"><div class="v">22</div><div class="l">条路线</div></div>
+      <div class="hero-stat"><div class="v">1500</div><div class="l">km 最远驾车</div></div>
+      <div class="hero-stat"><div class="v">7556</div><div class="l">m 最高海拔</div></div>
+      <div class="hero-stat"><div class="v">8</div><div class="l">省份覆盖</div></div>
+    </div>
+  </div>
+  <div class="hero-scroll">scroll</div>
+</section>
+
+<!-- MAP -->
+<section>
+  <div class="wrap">
+    <span class="sn">RADIAL OVERVIEW</span>
+    <h2 class="st">以巫山为圆心的路线辐射</h2>
+    <p class="sd">驾车距离从200km（恩施大峡谷）到1500km（玉龙雪山/梅里），覆盖华中-西南-华东-西北核心山野区域。</p>
+    <div class="map-wrap">
+      <svg viewBox="0 0 1000 620">
+        <defs>
+          <radialGradient id="cG" cx="47%" cy="44%" r="32%"><stop offset="0%" stop-color="rgba(232,148,58,0.05)"/><stop offset="100%" stop-color="transparent"/></radialGradient>
+          <filter id="dg"><feGaussianBlur stdDeviation="2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+        </defs>
+        <rect width="1000" height="620" fill="#0a1018"/>
+        <rect width="1000" height="620" fill="url(#cG)"/>
+        <!-- Simplified outline -->
+        <path d="M350 80 Q420 60 500 70 Q580 55 650 75 Q720 65 780 90 Q830 80 870 100 Q900 120 920 160 Q940 200 930 250 Q950 300 940 340 Q920 380 890 400 Q870 430 840 440 Q810 460 770 450 Q730 470 690 460 Q650 480 620 470 Q580 490 540 480 Q500 500 460 490 Q420 510 380 490 Q340 500 310 480 Q280 470 260 440 Q240 410 230 370 Q220 330 230 290 Q220 250 240 220 Q250 190 270 160 Q290 130 320 110 Q340 95 350 80Z" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="1"/>
+        <!-- Grid -->
+        <path d="M280 250 Q400 240 500 245 Q600 235 720 245 Q800 240 880 250" stroke="rgba(255,255,255,0.02)" stroke-width="0.5"/>
+        <path d="M300 350 Q400 345 500 350 Q600 340 700 350 Q780 345 850 360" stroke="rgba(255,255,255,0.02)" stroke-width="0.5"/>
+        <path d="M400 100 Q410 200 405 300 Q400 400 390 480" stroke="rgba(255,255,255,0.02)" stroke-width="0.5"/>
+        <path d="M600 80 Q610 180 605 280 Q600 380 590 480" stroke="rgba(255,255,255,0.02)" stroke-width="0.5"/>
+        <!-- Yangtze hint -->
+        <path d="M280 300 Q380 310 460 305 Q530 300 600 290 Q700 280 830 290" stroke="rgba(74,143,231,0.05)" stroke-width="1.5" fill="none"/>
+        <!-- Wushan center -->
+        <circle cx="468" cy="305" r="30" fill="rgba(232,148,58,0.03)"/>
+        <circle cx="468" cy="305" r="12" fill="rgba(232,148,58,0.06)" filter="url(#dg)"/>
+        <circle cx="468" cy="305" r="5" fill="#e8943a"/>
+        <text x="468" y="290" text-anchor="middle" fill="#e8943a" font-family="DM Mono" font-size="9" font-weight="500">巫山</text>
+        <!-- Distance rings -->
+        <circle cx="468" cy="305" r="50" fill="none" stroke="rgba(232,148,58,0.03)" stroke-width="0.5" stroke-dasharray="4 4"/>
+        <circle cx="468" cy="305" r="100" fill="none" stroke="rgba(232,148,58,0.03)" stroke-width="0.5" stroke-dasharray="4 4"/>
+        <circle cx="468" cy="305" r="160" fill="none" stroke="rgba(232,148,58,0.025)" stroke-width="0.5" stroke-dasharray="4 4"/>
+        <!-- Routes -->
+        <line x1="468" y1="305" x2="420" y2="345" stroke="rgba(232,148,58,0.18)" stroke-width="1"/><circle cx="420" cy="345" r="3.5" fill="#5ac76a"/><text x="405" y="362" text-anchor="end" fill="#5ac76a" font-family="Noto Serif SC" font-size="8" font-weight="600">恩施大峡谷</text><text x="405" y="373" text-anchor="end" fill="#7a756c" font-family="DM Mono" font-size="6.5">200km</text>
+        <line x1="468" y1="305" x2="440" y2="248" stroke="rgba(232,148,58,0.18)" stroke-width="1"/><circle cx="440" cy="248" r="3.5" fill="#4a8fe7"/><text x="425" y="240" text-anchor="end" fill="#4a8fe7" font-family="Noto Serif SC" font-size="8" font-weight="600">神农架</text><text x="425" y="251" text-anchor="end" fill="#7a756c" font-family="DM Mono" font-size="6.5">280km</text>
+        <line x1="468" y1="305" x2="392" y2="385" stroke="rgba(232,148,58,0.18)" stroke-width="1"/><circle cx="392" cy="385" r="3.5" fill="#5ac76a"/><text x="377" y="398" text-anchor="end" fill="#5ac76a" font-family="Noto Serif SC" font-size="8" font-weight="600">张家界</text><text x="377" y="409" text-anchor="end" fill="#7a756c" font-family="DM Mono" font-size="6.5">380km</text>
+        <line x1="468" y1="305" x2="412" y2="218" stroke="rgba(232,148,58,0.18)" stroke-width="1"/><circle cx="412" cy="218" r="3.5" fill="#9a7aea"/><text x="397" y="210" text-anchor="end" fill="#9a7aea" font-family="Noto Serif SC" font-size="8" font-weight="600">武当山</text><text x="397" y="221" text-anchor="end" fill="#7a756c" font-family="DM Mono" font-size="6.5">450km</text>
+        <line x1="468" y1="305" x2="380" y2="425" stroke="rgba(232,148,58,0.15)" stroke-width="1"/><circle cx="380" cy="425" r="3.5" fill="#e05a4a"/><text x="365" y="438" text-anchor="end" fill="#e05a4a" font-family="Noto Serif SC" font-size="8" font-weight="600">梵净山</text><text x="365" y="449" text-anchor="end" fill="#7a756c" font-family="DM Mono" font-size="6.5">550km</text>
+        <line x1="468" y1="305" x2="362" y2="405" stroke="rgba(232,148,58,0.12)" stroke-width="0.8"/><text x="348" y="398" text-anchor="end" fill="#e0c040" font-family="Noto Serif SC" font-size="7">衡山</text><text x="348" y="408" text-anchor="end" fill="#504c45" font-family="DM Mono" font-size="6">550km</text>
+        <line x1="468" y1="305" x2="392" y2="165" stroke="rgba(232,148,58,0.15)" stroke-width="1"/><circle cx="392" cy="165" r="3.5" fill="#e05a4a"/><text x="377" y="158" text-anchor="end" fill="#e05a4a" font-family="Noto Serif SC" font-size="8" font-weight="600">华山</text><text x="377" y="169" text-anchor="end" fill="#7a756c" font-family="DM Mono" font-size="6.5">650km</text>
+        <line x1="468" y1="305" x2="558" y2="388" stroke="rgba(232,148,58,0.15)" stroke-width="1"/><circle cx="558" cy="388" r="3.5" fill="#3acfb0"/><text x="573" y="383" fill="#3acfb0" font-family="Noto Serif SC" font-size="8" font-weight="600">武功山</text><text x="573" y="394" fill="#7a756c" font-family="DM Mono" font-size="6.5">700km</text>
+        <line x1="468" y1="305" x2="370" y2="195" stroke="rgba(232,148,58,0.12)" stroke-width="0.8"/><text x="355" y="188" text-anchor="end" fill="#e0c040" font-family="Noto Serif SC" font-size="7">太白山</text><text x="355" y="198" text-anchor="end" fill="#504c45" font-family="DM Mono" font-size="6">750km</text>
+        <line x1="468" y1="305" x2="310" y2="365" stroke="rgba(232,148,58,0.15)" stroke-width="1"/><circle cx="310" cy="365" r="3.5" fill="#e05a4a"/><text x="295" y="358" text-anchor="end" fill="#e05a4a" font-family="Noto Serif SC" font-size="8" font-weight="600">峨眉山</text><text x="295" y="369" text-anchor="end" fill="#7a756c" font-family="DM Mono" font-size="6.5">850km</text>
+        <line x1="468" y1="305" x2="282" y2="278" stroke="rgba(232,148,58,0.15)" stroke-width="1"/><circle cx="282" cy="278" r="3.5" fill="#e05a4a"/><text x="267" y="271" text-anchor="end" fill="#e05a4a" font-family="Noto Serif SC" font-size="8" font-weight="600">四姑娘山</text><text x="267" y="282" text-anchor="end" fill="#7a756c" font-family="DM Mono" font-size="6.5">900km</text>
+        <line x1="468" y1="305" x2="640" y2="258" stroke="rgba(232,148,58,0.12)" stroke-width="0.8"/><circle cx="640" cy="258" r="3" fill="#e0c040"/><text x="655" y="253" fill="#e0c040" font-family="Noto Serif SC" font-size="7">黄山</text><text x="655" y="263" fill="#504c45" font-family="DM Mono" font-size="6">950km</text>
+        <line x1="468" y1="305" x2="620" y2="178" stroke="rgba(232,148,58,0.12)" stroke-width="0.8"/><circle cx="620" cy="178" r="3" fill="#e0c040"/><text x="635" y="173" fill="#e0c040" font-family="Noto Serif SC" font-size="7">泰山</text><text x="635" y="183" fill="#504c45" font-family="DM Mono" font-size="6">1100km</text>
+        <line x1="468" y1="305" x2="340" y2="265" stroke="rgba(232,148,58,0.08)" stroke-width="0.5" stroke-dasharray="3 3"/><text x="325" y="258" text-anchor="end" fill="#504c45" font-family="Noto Serif SC" font-size="7">虎跳峡</text><text x="325" y="268" text-anchor="end" fill="#504c45" font-family="DM Mono" font-size="6">1300km</text>
+        <line x1="468" y1="305" x2="262" y2="308" stroke="rgba(232,148,58,0.06)" stroke-width="0.5" stroke-dasharray="3 3"/><text x="250" y="302" text-anchor="end" fill="#504c45" font-family="Noto Serif SC" font-size="7">稻城亚丁</text><text x="250" y="312" text-anchor="end" fill="#504c45" font-family="DM Mono" font-size="6">1400km</text>
+        <!-- Legend -->
+        <rect x="30" y="530" width="260" height="50" rx="6" fill="rgba(17,26,40,0.9)" stroke="rgba(255,255,255,0.04)"/>
+        <circle cx="48" cy="550" r="3" fill="#5ac76a"/><text x="58" y="553" fill="#c4bdb0" font-family="DM Mono" font-size="7">初级</text>
+        <circle cx="108" cy="550" r="3" fill="#4a8fe7"/><text x="118" y="553" fill="#c4bdb0" font-family="DM Mono" font-size="7">中级</text>
+        <circle cx="168" cy="550" r="3" fill="#e05a4a"/><text x="178" y="553" fill="#c4bdb0" font-family="DM Mono" font-size="7">高级</text>
+        <text x="48" y="570" fill="#7a756c" font-family="DM Mono" font-size="6.5">驾车距离从巫山出发 · 高速+国道估算</text>
+      </svg>
+    </div>
+  </div>
+</section>
+
+<!-- ===== CLIMBING ===== -->
+<section>
+  <div class="wrap">
+    <span class="sn">PART ONE</span>
+    <h2 class="st">爬山 · 以冲顶为目标</h2>
+    <p class="sd">核心指标是海拔落差和峰顶高度。路线更陡、距离更短、体感更强烈。</p>
+    <div class="tabs"><div class="tab on"><span>⛰️</span> 爬山路线 <span class="tc">11条</span></div></div>
+
+    <!-- C1 -->
+    <div class="rc">
+      <div class="rc-hd">
+        <div class="rc-n">01</div>
+        <div class="rc-inf">
+          <div class="rc-nm">神农架 · 神农顶</div>
+          <div class="rc-sub">SHENNONGDING · 华中最高峰 · 湖北</div>
+          <div class="rc-loc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="10" r="3"/><path d="M12 21.7C17.3 17 20 13 20 10a8 8 0 1 0-16 0c0 3 2.7 7 8 11.7z"/></svg>湖北省神农架林区 · 木鱼镇方向</div>
+        </div>
+      </div>
+      <div class="rc-bg"><span class="bg bg-y">中级</span><span class="bg bg-a">冲顶型</span><span class="bg bg-b">5-10月</span><span class="bg bg-v">华中屋脊</span></div>
+      <div class="drv"><div class="drv-i">🚗</div><div><div class="drv-t">驾车距离 · 巫山出发</div><div class="drv-v">280<span class="u">km</span> · 4.5<span class="u">h</span></div><div class="drv-r">巫山→宜昌→兴山→木鱼镇 · G42沪蓉高速+S312</div></div></div>
+      <div class="rc-grid">
+        <div class="dc"><div class="dl">距离</div><div class="dv">26<span class="du">km</span></div><div class="ds">往返</div></div>
+        <div class="dc"><div class="dl">爬升</div><div class="dv">1380<span class="du">m</span></div><div class="ds">单向</div></div>
+        <div class="dc"><div class="dl">最高</div><div class="dv">3106<span class="du">m</span></div><div class="ds">神农顶</div></div>
+        <div class="dc"><div class="dl">起步</div><div class="dv">1726<span class="du">m</span></div><div class="ds">景区门</div></div>
+        <div class="dc"><div class="dl">用时</div><div class="dv">8-10<span class="du">h</span></div><div class="ds">单日</div></div>
+        <div class="dc"><div class="dl">坡度</div><div class="dv">12.8<span class="du">°</span></div><div class="ds">后段陡</div></div>
+      </div>
+      <div class="rc-body">
+        <p>华中第一峰。从景区大门经板壁岩、风景垭上行，前段步道缓升，中段进入高山草甸和箭竹林，最后穿越风化岩石区登顶。天气好时可远眺三峡群山，山顶常有云海。</p>
+        <h4><span class="hd"></span>关键路段</h4>
+        <ul><li>0-4km：金猴岭→板壁岩，石板路缓升至2200m</li><li>4-8km：草甸+箭竹林，坡度15-18°，至2800m</li><li>8-13km：风化碎石冲顶，坡度20-25°</li></ul>
+      </div>
+    </div>
+
+    <!-- C2 -->
+    <div class="rc">
+      <div class="rc-hd">
+        <div class="rc-n">02</div>
+        <div class="rc-inf">
+          <div class="rc-nm">武当山 · 天柱峰</div>
+          <div class="rc-sub">MT WUDANG · 道教圣地 · 湖北</div>
+          <div class="rc-loc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="10" r="3"/><path d="M12 21.7C17.3 17 20 13 20 10a8 8 0 1 0-16 0c0 3 2.7 7 8 11.7z"/></svg>湖北省十堰市丹江口市</div>
+        </div>
+      </div>
+      <div class="rc-bg"><span class="bg bg-y">中级</span><span class="bg bg-a">冲顶型</span><span class="bg bg-g">全年</span><span class="bg bg-v">世界文化遗产</span></div>
+      <div class="drv"><div class="drv-i">🚗</div><div><div class="drv-t">驾车距离 · 巫山出发</div><div class="drv-v">450<span class="u">km</span> · 6<span class="u">h</span></div><div class="drv-r">巫山→巴东→十堰→武当山 · G42→G59</div></div></div>
+      <div class="rc-grid">
+        <div class="dc"><div class="dl">距离</div><div class="dv">30<span class="du">km</span></div><div class="ds">全程</div></div>
+        <div class="dc"><div class="dl">爬升</div><div class="dv">1350<span class="du">m</span></div><div class="ds">从山脚</div></div>
+        <div class="dc"><div class="dl">最高</div><div class="dv">1612<span class="du">m</span></div><div class="ds">天柱峰</div></div>
+        <div class="dc"><div class="dl">起步</div><div class="dv">260<span class="du">m</span></div><div class="ds">山门</div></div>
+        <div class="dc"><div class="dl">用时</div><div class="dv">1-2<span class="du">天</span></div><div class="ds">可住宿</div></div>
+        <div class="dc"><div class="dl">台阶</div><div class="dv">36000<span class="du">+</span></div><div class="ds">全程石阶</div></div>
+      </div>
+      <div class="rc-body">
+        <p>道教第一圣地。从山门步行上山经紫霄宫、南岩宫，最终登顶天柱峰金殿。沿途古建筑群密集，明成祖"北建故宫，南修武当"。路线极其成熟，适合各水平。</p>
+      </div>
+    </div>
+
+    <!-- C3 -->
+    <div class="rc">
+      <div class="rc-hd">
+        <div class="rc-n">03</div>
+        <div class="rc-inf">
+          <div class="rc-nm">梵净山 · 红云金顶</div>
+          <div class="rc-sub">FANJINGSHAN · 武陵主峰 · 贵州</div>
+          <div class="rc-loc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="10" r="3"/><path d="M12 21.7C17.3 17 20 13 20 10a8 8 0 1 0-16 0c0 3 2.7 7 8 11.7z"/></svg>贵州省铜仁市江口县 · 世界自然遗产</div>
+        </div>
+      </div>
+      <div class="rc-bg"><span class="bg bg-r">高级</span><span class="bg bg-a">冲顶型</span><span class="bg bg-b">4-11月</span><span class="bg bg-v">世界遗产</span></div>
+      <div class="drv"><div class="drv-i">🚗</div><div><div class="drv-t">驾车距离 · 巫山出发</div><div class="drv-v">550<span class="u">km</span> · 7<span class="u">h</span></div><div class="drv-r">巫山→恩施→吉首→铜仁·江口 · G50→G56</div></div></div>
+      <div class="rc-grid">
+        <div class="dc"><div class="dl">距离</div><div class="dv">18<span class="du">km</span></div><div class="ds">往返</div></div>
+        <div class="dc"><div class="dl">爬升</div><div class="dv">1200<span class="du">m</span></div><div class="ds">徒步段</div></div>
+        <div class="dc"><div class="dl">最高</div><div class="dv">2572<span class="du">m</span></div><div class="ds">金顶</div></div>
+        <div class="dc"><div class="dl">起步</div><div class="dv">550<span class="du">m</span></div><div class="ds">索道站</div></div>
+        <div class="dc"><div class="dl">用时</div><div class="dv">2<span class="du">天</span></div><div class="ds">含住宿</div></div>
+        <div class="dc"><div class="dl">最大坡度</div><div class="dv">40<span class="du">°</span></div><div class="ds">金顶铁链</div></div>
+      </div>
+      <div class="rc-body">
+        <p>武陵山脉主峰，以红云金顶的垂直岩柱闻名——顶上一分为二各建一庙。8000+级石阶上山，蘑菇石、万宝岩是标志性景观。最后200m近乎垂直，需抓铁链攀爬。雨天/结冰时极危险。</p>
+      </div>
+    </div>
+
+    <!-- C4 -->
+    <div class="rc">
+      <div class="rc-hd">
+        <div class="rc-n">04</div>
+        <div class="rc-inf">
+          <div class="rc-nm">华山 · 南峰落雁峰</div>
+          <div class="rc-sub">MT HUASHAN · 五岳最险 · 陕西</div>
+          <div class="rc-loc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="10" r="3"/><path d="M12 21.7C17.3 17 20 13 20 10a8 8 0 1 0-16 0c0 3 2.7 7 8 11.7z"/></svg>陕西省渭南市华阴市</div>
+        </div>
+      </div>
+      <div class="rc-bg"><span class="bg bg-r">高级</span><span class="bg bg-a">冲顶型</span><span class="bg bg-b">3-11月</span><span class="bg bg-v">天下第一险</span></div>
+      <div class="drv"><div class="drv-i">🚗</div><div><div class="drv-t">驾车距离 · 巫山出发</div><div class="drv-v">650<span class="u">km</span> · 8<span class="u">h</span></div><div class="drv-r">巫山→安康→西安→华阴 · G42→G65→G30</div></div></div>
+      <div class="rc-grid">
+        <div class="dc"><div class="dl">距离</div><div class="dv">20<span class="du">km</span></div><div class="ds">全程</div></div>
+        <div class="dc"><div class="dl">爬升</div><div class="dv">1700<span class="du">m</span></div><div class="ds">从玉泉院</div></div>
+        <div class="dc"><div class="dl">最高</div><div class="dv">2155<span class="du">m</span></div><div class="ds">南峰</div></div>
+        <div class="dc"><div class="dl">起步</div><div class="dv">455<span class="du">m</span></div><div class="ds">玉泉院</div></div>
+        <div class="dc"><div class="dl">用时</div><div class="dv">10-14<span class="du">h</span></div><div class="ds">单日/两日</div></div>
+        <div class="dc"><div class="dl">最大坡度</div><div class="dv">70<span class="du">°</span></div><div class="ds">千尺幢</div></div>
+      </div>
+      <div class="rc-body">
+        <p>五岳之西岳，以"险"著称天下。经千尺幢、百尺峡、老君犁沟、苍龙岭等著名险段一路攀升。部分路段坡度接近垂直，两侧铁链是唯一保护。全程石阶+铁链。</p>
+      </div>
+    </div>
+
+    <!-- C5 -->
+    <div class="rc">
+      <div class="rc-hd">
+        <div class="rc-n">05</div>
+        <div class="rc-inf">
+          <div class="rc-nm">太白山 · 拔仙台</div>
+          <div class="rc-sub">MT TAIBAI · 秦岭主峰 · 陕西</div>
+          <div class="rc-loc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="10" r="3"/><path d="M12 21.7C17.3 17 20 13 20 10a8 8 0 1 0-16 0c0 3 2.7 7 8 11.7z"/></svg>陕西省宝鸡市眉县 · 秦岭最高峰</div>
+        </div>
+      </div>
+      <div class="rc-bg"><span class="bg bg-r">高级</span><span class="bg bg-a">冲顶型</span><span class="bg bg-b">6-10月</span><span class="bg bg-v">秦岭之巅</span></div>
+      <div class="drv"><div class="drv-i">🚗</div><div><div class="drv-t">驾车距离 · 巫山出发</div><div class="drv-v">750<span class="u">km</span> · 9<span class="u">h</span></div><div class="drv-r">巫山→安康→西安→眉县 · G42→G65→G30</div></div></div>
+      <div class="rc-grid">
+        <div class="dc"><div class="dl">距离</div><div class="dv">40<span class="du">km</span></div><div class="ds">全程</div></div>
+        <div class="dc"><div class="dl">爬升</div><div class="dv">2600<span class="du">m</span></div><div class="ds">汤峪起</div></div>
+        <div class="dc"><div class="dl">最高</div><div class="dv">3767<span class="du">m</span></div><div class="ds">拔仙台</div></div>
+        <div class="dc"><div class="dl">起步</div><div class="dv">1160<span class="du">m</span></div><div class="ds">汤峪口</div></div>
+        <div class="dc"><div class="dl">用时</div><div class="dv">2-3<span class="du">天</span></div><div class="ds">大文公庙住</div></div>
+        <div class="dc"><div class="dl">特殊</div><div class="dv">冰川</div><div class="ds">第四纪遗迹</div></div>
+      </div>
+      <div class="rc-body">
+        <p>秦岭最高峰，南北分界线的制高点。从汤峪上山经下板寺、大文公庙、大爷海至拔仙台。海拔3000m以上为第四纪冰川地貌，大爷海是典型的冰斗湖。夏季山顶仍冷，需备保暖装备。沿途无补给点，需自备帐篷和食物。</p>
+      </div>
+    </div>
+
+    <!-- C6 -->
+    <div class="rc">
+      <div class="rc-hd">
+        <div class="rc-n">06</div>
+        <div class="rc-inf">
+          <div class="rc-nm">嵩山 · 少室山</div>
+          <div class="rc-sub">MT SONG · 五岳之中 · 河南</div>
+          <div class="rc-loc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="10" r="3"/><path d="M12 21.7C17.3 17 20 13 20 10a8 8 0 1 0-16 0c0 3 2.7 7 8 11.7z"/></svg>河南省登封市 · 少林寺所在</div>
+        </div>
+      </div>
+      <div class="rc-bg"><span class="bg bg-y">中级</span><span class="bg bg-a">冲顶型</span><span class="bg bg-g">全年</span></div>
+      <div class="drv"><div class="drv-i">🚗</div><div><div class="drv-t">驾车距离 · 巫山出发</div><div class="drv-v">800<span class="u">km</span> · 9.5<span class="u">h</span></div><div class="drv-r">巫山→襄阳→南阳→郑州→登封 · G42→G55→G36</div></div></div>
+      <div class="rc-grid">
+        <div class="dc"><div class="dl">距离</div><div class="dv">16<span class="du">km</span></div><div class="ds">三皇寨环线</div></div>
+        <div class="dc"><div class="dl">爬升</div><div class="dv">980<span class="du">m</span></div><div class="ds">累计</div></div>
+        <div class="dc"><div class="dl">最高</div><div class="dv">1512<span class="du">m</span></div><div class="ds">连天峰</div></div>
+        <div class="dc"><div class="dl">起步</div><div class="dv">530<span class="du">m</span></div><div class="ds">少林寺</div></div>
+        <div class="dc"><div class="dl">用时</div><div class="dv">5-7<span class="du">h</span></div><div class="ds">单日</div></div>
+        <div class="dc"><div class="dl">看点</div><div class="dv">书册崖</div><div class="ds">地质奇观</div></div>
+      </div>
+      <div class="rc-body">
+        <p>五岳之中岳。少室山三皇寨环线是嵩山最佳徒步+攀登路线。经少林寺→塔林→三皇寨→书册崖→连天峰，书册崖的层理构造如同翻开的巨型书页，是华北最壮观的地质景观之一。</p>
+      </div>
+    </div>
+
+    <!-- C7 -->
+    <div class="rc">
+      <div class="rc-hd">
+        <div class="rc-n">07</div>
+        <div class="rc-inf">
+          <div class="rc-nm">峨眉山 · 金顶</div>
+          <div class="rc-sub">MT EMEI · 佛教四大名山 · 四川</div>
+          <div class="rc-loc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="10" r="3"/><path d="M12 21.7C17.3 17 20 13 20 10a8 8 0 1 0-16 0c0 3 2.7 7 8 11.7z"/></svg>四川省乐山市峨眉山市</div>
+        </div>
+      </div>
+      <div class="rc-bg"><span class="bg bg-y">中级</span><span class="bg bg-a">冲顶型</span><span class="bg bg-g">全年</span><span class="bg bg-v">世界双遗产</span></div>
+      <div class="drv"><div class="drv-i">🚗</div><div><div class="drv-t">驾车距离 · 巫山出发</div><div class="drv-v">850<span class="u">km</span> · 10<span class="u">h</span></div><div class="drv-r">巫山→万州→重庆→成都→乐山 · G42→G93→G5</div></div></div>
+      <div class="rc-grid">
+        <div class="dc"><div class="dl">距离</div><div class="dv">50<span class="du">km</span></div><div class="ds">全程步行</div></div>
+        <div class="dc"><div class="dl">爬升</div><div class="dv">2600<span class="du">m</span></div><div class="ds">报国寺起</div></div>
+        <div class="dc"><div class="dl">最高</div><div class="dv">3099<span class="du">m</span></div><div class="ds">金顶</div></div>
+        <div class="dc"><div class="dl">起步</div><div class="dv">500<span class="du">m</span></div><div class="ds">报国寺</div></div>
+        <div class="dc"><div class="dl">用时</div><div class="dv">2-3<span class="du">天</span></div><div class="ds">沿途挂单</div></div>
+        <div class="dc"><div class="dl">奇观</div><div class="dv">4绝</div><div class="ds">日出云海佛光圣灯</div></div>
+      </div>
+      <div class="rc-body">
+        <p>佛教四大名山之一，海拔从500m一路上升到3099m。沿途寺庙可挂单住宿。途经清音阁、万年寺、洗象池，猴群出没区需注意。金顶日出+云海是峨眉山的灵魂体验。</p>
+      </div>
+    </div>
+
+    <!-- C8 -->
+    <div class="rc">
+      <div class="rc-hd">
+        <div class="rc-n">08</div>
+        <div class="rc-inf">
+          <div class="rc-nm">四姑娘山 · 大峰</div>
+          <div class="rc-sub">SIGUNIANG · 入门级5000m雪山 · 四川</div>
+          <div class="rc-loc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="10" r="3"/><path d="M12 21.7C17.3 17 20 13 20 10a8 8 0 1 0-16 0c0 3 2.7 7 8 11.7z"/></svg>四川省阿坝州小金县 · 户外入门雪山</div>
+        </div>
+      </div>
+      <div class="rc-bg"><span class="bg bg-r">高级</span><span class="bg bg-a">雪山冲顶</span><span class="bg bg-b">5-6/9-10月</span><span class="bg bg-v">需向导+技术装备</span></div>
+      <div class="drv"><div class="drv-i">🚗</div><div><div class="drv-t">驾车距离 · 巫山出发</div><div class="drv-v">900<span class="u">km</span> · 12<span class="u">h</span></div><div class="drv-r">巫山→万州→重庆→成都→映秀→小金·日隆 · G42→G4217</div></div></div>
+      <div class="rc-grid">
+        <div class="dc"><div class="dl">距离</div><div class="dv">28<span class="du">km</span></div><div class="ds">往返</div></div>
+        <div class="dc"><div class="dl">爬升</div><div class="dv">1800<span class="du">m</span></div><div class="ds">含大本营段</div></div>
+        <div class="dc"><div class="dl">最高</div><div class="dv">5025<span class="du">m</span></div><div class="ds">大峰顶</div></div>
+        <div class="dc"><div class="dl">起步</div><div class="dv">3200<span class="du">m</span></div><div class="ds">日隆镇</div></div>
+        <div class="dc"><div class="dl">用时</div><div class="dv">3<span class="du">天</span></div><div class="ds">适应+冲顶</div></div>
+        <div class="dc"><div class="dl">最大坡度</div><div class="dv">45<span class="du">°</span></div><div class="ds">冰雪坡</div></div>
+      </div>
+      <div class="rc-body">
+        <p>中国最容易接近的5000m级雪山。需专业高山向导带队，凌晨2点冲顶。D1适应性行走至大本营4400m，D2冲顶5025m后下撤。碎石坡+冰雪坡混合，需冰爪。高反是最大风险。</p>
+      </div>
+    </div>
+
+    <!-- C9 -->
+    <div class="rc">
+      <div class="rc-hd">
+        <div class="rc-n">09</div>
+        <div class="rc-inf">
+          <div class="rc-nm">黄山 · 莲花峰</div>
+          <div class="rc-sub">MT HUANG · 奇松怪石云海 · 安徽</div>
+          <div class="rc-loc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="10" r="3"/><path d="M12 21.7C17.3 17 20 13 20 10a8 8 0 1 0-16 0c0 3 2.7 7 8 11.7z"/></svg>安徽省黄山市 · 世界双遗产</div>
+        </div>
+      </div>
+      <div class="rc-bg"><span class="bg bg-y">中级</span><span class="bg bg-a">冲顶型</span><span class="bg bg-g">全年(冬最佳)</span><span class="bg bg-v">世界双遗产</span></div>
+      <div class="drv"><div class="drv-i">🚗</div><div><div class="drv-t">驾车距离 · 巫山出发</div><div class="drv-v">950<span class="u">km</span> · 10<span class="u">h</span></div><div class="drv-r">巫山→武汉→安庆→黄山 · G50→G3京台高速</div></div></div>
+      <div class="rc-grid">
+        <div class="dc"><div class="dl">距离</div><div class="dv">32<span class="du">km</span></div><div class="ds">全程穿越</div></div>
+        <div class="dc"><div class="dl">爬升</div><div class="dv">2200<span class="du">m</span></div><div class="ds">多峰起伏</div></div>
+        <div class="dc"><div class="dl">最高</div><div class="dv">1864<span class="du">m</span></div><div class="ds">莲花峰</div></div>
+        <div class="dc"><div class="dl">起步</div><div class="dv">300<span class="du">m</span></div><div class="ds">汤口</div></div>
+        <div class="dc"><div class="dl">用时</div><div class="dv">2-3<span class="du">天</span></div><div class="ds">山上住</div></div>
+        <div class="dc"><div class="dl">核心</div><div class="dv">西海</div><div class="ds">大峡谷</div></div>
+      </div>
+      <div class="rc-body">
+        <p>"五岳归来不看山，黄山归来不看岳。"五绝——奇松、怪石、云海、温泉、冬雪。西海大峡谷深度超1500m，栈道悬于绝壁。经天都峰、莲花峰、光明顶连穿是黄山最深度体验。</p>
+      </div>
+    </div>
+
+    <!-- C10 -->
+    <div class="rc">
+      <div class="rc-hd">
+        <div class="rc-n">10</div>
+        <div class="rc-inf">
+          <div class="rc-nm">泰山 · 玉皇顶</div>
+          <div class="rc-sub">MT TAI · 五岳之首 · 山东</div>
+          <div class="rc-loc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="10" r="3"/><path d="M12 21.7C17.3 17 20 13 20 10a8 8 0 1 0-16 0c0 3 2.7 7 8 11.7z"/></svg>山东省泰安市 · 帝王封禅之地</div>
+        </div>
+      </div>
+      <div class="rc-bg"><span class="bg bg-y">中级</span><span class="bg bg-a">冲顶型</span><span class="bg bg-g">全年</span><span class="bg bg-v">五岳之首</span></div>
+      <div class="drv"><div class="drv-i">🚗</div><div><div class="drv-t">驾车距离 · 巫山出发</div><div class="drv-v">1100<span class="u">km</span> · 12<span class="u">h</span></div><div class="drv-r">巫山→襄阳→郑州→泰安 · G42→G55→G3</div></div></div>
+      <div class="rc-grid">
+        <div class="dc"><div class="dl">距离</div><div class="dv">14<span class="du">km</span></div><div class="ds">红门往返</div></div>
+        <div class="dc"><div class="dl">爬升</div><div class="dv">1400<span class="du">m</span></div><div class="ds">单向</div></div>
+        <div class="dc"><div class="dl">最高</div><div class="dv">1545<span class="du">m</span></div><div class="ds">玉皇顶</div></div>
+        <div class="dc"><div class="dl">起步</div><div class="dv">150<span class="du">m</span></div><div class="ds">红门</div></div>
+        <div class="dc"><div class="dl">用时</div><div class="dv">4-6<span class="du">h</span></div><div class="ds">夜爬看日出</div></div>
+        <div class="dc"><div class="dl">台阶</div><div class="dv">6660<span class="du">级</span></div><div class="ds">十八盘最险</div></div>
+      </div>
+      <div class="rc-body">
+        <p>五岳之首，历代帝王封禅之地。全程6660级石阶，路线极成熟。最受欢迎"夜爬"——凌晨出发看日出。十八盘坡度达60°，是全程最险段。沿途石刻碑文从秦始皇到乾隆。</p>
+      </div>
+    </div>
+
+    <!-- C11 -->
+    <div class="rc">
+      <div class="rc-hd">
+        <div class="rc-n">11</div>
+        <div class="rc-inf">
+          <div class="rc-nm">玉龙雪山 · 扇子陡</div>
+          <div class="rc-sub">MT YULONG · 纳西圣山 · 云南</div>
+          <div class="rc-loc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="10" r="3"/><path d="M12 21.7C17.3 17 20 13 20 10a8 8 0 1 0-16 0c0 3 2.7 7 8 11.7z"/></svg>云南省丽江市 · 未登顶峰</div>
+        </div>
+      </div>
+      <div class="rc-bg"><span class="bg bg-r">高级</span><span class="bg bg-a">索道+冲顶</span><span class="bg bg-b">11-3月</span><span class="bg bg-v">5596m</span></div>
+      <div class="drv"><div class="drv-i">🚗</div><div><div class="drv-t">驾车距离 · 巫山出发</div><div class="drv-v">1500<span class="u">km</span> · 18<span class="u">h</span></div><div class="drv-r">巫山→重庆→成都→西昌→丽江 · G42→G5→G214（建议分两天）</div></div></div>
+      <div class="rc-grid">
+        <div class="dc"><div class="dl">距离</div><div class="dv">8<span class="du">km</span></div><div class="ds">索道上+步行</div></div>
+        <div class="dc"><div class="dl">爬升</div><div class="dv">600<span class="du">m</span></div><div class="ds">冰川公园起</div></div>
+        <div class="dc"><div class="dl">最高</div><div class="dv">4680<span class="du">m</span></div><div class="ds">索道终点</div></div>
+        <div class="dc"><div class="dl">峰顶</div><div class="dv">5596<span class="du">m</span></div><div class="ds">扇子陡(未登)</div></div>
+        <div class="dc"><div class="dl">用时</div><div class="dv">1<span class="du">天</span></div><div class="ds">景区+冰川</div></div>
+        <div class="dc"><div class="dl">特殊</div><div class="dv">冰川</div><div class="ds">低纬度冰川</div></div>
+      </div>
+      <div class="rc-body">
+        <p>纳西族圣山，北半球最南端的现代冰川。乘大索道至冰川公园4506m，步行上行至4680m观景台（游客可到达的最高点）。扇子陡主峰5596m至今无人登顶。高反需注意。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== TREKKING ===== -->
+<section>
+  <div class="wrap">
+    <span class="sn">PART TWO</span>
+    <h2 class="st">徒步 · 以穿越体验为核心</h2>
+    <p class="sd">核心指标是总里程和地形多样性。峡谷、草原、雪山、古道——走的过程本身就是目的。</p>
+    <div class="tabs"><div class="tab on"><span>🥾</span> 徒步路线 <span class="tc">11条</span></div></div>
+
+    <!-- T1 -->
+    <div class="rc">
+      <div class="rc-hd">
+        <div class="rc-n">01</div>
+        <div class="rc-inf">
+          <div class="rc-nm">恩施大峡谷</div>
+          <div class="rc-sub">ENSHI GRAND CANYON · 湖北 · "东方科罗拉多"</div>
+          <div class="rc-loc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="10" r="3"/><path d="M12 21.7C17.3 17 20 13 20 10a8 8 0 1 0-16 0c0 3 2.7 7 8 11.7z"/></svg>湖北省恩施市屯堡乡</div>
+        </div>
+      </div>
+      <div class="rc-bg"><span class="bg bg-y">中级</span><span class="bg bg-g">峡谷步道</span><span class="bg bg-g">全年</span></div>
+      <div class="drv"><div class="drv-i">🚗</div><div><div class="drv-t">驾车距离 · 巫山出发</div><div class="drv-v">200<span class="u">km</span> · 3<span class="u">h</span></div><div class="drv-r">巫山→巴东→建始→恩施 · G50沪渝高速 · 最近的优质路线</div></div></div>
+      <div class="rc-grid">
+        <div class="dc"><div class="dl">距离</div><div class="dv">22<span class="du">km</span></div><div class="ds">全程</div></div>
+        <div class="dc"><div class="dl">爬升</div><div class="dv">1100<span class="du">m</span></div><div class="ds">上下交替</div></div>
+        <div class="dc"><div class="dl">最高</div><div class="dv">1680<span class="du">m</span></div><div class="ds">山顶栈道</div></div>
+        <div class="dc"><div class="dl">最低</div><div class="dv">860<span class="du">m</span></div><div class="ds">地缝底部</div></div>
+        <div class="dc"><div class="dl">用时</div><div class="dv">6-8<span class="du">h</span></div><div class="ds">单日</div></div>
+        <div class="dc"><div class="dl">看点</div><div class="dv">一炷香</div><div class="ds">150m岩柱</div></div>
+      </div>
+      <div class="rc-body">
+        <p>七星寨（山上悬崖栈道）+ 云龙地缝（地下100m）。"一炷香"150m高的独立岩柱是标志。全程上下落差约800m。巫山出发最近的优质徒步目的地。</p>
+      </div>
+    </div>
+
+    <!-- T2 -->
+    <div class="rc">
+      <div class="rc-hd">
+        <div class="rc-n">02</div>
+        <div class="rc-inf">
+          <div class="rc-nm">张家界 · 金鞭溪-天子山穿越</div>
+          <div class="rc-sub">ZHANGJIAJIE · 湖南 · 3000根石英砂岩峰柱</div>
+          <div class="rc-loc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="10" r="3"/><path d="M12 21.7C17.3 17 20 13 20 10a8 8 0 1 0-16 0c0 3 2.7 7 8 11.7z"/></svg>湖南省张家界市武陵源区</div>
+        </div>
+      </div>
+      <div class="rc-bg"><span class="bg bg-y">中级</span><span class="bg bg-g">峡谷+山脊</span><span class="bg bg-b">3-11月</span><span class="bg bg-v">世界地质公园</span></div>
+      <div class="drv"><div class="drv-i">🚗</div><div><div class="drv-t">驾车距离 · 巫山出发</div><div class="drv-v">380<span class="u">km</span> · 5<span class="u">h</span></div><div class="drv-r">巫山→宜昌→常德→张家界 · G50→G56杭瑞高速</div></div></div>
+      <div class="rc-grid">
+        <div class="dc"><div class="dl">距离</div><div class="dv">28<span class="du">km</span></div><div class="ds">两日</div></div>
+        <div class="dc"><div class="dl">爬升</div><div class="dv">1600<span class="du">m</span></div><div class="ds">上下交替</div></div>
+        <div class="dc"><div class="dl">最高</div><div class="dv">1262<span class="du">m</span></div><div class="ds">天子山</div></div>
+        <div class="dc"><div class="dl">最低</div><div class="dv">310<span class="du">m</span></div><div class="ds">金鞭溪</div></div>
+        <div class="dc"><div class="dl">用时</div><div class="dv">2<span class="du">天</span></div><div class="ds">山上住</div></div>
+        <div class="dc"><div class="dl">核心</div><div class="dv">袁家界</div><div class="ds">哈利路亚山</div></div>
+      </div>
+      <div class="rc-body">
+        <p>3000多根石英砂岩峰柱密集排列，阿凡达取景地。D1金鞭溪谷底→乱窜坡上山；D2袁家界→天下第一桥→天子山山脊。云雾中的峰林如外星景观。</p>
+      </div>
+    </div>
+
+    <!-- T3 -->
+    <div class="rc">
+      <div class="rc-hd">
+        <div class="rc-n">03</div>
+        <div class="rc-inf">
+          <div class="rc-nm">武功山 · 全程穿越</div>
+          <div class="rc-sub">MT WUGONG · 江西 · 十万亩高山草甸</div>
+          <div class="rc-loc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="10" r="3"/><path d="M12 21.7C17.3 17 20 13 20 10a8 8 0 1 0-16 0c0 3 2.7 7 8 11.7z"/></svg>江西省萍乡市 · 中国最美高山草甸</div>
+        </div>
+      </div>
+      <div class="rc-bg"><span class="bg bg-y">中级</span><span class="bg bg-a">山脊穿越</span><span class="bg bg-b">5-10月</span><span class="bg bg-v">经典徒步线</span></div>
+      <div class="drv"><div class="drv-i">🚗</div><div><div class="drv-t">驾车距离 · 巫山出发</div><div class="drv-v">700<span class="u">km</span> · 8<span class="u">h</span></div><div class="drv-r">巫山→宜昌→长沙→萍乡 · G50→G4京港澳高速</div></div></div>
+      <div class="rc-grid">
+        <div class="dc"><div class="dl">距离</div><div class="dv">36<span class="du">km</span></div><div class="ds">三天两夜</div></div>
+        <div class="dc"><div class="dl">爬升</div><div class="dv">2400<span class="du">m</span></div><div class="ds">多次起伏</div></div>
+        <div class="dc"><div class="dl">最高</div><div class="dv">1918<span class="du">m</span></div><div class="ds">金顶</div></div>
+        <div class="dc"><div class="dl">起步</div><div class="dv">350<span class="du">m</span></div><div class="ds">沈子村</div></div>
+        <div class="dc"><div class="dl">用时</div><div class="dv">3<span class="du">天</span></div><div class="ds">山脊露营</div></div>
+        <div class="dc"><div class="dl">草甸</div><div class="dv">10<span class="du">万亩</span></div><div class="ds">连绵山脊</div></div>
+      </div>
+      <div class="rc-body">
+        <p>"中国最美高山草甸徒步路线"。全程行走在海拔1500-1918m的山脊草甸上。绝望坡是体力考验，日出云海和星空露营是最大亮点。十万亩草甸连绵不绝。</p>
+      </div>
+    </div>
+
+    <!-- T4 -->
+    <div class="rc">
+      <div class="rc-hd">
+        <div class="rc-n">04</div>
+        <div class="rc-inf">
+          <div class="rc-nm">南太行 · 郭亮-王莽岭穿越</div>
+          <div class="rc-sub">SOUTH TAIHANG · 河南/山西 · 挂壁公路+峡谷</div>
+          <div class="rc-loc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="10" r="3"/><path d="M12 21.7C17.3 17 20 13 20 10a8 8 0 1 0-16 0c0 3 2.7 7 8 11.7z"/></svg>河南省新乡市辉县 · 太行绝壁</div>
+        </div>
+      </div>
+      <div class="rc-bg"><span class="bg bg-y">中级</span><span class="bg bg-g">峡谷+崖壁</span><span class="bg bg-b">4-10月</span></div>
+      <div class="drv"><div class="drv-i">🚗</div><div><div class="drv-t">驾车距离 · 巫山出发</div><div class="drv-v">850<span class="u">km</span> · 10<span class="u">h</span></div><div class="drv-r">巫山→襄阳→南阳→新乡→辉县 · G42→G55→G4</div></div></div>
+      <div class="rc-grid">
+        <div class="dc"><div class="dl">距离</div><div class="dv">45<span class="du">km</span></div><div class="ds">三天</div></div>
+        <div class="dc"><div class="dl">爬升</div><div class="dv">2800<span class="du">m</span></div><div class="ds">累计</div></div>
+        <div class="dc"><div class="dl">最高</div><div class="dv">1700<span class="du">m</span></div><div class="ds">王莽岭</div></div>
+        <div class="dc"><div class="dl">最低</div><div class="dv">600<span class="du">m</span></div><div class="ds">谷底</div></div>
+        <div class="dc"><div class="dl">用时</div><div class="dv">3<span class="du">天</span></div><div class="ds">村庄住宿</div></div>
+        <div class="dc"><div class="dl">看点</div><div class="dv">挂壁公路</div><div class="ds">人工奇迹</div></div>
+      </div>
+      <div class="rc-body">
+        <p>太行绝壁上的挂壁公路是人类意志的奇迹——郭亮村民在千米绝壁上手工凿出1250m长的公路隧道。穿越路线沿太行山脊行走，红岩绝壁、深邃峡谷交替出现，气势磅礴。</p>
+      </div>
+    </div>
+
+    <!-- T5 -->
+    <div class="rc">
+      <div class="rc-hd">
+        <div class="rc-n">05</div>
+        <div class="rc-inf">
+          <div class="rc-nm">扎尕那 · 石城徒步</div>
+          <div class="rc-sub">ZAGAINA · 甘肃 · 甘南秘境</div>
+          <div class="rc-loc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="10" r="3"/><path d="M12 21.7C17.3 17 20 13 20 10a8 8 0 1 0-16 0c0 3 2.7 7 8 11.7z"/></svg>甘肃省甘南州迭部县 · 藏族石城</div>
+        </div>
+      </div>
+      <div class="rc-bg"><span class="bg bg-y">中级</span><span class="bg bg-g">峡谷+草甸</span><span class="bg bg-b">6-10月</span><span class="bg bg-v">人间秘境</span></div>
+      <div class="drv"><div class="drv-i">🚗</div><div><div class="drv-t">驾车距离 · 巫山出发</div><div class="drv-v">700<span class="u">km</span> · 9<span class="u">h</span></div><div class="drv-r">巫山→万州→广元→陇南→迭部 · G42→G75兰海高速</div></div></div>
+      <div class="rc-grid">
+        <div class="dc"><div class="dl">距离</div><div class="dv">25<span class="du">km</span></div><div class="ds">环线</div></div>
+        <div class="dc"><div class="dl">爬升</div><div class="dv">1200<span class="du">m</span></div><div class="ds">累计</div></div>
+        <div class="dc"><div class="dl">最高</div><div class="dv">3900<span class="du">m</span></div><div class="ds">垭口</div></div>
+        <div class="dc"><div class="dl">起步</div><div class="dv">2700<span class="du">m</span></div><div class="ds">扎尕那村</div></div>
+        <div class="dc"><div class="dl">用时</div><div class="dv">2-3<span class="du">天</span></div><div class="ds">藏家住宿</div></div>
+        <div class="dc"><div class="dl">特殊</div><div class="dv">石城</div><div class="ds">石灰岩峰丛</div></div>
+      </div>
+      <div class="rc-body">
+        <p>四面石灰岩绝壁围合的藏族村寨，被称为"石城"。徒步路线穿越石峰峡谷、高山草甸和藏族牧场。清晨云雾弥漫时，石峰若隐若现，如同仙境。海拔2700-3900m，需适应高原。</p>
+      </div>
+    </div>
+
+    <!-- T6 -->
+    <div class="rc">
+      <div class="rc-hd">
+        <div class="rc-n">06</div>
+        <div class="rc-inf">
+          <div class="rc-nm">长穿毕（长坪沟→毕棚沟）</div>
+          <div class="rc-sub">CHANGPING-BIPENG · 四川 · 翻越4668m垭口</div>
+          <div class="rc-loc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="10" r="3"/><path d="M12 21.7C17.3 17 20 13 20 10a8 8 0 1 0-16 0c0 3 2.7 7 8 11.7z"/></svg>四川省阿坝州小金县/理县</div>
+        </div>
+      </div>
+      <div class="rc-bg"><span class="bg bg-r">高级</span><span class="bg bg-a">高海拔穿越</span><span class="bg bg-b">5-6/9-10月</span><span class="bg bg-v">垭口4668m</span></div>
+      <div class="drv"><div class="drv-i">🚗</div><div><div class="drv-t">驾车距离 · 巫山出发</div><div class="drv-v">900<span class="u">km</span> · 12<span class="u">h</span></div><div class="drv-r">巫山→万州→重庆→成都→映秀→小金 · G42→G4217</div></div></div>
+      <div class="rc-grid">
+        <div class="dc"><div class="dl">距离</div><div class="dv">38<span class="du">km</span></div><div class="ds">单向</div></div>
+        <div class="dc"><div class="dl">爬升</div><div class="dv">2100<span class="du">m</span></div><div class="ds">含垭口</div></div>
+        <div class="dc"><div class="dl">最高</div><div class="dv">4668<span class="du">m</span></div><div class="ds">垭口</div></div>
+        <div class="dc"><div class="dl">起步</div><div class="dv">3100<span class="du">m</span></div><div class="ds">长坪沟口</div></div>
+        <div class="dc"><div class="dl">用时</div><div class="dv">3-4<span class="du">天</span></div><div class="ds">露营+翻垭口</div></div>
+        <div class="dc"><div class="dl">核心</div><div class="dv">幺妹峰</div><div class="ds">北壁仰望</div></div>
+      </div>
+      <div class="rc-body">
+        <p>从四姑娘山长坪沟穿越到毕棚沟，翻越4668m垭口。能从背面仰望幺妹峰（6250m）的千米冰壁。原始森林→高山草甸→碎石坡→冰川遗迹，四川最经典高海拔穿越线之一。</p>
+      </div>
+    </div>
+
+    <!-- T7 -->
+    <div class="rc">
+      <div class="rc-hd">
+        <div class="rc-n">07</div>
+        <div class="rc-inf">
+          <div class="rc-nm">贡嘎转山</div>
+          <div class="rc-sub">GONGGA CIRCLE · 四川 · 蜀山之王环绕</div>
+          <div class="rc-loc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="10" r="3"/><path d="M12 21.7C17.3 17 20 13 20 10a8 8 0 1 0-16 0c0 3 2.7 7 8 11.7z"/></svg>四川省甘孜州康定市/泸定县 · 7556m</div>
+        </div>
+      </div>
+      <div class="rc-bg"><span class="bg bg-r">高级</span><span class="bg bg-a">高海拔环线</span><span class="bg bg-b">5-6/9-10月</span><span class="bg bg-v">蜀山之王</span></div>
+      <div class="drv"><div class="drv-i">🚗</div><div><div class="drv-t">驾车距离 · 巫山出发</div><div class="drv-v">1000<span class="u">km</span> · 12<span class="u">h</span></div><div class="drv-r">巫山→万州→重庆→成都→康定→老榆林 · G42→G5→G318</div></div></div>
+      <div class="rc-grid">
+        <div class="dc"><div class="dl">距离</div><div class="dv">55<span class="du">km</span></div><div class="ds">大环线</div></div>
+        <div class="dc"><div class="dl">爬升</div><div class="dv">3500<span class="du">m</span></div><div class="ds">累计</div></div>
+        <div class="dc"><div class="dl">最高</div><div class="dv">4900<span class="du">m</span></div><div class="ds">日乌且垭口</div></div>
+        <div class="dc"><div class="dl">起步</div><div class="dv">3000<span class="du">m</span></div><div class="ds">老榆林</div></div>
+        <div class="dc"><div class="dl">用时</div><div class="dv">6-8<span class="du">天</span></div><div class="ds">全程露营</div></div>
+        <div class="dc"><div class="dl">核心</div><div class="dv">7556<span class="du">m</span></div><div class="ds">贡嘎主峰</div></div>
+      </div>
+      <div class="rc-body">
+        <p>环绕蜀山之王贡嘎山（7556m），中国最具挑战的高海拔徒步之一。翻越4900m日乌且垭口，途经贡嘎冰川、日乌且沟、莫溪沟。全程需露营，无商业设施，必须有高海拔经验。</p>
+      </div>
+    </div>
+
+    <!-- T8 -->
+    <div class="rc">
+      <div class="rc-hd">
+        <div class="rc-n">08</div>
+        <div class="rc-inf">
+          <div class="rc-nm">虎跳峡 · 高路徒步</div>
+          <div class="rc-sub">TIGER LEAPING GORGE · 云南 · 世界级峡谷</div>
+          <div class="rc-loc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="10" r="3"/><path d="M12 21.7C17.3 17 20 13 20 10a8 8 0 1 0-16 0c0 3 2.7 7 8 11.7z"/></svg>云南省丽江/迪庆 · 金沙江峡谷</div>
+        </div>
+      </div>
+      <div class="rc-bg"><span class="bg bg-y">中级</span><span class="bg bg-g">峡谷高路</span><span class="bg bg-b">3-6/9-11月</span><span class="bg bg-v">全球十大经典</span></div>
+      <div class="drv"><div class="drv-i">🚗</div><div><div class="drv-t">驾车距离 · 巫山出发</div><div class="drv-v">1300<span class="u">km</span> · 16<span class="u">h</span></div><div class="drv-r">巫山→重庆→成都→西昌→丽江→虎跳峡镇 · G42→G5→G214（建议分两天）</div></div></div>
+      <div class="rc-grid">
+        <div class="dc"><div class="dl">距离</div><div class="dv">22<span class="du">km</span></div><div class="ds">高路单向</div></div>
+        <div class="dc"><div class="dl">爬升</div><div class="dv">1200<span class="du">m</span></div><div class="ds">上下交替</div></div>
+        <div class="dc"><div class="dl">最高</div><div class="dv">2670<span class="du">m</span></div><div class="ds">高路最高点</div></div>
+        <div class="dc"><div class="dl">峡谷深</div><div class="dv">3900<span class="du">m</span></div><div class="ds">江面→哈巴顶</div></div>
+        <div class="dc"><div class="dl">用时</div><div class="dv">2<span class="du">天</span></div><div class="ds">中途客栈住</div></div>
+        <div class="dc"><div class="dl">江宽</div><div class="dv">30-60<span class="du">m</span></div><div class="ds">最窄处</div></div>
+      </div>
+      <div class="rc-body">
+        <p>全球十大经典徒步路线之一。金沙江切入玉龙雪山与哈巴雪山之间，深达3900m。高路行走于哈巴雪山半山腰，脚下奔腾金沙江。沿途客栈系统成熟，入门级长线首选。</p>
+      </div>
+    </div>
+
+    <!-- T9 -->
+    <div class="rc">
+      <div class="rc-hd">
+        <div class="rc-n">09</div>
+        <div class="rc-inf">
+          <div class="rc-nm">稻城亚丁 · 三神山+三海子</div>
+          <div class="rc-sub">DAOCHENG YADING · 四川 · "最后一片净土"</div>
+          <div class="rc-loc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="10" r="3"/><path d="M12 21.7C17.3 17 20 13 20 10a8 8 0 1 0-16 0c0 3 2.7 7 8 11.7z"/></svg>四川省甘孜州稻城县</div>
+        </div>
+      </div>
+      <div class="rc-bg"><span class="bg bg-r">高级</span><span class="bg bg-a">高海拔徒步</span><span class="bg bg-b">5-6/9-10月</span><span class="bg bg-v">4000m+</span></div>
+      <div class="drv"><div class="drv-i">🚗</div><div><div class="drv-t">驾车距离 · 巫山出发</div><div class="drv-v">1400<span class="u">km</span> · 18<span class="u">h</span></div><div class="drv-r">巫山→万州→重庆→成都→雅安→康定→理塘→稻城 · G42→G318→S217（建议分三天）</div></div></div>
+      <div class="rc-grid">
+        <div class="dc"><div class="dl">距离</div><div class="dv">32<span class="du">km</span></div><div class="ds">景区内</div></div>
+        <div class="dc"><div class="dl">爬升</div><div class="dv">1000<span class="du">m</span></div><div class="ds">洛绒→海子</div></div>
+        <div class="dc"><div class="dl">最高</div><div class="dv">4700<span class="du">m</span></div><div class="ds">五色海</div></div>
+        <div class="dc"><div class="dl">起步</div><div class="dv">3900<span class="du">m</span></div><div class="ds">亚丁村</div></div>
+        <div class="dc"><div class="dl">用时</div><div class="dv">3<span class="du">天</span></div><div class="ds">三天票</div></div>
+        <div class="dc"><div class="dl">核心</div><div class="dv">牛奶海</div><div class="ds">4600m</div></div>
+      </div>
+      <div class="rc-body">
+        <p>三座神山（仙乃日5998m、央迈勇5958m、夏诺多吉5958m）环绕的高山海子群。全程4000m+行走，高反是最大挑战。雪山、冰川、高山湖泊的组合在全世界也属顶级。洛绒牛场→牛奶海→五色海是核心段。</p>
+      </div>
+    </div>
+
+    <!-- T10 -->
+    <div class="rc">
+      <div class="rc-hd">
+        <div class="rc-n">10</div>
+        <div class="rc-inf">
+          <div class="rc-nm">雨崩 · 梅里雪山朝圣</div>
+          <div class="rc-sub">YUBENG · 云南 · 神山脚下的隐世村落</div>
+          <div class="rc-loc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="10" r="3"/><path d="M12 21.7C17.3 17 20 13 20 10a8 8 0 1 0-16 0c0 3 2.7 7 8 11.7z"/></svg>云南省迪庆州德钦县 · 梅里雪山脚下</div>
+        </div>
+      </div>
+      <div class="rc-bg"><span class="bg bg-y">中级</span><span class="bg bg-g">森林+冰川</span><span class="bg bg-b">5-6/9-11月</span><span class="bg bg-v">日照金山</span></div>
+      <div class="drv"><div class="drv-i">🚗</div><div><div class="drv-t">驾车距离 · 巫山出发</div><div class="drv-v">1500<span class="u">km</span> · 18<span class="u">h</span></div><div class="drv-r">巫山→重庆→成都→西昌→丽江→德钦·飞来寺 · G42→G5→G214（建议分三天）</div></div></div>
+      <div class="rc-grid">
+        <div class="dc"><div class="dl">距离</div><div class="dv">42<span class="du">km</span></div><div class="ds">进出+冰湖神瀑</div></div>
+        <div class="dc"><div class="dl">爬升</div><div class="dv">2200<span class="du">m</span></div><div class="ds">累计</div></div>
+        <div class="dc"><div class="dl">最高</div><div class="dv">3900<span class="du">m</span></div><div class="ds">冰湖</div></div>
+        <div class="dc"><div class="dl">起步</div><div class="dv">2100<span class="du">m</span></div><div class="ds">西当温泉</div></div>
+        <div class="dc"><div class="dl">用时</div><div class="dv">4-5<span class="du">天</span></div><div class="ds">村庄住宿</div></div>
+        <div class="dc"><div class="dl">核心</div><div class="dv">日照金山</div><div class="ds">卡瓦格博</div></div>
+      </div>
+      <div class="rc-body">
+        <p>梅里雪山（卡瓦格博6740m）脚下的隐世藏族村落。进出需翻越3700m南宗垭口。进村后徒步冰湖（冰川湖）和神瀑（藏民朝圣地）。在飞来寺等待"日照金山"是整个行程的灵魂时刻。</p>
+      </div>
+    </div>
+
+    <!-- T11 -->
+    <div class="rc">
+      <div class="rc-hd">
+        <div class="rc-n">11</div>
+        <div class="rc-inf">
+          <div class="rc-nm">三清山 · 花岗岩峰林</div>
+          <div class="rc-sub">MT SANQING · 江西 · 世界自然遗产</div>
+          <div class="rc-loc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="10" r="3"/><path d="M12 21.7C17.3 17 20 13 20 10a8 8 0 1 0-16 0c0 3 2.7 7 8 11.7z"/></svg>江西省上饶市 · 西太平洋最美花岗岩</div>
+        </div>
+      </div>
+      <div class="rc-bg"><span class="bg bg-y">中级</span><span class="bg bg-g">山脊栈道</span><span class="bg bg-g">全年</span><span class="bg bg-v">世界自然遗产</span></div>
+      <div class="drv"><div class="drv-i">🚗</div><div><div class="drv-t">驾车距离 · 巫山出发</div><div class="drv-v">900<span class="u">km</span> · 9<span class="u">h</span></div><div class="drv-r">巫山→武汉→九江→上饶→三清山 · G50→G56杭瑞高速</div></div></div>
+      <div class="rc-grid">
+        <div class="dc"><div class="dl">距离</div><div class="dv">20<span class="du">km</span></div><div class="ds">环线</div></div>
+        <div class="dc"><div class="dl">爬升</div><div class="dv">900<span class="du">m</span></div><div class="ds">累计</div></div>
+        <div class="dc"><div class="dl">最高</div><div class="dv">1820<span class="du">m</span></div><div class="ds">玉京峰</div></div>
+        <div class="dc"><div class="dl">起步</div><div class="dv">920<span class="du">m</span></div><div class="ds">索道站</div></div>
+        <div class="dc"><div class="dl">用时</div><div class="dv">1-2<span class="du">天</span></div><div class="ds">山上住</div></div>
+        <div class="dc"><div class="dl">核心</div><div class="dv">巨蟒出山</div><div class="ds">128m岩柱</div></div>
+      </div>
+      <div class="rc-body">
+        <p>被《中国国家地理》评为"西太平洋最美花岗岩"。花岗岩峰林+云海+杜鹃的组合极其震撼。巨蟒出山（128m独立岩柱）、司春女神等造型石令人叹为观止。高空栈道系统完善。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== FULL COMPARISON ===== -->
+<section>
+  <div class="wrap">
+    <span class="sn">FULL COMPARISON</span>
+    <h2 class="st">22条路线 · 完整数据对比</h2>
+    <p class="sd">按驾车距离从近到远排列，方便从巫山出发规划。</p>
+    <div class="cmp-w">
+      <table class="cmp">
+        <thead><tr><th>#</th><th>路线</th><th>类型</th><th>驾车</th><th>时间</th><th>徒步距离</th><th>爬升</th><th>最高点</th><th>用时</th><th>难度</th></tr></thead>
+        <tbody>
+          <tr class="sec-r"><td colspan="10">⛰️ 爬山 · 11条</td></tr>
+          <tr><td class="rnm">C1</td><td class="rn">神农架·神农顶</td><td>冲顶</td><td class="dc-c">280km</td><td>4.5h</td><td>26km</td><td>1380m</td><td>3106m</td><td>8-10h</td><td><span class="bg bg-y">中级</span></td></tr>
+          <tr><td class="rnm">C2</td><td class="rn">武当山·天柱峰</td><td>冲顶</td><td class="dc-c">450km</td><td>6h</td><td>30km</td><td>1350m</td><td>1612m</td><td>1-2天</td><td><span class="bg bg-y">中级</span></td></tr>
+          <tr><td class="rnm">C3</td><td class="rn">梵净山·红云金顶</td><td>冲顶</td><td class="dc-c">550km</td><td>7h</td><td>18km</td><td>1200m</td><td>2572m</td><td>2天</td><td><span class="bg bg-r">高级</span></td></tr>
+          <tr><td class="rnm">C4</td><td class="rn">华山·南峰</td><td>冲顶</td><td class="dc-c">650km</td><td>8h</td><td>20km</td><td>1700m</td><td>2155m</td><td>10-14h</td><td><span class="bg bg-r">高级</span></td></tr>
+          <tr><td class="rnm">C5</td><td class="rn">太白山·拔仙台</td><td>冲顶</td><td class="dc-c">750km</td><td>9h</td><td>40km</td><td>2600m</td><td>3767m</td><td>2-3天</td><td><span class="bg bg-r">高级</span></td></tr>
+          <tr><td class="rnm">C6</td><td class="rn">嵩山·少室山</td><td>冲顶</td><td class="dc-c">800km</td><td>9.5h</td><td>16km</td><td>980m</td><td>1512m</td><td>5-7h</td><td><span class="bg bg-y">中级</span></td></tr>
+          <tr><td class="rnm">C7</td><td class="rn">峨眉山·金顶</td><td>冲顶</td><td class="dc-c">850km</td><td>10h</td><td>50km</td><td>2600m</td><td>3099m</td><td>2-3天</td><td><span class="bg bg-y">中级</span></td></tr>
+          <tr><td class="rnm">C8</td><td class="rn">四姑娘山·大峰</td><td>雪山</td><td class="dc-c">900km</td><td>12h</td><td>28km</td><td>1800m</td><td>5025m</td><td>3天</td><td><span class="bg bg-r">高级</span></td></tr>
+          <tr><td class="rnm">C9</td><td class="rn">黄山·莲花峰</td><td>冲顶</td><td class="dc-c">950km</td><td>10h</td><td>32km</td><td>2200m</td><td>1864m</td><td>2-3天</td><td><span class="bg bg-y">中级</span></td></tr>
+          <tr><td class="rnm">C10</td><td class="rn">泰山·玉皇顶</td><td>冲顶</td><td class="dc-c">1100km</td><td>12h</td><td>14km</td><td>1400m</td><td>1545m</td><td>4-6h</td><td><span class="bg bg-y">中级</span></td></tr>
+          <tr><td class="rnm">C11</td><td class="rn">玉龙雪山</td><td>索道+冲</td><td class="dc-c">1500km</td><td>18h</td><td>8km</td><td>600m</td><td>4680m</td><td>1天</td><td><span class="bg bg-r">高级</span></td></tr>
+
+          <tr class="sec-r sec-r-tl"><td colspan="10">🥾 徒步 · 11条</td></tr>
+          <tr><td class="rnm">T1</td><td class="rn">恩施大峡谷</td><td>峡谷</td><td class="dc-c">200km</td><td>3h</td><td>22km</td><td>1100m</td><td>1680m</td><td>6-8h</td><td><span class="bg bg-y">中级</span></td></tr>
+          <tr><td class="rnm">T2</td><td class="rn">张家界穿越</td><td>峰林</td><td class="dc-c">380km</td><td>5h</td><td>28km</td><td>1600m</td><td>1262m</td><td>2天</td><td><span class="bg bg-y">中级</span></td></tr>
+          <tr><td class="rnm">T3</td><td class="rn">扎尕那石城</td><td>峡谷草甸</td><td class="dc-c">700km</td><td>9h</td><td>25km</td><td>1200m</td><td>3900m</td><td>2-3天</td><td><span class="bg bg-y">中级</span></td></tr>
+          <tr><td class="rnm">T4</td><td class="rn">武功山穿越</td><td>山脊草甸</td><td class="dc-c">700km</td><td>8h</td><td>36km</td><td>2400m</td><td>1918m</td><td>3天</td><td><span class="bg bg-y">中级</span></td></tr>
+          <tr><td class="rnm">T5</td><td class="rn">南太行穿越</td><td>峡谷崖壁</td><td class="dc-c">850km</td><td>10h</td><td>45km</td><td>2800m</td><td>1700m</td><td>3天</td><td><span class="bg bg-y">中级</span></td></tr>
+          <tr><td class="rnm">T6</td><td class="rn">三清山环线</td><td>花岗岩峰林</td><td class="dc-c">900km</td><td>9h</td><td>20km</td><td>900m</td><td>1820m</td><td>1-2天</td><td><span class="bg bg-y">中级</span></td></tr>
+          <tr><td class="rnm">T7</td><td class="rn">长穿毕穿越</td><td>高海拔</td><td class="dc-c">900km</td><td>12h</td><td>38km</td><td>2100m</td><td>4668m</td><td>3-4天</td><td><span class="bg bg-r">高级</span></td></tr>
+          <tr><td class="rnm">T8</td><td class="rn">贡嘎转山</td><td>高海拔环线</td><td class="dc-c">1000km</td><td>12h</td><td>55km</td><td>3500m</td><td>4900m</td><td>6-8天</td><td><span class="bg bg-r">高级</span></td></tr>
+          <tr><td class="rnm">T9</td><td class="rn">虎跳峡高路</td><td>峡谷</td><td class="dc-c">1300km</td><td>16h</td><td>22km</td><td>1200m</td><td>2670m</td><td>2天</td><td><span class="bg bg-y">中级</span></td></tr>
+          <tr><td class="rnm">T10</td><td class="rn">稻城亚丁</td><td>高海拔</td><td class="dc-c">1400km</td><td>18h</td><td>32km</td><td>1000m</td><td>4700m</td><td>3天</td><td><span class="bg bg-r">高级</span></td></tr>
+          <tr><td class="rnm">T11</td><td class="rn">雨崩·梅里</td><td>森林冰川</td><td class="dc-c">1500km</td><td>18h</td><td>42km</td><td>2200m</td><td>3900m</td><td>4-5天</td><td><span class="bg bg-y">中级</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ===== PLANNING ===== -->
+<section>
+  <div class="wrap">
+    <span class="sn">TRIP PLANNING</span>
+    <h2 class="st">从巫山出发的行程规划</h2>
+    <div class="tg">
+      <div class="tc2">
+        <div class="ti" style="background:var(--gn-d)">🟢</div>
+        <h4>周末（2天 · 200-500km）</h4>
+        <p><strong>恩施大峡谷</strong>（3h）最佳起步。<strong>神农架</strong>（4.5h）华中最高峰。<strong>武当山</strong>（6h）周五晚出发可行。</p>
+      </div>
+      <div class="tc2">
+        <div class="ti" style="background:var(--bl-d)">🔵</div>
+        <h4>小长假（3-5天 · 500-800km）</h4>
+        <p><strong>张家界</strong>（5h）+<strong>恩施</strong>可连走。<strong>梵净山</strong>（7h）周末+请假1天。<strong>武功山</strong>（8h）经典3天线。</p>
+      </div>
+      <div class="tc2">
+        <div class="ti" style="background:var(--ac-d)">🟠</div>
+        <h4>长假（7-10天 · 800-1100km）</h4>
+        <p><strong>峨眉</strong>→<strong>四姑娘</strong>串走川西。<strong>华山</strong>→<strong>太白山</strong>走秦岭。<strong>黄山</strong>→<strong>三清山</strong>华东双遗产。</p>
+      </div>
+      <div class="tc2">
+        <div class="ti" style="background:var(--rd-d)">🔴</div>
+        <h4>超远征（15天+ · 1100-1500km）</h4>
+        <p>"巫山→成都→虎跳峡→稻城→雨崩"大环线。或"巫山→成都→贡嘎转山→长穿毕"川西深度。</p>
+      </div>
+    </div>
+    <div class="v-box">
+      <h3>巫山：中国山野旅行的理想中转站</h3>
+      <p>地处三峡腹地，西接川渝、东连荆楚、北通关中、南达湘西。3h内有恩施大峡谷和神农架，一天车程覆盖华中四省主要山岳，两天可达川西雪山群。<strong style="color:var(--ac)">200km起步，1500km封顶——从家门口到中国山野的每一个角落。</strong></p>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <p>以巫山为圆心 · 全国22条山野路线指南</p>
+    <p style="opacity:0.35;margin-top:0.4rem">驾车距离为高速+国道估算 · 山野数据为参考值 · 实际请以最新信息为准</p>
+  </div>
+</footer>
+
+<script>
+const obs=new IntersectionObserver(e=>{e.forEach(i=>{if(i.isIntersecting)i.target.style.animationPlayState='running'})},{threshold:0.05});
+document.querySelectorAll('.rc,.tc2').forEach(el=>{el.style.animationPlayState='paused';obs.observe(el)});
+</script>
+</body>
+</html>

@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🌟 国产大模型 Arena 榜单纵览</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=DM+Mono:wght@400;500&family=Noto+Serif+SC:wght@400;600;700&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:       #faf8f4;
+  --bg-2:     #f2efe9;
+  --bg-3:     #eae7e0;
+  --card:     #ffffff;
+  --card-bd:  #e6e2d9;
+  --text:     #1e1b16;
+  --text-2:   #4a453d;
+  --text-3:   #7a756d;
+  --text-4:   #a8a29e;
+  --accent:   #c27d38;
+  --accent-lt:#faf3ea;
+  --accent-dk:#a56828;
+  --tier-t1:  #b45309;
+  --tier-t2:  #4a7c59;
+  --tier-t3:  #5b6abf;
+  --tier-t4:  #8a55a8;
+  --tier-bg1: #fef7ed;
+  --tier-bg2: #f0f7f2;
+  --tier-bg3: #eef0fb;
+  --tier-bg4: #f5eef8;
+  --bd:       #ddd8ce;
+  --code-bg:  #2d2926;
+  --code-fg:  #e8e4dd;
+  --ff-dis:   'Cormorant Garamond','Noto Serif SC',Georgia,serif;
+  --ff-body:  'Source Serif 4','Noto Serif SC',Georgia,serif;
+  --ff-mono:  'DM Mono','Courier New',monospace;
+}
+
+*,*::before,*::after { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  font-family: var(--ff-body);
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.7;
+  overflow-x: hidden;
+}
+
+body::before {
+  content:'';
+  position:fixed;inset:0;
+  background:
+    radial-gradient(ellipse at 15% 20%, rgba(194,125,56,0.04) 0%, transparent 50%),
+    radial-gradient(ellipse at 85% 80%, rgba(90,106,191,0.03) 0%, transparent 50%);
+  pointer-events:none;z-index:0;
+}
+
+.wrap {
+  position:relative;z-index:1;
+  max-width:1180px;margin:0 auto;padding:0 32px;
+}
+
+/* ── Header ── */
+
+.hero {
+  padding:72px 0 40px;
+  border-bottom:1px solid var(--bd);
+  margin-bottom:48px;
+}
+.hero-pre {
+  font-family:var(--ff-mono);font-size:.74rem;
+  color:var(--accent);letter-spacing:.12em;
+  text-transform:uppercase;margin-bottom:12px;
+  opacity:0;animation:fadeUp .6s .1s ease forwards;
+}
+.hero h1 {
+  font-family:var(--ff-dis);font-size:2.8rem;
+  font-weight:700;line-height:1.2;
+  letter-spacing:-.03em;
+  opacity:0;animation:fadeUp .6s .2s ease forwards;
+}
+.hero h1 em {
+  font-style:normal;color:var(--accent);
+}
+.hero-sub {
+  margin-top:14px;font-size:1.05rem;
+  color:var(--text-2);max-width:680px;
+  opacity:0;animation:fadeUp .6s .3s ease forwards;
+}
+.hero-meta {
+  margin-top:20px;display:flex;flex-wrap:wrap;gap:20px;
+  font-family:var(--ff-mono);font-size:.76rem;color:var(--text-3);
+  opacity:0;animation:fadeUp .6s .4s ease forwards;
+}
+.hero-meta .pill {
+  padding:3px 12px;background:var(--bg-2);
+  border:1px solid var(--bd);border-radius:20px;
+}
+
+/* ── Section titles ── */
+
+.sec {
+  margin-bottom:48px;
+  opacity:0;animation:fadeUp .6s ease forwards;
+}
+.sec:nth-child(2){animation-delay:.15s}
+.sec:nth-child(3){animation-delay:.2s}
+.sec:nth-child(4){animation-delay:.25s}
+.sec:nth-child(5){animation-delay:.3s}
+
+.sec-tt {
+  font-family:var(--ff-dis);font-size:1.6rem;
+  font-weight:600;margin-bottom:6px;
+  letter-spacing:-.02em;
+}
+.sec-desc {
+  font-size:.92rem;color:var(--text-3);
+  margin-bottom:24px;
+}
+
+/* ── Tier label ── */
+
+.tier {
+  display:inline-flex;align-items:center;gap:8px;
+  font-family:var(--ff-mono);font-size:.72rem;
+  font-weight:500;letter-spacing:.08em;
+  padding:4px 14px;border-radius:20px;
+  margin-bottom:20px;
+}
+.tier-t1 { background:var(--tier-bg1);color:var(--tier-t1);border:1px solid #f0d6b0; }
+.tier-t2 { background:var(--tier-bg2);color:var(--tier-t2);border:1px solid #b8d4c2; }
+.tier-t3 { background:var(--tier-bg3);color:var(--tier-t3);border:1px solid #c4cbe8; }
+.tier-t4 { background:var(--tier-bg4);color:var(--tier-t4);border:1px solid #d4c2e0; }
+
+/* ── Card grid ── */
+
+.grid {
+  display:grid;
+  grid-template-columns:1fr;
+  gap:18px;
+}
+
+/* ── Model card ── */
+
+.mc {
+  background:var(--card);
+  border:1px solid var(--card-bd);
+  border-radius:10px;
+  padding:28px 32px;
+  transition:box-shadow .25s ease, transform .25s ease;
+  position:relative;overflow:hidden;
+}
+.mc::before {
+  content:'';position:absolute;top:0;left:0;
+  width:4px;height:100%;border-radius:4px 0 0 4px;
+  transition:width .2s ease;
+}
+.mc.t1::before { background:var(--tier-t1); }
+.mc.t2::before { background:var(--tier-t2); }
+.mc.t3::before { background:var(--tier-t3); }
+.mc.t4::before { background:var(--tier-t4); }
+
+.mc:hover {
+  box-shadow:0 8px 32px rgba(30,27,22,0.07);
+  transform:translateY(-2px);
+}
+.mc:hover::before { width:5px; }
+
+.mc-top {
+  display:flex;align-items:flex-start;justify-content:space-between;
+  margin-bottom:14px;flex-wrap:wrap;gap:8px;
+}
+.mc-name {
+  font-family:var(--ff-dis);font-size:1.35rem;
+  font-weight:600;letter-spacing:-.01em;
+  display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;
+}
+.mc-vendor {
+  font-family:var(--ff-mono);font-size:.7rem;
+  color:var(--text-4);letter-spacing:.04em;
+}
+.mc-elo {
+  font-family:var(--ff-mono);font-size:.78rem;
+  color:var(--accent-dk);font-weight:500;
+  padding:3px 12px;background:var(--accent-lt);
+  border-radius:16px;white-space:nowrap;
+}
+
+.mc-desc {
+  font-size:.94rem;color:var(--text-2);
+  margin-bottom:16px;line-height:1.65;
+}
+
+/* ── Spec grid ── */
+
+.specs {
+  display:grid;
+  grid-template-columns:repeat(auto-fill, minmax(170px, 1fr));
+  gap:10px;
+  margin-bottom:16px;
+}
+.sp {
+  padding:8px 12px;
+  background:var(--bg-2);
+  border-radius:6px;
+  font-size:.78rem;
+  display:flex;flex-direction:column;gap:2px;
+}
+.sp-k {
+  font-family:var(--ff-mono);font-size:.68rem;
+  color:var(--text-4);letter-spacing:.04em;
+}
+.sp-v {
+  color:var(--text);font-weight:500;
+  font-size:.84rem;
+}
+
+/* ── Arena tags ── */
+
+.tags {
+  display:flex;flex-wrap:wrap;gap:6px;
+  margin-bottom:12px;
+}
+.tag {
+  font-family:var(--ff-mono);font-size:.68rem;
+  padding:2px 10px;border-radius:14px;
+  white-space:nowrap;
+}
+.tag-rank { background:var(--tier-bg1);color:var(--tier-t1); }
+.tag-special { background:var(--bg-2);color:var(--text-3); }
+.tag-new {
+  background:#fef2f2;color:#b91c1c;
+}
+.tag-price {
+  background:var(--tier-bg2);color:var(--tier-t2);
+}
+
+/* ── Highlight bar ── */
+
+.hl-bar {
+  display:flex;flex-wrap:wrap;gap:12px;
+  padding:10px 14px;
+  background:var(--bg);
+  border-radius:6px;
+  font-family:var(--ff-mono);font-size:.72rem;
+  color:var(--text-3);
+}
+.hl-bar .hl-item { display:flex;gap:4px; }
+.hl-bar .hl-l { color:var(--text-4); }
+.hl-bar .hl-v { color:var(--text);font-weight:500; }
+
+/* ── Notes section ── */
+
+.note-box {
+  background:var(--card);
+  border:1px solid var(--card-bd);
+  border-radius:10px;
+  padding:28px 32px;
+  margin-top:48px;
+  opacity:0;animation:fadeUp .6s .45s ease forwards;
+}
+.note-box h3 {
+  font-family:var(--ff-dis);font-size:1.2rem;
+  font-weight:600;margin-bottom:12px;
+}
+.note-box p,.note-box li {
+  font-size:.92rem;color:var(--text-2);
+  line-height:1.75;
+}
+.note-box ul {
+  padding-left:1.2em;margin-top:8px;
+}
+.note-box li { margin-bottom:6px; }
+
+/* ── Method box ── */
+
+.method {
+  background:var(--bg-2);
+  border:1px dashed var(--bd);
+  border-radius:8px;
+  padding:20px 24px;
+  margin-top:24px;
+  font-size:.84rem;color:var(--text-3);
+  line-height:1.7;
+}
+.method strong { color:var(--text-2); }
+
+/* ── Comparison table ── */
+
+.cmp-wrap {
+  overflow-x:auto;
+  margin-top:20px;
+  border:1px solid var(--card-bd);
+  border-radius:10px;
+}
+.cmp {
+  width:100%;
+  border-collapse:collapse;
+  font-size:.82rem;
+}
+.cmp th {
+  font-family:var(--ff-mono);font-size:.7rem;
+  font-weight:500;letter-spacing:.05em;
+  color:var(--text-3);text-align:left;
+  padding:10px 14px;
+  background:var(--bg-2);
+  border-bottom:1px solid var(--bd);
+  position:sticky;top:0;z-index:2;
+}
+.cmp td {
+  padding:10px 14px;
+  border-bottom:1px solid var(--bg-3);
+  vertical-align:top;
+  color:var(--text-2);
+}
+.cmp tr:last-child td { border-bottom:none; }
+.cmp tr:hover td { background:var(--accent-lt); }
+.cmp .model-col {
+  font-family:var(--ff-dis);font-weight:600;
+  color:var(--text);font-size:.88rem;
+  white-space:nowrap;
+}
+
+/* ── Footer ── */
+
+.foot {
+  margin-top:64px;padding:28px 0;
+  border-top:1px solid var(--bd);
+  font-family:var(--ff-mono);font-size:.7rem;
+  color:var(--text-4);text-align:center;
+  letter-spacing:.02em;
+  opacity:0;animation:fadeUp .6s .5s ease forwards;
+}
+
+/* ── Animations ── */
+
+@keyframes fadeUp {
+  from { opacity:0;transform:translateY(16px); }
+  to   { opacity:1;transform:translateY(0); }
+}
+
+/* ── Responsive ── */
+
+@media(max-width:768px){
+  .wrap { padding:0 18px; }
+  .hero { padding:40px 0 28px; }
+  .hero h1 { font-size:2rem; }
+  .mc { padding:20px; }
+  .specs { grid-template-columns:repeat(auto-fill,minmax(140px,1fr)); }
+  .cmp { font-size:.76rem; }
+  .cmp th,.cmp td { padding:8px 10px; }
+}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+<!-- ═══ Hero ═══ -->
+<header class="hero">
+  <div class="hero-pre">Arena Platform · 2026 Q3 Overview</div>
+  <h1>国产大模型 <em>Arena 榜单</em> 纵览</h1>
+  <p class="hero-sub">
+    基于 Arena（arena.ai）平台截至 2026 年 9 月初的匿名盲测数据，综合多份第三方评测报告，按综合榜 ELO 排名整理的七家核心国产模型全景对照。(citation:2)(citation:3)
+  </p>
+  <div class="hero-meta">
+    <span class="pill">数据截至 2026-09-03</span>
+    <span class="pill">Arena 盲测排名</span>
+    <span class="pill">AA 智能指数</span>
+    <span class="pill">SuperCLUE 中文测评</span>
+  </div>
+</header>
+
+<!-- ═══ Tier 1 ═══ -->
+<section class="sec">
+  <h2 class="sec-tt">综合榜 Top 10 — 第一梯队</h2>
+  <p class="sec-desc">ELO 分数在误差范围内可视为接近，进入全球前十五的国产旗舰。(citation:4)</p>
+  <div class="tier tier-t1">TIER T1 · 综合 &amp; 推理上界</div>
+
+  <div class="grid">
+    <!-- Kimi K3 -->
+    <div class="mc t1">
+      <div class="mc-top">
+        <div class="mc-name">Kimi K3 <span class="mc-vendor">月之暗面 Moonshot</span></div>
+        <div class="mc-elo">综合 ELO 1489 · 第 10 名</div>
+      </div>
+      <p class="mc-desc">
+        2026 年 7 月 17 日发布，是目前验证维度最完整的中国模型。AA 智能指数 57–60 分（开源模型历史最高、全球第 4），Arena 四个实战榜单三项国产第一。(citation:4) 原生支持文本、图像、视频、音频四模态输入，是全球首个开源的万亿级多模态模型。(citation:11)
+      </p>
+      <div class="tags">
+        <span class="tag tag-rank">代码榜 #6 · ELO 1542</span>
+        <span class="tag tag-rank">前端榜 #2 · ELO 1674</span>
+        <span class="tag tag-rank">智能体榜 #4 · 10.41% 净提升</span>
+        <span class="tag tag-new">开源 MIT</span>
+      </div>
+      <div class="specs">
+        <div class="sp"><span class="sp-k">总参数</span><span class="sp-v">2.8 万亿（2.8T MoE）</span></div>
+        <div class="sp"><span class="sp-k">激活参数</span><span class="sp-v">~500 亿（16/896 专家）</span></div>
+        <div class="sp"><span class="sp-k">上下文窗口</span><span class="sp-v">1M tokens</span></div>
+        <div class="sp"><span class="sp-k">多模态</span><span class="sp-v">文本 + 图片 + 视频 + 音频</span></div>
+        <div class="sp"><span class="sp-k">输出定价</span><span class="sp-v">100 元 / MTok</span></div>
+        <div class="sp"><span class="sp-k">缓存命中输入</span><span class="sp-v">2 元 / MTok（降 90%）</span></div>
+      </div>
+      <div class="hl-bar">
+        <span class="hl-item"><span class="hl-l">DeepSWE</span> <span class="hl-v">67.3</span></span>
+        <span class="hl-item"><span class="hl-l">BrowseComp</span> <span class="hl-v">90.4</span></span>
+        <span class="hl-item"><span class="hl-l">AA 指数</span> <span class="hl-v">57–60 分</span></span>
+        <span class="hl-item"><span class="hl-l">开源日期</span> <span class="hl-v">2026-07-27</span></span>
+      </div>
+    </div>
+
+    <!-- GLM-5.3-Max -->
+    <div class="mc t1">
+      <div class="mc-top">
+        <div class="mc-name">GLM-5.3-Max <span class="mc-vendor">智谱 AI Z.ai</span></div>
+        <div class="mc-elo">综合 ELO 1487 · 第 13 名</div>
+      </div>
+      <p class="mc-desc">
+        2026 年 8 月 14 日发布，首次入榜即闯入综合 Top 15，是本周变化最大的新模型。(citation:2) 基座模型与 GLM-5.2 完全相同，通过"数十倍的长程任务环境训练"实现能力跃升约 50%，路线独特。(citation:11) 在 CyberGym 安全漏洞发现评测中登顶第一，累计发现 2436 个漏洞。(citation:11)
+      </p>
+      <div class="tags">
+        <span class="tag tag-rank">代码榜 #10 · ELO 1531</span>
+        <span class="tag tag-rank">前端榜 #8</span>
+        <span class="tag tag-new">新上榜</span>
+      </div>
+      <div class="specs">
+        <div class="sp"><span class="sp-k">总参数</span><span class="sp-v">7530 亿（753B MoE）</span></div>
+        <div class="sp"><span class="sp-k">激活参数</span><span class="sp-v">未披露（MoE 稀疏）</span></div>
+        <div class="sp"><span class="sp-k">上下文窗口</span><span class="sp-v">1M tokens</span></div>
+        <div class="sp"><span class="sp-k">最大输出</span><span class="sp-v">128K tokens</span></div>
+        <div class="sp"><span class="sp-k">多模态</span><span class="sp-v">仅文本</span></div>
+        <div class="sp"><span class="sp-k">推理强度</span><span class="sp-v">low / high / max（强制开启）</span></div>
+      </div>
+      <div class="hl-bar">
+        <span class="hl-item"><span class="hl-l">CyberGym</span> <span class="hl-v">84.5%（第一）</span></span>
+        <span class="hl-item"><span class="hl-l">DeepSWE</span> <span class="hl-v">66.9%</span></span>
+        <span class="hl-item"><span class="hl-l">Terminal-Bench</span> <span class="hl-v">28.3（+515%）</span></span>
+        <span class="hl-item"><span class="hl-l">AA 指数</span> <span class="hl-v">60 分</span></span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ Tier 2 ═══ -->
+<section class="sec">
+  <h2 class="sec-tt">综合榜 Top 20 — 生态与中文综合</h2>
+  <p class="sec-desc">中文能力突出，前端开发等细分领域具备全球竞争力。(citation:4)(citation:6)</p>
+  <div class="tier tier-t2">TIER T2 · 中文综合 &amp; 生态领先</div>
+
+  <div class="grid">
+    <!-- Qwen3.8-Max -->
+    <div class="mc t2">
+      <div class="mc-top">
+        <div class="mc-name">Qwen3.8-Max <span class="mc-vendor">阿里巴巴 Alibaba</span></div>
+        <div class="mc-elo">综合 ELO 1481 · 第 19 名</div>
+      </div>
+      <p class="mc-desc">
+        SuperCLUE 中文综合第一，Arena 综合榜国产位置最高（第 8 名）。(citation:4) Qwen 开源家族全球下载量第一，衍生模型生态最厚，是产业渗透角度的隐形冠军。(citation:4) 不过需要指出，其 AA 智能指数尚未完成评测，官方成绩目前属于"厂商主张"。(citation:4)
+      </p>
+      <div class="tags">
+        <span class="tag tag-rank">前端榜 #3 · ELO 1669</span>
+        <span class="tag tag-rank">代码榜 #25 · ELO 1520</span>
+        <span class="tag tag-rank">智能体榜 #15 · 6.20% 净提升</span>
+        <span class="tag tag-special">SuperCLUE 中文 #1</span>
+      </div>
+      <div class="specs">
+        <div class="sp"><span class="sp-k">总参数</span><span class="sp-v">2.4 万亿（2.4T MoE）</span></div>
+        <div class="sp"><span class="sp-k">激活参数</span><span class="sp-v">950 亿（95B）</span></div>
+        <div class="sp"><span class="sp-k">上下文窗口</span><span class="sp-v">1M tokens</span></div>
+        <div class="sp"><span class="sp-k">多模态</span><span class="sp-v">文本 + 图片 + 视频输入</span></div>
+        <div class="sp"><span class="sp-k">输出定价</span><span class="sp-v">$6 / MTok</span></div>
+        <div class="sp"><span class="sp-k">开源状态</span><span class="sp-v">Qwen 家族全球下载量 #1</span></div>
+      </div>
+      <div class="hl-bar">
+        <span class="hl-item"><span class="hl-l">AA 指数</span> <span class="hl-v">58 分</span></span>
+        <span class="hl-item"><span class="hl-l">SuperCLUE</span> <span class="hl-v">中文综合 #1</span></span>
+        <span class="hl-item"><span class="hl-l">工具幻觉率</span> <span class="hl-v">仅 0.18%</span></span>
+        <span class="hl-item"><span class="hl-l">正式发布</span> <span class="hl-v">2026-08-03</span></span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ Tier 3 ═══ -->
+<section class="sec">
+  <h2 class="sec-tt">综合榜 Top 25–30 — 高性价比与专精路线</h2>
+  <p class="sec-desc">排名处于中上游，各自在性价比、特定任务或生态位上具备竞争力。(citation:10)</p>
+  <div class="tier tier-t3">TIER T3 · 性价比 &amp; 专精</div>
+
+  <div class="grid">
+    <!-- MiMo-V2.5-Pro -->
+    <div class="mc t3">
+      <div class="mc-top">
+        <div class="mc-name">MiMo-V2.5-Pro <span class="mc-vendor">小米 Xiaomi</span></div>
+        <div class="mc-elo">综合 ELO ~1466 · 第 25 名区间</div>
+      </div>
+      <p class="mc-desc">
+        小米生态的旗舰代表，综合能力处于中上游。在代码榜中位列第 27 名（ELO 1519），排名基本持平。(citation:2) 采用多领域专家 MOPD（Multi-Teacher On-Policy Distillation）技术路线，与 Kimi K3 思路相近，先把各领域 RL 做好再通过蒸馏合并。(citation:7) AA 智能指数 43 分，位于 T3 档位。(citation:10)
+      </p>
+      <div class="tags">
+        <span class="tag tag-rank">代码榜 #27 · ELO 1519</span>
+        <span class="tag tag-price">输出 $0.87 / MTok</span>
+      </div>
+      <div class="specs">
+        <div class="sp"><span class="sp-k">架构</span><span class="sp-v">MoE 稀疏（详情未完整披露）</span></div>
+        <div class="sp"><span class="sp-k">上下文窗口</span><span class="sp-v">1.05M tokens</span></div>
+        <div class="sp"><span class="sp-k">输入定价</span><span class="sp-v">$0.44 / MTok</span></div>
+        <div class="sp"><span class="sp-k">输出定价</span><span class="sp-v">$0.87 / MTok</span></div>
+        <div class="sp"><span class="sp-k">AA 指数</span><span class="sp-v">43 分（T3 档）</span></div>
+        <div class="sp"><span class="sp-k">蒸馏方式</span><span class="sp-v">多领域 MOPD（Reverse-KL）</span></div>
+      </div>
+    </div>
+
+    <!-- DeepSeek-V4-Pro -->
+    <div class="mc t3">
+      <div class="mc-top">
+        <div class="mc-name">DeepSeek-V4-Pro <span class="mc-vendor">深度求索 DeepSeek</span></div>
+        <div class="mc-elo">综合 ELO ~1473 · 第 30 名区间</div>
+      </div>
+      <p class="mc-desc">
+        推理与性价比之王。独立横评中 V4 Pro 以 9.1 分排国产模型之首，全场仅次于 Claude Opus 4.8，推理单项 9.5 分超过 GPT-5.6。(citation:4) 2026 年 8 月 13 日正式版引入峰谷定价和三档推理强度（low/high/max），原生支持 Responses API，直接对标 Agent 生产部署。(citation:11)
+      </p>
+      <div class="tags">
+        <span class="tag tag-rank">智能体榜 #14 · 6.26% 净提升</span>
+        <span class="tag tag-special">SWE-bench 80.6%</span>
+        <span class="tag tag-new">新上榜</span>
+      </div>
+      <div class="specs">
+        <div class="sp"><span class="sp-k">总参数（Pro）</span><span class="sp-v">~1.6T（49B 激活）</span></div>
+        <div class="sp"><span class="sp-k">总参数（Flash）</span><span class="sp-v">~284B（13B 激活）</span></div>
+        <div class="sp"><span class="sp-k">上下文窗口</span><span class="sp-v">1M tokens</span></div>
+        <div class="sp"><span class="sp-k">Pro 输出（空闲）</span><span class="sp-v">13.5 元 / MTok</span></div>
+        <div class="sp"><span class="sp-k">Flash 输出（空闲）</span><span class="sp-v">4.5 元 / MTok</span></div>
+        <div class="sp"><span class="sp-k">定价机制</span><span class="sp-v">峰谷双轨（空闲 = 高峰半价）</span></div>
+      </div>
+      <div class="hl-bar">
+        <span class="hl-item"><span class="hl-l">AA 指数</span> <span class="hl-v">53 分</span></span>
+        <span class="hl-item"><span class="hl-l">推理实测</span> <span class="hl-v">9.5 分（国产 #1）</span></span>
+        <span class="hl-item"><span class="hl-l">开源</span> <span class="sp-v">HuggingFace / ModelScope</span></span>
+      </div>
+    </div>
+
+    <!-- Qwen3.7-Max-Preview -->
+    <div class="mc t3">
+      <div class="mc-top">
+        <div class="mc-name">Qwen3.7-Max-Preview <span class="mc-vendor">阿里巴巴 Alibaba</span></div>
+        <div class="mc-elo">综合 ELO 1474 · 第 27 名</div>
+      </div>
+      <p class="mc-desc">
+        Qwen3.8-Max 的前代旗舰，AA 智能指数验证成绩 56.6 分——这是该家族迄今唯一的第三方国际标准化参照。(citation:4) 代码榜第 17 名（ELO 1524），排名基本持平。(citation:2)
+      </p>
+      <div class="tags">
+        <span class="tag tag-rank">代码榜 #17 · ELO 1524</span>
+        <span class="tag tag-price">输入 $1.48 / MTok</span>
+      </div>
+      <div class="specs">
+        <div class="sp"><span class="sp-k">上下文窗口</span><span class="sp-v">1M tokens</span></div>
+        <div class="sp"><span class="sp-k">输入定价</span><span class="sp-v">$1.48 / MTok</span></div>
+        <div class="sp"><span class="sp-k">输出定价</span><span class="sp-v">$4.43 / MTok</span></div>
+        <div class="sp"><span class="sp-k">AA 指数</span><span class="sp-v">56.6 分</span></div>
+      </div>
+    </div>
+
+    <!-- GLM-5.3-Flash -->
+    <div class="mc t3">
+      <div class="mc-top">
+        <div class="mc-name">GLM-5.3-Flash <span class="mc-vendor">智谱 AI Z.ai</span></div>
+        <div class="mc-elo">综合 ELO ~1473 · 第 30 名区间</div>
+      </div>
+      <p class="mc-desc">
+        GLM-5.3 的低成本多模态版本，原生支持文本、图片、视频输入，适合视频理解、视觉 Coding 和高频 Agent。(citation:12) 采用 MLA、DSA 稀疏注意力、KDA 线性注意力等混合架构，约以旗舰 1/10 的成本逼近高段位体感。(citation:12)(citation:13)
+      </p>
+      <div class="tags">
+        <span class="tag tag-new">新上榜</span>
+        <span class="tag tag-special">原生多模态</span>
+        <span class="tag tag-price">低成本</span>
+      </div>
+      <div class="specs">
+        <div class="sp"><span class="sp-k">总参数</span><span class="sp-v">~320B（18B 激活）</span></div>
+        <div class="sp"><span class="sp-k">上下文窗口</span><span class="sp-v">1M tokens</span></div>
+        <div class="sp"><span class="sp-k">多模态</span><span class="sp-v">文本 + 图片 + 视频</span></div>
+        <div class="sp"><span class="sp-k">定位</span><span class="sp-v">放量默认 / 高频路由</span></div>
+        <div class="sp"><span class="sp-k">FP8 权重</span><span class="sp-v">~306 GiB</span></div>
+        <div class="sp"><span class="sp-k">成本对比</span><span class="sp-v">约旗舰 GLM-5.3 的 1/10</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ Tier 4 ═══ -->
+<section class="sec">
+  <h2 class="sec-tt">Top 70+ — Agent 与垂直场景</h2>
+  <p class="sec-desc">通用排名靠后，但在特定垂直领域或高频调用场景中仍有定位。(citation:10)</p>
+  <div class="tier tier-t4">TIER T4 · 垂直场景</div>
+
+  <div class="grid">
+    <!-- MiniMax-M3 -->
+    <div class="mc t4">
+      <div class="mc-top">
+        <div class="mc-name">MiniMax-M3 <span class="mc-vendor">稀宇科技 MiniMax</span></div>
+        <div class="mc-elo">综合 ELO ~1452 · Top 70</div>
+      </div>
+      <p class="mc-desc">
+        主要面向 Agent 与多模态场景。AA 智能指数 45 分，在 AI 视频榜中 MiniMax-H3 曾首次入榜即排名第 4。(citation:3) 走"量大管饱"路线，适合特定 Agent 工作流。(citation:10)
+      </p>
+      <div class="specs">
+        <div class="sp"><span class="sp-k">AA 指数</span><span class="sp-v">45 分（T4 档）</span></div>
+        <div class="sp"><span class="sp-k">AI 视频榜</span><span class="sp-v">MiniMax-H3 曾 #4</span></div>
+        <div class="sp"><span class="sp-k">定位</span><span class="sp-v">Agent + 多模态</span></div>
+      </div>
+    </div>
+
+    <!-- StepFun -->
+    <div class="mc t4">
+      <div class="mc-top">
+        <div class="mc-name">Step 3.7 Flash <span class="mc-vendor">阶跃星辰 StepFun</span></div>
+        <div class="mc-elo">未进入头部榜单</div>
+      </div>
+      <p class="mc-desc">
+        未进入 Arena 头部榜单。AA 智能指数 31 分，更聚焦特定垂直场景。(citation:10) 在通用场景适用性有限，目前适合量级驱动的垂直领域调用。
+      </p>
+      <div class="specs">
+        <div class="sp"><span class="sp-k">AA 指数</span><span class="sp-v">31 分</span></div>
+        <div class="sp"><span class="sp-k">定位</span><span class="sp-v">垂直领域 / 低成本调用</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ Comparison Table ═══ -->
+<section class="sec" style="animation-delay:.35s">
+  <h2 class="sec-tt">横向参数速查</h2>
+  <p class="sec-desc">将七家模型的核心参数与定价放在同一张表中快速对比。</p>
+
+  <div class="cmp-wrap">
+    <table class="cmp">
+      <thead>
+        <tr>
+          <th>模型</th>
+          <th>厂商</th>
+          <th>总参数</th>
+          <th>激活参数</th>
+          <th>上下文</th>
+          <th>多模态</th>
+          <th>AA 指数</th>
+          <th>输出定价</th>
+          <th>开源</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="model-col">Kimi K3</td>
+          <td>月之暗面</td>
+          <td>2.8T</td>
+          <td>~500 亿</td>
+          <td>1M</td>
+          <td>文本+图+视频+音频</td>
+          <td>57–60</td>
+          <td>100 元/MTok</td>
+          <td>MIT</td>
+        </tr>
+        <tr>
+          <td class="model-col">GLM-5.3-Max</td>
+          <td>智谱 AI</td>
+          <td>753B</td>
+          <td>未披露</td>
+          <td>1M</td>
+          <td>仅文本</td>
+          <td>60</td>
+          <td>待公布</td>
+          <td>两周后</td>
+        </tr>
+        <tr>
+          <td class="model-col">Qwen3.8-Max</td>
+          <td>阿里巴巴</td>
+          <td>2.4T</td>
+          <td>950 亿</td>
+          <td>1M</td>
+          <td>文本+图+视频</td>
+          <td>58</td>
+          <td>$6/MTok</td>
+          <td>Qwen 生态</td>
+        </tr>
+        <tr>
+          <td class="model-col">DeepSeek V4-Pro</td>
+          <td>深度求索</td>
+          <td>~1.6T</td>
+          <td>490 亿</td>
+          <td>1M</td>
+          <td>仅文本</td>
+          <td>53</td>
+          <td>13.5 元/MTok</td>
+          <td>已开源</td>
+        </tr>
+        <tr>
+          <td class="model-col">MiMo-V2.5-Pro</td>
+          <td>小米</td>
+          <td>未完整披露</td>
+          <td>MoE</td>
+          <td>1.05M</td>
+          <td>未明确</td>
+          <td>43</td>
+          <td>$0.87/MTok</td>
+          <td>—</td>
+        </tr>
+        <tr>
+          <td class="model-col">Qwen3.7-Max</td>
+          <td>阿里巴巴</td>
+          <td>未披露</td>
+          <td>—</td>
+          <td>1M</td>
+          <td>未明确</td>
+          <td>56.6</td>
+          <td>$4.43/MTok</td>
+          <td>—</td>
+        </tr>
+        <tr>
+          <td class="model-col">GLM-5.3-Flash</td>
+          <td>智谱 AI</td>
+          <td>~320B</td>
+          <td>180 亿</td>
+          <td>1M</td>
+          <td>文本+图+视频</td>
+          <td>—</td>
+          <td>~旗舰 1/10</td>
+          <td>权重更明确</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ═══ MOPD Explainer ═══ -->
+<section class="sec" style="animation-delay:.4s">
+  <h2 class="sec-tt">技术路线：后训练蒸馏的三条路</h2>
+  <p class="sec-desc">2026 年国产模型的训练范式正在分化，核心分歧在于如何融合多领域能力。(citation:7)</p>
+
+  <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(320px,1fr))">
+    <div class="mc" style="border-left:3px solid var(--tier-t1)">
+      <div class="mc-name" style="font-size:1.1rem;margin-bottom:10px">Qwen：强模型教小模型</div>
+      <p class="mc-desc" style="font-size:.88rem">
+        大模型已经花大量计算获得 reasoning 等能力，小模型通过 Off-policy → On-policy 蒸馏直接继承，无需重新跑完整 RL。(citation:7) 核心价值：<strong>模型压缩</strong>。
+      </p>
+    </div>
+    <div class="mc" style="border-left:3px solid var(--tier-t2)">
+      <div class="mc-name" style="font-size:1.1rem;margin-bottom:10px">GLM：历史 Checkpoint 防遗忘</div>
+      <p class="mc-desc" style="font-size:.88rem">
+        连续做 Reasoning RL → Agentic RL → General RL 时，后面训练可能让前面能力退化。GLM 保存之前训练阶段的 checkpoint 作为 Teacher，用 Cross-stage Distillation 重新巩固所有能力。(citation:7)
+      </p>
+    </div>
+    <div class="mc" style="border-left:3px solid var(--tier-t3)">
+      <div class="mc-name" style="font-size:1.1rem;margin-bottom:10px">Kimi / MiMo / DeepSeek：多专家融合</div>
+      <p class="mc-desc" style="font-size:.88rem">
+        先分别在 Math、Coding、Agent 等领域做 RL 得到多个专家 Teacher，再通过 MOPD 蒸馏进一个统一 Student。(citation:7) 内部分歧在于 KL 粒度：Kimi 偏 Sampled Token 追求低成本，DeepSeek 用 Full-Vocabulary 追求更稳定梯度，MiMo 统一在 Reverse-KL 框架下可切换近似方式。
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ Notes ═══ -->
+<div class="note-box">
+  <h3>关于排名的解读方式</h3>
+  <p>
+    Arena 平台的 ELO 分差在 ±30 分以内通常被视为统计误差范围内的接近。(citation:2) 这意味着榜单上排名紧挨着的模型，实际用户体验差别可能微乎其微。在这个区间里，<strong>"谁更好"远不如"谁更适合你的任务"</strong>重要。
+  </p>
+  <ul>
+    <li><strong>写代码、做前端、跑 Agent</strong>：Kimi K3 是当前国产验证成绩最好的选择。(citation:4)</li>
+    <li><strong>中文写作、超长文档、综合办公</strong>：Qwen3.8-Max 更稳。(citation:4)</li>
+    <li><strong>高难度推理和数学</strong>：DeepSeek V4 Pro 实测推理单项国产最强。(citation:4)</li>
+    <li><strong>预算敏感的高频调用</strong>：DeepSeek V4 Flash 性价比没有对手。(citation:4)</li>
+    <li><strong>安全漏洞与编程专项</strong>：GLM-5.3 在 CyberGym 登顶第一。(citation:11)</li>
+    <li><strong>本地部署、数据不出内网</strong>：可选开源的 Kimi K3、GLM-5.2 或 Qwen 家族。(citation:4)</li>
+  </ul>
+
+  <div class="method">
+    <strong>判断任何"第一"宣称的三个问题：</strong>这个第一是在哪个坐标系里？这个坐标系是谁定义的？同一坐标系里排第二第三的是谁？(citation:4) 每家厂商的说法在技术上都不算撒谎，它们只是选择了对自己最有利的坐标系——切法无穷，"第一"也无穷。
+  </div>
+</div>
+
+<!-- ═══ Footer ═══ -->
+<footer class="foot">
+  数据来源：Arena（arena.ai）盲测排名 · Artificial Analysis 智能指数 · SuperCLUE 中文测评<br>
+  价格与排名均以 2026 年 9 月初为参照，各厂商定价随时调整，请以官方最新文档为准。
+</footer>
+
+</div><!-- .wrap -->
+
+</body>
+</html>

@@ -1,0 +1,874 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="color-scheme" content="light dark" />
+<link rel="icon" href="data:," />
+<title>OpenRouter 模型选型分析</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700;900&family=Noto+Serif+SC:wght@600;900&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --bg:#f6f6f3;
+    --surface:#ffffff;
+    --surface-2:#eef0ea;
+    --ink:#191c1f;
+    --ink-2:#4c5257;
+    --ink-3:#7a8087;
+    --line:#dcded6;
+    --accent:#0e6b5c;
+    --accent-ink:#0a5246;
+    --accent-soft:#e2efe9;
+    --amber:#a35a12;
+    --amber-soft:#f7ecdc;
+    --red:#a83a2c;
+    --red-soft:#f8e7e2;
+    --bar:#0e6b5c;
+    --bar-2:#9db8a9;
+    color-scheme: light dark;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#121416;
+      --surface:#1a1d20;
+      --surface-2:#22262a;
+      --ink:#e9ebec;
+      --ink-2:#b6bcc1;
+      --ink-3:#878e94;
+      --line:#33383d;
+      --accent:#3ec9ae;
+      --accent-ink:#7fe0cd;
+      --accent-soft:#17332c;
+      --amber:#e0a04e;
+      --amber-soft:#3a2c17;
+      --red:#e07a68;
+      --red-soft:#3c231e;
+      --bar:#3ec9ae;
+      --bar-2:#4a5d54;
+    }
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Noto Sans SC",system-ui,-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;
+    font-size:16px;line-height:1.65;
+    -webkit-font-smoothing:antialiased;
+  }
+  .mono{font-family:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 20px;}
+  a{color:var(--accent-ink);text-decoration:underline;text-underline-offset:3px;text-decoration-thickness:1px;}
+  a:hover{text-decoration-thickness:2px;}
+
+  /* ---------- header ---------- */
+  header{padding:52px 0 8px;}
+  .dateline{
+    display:flex;flex-wrap:wrap;gap:8px 18px;align-items:baseline;
+    font-size:13px;color:var(--ink-2);border-bottom:2px solid var(--ink);
+    padding-bottom:14px;margin-bottom:30px;
+  }
+  .dateline b{color:var(--ink);}
+  h1{
+    font-family:"Noto Serif SC",serif;font-weight:900;
+    font-size:clamp(30px,5.4vw,46px);line-height:1.22;margin:0 0 16px;letter-spacing:.01em;
+  }
+  h1 .hl{color:var(--accent-ink);}
+  .lede{font-size:17.5px;color:var(--ink-2);max-width:46em;margin:0 0 8px;}
+  .lede b{color:var(--ink);}
+
+  /* ---------- takeaway strip ---------- */
+  .takeaways{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:30px 0 6px;}
+  .take{
+    background:var(--surface);border:1px solid var(--line);border-top:3px solid var(--accent);
+    padding:16px 16px 14px;
+  }
+  .take .num{font-family:"IBM Plex Mono",monospace;font-size:26px;font-weight:600;color:var(--accent-ink);line-height:1.1;}
+  .take .num small{font-size:13px;color:var(--ink-3);font-weight:400;}
+  .take p{margin:8px 0 0;font-size:13.5px;line-height:1.55;color:var(--ink-2);}
+  .take p b{color:var(--ink);}
+
+  /* ---------- sections ---------- */
+  section{padding:38px 0 6px;}
+  h2{
+    font-family:"Noto Serif SC",serif;font-weight:900;font-size:clamp(22px,3.4vw,28px);
+    margin:0 0 6px;display:flex;align-items:baseline;gap:12px;
+  }
+  h2 .no{font-family:"IBM Plex Mono",monospace;font-size:15px;color:var(--accent-ink);font-weight:600;}
+  .sec-sub{color:var(--ink-2);margin:0 0 20px;max-width:48em;font-size:15px;}
+  h3{font-size:17px;font-weight:900;margin:26px 0 10px;}
+  p{margin:0 0 12px;}
+  .small{font-size:13px;color:var(--ink-3);}
+  .note{
+    background:var(--amber-soft);border:1px solid var(--line);padding:14px 18px;
+    font-size:14px;line-height:1.65;margin:16px 0;
+  }
+  .note b{color:var(--amber);}
+  .method{
+    background:var(--surface);border:1px solid var(--line);padding:18px 20px;margin:18px 0;
+  }
+  .method h3{margin-top:0;}
+  .method ul{margin:6px 0 0;padding-left:20px;}
+  .method li{margin:6px 0;font-size:14.5px;color:var(--ink-2);}
+  .method li b{color:var(--ink);}
+
+  /* ---------- chart ---------- */
+  .chart-box{background:var(--surface);border:1px solid var(--line);padding:20px 20px 12px;margin:6px 0 18px;}
+  .chart-box .cap{font-size:13px;color:var(--ink-3);margin-top:10px;}
+  .bar-row{display:grid;grid-template-columns:196px 1fr 74px;gap:12px;align-items:center;padding:5px 0;}
+  .bar-row .nm{font-size:13.5px;font-weight:500;text-align:right;line-height:1.35;}
+  .bar-row .nm span{display:block;font-size:11.5px;color:var(--ink-3);font-weight:400;}
+  .bar-track{height:20px;background:var(--surface-2);position:relative;}
+  .bar-fill{height:100%;background:var(--bar);}
+  .bar-fill.dim{background:var(--bar-2);}
+  .bar-row .val{font-family:"IBM Plex Mono",monospace;font-size:13px;font-weight:600;}
+  @media (max-width:640px){
+    .bar-row{grid-template-columns:118px 1fr 62px;gap:8px;}
+    .bar-row .nm{font-size:12px;}
+    .bar-row .nm span{display:none;}
+  }
+
+  /* ---------- tables ---------- */
+  .tbl-wrap{overflow:visible;}
+  table{width:100%;border-collapse:collapse;font-size:14px;background:var(--surface);border:1px solid var(--line);}
+  th,td{padding:9px 12px;text-align:left;vertical-align:top;border-bottom:1px solid var(--line);}
+  thead th{
+    background:var(--surface-2);font-size:12.5px;font-weight:700;color:var(--ink-2);
+    border-bottom:2px solid var(--ink);white-space:nowrap;
+  }
+  tbody tr:last-child td{border-bottom:none;}
+  td.num,th.num{text-align:right;font-family:"IBM Plex Mono",monospace;font-size:13px;white-space:nowrap;}
+  td.rank{font-family:"IBM Plex Mono",monospace;color:var(--ink-3);text-align:right;width:34px;}
+  .model-name{font-weight:700;}
+  .model-id{display:block;font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--ink-3);font-weight:400;word-break:break-all;}
+  .up{color:var(--accent-ink);font-weight:600;}
+  .down{color:var(--red);font-weight:600;}
+  .newtag{
+    display:inline-block;font-size:11px;font-weight:700;color:var(--amber);
+    border:1px solid var(--amber);padding:0 5px;border-radius:99px;line-height:1.6;vertical-align:1px;
+  }
+  @media (max-width:720px){
+    table,thead,tbody,tr,td,th{display:block;}
+    thead{display:none;}
+    tbody tr{border-bottom:2px solid var(--ink);padding:8px 0;}
+    tbody tr:last-child{border-bottom:none;}
+    td{border-bottom:none;padding:3px 14px;display:flex;justify-content:space-between;gap:16px;align-items:baseline;}
+    td.num{white-space:normal;text-align:right;}
+    td::before{content:attr(data-l);font-size:12px;color:var(--ink-3);flex:none;padding-top:2px;}
+    td.rank{display:none;}
+    td:first-child{padding-top:6px;}
+    td .model-id{display:inline;margin-left:6px;}
+  }
+
+  /* ---------- tiers ---------- */
+  .tier{border:1px solid var(--line);background:var(--surface);margin:0 0 18px;}
+  .tier-head{
+    display:flex;flex-wrap:wrap;gap:6px 16px;align-items:baseline;
+    padding:16px 20px 12px;border-bottom:1px solid var(--line);
+  }
+  .tier-head .price{font-family:"IBM Plex Mono",monospace;font-weight:600;color:var(--accent-ink);font-size:15px;}
+  .tier-head h3{margin:0;font-size:18px;}
+  .tier-head .members{font-size:13px;color:var(--ink-3);width:100%;}
+  .tier-body{padding:6px 20px 16px;}
+  .tier-body table{border:none;background:transparent;}
+  .tier-body th,.tier-body td{border-bottom:1px solid var(--line);}
+  .tier-body thead th{background:transparent;border-bottom:2px solid var(--ink);}
+  .verdict{
+    margin:14px 0 4px;padding:12px 16px;background:var(--accent-soft);font-size:14.5px;line-height:1.65;
+  }
+  .verdict b{color:var(--accent-ink);}
+  .warn{background:var(--red-soft);}
+  .warn b{color:var(--red);}
+
+  /* ---------- use-case picker ---------- */
+  .uc-tabs{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 18px;}
+  .uc-tabs button{
+    font:inherit;font-size:14px;font-weight:500;cursor:pointer;
+    background:var(--surface);color:var(--ink);border:1px solid var(--line);
+    padding:8px 14px;border-radius:99px;
+  }
+  .uc-tabs button:hover{border-color:var(--accent);}
+  .uc-tabs button[aria-selected="true"]{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:700;}
+  @media (prefers-color-scheme: dark){
+    .uc-tabs button[aria-selected="true"]{color:#0b1512;}
+  }
+  .uc-panel{display:none;}
+  .uc-panel.active{display:block;}
+  .uc-note{font-size:13.5px;color:var(--ink-2);background:var(--surface-2);padding:10px 14px;margin:0 0 14px;}
+  .recs{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+  .rec{
+    background:var(--surface);border:1px solid var(--line);padding:16px 18px;position:relative;
+  }
+  .rec .pick{
+    font-family:"IBM Plex Mono",monospace;font-size:11.5px;font-weight:600;color:var(--accent-ink);
+    letter-spacing:.04em;
+  }
+  .rec h4{margin:6px 0 4px;font-size:16.5px;line-height:1.35;}
+  .rec .pr{font-family:"IBM Plex Mono",monospace;font-size:12.5px;color:var(--ink-3);margin-bottom:8px;}
+  .rec p{font-size:13.5px;color:var(--ink-2);margin:0;line-height:1.6;}
+  .rec p b{color:var(--ink);}
+  @media (max-width:860px){.recs{grid-template-columns:1fr;}}
+  @media (max-width:860px){.takeaways{grid-template-columns:repeat(2,1fr);}}
+  @media (max-width:480px){.takeaways{grid-template-columns:1fr;}}
+
+  /* ---------- moat / reasons ---------- */
+  .reasons{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin:0 0 8px;}
+  .reason{background:var(--surface);border:1px solid var(--line);padding:16px 18px;}
+  .reason h4{margin:0 0 6px;font-size:15.5px;}
+  .reason h4 .n{font-family:"IBM Plex Mono",monospace;color:var(--accent-ink);margin-right:8px;}
+  .reason p{margin:0;font-size:14px;color:var(--ink-2);}
+  @media (max-width:720px){.reasons{grid-template-columns:1fr;}}
+  .replaced{list-style:none;margin:0;padding:0;}
+  .replaced li{
+    padding:12px 16px;background:var(--surface);border:1px solid var(--line);margin-bottom:8px;font-size:14.5px;
+  }
+  .replaced .from{color:var(--ink-3);text-decoration:line-through;text-decoration-thickness:1px;}
+  .replaced .arrow{color:var(--accent-ink);font-weight:700;margin:0 6px;}
+  .replaced .why{display:block;font-size:13.5px;color:var(--ink-2);margin-top:3px;}
+
+  /* ---------- filter ---------- */
+  .filter-row{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 14px;align-items:center;}
+  .filter-row .lbl{font-size:13.5px;color:var(--ink-2);margin-right:2px;}
+  .filter-row button{
+    font:inherit;font-size:13.5px;cursor:pointer;padding:6px 12px;border-radius:99px;
+    background:var(--surface);color:var(--ink);border:1px solid var(--line);
+  }
+  .filter-row button[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink);font-weight:700;}
+  tr.hidden-row{display:none;}
+  @media (max-width:720px){tr.hidden-row{display:none !important;}}
+
+  /* ---------- sources / footer ---------- */
+  .sources{font-size:13.5px;color:var(--ink-2);}
+  .sources li{margin:7px 0;word-break:break-word;}
+  .uncertain li{margin:8px 0;font-size:14.5px;color:var(--ink-2);}
+  footer{border-top:2px solid var(--ink);margin-top:44px;padding:20px 0 44px;font-size:13px;color:var(--ink-3);}
+  :focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
+  @media (prefers-reduced-motion: reduce){
+    html{scroll-behavior:auto;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="dateline">
+    <span>数据基准：<b>OpenRouter 周榜，截至 2026-11-07 UTC</b></span>
+    <span>抓取与核对：<b>2026-11-08</b></span>
+    <span>价格单位：<b>美元 / 每百万 tokens（输入 / 输出）</b></span>
+  </div>
+  <h1>调用量最高的模型，<br />强在<span class="hl">模型本身</span>，不是供应商多</h1>
+  <p class="lede">供应商多是<b>结果，不是原因</b>。周榜前 20 名一周烧掉 <b>163.68T tokens</b>，头部模型几乎都收敛到同一套内在配方——<b>稀疏 MoE（总参数百 B、激活仅 8–55B）＋混合稀疏/线性注意力＋ 1M 上下文＋ FP8/FP4 量化</b>，同时压低每 token 的计算和 KV 显存，provider 才有可能把价格压到 $0.1–0.6。开放权重让更多人能复制这套配方、参与压价，是<b>放大器，不是发动机</b>。这页逐个深挖 17 个模型的许可证、参数、架构、部署成本和真正强弱项。</p>
+
+  <div class="takeaways">
+    <div class="take">
+      <div class="num">56.04T <small>tokens / 周</small></div>
+      <p><b>DeepSeek V4.1 Flash 1017 独占鳌头</b>：MIT 开放权重，激活仅 8B（prefill）/16B（decode），全局 KV 仅 890 字节/token——同价位 agent 编码最强、长上下文成本最低。</p>
+    </div>
+    <div class="take">
+      <div class="num">12 / 18</div>
+      <p><b>开放权重占三分之二。</b>前 20 名剔除 2 个身份不明条目后，开放权重 12 席、闭源 6 席（67%）；但开放≠便宜——见 Kimi 反例。</p>
+    </div>
+    <div class="take">
+      <div class="num">8–18B <small>激活参数</small></div>
+      <p><b>便宜的真正来源是低激活。</b>DeepSeek 1017 8/16B、MiMo-Flash 15B、GLM Flash 18B 才能做到 $0.28–0.60 输出价；激活 104B 的 Kimi 即便开放也卖 $2/$10。</p>
+    </div>
+    <div class="take">
+      <div class="num">510GB–1.56TB</div>
+      <p><b>开放≠个人能跑。</b>上榜开放模型权重 252GB–1.56TB，能部署的只有 B200/H200 集群的大 provider；普通用户买的仍是 API。</p>
+    </div>
+  </div>
+</header>
+
+<section id="rankings">
+  <h2><span class="no">01</span>排名：先把口径说清楚</h2>
+  <p class="sec-sub">排行榜量的是「谁被用得多」，不是「谁更好」。下面三件事不先说清，后面所有数字都会被误读。</p>
+
+  <div class="method">
+    <h3>统计口径（OpenRouter 官方说明）</h3>
+    <ul>
+      <li><b>按 tokens 排名</b>（输入 + 输出之和），不是请求数、不是花了多少钱、不是质量分。官方明确说排行榜不衡量用户数、支出或 benchmark 成绩；模型的啰嗦程度和 tokenizer 差异也会影响 token 总量。</li>
+      <li><b>按模型变体分别排名</b>：免费变体（<span class="mono">:free</span>）单独算；用户设为私有的请求排除在外。窗口为过去 1 / 7 / 30 天，均截至最新完整 UTC 日；下文以<b>周榜（过去 7 天）</b>为准，单日波动太大。</li>
+      <li><b>开放权重≠开源≠能自托管：</b>多数只公开权重，许可证从 MIT/Apache 2.0 到自定义附条件许可差别极大；权重 252GB–1.56TB 决定了自托管门槛，总参数决定显存、激活参数决定每 token 计算，两者必须分开看。</li>
+      <li><b>价格有两套口径（次要因素）</b>：厂商端价（模型作者自己 endpoint 的价）和 OpenRouter 最低价（几十家第三方 provider 里最便宜的一家），同一模型可差 10–25 倍。本页两个都给，不混用。</li>
+      <li><b>速度是「最优 provider 的 P50」</b>，不是你默认路由到的体验；不同 provider 之间速度可差 2–5 倍。DeepSeek 1017 标称的 725 tok/s 来自最贵的 Ultrafast endpoint，普通 provider 约 130–276 tok/s。</li>
+      <li><b>流量主要由 agent 应用驱动</b>，不是个人聊天：DeepSeek 1017 的最大来源是 Hermes Agent（8.21T）、Claude Code（5.69T）、pi（5.63T）；Opus 5.5 的最大来源 Claude Code 一家就贡献了 14.2T。</li>
+    </ul>
+  </div>
+
+  <div class="chart-box" role="img" aria-label="周榜前十名 token 量条形图：DeepSeek V4.1 Flash 1017 以 56.04T 居首，约为第二名旧版 V4.1 Flash 17.69T 的三倍多">
+    <div class="bar-row"><div class="nm">DeepSeek V4.1 Flash 1017<span>DeepSeek</span></div><div class="bar-track"><div class="bar-fill" style="width:100%"></div></div><div class="val">56.04T</div></div>
+    <div class="bar-row"><div class="nm">DeepSeek V4.1 Flash（旧版）<span>DeepSeek · 0910 快照</span></div><div class="bar-track"><div class="bar-fill" style="width:31.6%"></div></div><div class="val">17.69T</div></div>
+    <div class="bar-row"><div class="nm">GLM 5.3 Flash<span>Z.ai</span></div><div class="bar-track"><div class="bar-fill" style="width:24.1%"></div></div><div class="val">13.51T</div></div>
+    <div class="bar-row"><div class="nm">Hy4<span>Tencent · 11-04 发布</span></div><div class="bar-track"><div class="bar-fill" style="width:18.0%"></div></div><div class="val">10.06T</div></div>
+    <div class="bar-row"><div class="nm">GPT-6 Luna<span>OpenAI</span></div><div class="bar-track"><div class="bar-fill dim" style="width:13.0%"></div></div><div class="val">7.26T</div></div>
+    <div class="bar-row"><div class="nm">Step 5 Preview<span>StepFun</span></div><div class="bar-track"><div class="bar-fill dim" style="width:12.5%"></div></div><div class="val">6.99T</div></div>
+    <div class="bar-row"><div class="nm">Claude Opus 5.5<span>Anthropic · 旗舰价</span></div><div class="bar-track"><div class="bar-fill dim" style="width:12.0%"></div></div><div class="val">6.74T</div></div>
+    <div class="bar-row"><div class="nm">MiniMax M3.1 Flash<span>MiniMax</span></div><div class="bar-track"><div class="bar-fill dim" style="width:9.6%"></div></div><div class="val">5.37T</div></div>
+    <div class="bar-row"><div class="nm">Hy4 preview<span>Tencent · 被正式版取代中</span></div><div class="bar-track"><div class="bar-fill dim" style="width:7.5%"></div></div><div class="val">4.20T</div></div>
+    <div class="bar-row"><div class="nm">Kimi K3.1 Pro<span>Moonshot AI</span></div><div class="bar-track"><div class="bar-fill dim" style="width:7.4%"></div></div><div class="val">4.12T</div></div>
+    <p class="cap">周 tokens 量（过去 7 天，截至 2026-11-07）。第 3 名之后全部在 10T 以下，第 1 名约等于第 2–5 名之和。来源：OpenRouter 官方排行榜（前 10 名已 live 逐项核对）。</p>
+  </div>
+
+  <h3>周榜前 20 名全表</h3>
+  <div class="tbl-wrap">
+  <table>
+    <thead>
+      <tr><th>#</th><th>模型</th><th class="num">周 tokens</th><th class="num">占前 20</th><th class="num">周环比</th><th class="num">30 天 tokens</th></tr>
+    </thead>
+    <tbody>
+      <tr><td class="rank">1</td><td data-l="模型"><span class="model-name">DeepSeek V4.1 Flash 1017</span></td><td class="num" data-l="周 tokens">56.04T</td><td class="num" data-l="占前 20">34.2%</td><td class="num up" data-l="周环比">+17%</td><td class="num" data-l="30 天">135T</td></tr>
+      <tr><td class="rank">2</td><td data-l="模型"><span class="model-name">DeepSeek V4.1 Flash</span>（0910 快照）</td><td class="num" data-l="周 tokens">17.69T</td><td class="num" data-l="占前 20">10.8%</td><td class="num up" data-l="周环比">+21%</td><td class="num" data-l="30 天">97.6T</td></tr>
+      <tr><td class="rank">3</td><td data-l="模型"><span class="model-name">GLM 5.3 Flash</span>（Z.ai）</td><td class="num" data-l="周 tokens">13.51T</td><td class="num" data-l="占前 20">8.3%</td><td class="num down" data-l="周环比">−14%</td><td class="num" data-l="30 天">58T</td></tr>
+      <tr><td class="rank">4</td><td data-l="模型"><span class="model-name">Hy4</span>（Tencent）<span class="newtag">NEW</span></td><td class="num" data-l="周 tokens">10.06T</td><td class="num" data-l="占前 20">6.1%</td><td class="num" data-l="周环比">新发布</td><td class="num" data-l="30 天">—</td></tr>
+      <tr><td class="rank">5</td><td data-l="模型"><span class="model-name">GPT-6 Luna</span>（OpenAI）</td><td class="num" data-l="周 tokens">7.26T</td><td class="num" data-l="占前 20">4.4%</td><td class="num down" data-l="周环比">−29%</td><td class="num" data-l="30 天">33.5T</td></tr>
+      <tr><td class="rank">6</td><td data-l="模型"><span class="model-name">Step 5 Preview</span>（StepFun）</td><td class="num" data-l="周 tokens">6.99T</td><td class="num" data-l="占前 20">4.3%</td><td class="num up" data-l="周环比">+11%</td><td class="num" data-l="30 天">35.8T</td></tr>
+      <tr><td class="rank">7</td><td data-l="模型"><span class="model-name">Claude Opus 5.5</span>（Anthropic）</td><td class="num" data-l="周 tokens">6.74T</td><td class="num" data-l="占前 20">4.1%</td><td class="num down" data-l="周环比">−2%</td><td class="num" data-l="30 天">29.5T</td></tr>
+      <tr><td class="rank">8</td><td data-l="模型"><span class="model-name">MiniMax M3.1 Flash</span></td><td class="num" data-l="周 tokens">5.37T</td><td class="num" data-l="占前 20">3.3%</td><td class="num down" data-l="周环比">−5%</td><td class="num" data-l="30 天">28T*</td></tr>
+      <tr><td class="rank">9</td><td data-l="模型"><span class="model-name">Hy4 preview</span>（Tencent）</td><td class="num" data-l="周 tokens">4.20T</td><td class="num" data-l="占前 20">2.6%</td><td class="num down" data-l="周环比">−55%</td><td class="num" data-l="30 天">32.4T</td></tr>
+      <tr><td class="rank">10</td><td data-l="模型"><span class="model-name">Kimi K3.1 Pro</span>（Moonshot AI）</td><td class="num" data-l="周 tokens">4.12T</td><td class="num" data-l="占前 20">2.5%</td><td class="num up" data-l="周环比">+109%</td><td class="num" data-l="30 天">—</td></tr>
+      <tr><td class="rank">11</td><td data-l="模型"><span class="model-name">GPT-6.1 Sol</span>（OpenAI）</td><td class="num" data-l="周 tokens">3.94T</td><td class="num" data-l="占前 20">2.4%</td><td class="num up" data-l="周环比">+9%</td><td class="num" data-l="30 天">—</td></tr>
+      <tr><td class="rank">12</td><td data-l="模型"><span class="model-name">GLM 5.3</span>（Z.ai）</td><td class="num" data-l="周 tokens">3.64T</td><td class="num" data-l="占前 20">2.2%</td><td class="num down" data-l="周环比">−18%</td><td class="num" data-l="30 天">19.5T</td></tr>
+      <tr><td class="rank">13</td><td data-l="模型"><span class="model-name">DeepSeek V4 Flash 0731</span></td><td class="num" data-l="周 tokens">3.40T</td><td class="num" data-l="占前 20">2.1%</td><td class="num down" data-l="周环比">−14%</td><td class="num" data-l="30 天">—</td></tr>
+      <tr><td class="rank">14</td><td data-l="模型"><span class="model-name">Crouton Alpha</span>（匿名 stealth）</td><td class="num" data-l="周 tokens">3.33T</td><td class="num" data-l="占前 20">2.0%</td><td class="num" data-l="周环比">新上榜</td><td class="num" data-l="30 天">—</td></tr>
+      <tr><td class="rank">15</td><td data-l="模型"><span class="model-name">GPT-5.6 Luna</span>（OpenAI）</td><td class="num" data-l="周 tokens">3.13T</td><td class="num" data-l="占前 20">1.9%</td><td class="num down" data-l="周环比">−22%</td><td class="num" data-l="30 天">—</td></tr>
+      <tr><td class="rank">16</td><td data-l="模型"><span class="model-name">typesafe/jev-1.13-20260917</span></td><td class="num" data-l="周 tokens">3.10T</td><td class="num" data-l="占前 20">1.9%</td><td class="num down" data-l="周环比">−1%</td><td class="num" data-l="30 天">—</td></tr>
+      <tr><td class="rank">17</td><td data-l="模型"><span class="model-name">Nemotron 3 Ultra</span>（NVIDIA，:free）</td><td class="num" data-l="周 tokens">2.93T</td><td class="num" data-l="占前 20">1.8%</td><td class="num down" data-l="周环比">−10%</td><td class="num" data-l="30 天">19.6T</td></tr>
+      <tr><td class="rank">18</td><td data-l="模型"><span class="model-name">Nemotron 3.5 Super VL</span>（NVIDIA，:free）</td><td class="num" data-l="周 tokens">2.91T</td><td class="num" data-l="占前 20">1.8%</td><td class="num up" data-l="周环比">+32%</td><td class="num" data-l="30 天">—</td></tr>
+      <tr><td class="rank">19</td><td data-l="模型"><span class="model-name">Muse Spark 1.3 Contributor</span>（Meta）</td><td class="num" data-l="周 tokens">2.68T</td><td class="num" data-l="占前 20">1.6%</td><td class="num up" data-l="周环比">+3%</td><td class="num" data-l="30 天">—</td></tr>
+      <tr><td class="rank">20</td><td data-l="模型"><span class="model-name">Claude Haiku 5.5</span>（Anthropic）</td><td class="num" data-l="周 tokens">2.64T</td><td class="num" data-l="占前 20">1.6%</td><td class="num down" data-l="周环比">−4%</td><td class="num" data-l="30 天">—</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p class="small">* MiniMax M3.1 Flash 于 10 月 19 日发布，30 天口径 28T 含 stealth 测试期流量。来源：<a href="https://openrouter.ai/rankings">OpenRouter 官方排行榜</a>（前 10 名 2026-11-08 live 核对一致）；11–20 名引自 AIMap 对同一官方数据源的镜像 <a href="https://aimap.page/en/models/rankings/">aimap.page</a>（数据截至 2026-11-07，2026-11-08 抓取），未逐项点开官网「Show more」核对。排行榜数据许可为 CC BY 4.0。</p>
+
+  <div class="note"><b>两行不进选型：</b>第 14 名 Crouton Alpha 是匿名 stealth 模型，厂商、价格、能力均未知（OpenRouter 标注 $0/$0）；第 16 名 Jev 1.13 是 TypeSafe 的结构化决策模型，只返回类型化选择，不是聊天模型。两者出现在榜上只说明「有大应用在批量调用」，不构成推荐理由。另外 Claude Sonnet 5.5（$2/$10）本周约 2.6T 级别、跌出前 20，但在 10 月 24–30 日那周排第 19，仍是旗舰档的重要对照，下文纳入对比。</div>
+
+  <p>换一个口径，画面会完全不同：按<b>请求数</b>统计的作者份额里，DeepSeek 29.8%、OpenAI 18.8%、Google 14.4% 排第 3——但按 tokens 没有任何 Google 模型进前 20。Google 的流量多而短；agent 长任务的时代，长上下文 + 低价的组合正在系统性挤压短请求模型。</p>
+</section>
+
+<section id="specs">
+  <h2><span class="no">02</span>内在规格：开放权重、参数与架构决定部署成本</h2>
+  <p class="sec-sub">先看模型本身，再看价格。真正压低每 token 成本的是三件事：<b>激活参数小</b>（每 token 只算 8–27B，而不是总参的数百 B）、<b>KV 缓存压缩</b>（混合稀疏/线性注意力让 1M 上下文的并发显存可控）、<b>量化友好</b>（原生 FP8/FP4）。下表是 17 个模型的内在规格总表；价格与 provider 数量放在表后，只作结果参考。来源标注：厂商自评与独立第三方（AA 等）严格分开，AA 在 2026-10-27 推出 v5.0 重标尺度，<b>不同版本分数不可直接比较</b>。</p>
+
+  <div class="method">
+    <h3>假设检验：「开放 → 便宜部署 → 低价 → 高用量」只对了一半</h3>
+    <ul>
+      <li><b>环节 1 打折——开放≠个人能便宜部署：</b>DeepSeek 1017 约 510GB、GLM Flash FP8 约 331GB、Hy4 FP8 约 770GB、Kimi 1.56TB、Step 5 FP8 约 650GB。能跑它们的只有大集群，不是普通用户。</li>
+      <li><b>环节 2 打折——开放≠低价：</b>Kimi 开放权重却卖 $2/$10（104B 激活），与闭源 Sonnet / GPT-6.1 Sol 同档，一周只有 4.12T；反过来闭源 GPT-6 Luna、Claude Haiku 5.5 都是 $0.10/$0.50，比多数开放模型还便宜。</li>
+      <li><b>环节 3 打折——免费≠高用量：</b>Nemotron 两款 $0 免费模型只排第 17、18 名（2.93T / 2.91T），远低于 DeepSeek 1017 的 56.04T。价格降到 0 之后，能力天花板和生态入口成为瓶颈。</li>
+      <li><b>共同配方才是底层原因：</b>2026 年 8–10 月这批模型几乎全部是稀疏 MoE + 混合注意力 + 1M 上下文 + 原生视觉 + 默认深度思考 + FP8/FP4。没有这套配方，光开放也冲不上榜（见第 05 节反例）。</li>
+    </ul>
+  </div>
+
+  <h3>17 个模型内在总表（许可证 · 参数 · 架构 · 强弱）</h3>
+  <div class="tbl-wrap"><table>
+    <thead><tr><th>模型</th><th>开放权重 / 许可证</th><th>总参 / 激活</th><th>核心架构</th><th>最强（注明出处性质）</th><th>最弱</th></tr></thead>
+    <tbody>
+      <tr><td data-l="模型"><span class="model-name">DeepSeek V4.1 Flash 1017</span></td><td data-l="许可证">是，MIT（HF 模型卡；个别聚合页写 Apache 2.0，以 HF 为准）</td><td data-l="参数">552B+196B Engram / 8B prefill·16B decode</td><td data-l="架构">CED 20+20 层 + CSA2 + Engram；KV 890B/token；FP8/FP4；原生视觉</td><td data-l="最强">DeepSWE 77.0（厂商自评）；Vibe Code 87.7%（独立 Vals）</td><td data-l="最弱">Terminal-Bench 4.0 仍落后 Opus；输出啰嗦</td></tr>
+      <tr><td data-l="模型"><span class="model-name">GLM 5.3 Flash</span></td><td data-l="许可证">是，MIT（FP8 约 331GB）</td><td data-l="参数">320B / 18B</td><td data-l="架构">34 层线性注意力（KDA）+11 层稀疏注意力；288+1 专家 top-8；首个原生多模态 GLM-5（图/视频）</td><td data-l="最强">AutomationBench 48.8、Toolathlon 78.4（厂商自评）</td><td data-l="最弱">Terminal-Bench 4.0 约 33%（独立）；token 消耗大</td></tr>
+      <tr><td data-l="模型"><span class="model-name">腾讯 Hy4</span></td><td data-l="许可证">预览版 Apache 2.0；<b>正式版权重尚未发布</b>（截至 11-03/04 报道）</td><td data-l="参数">770B / 49B</td><td data-l="架构">Gated DSA+MLA+IndexCache；256+1 专家 top-8；原生 FP8；预览纯文本，正式版加视觉+计算机操作</td><td data-l="最强">SWE-bench Multilingual 82.9、GPQA 92.3（均为厂商自评，独立复核缺失）</td><td data-l="最弱">思考过长、过度自我验证（腾讯自承）；Vals TB 4.0 仅 8.1%（口径不同，不宜直比）</td></tr>
+      <tr><td data-l="模型"><span class="model-name">GPT-6 Luna</span></td><td data-l="许可证">否，专有闭源，未披露参数</td><td data-l="参数">未披露</td><td data-l="架构">未披露；家族中唯一可关闭推理（none）；$0.10/$0.50</td><td data-l="最强">每任务成本 $0.07（AA）、约 129 tok/s，高频简单任务</td><td data-l="最弱">TB 4.0 约 13%；事实错误率 max 档 18.4%（OpenAI 自测）</td></tr>
+      <tr><td data-l="模型"><span class="model-name">Step 5 Preview</span></td><td data-l="许可证">是，自定义 StepFun License 1.0（MaaS 年收入 &gt;$20M 需另签）</td><td data-l="参数">600B / 27B</td><td data-l="架构">92 层窄深；Gated SWA+GQA 交错；352 专家</td><td data-l="最强">AA-LCR 长上下文推理 88.3%（独立）；FrontierFinance 66.4（厂商）</td><td data-l="最弱">TB 4.0 33.3%；SRE/法律极弱</td></tr>
+      <tr><td data-l="模型"><span class="model-name">Claude Opus 5.5</span></td><td data-l="许可证">否，专有闭源</td><td data-l="参数">未披露</td><td data-l="架构">未披露；1M / 128K；$4/$20</td><td data-l="最强">AA 约 57.6–58（独立）；OSWorld 81.8%（厂商）</td><td data-l="最弱">TB 4.0 输给同门 Sonnet（66.4% vs 70.6%，厂商）；价格 2 倍于 Sonnet</td></tr>
+      <tr><td data-l="模型"><span class="model-name">MiniMax M3.1 Flash</span></td><td data-l="许可证">是，MiniMax Community License（年收入 &gt;$20M 需书面授权；权重约 252GB）</td><td data-l="参数">约 428B / 23B</td><td data-l="架构">60 层全稀疏注意力 + DSpark 推测解码；FP4 专家</td><td data-l="最强">BankerToolBench 76.2、AutomationBench 62.8（厂商自评）</td><td data-l="最弱">Vibe Code 73.9%（独立）；OSWorld 61.7%</td></tr>
+      <tr><td data-l="模型"><span class="model-name">Kimi K3.1 Pro</span></td><td data-l="许可证">是，自定义 Kimi License（MaaS &gt;$20M 需另签；权重 1.56TB）</td><td data-l="参数">2.8T / 104B</td><td data-l="架构">896 专家 top-16+2 共享；MXFP4；仅思考模式</td><td data-l="最强">GPQA 94.2、HLE 有工具 70.0（厂商）；AA 55.1（独立）</td><td data-l="最弱">科学/程序合成弱；自托管几乎不可能</td></tr>
+      <tr><td data-l="模型"><span class="model-name">GPT-6.1 Sol</span></td><td data-l="许可证">否，专有闭源</td><td data-l="参数">未披露</td><td data-l="架构">未披露；不可关闭推理；$2/$10，Codex 默认</td><td data-l="最强">AA 52（独立）；TB 4.0 56.1% 且每任务 $1.82（独立，Opus 为 $13.11）</td><td data-l="最弱">SciCode 弱于 Opus；速度仅约 29–52 tok/s</td></tr>
+      <tr><td data-l="模型"><span class="model-name">GLM 5.3</span></td><td data-l="许可证">权重已发布，自定义 GLM-5.3 License（<b>已非 MIT</b>，大 MaaS 需安全审查）</td><td data-l="参数">约 753B / 约 39–40B</td><td data-l="架构">与 GLM 5.2 同底座、提升全来自后训练；DSA；始终推理；纯文本</td><td data-l="最强">CyberGym 84.5%（厂商自评，第一）；AA v4.1.1 60（独立）</td><td data-l="最弱">ExploitBench 54.4% 远落后闭源；无视觉</td></tr>
+      <tr><td data-l="模型"><span class="model-name">Claude Sonnet 5.5</span></td><td data-l="许可证">否，专有闭源</td><td data-l="参数">未披露</td><td data-l="架构">未披露；$2/$10</td><td data-l="最强">TB 4.0 70.6% 家族第一（厂商）；GPQA 92.4%（OpenRouter 自跑）</td><td data-l="最弱">长程开放式判断略逊 Opus</td></tr>
+      <tr><td data-l="模型"><span class="model-name">Claude Haiku 5.5</span></td><td data-l="许可证">否，专有闭源</td><td data-l="参数">未披露</td><td data-l="架构">未披露；&gt;100k 提示价跳升 5 倍（$0.50/$2.50）</td><td data-l="最强">GDPval 为 Sonnet 的 88%、OSWorld 72.4%（厂商）</td><td data-l="最弱">TB 4.0 39.2%；max 档输出约 Luna 的 3 倍，长任务账单不便宜</td></tr>
+      <tr><td data-l="模型"><span class="model-name">Gemini 3.8 Flash</span></td><td data-l="许可证">否，专有闭源</td><td data-l="参数">未披露</td><td data-l="架构">基于 3.7 Flash 再训练；多模态最全（图/音/视频/PDF）；最大输出 65K</td><td data-l="最强">DeepSWE 73.7%、TB 2.1 89.4%（Google 自跑）</td><td data-l="最弱">TB 4.0 AA 口径约 20%；2027-01-01 涨价至 $1.50/$7.50</td></tr>
+      <tr><td data-l="模型"><span class="model-name">Nemotron 3 Ultra :free</span></td><td data-l="许可证">是，OpenMDW-1.1（权重/数据/配方全公开）</td><td data-l="参数">550B / 55B</td><td data-l="架构">LatentMoE：Mamba-2+MoE+注意力；512 专家 top-22；MTP</td><td data-l="最强">RULER 1M 94.7%、抗幻觉 78.7（厂商自评）</td><td data-l="最弱">编码弱（SWE 70.7）；免费仍只排第 17</td></tr>
+      <tr><td data-l="模型"><span class="model-name">Nemotron 3.5 Super VL :free</span></td><td data-l="许可证">是，OpenMDW-1.1（NVFP4 约 75GB）</td><td data-l="参数">120B / 12B</td><td data-l="架构">Mamba-2+Transformer MoE；C-RADIO 视觉；视频最长 2 分钟；可单台 DGX Spark 运行</td><td data-l="最强">极速约 196–409 tok/s（AA）；视觉+文档+视频合一</td><td data-l="最弱">AA 26–26.5，仅为头部一半多</td></tr>
+      <tr><td data-l="模型"><span class="model-name">Muse Spark 1.3 Contributor</span></td><td data-l="许可证">否，专有闭源（勿与 1.2 谱系的 Muse Spark Open 混淆）</td><td data-l="参数">未披露</td><td data-l="架构">未披露；始终推理；Contributor $0.10/$0.20 = 数据换折扣（标准版 $1.25/$4.25）</td><td data-l="最强">MRCR 512K–1M 98.1%、DeepSWE 75.4%（厂商 max 档，发布时 gated）</td><td data-l="最弱">通用 agent 六项无一第一；音频支持不完整</td></tr>
+      <tr><td data-l="模型"><span class="model-name">MiMo-V2.6-Flash</span>（30 天榜第 8，本周第 24）</td><td data-l="许可证">是，MIT（FP8 仅 172.9GB）</td><td data-l="参数">309B / 15B</td><td data-l="架构">39 层 SWA+9 层 GA；5 层 MTP 推测解码；图/视频/音频输入；$0.14/$0.28 全组最便宜付费价</td><td data-l="最强">CyberGym 95.1%（厂商；DeepSWE 67.9 与官方 dashboard 65.68 冲突）</td><td data-l="最弱">TB 4.0 约 24–29% 全榜最弱一档</td></tr>
+    </tbody>
+  </table></div>
+  <p class="small">自托管门槛速查：DeepSeek 1017 生产形态约 1 个 8×H200 节点（GGUF 可压至 246GiB 起，需专门分支）；GLM Flash vLLM 约 306GiB；Hy4 官方配方最低 16×B200 或 8×B300，8×H100 装不下 FP8 权重；Step 5 FP8 需 4×B300 或 8×H200；Nemotron Ultra NVFP4 至少 4×B200 或 8×H100；Nemotron Super VL 是唯一单机可跑的（1 台 DGX Spark）。闭源模型无自托管，成本结构是厂商内部优化+规模分摊+生态溢价，与开放模型完全不同。</p>
+
+  <h3>价格与 provider（结果，不是原因——附表）</h3>
+  <p class="sec-sub" style="margin-bottom:14px;">下表保留第一轮的价格/速度/provider 数据供查账，但请按「结果」读它：provider 多、价格低，是上面的架构配方和开放权重共同作用后的市场表现，不是选型的第一性依据。OpenRouter 充值收 5.5% 手续费（最低 $0.80），token 价本身不加价。</p>
+
+  <div class="tbl-wrap">
+  <table>
+    <thead>
+      <tr><th>模型</th><th class="num">厂商端价 入/出</th><th class="num">最低价 入/出</th><th>上下文 / 最大输出</th><th>输入模态</th><th class="num">速度（最优 P50）</th><th class="num">3 日可用性</th><th class="num">Provider</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td data-l="模型"><span class="model-name">DeepSeek V4.1 Flash 1017</span><span class="model-id">deepseek/deepseek-v4.1-flash-1017</span></td>
+        <td class="num" data-l="厂商端价">$0.15 / $0.60</td><td class="num" data-l="最低价">$0.006 / $0.50</td>
+        <td data-l="上下文">1M / 1M</td><td data-l="模态">文本+图像</td>
+        <td class="num" data-l="速度">725 tok/s* / 0.13s</td><td class="num" data-l="可用性">99.90%</td><td class="num" data-l="Provider">40</td>
+      </tr>
+      <tr>
+        <td data-l="模型"><span class="model-name">DeepSeek V4.1 Flash</span>（旧版）<span class="model-id">deepseek/deepseek-v4.1-flash</span></td>
+        <td class="num" data-l="厂商端价">$0.14 / $0.42†</td><td class="num" data-l="最低价">$0.051 / $0.567</td>
+        <td data-l="上下文">1M / —</td><td data-l="模态">文本+图像</td>
+        <td class="num" data-l="速度">未单独抓取</td><td class="num" data-l="可用性">—</td><td class="num" data-l="Provider">多家</td>
+      </tr>
+      <tr>
+        <td data-l="模型"><span class="model-name">GLM 5.3 Flash</span><span class="model-id">z-ai/glm-5.3-flash</span></td>
+        <td class="num" data-l="厂商端价">$0.15 / $0.50</td><td class="num" data-l="最低价">$0.034 / $0.083</td>
+        <td data-l="上下文">1M / 131K</td><td data-l="模态">文本+图像+视频</td>
+        <td class="num" data-l="速度">162 tok/s / 0.18s</td><td class="num" data-l="可用性">99.88%</td><td class="num" data-l="Provider">36</td>
+      </tr>
+      <tr>
+        <td data-l="模型"><span class="model-name">Hy4</span><span class="model-id">tencent/hy4</span></td>
+        <td class="num" data-l="厂商端价">$0.417 / $1.251‡</td><td class="num" data-l="最低价">$0.417 / $1.251</td>
+        <td data-l="上下文">1M / 65K</td><td data-l="模态">文本+图像</td>
+        <td class="num" data-l="速度">50 tok/s / 3.25s</td><td class="num" data-l="可用性">99.91%</td><td class="num" data-l="Provider"><b>1</b></td>
+      </tr>
+      <tr>
+        <td data-l="模型"><span class="model-name">GPT-6 Luna</span><span class="model-id">openai/gpt-6-luna</span></td>
+        <td class="num" data-l="厂商端价">$0.10 / $0.50</td><td class="num" data-l="最低价">$0.10 / $0.50</td>
+        <td data-l="上下文">1.05M / 128K</td><td data-l="模态">文本+图像+PDF</td>
+        <td class="num" data-l="速度">150 tok/s / 0.61s</td><td class="num" data-l="可用性">99.43%</td><td class="num" data-l="Provider">3</td>
+      </tr>
+      <tr>
+        <td data-l="模型"><span class="model-name">Step 5 Preview</span><span class="model-id">stepfun/step-5-preview</span></td>
+        <td class="num" data-l="厂商端价">$1.00 / $2.70</td><td class="num" data-l="最低价">$1.00 / $2.70</td>
+        <td data-l="上下文">1M / —</td><td data-l="模态">文本+图像+视频</td>
+        <td class="num" data-l="速度">104 tok/s / 2.81s</td><td class="num" data-l="可用性"><b>33.87%</b></td><td class="num" data-l="Provider">3</td>
+      </tr>
+      <tr>
+        <td data-l="模型"><span class="model-name">Claude Opus 5.5</span><span class="model-id">anthropic/claude-opus-5.5</span></td>
+        <td class="num" data-l="厂商端价">$4.00 / $20.00</td><td class="num" data-l="最低价">$4.00 / $20.00</td>
+        <td data-l="上下文">1M / 128K</td><td data-l="模态">文本+图像+PDF</td>
+        <td class="num" data-l="速度">144 tok/s§ / 0.83s</td><td class="num" data-l="可用性">99.92%</td><td class="num" data-l="Provider">5</td>
+      </tr>
+      <tr>
+        <td data-l="模型"><span class="model-name">MiniMax M3.1 Flash</span><span class="model-id">minimax/minimax-m3.1-flash</span></td>
+        <td class="num" data-l="厂商端价">$0.15 / $0.60</td><td class="num" data-l="最低价">$0.113 / $0.45</td>
+        <td data-l="上下文">1M / —</td><td data-l="模态">文本+图像+视频</td>
+        <td class="num" data-l="速度">243 tok/s / 0.24s</td><td class="num" data-l="可用性">99.93%</td><td class="num" data-l="Provider">12</td>
+      </tr>
+      <tr>
+        <td data-l="模型"><span class="model-name">Kimi K3.1 Pro</span><span class="model-id">moonshotai/kimi-k3.1-pro</span></td>
+        <td class="num" data-l="厂商端价">$2.00 / $10.00</td><td class="num" data-l="最低价">$0.377 / $7.95</td>
+        <td data-l="上下文">1M / <b>1M</b></td><td data-l="模态">文本+图像+视频</td>
+        <td class="num" data-l="速度">130 tok/s / 0.66s</td><td class="num" data-l="可用性">99.88%</td><td class="num" data-l="Provider">17</td>
+      </tr>
+      <tr>
+        <td data-l="模型"><span class="model-name">GPT-6.1 Sol</span><span class="model-id">openai/gpt-6.1-sol</span></td>
+        <td class="num" data-l="厂商端价">$2.00 / $10.00</td><td class="num" data-l="最低价">$2.00 / $10.00</td>
+        <td data-l="上下文">1.05M / 128K</td><td data-l="模态">文本+图像+PDF</td>
+        <td class="num" data-l="速度">67 tok/s / 1.78s</td><td class="num" data-l="可用性">99.57%</td><td class="num" data-l="Provider">3</td>
+      </tr>
+      <tr>
+        <td data-l="模型"><span class="model-name">GLM 5.3</span><span class="model-id">z-ai/glm-5.3</span></td>
+        <td class="num" data-l="厂商端价">$1.40 / $4.40</td><td class="num" data-l="最低价">$0.070 / $1.40</td>
+        <td data-l="上下文">1M / 1M</td><td data-l="模态"><b>仅文本</b></td>
+        <td class="num" data-l="速度">280 tok/s¶ / 0.24s</td><td class="num" data-l="可用性">99.89%</td><td class="num" data-l="Provider">36</td>
+      </tr>
+      <tr>
+        <td data-l="模型"><span class="model-name">Nemotron 3 Ultra :free</span><span class="model-id">nvidia/nemotron-3-ultra-550b-a55b:free</span></td>
+        <td class="num" data-l="厂商端价">$0 / $0</td><td class="num" data-l="最低价">$0 / $0</td>
+        <td data-l="上下文">1M / 65K</td><td data-l="模态">仅文本</td>
+        <td class="num" data-l="速度">53 tok/s / 1.15s</td><td class="num" data-l="可用性">98.31%</td><td class="num" data-l="Provider">1</td>
+      </tr>
+      <tr>
+        <td data-l="模型"><span class="model-name">Muse Spark 1.3 Contributor</span><span class="model-id">meta/muse-spark-1.3-contributor</span></td>
+        <td class="num" data-l="厂商端价">$0.10 / $0.20</td><td class="num" data-l="最低价">$0.10 / $0.20</td>
+        <td data-l="上下文">1M / —</td><td data-l="模态">文本+图像+视频+PDF</td>
+        <td class="num" data-l="速度">93 tok/s / 2.81s</td><td class="num" data-l="可用性">99.81%</td><td class="num" data-l="Provider"><b>1</b></td>
+      </tr>
+      <tr>
+        <td data-l="模型"><span class="model-name">Claude Haiku 5.5</span><span class="model-id">anthropic/claude-haiku-5.5</span></td>
+        <td class="num" data-l="厂商端价">$0.10 / $0.50</td><td class="num" data-l="最低价">$0.10 / $0.50</td>
+        <td data-l="上下文">1M / 128K</td><td data-l="模态">文本+图像+PDF</td>
+        <td class="num" data-l="速度">164 tok/s / 0.68s</td><td class="num" data-l="可用性">99.93%</td><td class="num" data-l="Provider">5</td>
+      </tr>
+      <tr>
+        <td data-l="模型"><span class="model-name">Claude Sonnet 5.5</span>（榜外对照）<span class="model-id">anthropic/claude-sonnet-5.5</span></td>
+        <td class="num" data-l="厂商端价">$2.00 / $10.00</td><td class="num" data-l="最低价">$2.00 / $10.00</td>
+        <td data-l="上下文">1M / 128K</td><td data-l="模态">文本+图像+PDF</td>
+        <td class="num" data-l="速度">122 tok/s / 0.56s</td><td class="num" data-l="可用性">99.92%</td><td class="num" data-l="Provider">5</td>
+      </tr>
+      <tr>
+        <td data-l="模型"><span class="model-name">Gemini 3.8 Flash</span>（榜外对照）<span class="model-id">google/gemini-3.8-flash</span></td>
+        <td class="num" data-l="厂商端价">$0.75 / $3.75#</td><td class="num" data-l="最低价">$0.75 / $3.75</td>
+        <td data-l="上下文">1M / 65K</td><td data-l="模态">文本+图像+视频+PDF+<b>音频</b></td>
+        <td class="num" data-l="速度">103 tok/s / 2.29s</td><td class="num" data-l="可用性">99.77%</td><td class="num" data-l="Provider">2</td>
+      </tr>
+    </tbody>
+  </table>
+  </div>
+  <p class="small">
+    全部模型均支持工具调用（Nemotron 3 Ultra 例外：支持 tools 但不支持 <span class="mono">response_format</span>，JSON 输出无法强制）。缓存读价示例：DeepSeek 1017 $0.005/M、GLM 5.3 Flash $0.03/M、GPT-6 Luna $0.01/M、Opus 5.5 $0.20/M。<br />
+    * 725 tok/s 是最贵 Ultrafast endpoint（$2.40/$9.60）的数值，普通 provider 约 130–276 tok/s、延迟 0.23–1.5s，不要把最优值当默认体验。† DeepInfra 30% 促销价，标准价约 $0.20/$0.60。‡ Hy4 标价 $0.834/$2.501，现价 5 折。§ Opus 的 144 tok/s 是 Fast endpoint（$8/$40），标准 endpoint 约 74–89 tok/s。¶ GLM 5.3 的 280 tok/s 是 Fast endpoint（$2.10/$6.60），标准 provider 约 100–130 tok/s。# Gemini 5 折促销价，标价 $1.50/$7.50，2027-01-01 起恢复标价。<br />
+    来源：各模型 OpenRouter 官方模型页（2026-11-08 抓取），如 <a href="https://openrouter.ai/deepseek/deepseek-v4.1-flash-1017">DeepSeek 1017</a>、<a href="https://openrouter.ai/z-ai/glm-5.3-flash">GLM 5.3 Flash</a>、<a href="https://openrouter.ai/anthropic/claude-opus-5.5">Opus 5.5</a>、<a href="https://openrouter.ai/moonshotai/kimi-k3.1-pro">Kimi K3.1 Pro</a>；厂商端价交叉核对自 <a href="https://www.teamday.ai/blog/top-ai-models-openrouter-2026">Teamday 2026-10-31 的 endpoint 价表</a>。最低价为抓取当日快照，促销随时变化，实际账单以请求时路由到的 provider 为准。
+  </p>
+
+  <h3>容易被忽略的折扣与涨价规则</h3>
+  <div class="method">
+    <ul>
+      <li><b>分时定价：</b>DeepSeek 厂商端高峰（工作日 01:00–04:00、06:00–10:00 UTC）$0.30/$1.20，非高峰 $0.15/$0.60；MiniMax 每天 15:00–01:00 UTC 半价（$0.075/$0.30）；Hy4 preview 16:00–24:00 UTC 9 折。</li>
+      <li><b>Batch 变体（<span class="mono">:batch</span>）</b>约为正常价 5 折，24 小时内完成，适合非实时批量任务；2026-10-31 时平台上有 71 个 <span class="mono">:batch</span> 变体。OpenAI 的 Flex endpoint 约为标准价一半（GPT-6 Luna Flex $0.05/$0.25），Fast 约为 2 倍。</li>
+      <li><b>长上下文涨价陷阱：</b>Claude Haiku 5.5 在 prompt 超过 100K 后价格变 5 倍（$0.50/$2.50）——名义 1M 上下文，长文档场景实际最贵。GPT-6 系列 prompt 超过约 272K 后收费上浮（Teamday 提醒，未单独核实具体倍数）。</li>
+      <li><b>免费档限额：</b>免费模型 20 请求/分钟；累计充值不足 $10 时每天 50 次，≥$10 后每天 1000 次（<a href="https://openrouter.ai/docs/faq">OpenRouter FAQ</a>）。这是免费档不能用于生产的核心原因。</li>
+    </ul>
+  </div>
+</section>
+
+<section id="tiers">
+  <h2><span class="no">03</span>按价位分档：同档之内，差在哪</h2>
+  <p class="sec-sub">分档以厂商端输入价为主。同档模型标价相近，但能力坐标、速度、稳定性和数据政策可以完全不同——这正是「为什么没被替代」的答案所在。能力分数标注来源：AA = Artificial Analysis 智力/编码指数，属第三方评测；DeepSWE 为厂商表数据，注意自评偏差。本节沿用第一轮抓取口径，与第 02 节第二轮口径（如 Opus AA 59.1 vs 57.6–58）版本不同、不可混用——选型先看第 02 节的架构与强弱项，分档价格只作预算参考。</p>
+
+  <div class="tier">
+    <div class="tier-head">
+      <h3>免费档</h3><span class="price">$0 / $0</span>
+      <span class="members">Nemotron 3 Ultra :free · Nemotron 3.5 Super VL :free（榜上其余 $0 条目为匿名 stealth，不计）</span>
+    </div>
+    <div class="tier-body">
+      <div class="tbl-wrap"><table>
+        <thead><tr><th>模型</th><th class="num">速度</th><th>定位与短板</th></tr></thead>
+        <tbody>
+          <tr><td data-l="模型"><span class="model-name">Nemotron 3 Ultra :free</span></td><td class="num" data-l="速度">53 tok/s / 1.15s</td><td data-l="定位">550B MoE（55B 激活）的旗舰推理定位，1M 上下文；Kilo Code / Cline 用它跑了数 T tokens。短板：免费档最慢之一、可用性 98.31%、<b>不支持 response_format</b>，结构化输出不可强制。</td></tr>
+          <tr><td data-l="模型"><span class="model-name">Nemotron 3.5 Super VL :free</span></td><td class="num" data-l="速度">未单独抓取</td><td data-l="定位">视觉版（VL），本周 +32%，免费档里增长最快；上下文与工具支持细节未在本轮核实。</td></tr>
+        </tbody>
+      </table></div>
+      <div class="verdict"><b>档内结论：</b>免费档没有真正的竞争，两个 Nemotron 就是全部选择——Ultra 做纯文本推理/编码实验，Super VL 做免费视觉实验。代价是速度慢、限额低（50–1000 次/天）、结构化输出弱；且免费档默认路由可能包含会拿数据训练的 provider，需在隐私设置中关闭。<b>生产环境不要把免费档当主力。</b></div>
+    </div>
+  </div>
+
+  <div class="tier">
+    <div class="tier-head">
+      <h3>廉价档——榜单的主战场（约占前 20 名 tokens 的 70%）</h3><span class="price">输入约 $0.1–0.5 / M</span>
+      <span class="members">DeepSeek V4.1 Flash 1017 · DeepSeek V4.1 Flash · GLM 5.3 Flash · GPT-6 Luna · MiniMax M3.1 Flash · Muse Spark 1.3 · Claude Haiku 5.5 · DeepSeek V4 Flash 0731 · GPT-5.6 Luna · MiMo-V2.6-Flash（30 天榜第 8，$0.14/$0.28，本周跌出前 20）</span>
+    </div>
+    <div class="tier-body">
+      <div class="tbl-wrap"><table>
+        <thead><tr><th>模型</th><th class="num">速度（最优 P50）</th><th>能力坐标（第三方）</th><th>稳定性 / 数据政策</th></tr></thead>
+        <tbody>
+          <tr><td data-l="模型"><span class="model-name">DeepSeek V4.1 Flash 1017</span></td><td class="num" data-l="速度">普通 provider 130–276 tok/s</td><td data-l="能力">本档最强：AA 智力指数 32.6；DeepSWE v1.1 77%（厂商表，高于 Opus 5 的 74%）；BenchLeader 编码 64.0、agent/工具 63.0</td><td data-l="稳定性">99.90%，40 家 provider，抗单点故障最强。数据政策：厂商端在第三方统计中被标记为「保留且可能训练」、数据存于中国境内（第三方结论），可经第三方 provider 路由规避</td></tr>
+          <tr><td data-l="模型"><span class="model-name">GLM 5.3 Flash</span></td><td class="num" data-l="速度">162 tok/s / 0.18s</td><td data-l="能力">次强：BenchLeader 编码 57.4、agent 59.7；<b>数学反超 DeepSeek（69 vs 61）</b>；DeepSWE 63.4%</td><td data-l="稳定性">99.88%，36 家；支持 EU 区域内路由。Z.ai 厂商端称 API 内容不存储（第三方文章引述，未单独核实）</td></tr>
+          <tr><td data-l="模型"><span class="model-name">MiniMax M3.1 Flash</span></td><td class="num" data-l="速度">243 tok/s / 0.24s</td><td data-l="能力">GPQA 约 87–89%；厂商称 agent/代码/安全方向提升明显</td><td data-l="稳定性">99.93%，12 家；数据政策未单独核实</td></tr>
+          <tr><td data-l="模型"><span class="model-name">GPT-6 Luna</span></td><td class="num" data-l="速度">150 tok/s / 0.61s</td><td data-l="能力">廉价定位，AA 智力指数未进前列；厂商定位高容量聊天/分类/轻 agent</td><td data-l="稳定性">99.43%（本档最低之一），仅 3 家 provider（OpenAI/Bedrock/Azure）。OpenAI API 数据默认不用于训练（厂商政策，第三方引述）；ZDR 需审批</td></tr>
+          <tr><td data-l="模型"><span class="model-name">Claude Haiku 5.5</span></td><td class="num" data-l="速度">164 tok/s / 0.68s</td><td data-l="能力">GPQA 约 87%；首个支持可调 effort 的 Haiku，编码/计算机使用比上代强</td><td data-l="稳定性">99.93%，5 家云厂商 failover。Anthropic 默认不训练；ZDR 需企业签约。但 <b>&gt;100K prompt 后价格 5 倍</b></td></tr>
+          <tr><td data-l="模型"><span class="model-name">Muse Spark 1.3</span></td><td class="num" data-l="速度">93 tok/s / 2.81s</td><td data-l="能力">实验性多模态推理定位，无公开第三方高分</td><td data-l="稳定性">99.81% 但<b>单 provider = 单点故障</b>；官方页面明确提示 prompt 与输出可能被用于改进 Meta 产品，敏感数据慎用</td></tr>
+        </tbody>
+      </table></div>
+      <div class="verdict"><b>档内横向结论：</b>速度看 MiniMax 和 DeepSeek 1017；推理/代码 DeepSeek 1017 &gt; GLM Flash &gt; 其余，但<b>数学是 GLM Flash 更好</b>。Haiku 和 GPT-6 Luna 的卖点不是绝对能力，而是 Claude Code / Codex 的生态和稳定性。长上下文名义都是 1M，真正以「长上下文不掉点」为卖点的只有 DeepSeek / GLM / MiniMax / Kimi 一系。工具调用全员支持，差异在真实 agent 流量的背书量。想要「不训练 + 可留欧」，选 GLM（EU 路由）或 OpenAI / Anthropic 系。</div>
+    </div>
+  </div>
+
+  <div class="tier">
+    <div class="tier-head">
+      <h3>中档</h3><span class="price">输入约 $1–3 / M</span>
+      <span class="members">Step 5 Preview · GLM 5.3 · Hy4 / Hy4 preview · Kimi K3.1 Pro · GPT-6.1 Sol · Claude Sonnet 5.5 · Gemini 3.8 Flash</span>
+    </div>
+    <div class="tier-body">
+      <div class="tbl-wrap"><table>
+        <thead><tr><th>模型</th><th class="num">速度</th><th>能力坐标（第三方）</th><th>稳定性 / 备注</th></tr></thead>
+        <tbody>
+          <tr><td data-l="模型"><span class="model-name">Claude Sonnet 5.5</span>（$2/$10）</td><td class="num" data-l="速度">122 tok/s / 0.56s</td><td data-l="能力">AA 智力 54.5（第 4）、AA 编码 87.4、GPQA 约 93%；LMArena 文本 1469</td><td data-l="稳定性">99.92%，5 家；Claude Code 真实 agent 流量背书</td></tr>
+          <tr><td data-l="模型"><span class="model-name">GPT-6.1 Sol</span>（$2/$10）</td><td class="num" data-l="速度"><b>67 tok/s</b> / 1.78s</td><td data-l="能力">AA 智力 54.6（第 3）、AA 编码 82.2、GPQA 94.8%；LMArena 创意 1421</td><td data-l="稳定性">99.57%，3 家；速度是最大短板，agent 长任务等待感明显</td></tr>
+          <tr><td data-l="模型"><span class="model-name">Kimi K3.1 Pro</span>（$2/$10，最低入 $0.377）</td><td class="num" data-l="速度">130 tok/s / 0.66s</td><td data-l="能力">AA 智力 46.5（第 9）、AA 编码 82.0、GPQA 约 93%；长程编码/金融研究定位</td><td data-l="稳定性">99.88%，17 家；<b>最大输出 1M 为同档唯一</b>。Moonshot 厂商政策称服务数据可用于训练（第三方引述），可经第三方 provider 绕开</td></tr>
+          <tr><td data-l="模型"><span class="model-name">GLM 5.3</span>（$1.40/$4.40，最低入 $0.07）</td><td class="num" data-l="速度">100–130 tok/s / 0.24s</td><td data-l="能力">DeepSWE 66.9%；推理常开、max effort 默认，长程 agent 定位</td><td data-l="稳定性">99.89%，36 家，本档最稳；纯文本无视觉，推理常开使长任务 token 消耗大</td></tr>
+          <tr><td data-l="模型"><span class="model-name">Gemini 3.8 Flash</span>（$0.75/$3.75 促销）</td><td class="num" data-l="速度">103 tok/s / 2.29s</td><td data-l="能力">AA 智力 30.8 偏低，但 GPQA 94.9% 单项高；LMArena 视觉创意 1319</td><td data-l="稳定性">99.77%，仅 2 家（AI Studio/Vertex）；多模态最全，最大输出仅 65K</td></tr>
+          <tr><td data-l="模型"><span class="model-name">Hy4</span>（折后 $0.417/$1.251）</td><td class="num" data-l="速度"><b>50 tok/s / 3.25s，全榜最慢</b></td><td data-l="能力">厂商称 agent/长程生产力任务大幅提升、首次支持视觉；无独立第三方分数</td><td data-l="稳定性">99.91% 但单 provider；腾讯云数据政策未单独核实</td></tr>
+          <tr><td data-l="模型"><span class="model-name">Step 5 Preview</span>（$1/$2.70）</td><td class="num" data-l="速度">104 tok/s / 2.81s</td><td data-l="能力">厂商定位旗舰 agent，金融/长任务强；无独立第三方高分记录</td><td data-l="稳定性"><b>可用性 33.87%（3 日），全榜最差</b>，3 家 provider；高调用量但极不稳定，生产慎用（该数字为模型页 3 日统计，原因未核实）</td></tr>
+        </tbody>
+      </table></div>
+      <div class="verdict"><b>档内横向结论：</b>推理/代码第一梯队是 GPT-6.1 Sol 与 Sonnet 5.5（AA 54.6 / 54.5），Kimi 46.5 第二梯队；GLM 5.3 靠「推理常开 + 第三方超低价」打性价比。<b>本档最大的陷阱是价差：</b>GLM 5.3 厂商价 $1.40 vs 最低 $0.07、Kimi $2 vs $0.377——默认路由可能已经是最便宜价，手动锁定厂商端反而贵 5–20 倍，选型时必须看清自己实际走的 provider。</div>
+    </div>
+  </div>
+
+  <div class="tier">
+    <div class="tier-head">
+      <h3>旗舰档</h3><span class="price">输出价 $20 / M 起</span>
+      <span class="members">Claude Opus 5.5（$4/$20）· 榜外对照：GPT-6 Astra（$10/$50）、Claude Fable 5.1（$10/$50）</span>
+    </div>
+    <div class="tier-body">
+      <div class="tbl-wrap"><table>
+        <thead><tr><th>模型</th><th class="num">速度</th><th>能力坐标（第三方）</th><th>备注</th></tr></thead>
+        <tbody>
+          <tr><td data-l="模型"><span class="model-name">Claude Opus 5.5</span></td><td class="num" data-l="速度">标准 74–89 tok/s；Fast 144 tok/s</td><td data-l="能力"><b>AA 智力指数 59.1 全榜第 1</b>、AA 编码 88.9、GPQA 约 90%；LMArena 创意写作 1532（第 2）、文本 1512</td><td data-l="稳定性">99.92%，5 家云厂商；Claude Code 主力（14.2T tokens 流量）</td></tr>
+          <tr><td data-l="模型"><span class="model-name">GPT-6 Astra</span>（榜外）</td><td class="num" data-l="速度">未单独抓取</td><td data-l="能力">AA 56.9（第 2）、编码 85.0</td><td data-l="稳定性">价格为 Opus 的 2.5 倍，量更小，不在周榜前 20</td></tr>
+          <tr><td data-l="模型"><span class="model-name">Claude Fable 5.1</span>（榜外）</td><td class="num" data-l="速度">未单独抓取</td><td data-l="能力">AA 50.0、LMArena 创意 1514（第 3）</td><td data-l="稳定性">同上</td></tr>
+        </tbody>
+      </table></div>
+      <div class="verdict"><b>档内结论：</b>Opus 5.5 是唯一以旗舰价冲进周榜前 10 的模型。它的 token 量只有 DeepSeek 1017 的 12%，但按 $4/$20 粗算的收入量级远高于所有廉价模型——<b>token 榜系统性低估了旗舰模型的商业分量</b>。</div>
+    </div>
+  </div>
+
+  <div class="note"><b>跨档共性——数据政策：</b>OpenRouter 官方把 provider 政策分三档：ZDR（零数据保留）、Safety Retention（仅防滥用保留、不训练）、Retention and Training（可存储并训练）。账户可分别对付费/免费模型关闭「可能训练」的 provider 路由；OpenRouter 自身默认不记录 prompt 内容。官方层面：Anthropic 首方 endpoint 不支持 ZDR（走 Bedrock/Vertex 才有），OpenAI 的 ZDR 需事先审批。第三方统计（vanja.io，2026-10-19，对 94 家有政策的 provider）称 4 家被标记为训练型（DeepSeek、Thinking Machines、NVIDIA、Liquid）——这是<b>第三方结论</b>，OpenRouter 自身声明其政策表「不是决定性来源」。EU 区域内路由（eu.openrouter.ai）支持 GLM 5.3 Flash、GLM 5.3、Claude 全家、GPT-6 Luna/Sol，需 Business 或 Enterprise 计划。来源：<a href="https://openrouter.ai/docs/faq">OpenRouter FAQ</a>、<a href="https://vanja.io/openrouter/">vanja.io 第三方统计</a>。</div>
+</section>
+
+<section id="usecases">
+  <h2><span class="no">04</span>按用途选：每个推荐都说明「为什么不是另一个」</h2>
+  <p class="sec-sub">点一个用途看推荐。标注说明：「官方数据」指 OpenRouter 模型页/排行榜/FAQ；「第三方评测」指 Artificial Analysis、LMArena、BenchLeader、DeepSWE 等；未标注硬指标的判断属社区共识，请自行小规模验证。用例落点已按内在特点校准：如长文档优先 Kimi 的 1M 最大输出、数学优先 GLM Flash、安全类优先 GLM 5.3 / MiMo 的 CyberGym 长板。</p>
+
+  <div class="uc-tabs" role="tablist" aria-label="用途选择">
+    <button role="tab" aria-selected="true" data-uc="chat">日常聊天问答</button>
+    <button role="tab" aria-selected="false" data-uc="agent">代理式编程</button>
+    <button role="tab" aria-selected="false" data-uc="completion">代码补全</button>
+    <button role="tab" aria-selected="false" data-uc="rag">长文档 / RAG</button>
+    <button role="tab" aria-selected="false" data-uc="math">数学与复杂推理</button>
+    <button role="tab" aria-selected="false" data-uc="writing">创意写作 / 角色扮演</button>
+    <button role="tab" aria-selected="false" data-uc="batch">批量处理</button>
+    <button role="tab" aria-selected="false" data-uc="vision">视觉理解</button>
+    <button role="tab" aria-selected="false" data-uc="translate">翻译</button>
+    <button role="tab" aria-selected="false" data-uc="fallback">便宜兜底</button>
+  </div>
+
+  <div class="uc-panel active" data-panel="chat">
+    <div class="recs">
+      <div class="rec"><div class="pick">首选</div><h4>GLM 5.3 Flash</h4><div class="pr">$0.15 / $0.50（最低 $0.034 / $0.083）</div><p>同价位里<b>数学更好</b>（BenchLeader 数学 69 vs DeepSeek 61），日常问答里的理科问题更稳；还支持视频输入、有 EU 路由。</p></div>
+      <div class="rec"><div class="pick">聊天常带任务时</div><h4>DeepSeek V4.1 Flash 1017</h4><div class="pr">$0.15 / $0.60（最低 $0.006 / $0.50）</div><p>同价位 agent/编码最强、40 家 provider 最稳、速度最快。聊天里常夹着「帮我写段代码/跑个任务」，选它而不是 GLM。</p></div>
+      <div class="rec"><div class="pick">为对话质量付同价</div><h4>Claude Haiku 5.5</h4><div class="pr">$0.10 / $0.50</div><p>Claude 系的表达和指令遵循在 LMArena 文本榜上系统性高于廉价中国模型。但 prompt 超 100K 后价格跳变 5 倍，<b>长对话慎用</b>。</p></div>
+    </div>
+  </div>
+
+  <div class="uc-panel" data-panel="agent">
+    <div class="recs">
+      <div class="rec"><div class="pick">预算充足</div><h4>Claude Opus 5.5</h4><div class="pr">$4.00 / $20.00</div><p>AA 智力指数 59.1 第一、AA 编码 88.9，Claude Code 主力（14.2T tokens 背书）。长程多文件改动、code review、找 bug 的上限最高。贵 20–40 倍，但 agent 任务里<b>「一次做对」比「便宜但返工」更省钱</b>。</p></div>
+      <div class="rec"><div class="pick">预算有限</div><h4>DeepSeek V4.1 Flash 1017</h4><div class="pr">$0.15 / $0.60</div><p>DeepSWE v1.1 77%（厂商表，高于 Opus 5 的 74%）、Terminal-Bench 4.0 42.3%，且是 Claude Code / Hermes / pi 里真实在跑 agent 的模型。同价位 GLM Flash 的 DeepSWE 只有 63.4%，差距明显。</p></div>
+      <div class="rec"><div class="pick">折中</div><h4>GLM 5.3</h4><div class="pr">$1.40 / $4.40（第三方入价低至 $0.07）</div><p>推理常开、max effort 默认，长程任务不容易「想一半就停」；实际成本可比肩廉价档。缺点：纯文本无视觉、推理 token 消耗大。</p></div>
+    </div>
+    <p class="uc-note">不推荐 Step 5 Preview 做主力：3 日可用性 33.87%，agent 长任务跑到一半断连的代价，远高于它省下的钱。</p>
+  </div>
+
+  <div class="uc-panel" data-panel="completion">
+    <p class="uc-note">说明：前 20 名里<b>没有专用的 FIM（中间填充）补全模型</b>，OpenRouter 上补全实际就是用聊天模型做短补全。以下为社区共识，非排行榜结论。</p>
+    <div class="recs">
+      <div class="rec"><div class="pick">首选</div><h4>DeepSeek V4.1 Flash 1017</h4><div class="pr">$0.15 / $0.60</div><p>IDE 内联补全对首 token 延迟最敏感：它的 0.13–0.36s 延迟和 200+ tok/s 最合适，且最便宜、provider 最多。</p></div>
+      <div class="rec"><div class="pick">对延迟更敏感</div><h4>MiniMax M3.1 Flash</h4><div class="pr">$0.15 / $0.60（半价时段 $0.075 / $0.30）</div><p>同价位速度第一档：243 tok/s / 0.24s；赶上半价时段成本再降一半。</p></div>
+      <div class="rec"><div class="pick">质量优先</div><h4>Claude Haiku 5.5 / Sonnet 5.5</h4><div class="pr">$0.10 / $0.50 · $2.00 / $10.00</div><p>大函数、跨文件上下文的补全选 Claude 系。代价：Haiku 长上下文价格跳变，Sonnet 贵 20 倍。</p></div>
+    </div>
+  </div>
+
+  <div class="uc-panel" data-panel="rag">
+    <div class="recs">
+      <div class="rec"><div class="pick">首选</div><h4>Kimi K3.1 Pro</h4><div class="pr">$2.00 / $10.00（最低入 $0.377）</div><p>1M 上下文 + <b>1M 最大输出（同档唯一）</b>。做「读 50 万字文档并输出长报告」时，输出上限比输入上下文更重要——其他模型会在输出端先撞墙。</p></div>
+      <div class="rec"><div class="pick">边读边推理</div><h4>GLM 5.3</h4><div class="pr">$1.40 / $4.40（最低入 $0.07）</div><p>推理常开 + 1M 上下文 + 36 家 provider，适合财报、论文、合同审查这类需要推理的长文档。缺点是纯文本：扫描版 PDF/图表需先 OCR。</p></div>
+      <div class="rec"><div class="pick">批量 RAG</div><h4>DeepSeek V4.1 Flash 1017</h4><div class="pr">缓存读 $0.005 / M</div><p>输入最低 $0.006/M、缓存读 $0.005/M，重复检索的缓存命中成本极低；1M 上下文足够放大量 chunk。</p></div>
+    </div>
+    <p class="uc-note">备选 Gemini 3.8 Flash：PDF/图像/音频原生输入，读扫描件和图表不用预处理；但最大输出仅 65K，且 5 折促销价 2027 年到期恢复标价。</p>
+  </div>
+
+  <div class="uc-panel" data-panel="math">
+    <div class="recs">
+      <div class="rec"><div class="pick">最难的问题</div><h4>Claude Opus 5.5</h4><div class="pr">$4.00 / $20.00</div><p>AA 智力指数 59.1 第一、GPQA 约 90%。多步推理、科研/金融分析的首选。</p></div>
+      <div class="rec"><div class="pick">半价拿单项最高</div><h4>GPT-6.1 Sol</h4><div class="pr">$2.00 / $10.00</div><p>AA 54.6 第二、<b>GPQA 94.8%</b>（本轮抓到的单项最高之一），价格是 Opus 的一半。缺点：67 tok/s 较慢，长推理等待久。</p></div>
+      <div class="rec"><div class="pick">廉价档数学最强</div><h4>GLM 5.3 Flash</h4><div class="pr">$0.15 / $0.50</div><p>BenchLeader 数学 69 胜 DeepSeek 1017 的 61；HLE 带工具 55.3% vs DeepSeek 42.6%（第三方转引）。预算有限做数学题，选它而不是 DeepSeek。</p></div>
+    </div>
+    <p class="uc-note">注意：DeepSeek 1017 的 DeepSWE 强，但 HLE（无工具）42.6% 低于 Opus 5 的 56.3%——纯推理不是它的长项，别被它的总排名误导。</p>
+  </div>
+
+  <div class="uc-panel" data-panel="writing">
+    <div class="recs">
+      <div class="rec"><div class="pick">首选</div><h4>Claude Opus 5.5</h4><div class="pr">$4.00 / $20.00</div><p>LMArena 创意写作 1532（第 2，仅次于 Gemini 4 Argon 的 1536）、文本榜 1512。长篇小说、剧本、需要持续人设的写作首选。</p></div>
+      <div class="rec"><div class="pick">性价比</div><h4>Claude Sonnet 5.5</h4><div class="pr">$2.00 / $10.00</div><p>LMArena 文本 1469，价格是 Opus 的一半。日常创意写作、营销文案、剧本初稿用它足够。</p></div>
+      <div class="rec"><div class="pick">便宜 + 多模态</div><h4>Gemini 3.8 Flash</h4><div class="pr">$0.75 / $3.75（促销）</div><p>LMArena 视觉创意 1319，便宜档里创意分相对最高，且是榜内少有的「创意 + 多模态」组合。预算极低的常见组合：GLM Flash / DeepSeek 1017 出初稿，Sonnet 润色（社区共识）。</p></div>
+    </div>
+    <p class="uc-note">角色扮演（RP）没有公开 benchmark 支撑：社区共识是开放权重模型因限制较少而常被用于 RP，本页不就内容政策做断言，需自行验证。</p>
+  </div>
+
+  <div class="uc-panel" data-panel="batch">
+    <div class="recs">
+      <div class="rec"><div class="pick">输出短的任务</div><h4>GLM 5.3 Flash</h4><div class="pr">输出最低 $0.083 / M</div><p>分类、抽取这类输出短的任务，成本由输出价决定——它的输出价是全榜最低，162 tok/s 也够快。</p></div>
+      <div class="rec"><div class="pick">输入长的任务</div><h4>DeepSeek V4.1 Flash 1017</h4><div class="pr">输入最低 $0.006 / M</div><p>长文档分类这类输入长、输出短的任务，成本由输入价和缓存决定：输入 $0.006/M、缓存读 $0.005/M，无人能比。</p></div>
+      <div class="rec"><div class="pick">非实时 + OpenAI 系</div><h4>GPT-6 Luna（:batch / Flex）</h4><div class="pr">Flex $0.05 / $0.25</div><p>Batch 约 5 折、Flex 约半价，是最便宜的 OpenAI 系选择，且 OpenAI 系的结构化输出最成熟。</p></div>
+    </div>
+    <p class="uc-note">通用技巧：批量任务一律走 <span class="mono">:batch</span> 变体（约 5 折）或用缓存。免费档因 50–1000 次/天的限额，不适合批量。</p>
+  </div>
+
+  <div class="uc-panel" data-panel="vision">
+    <div class="recs">
+      <div class="rec"><div class="pick">首选</div><h4>Gemini 3.8 Flash</h4><div class="pr">$0.75 / $3.75（促销）</div><p>多模态最全：文本+图像+视频+PDF+<b>音频</b>原生输入，GPQA 94.9%，LMArena 视觉创意 1319。读截图、图表、扫描 PDF、视频帧选它。缺点：仅 2 家 provider、促销价 2027 年到期。</p></div>
+      <div class="rec"><div class="pick">看图 + 推理</div><h4>Kimi K3.1 Pro</h4><div class="pr">$2.00 / $10.00</div><p>原生图像+视频理解，叠加 AA 46.5 的推理能力，适合看架构图写代码、看财报图做分析；最大输出 1M 可输出长分析。</p></div>
+      <div class="rec"><div class="pick">便宜视觉</div><h4>DeepSeek 1017 / GLM 5.3 Flash</h4><div class="pr">$0.15 起 / M</div><p>两者都是 OpenRouter 视觉模型榜前 3（官方视觉合集），读图/OCR 够用且便宜 10 倍以上；GLM 还支持视频输入。</p></div>
+    </div>
+    <p class="uc-note">免费备选：Nemotron 3.5 Super VL（:free）——免费视觉模型，但上下文/工具细节未在本轮核实，限额也低。</p>
+  </div>
+
+  <div class="uc-panel" data-panel="translate">
+    <p class="uc-note">说明：前 20 名里<b>没有专用翻译模型</b>（腾讯 Hy-MT 系列未进榜）。以下基于通用能力的推荐，非翻译 benchmark 结论。</p>
+    <div class="recs">
+      <div class="rec"><div class="pick">批量翻译</div><h4>GPT-6 Luna</h4><div class="pr">$0.10 / $0.50</div><p>便宜、OpenAI 系指令遵循好、结构化输出成熟，适合「翻译 + 保留格式/术语表」的批量场景。</p></div>
+      <div class="rec"><div class="pick">中英互译大批量</div><h4>GLM 5.3 Flash / DeepSeek 1017</h4><div class="pr">$0.15 起 / M</div><p>成本最低的一档：GLM 有中文语料优势，DeepSeek 有速度优势，按语对取舍。</p></div>
+      <div class="rec"><div class="pick">终稿质量</div><h4>Claude Sonnet 5.5</h4><div class="pr">$2.00 / $10.00</div><p>文学/专业翻译需要信达雅和术语一致时选它。贵 20 倍，只用于终稿，不要全程用。</p></div>
+    </div>
+  </div>
+
+  <div class="uc-panel" data-panel="fallback">
+    <div class="recs">
+      <div class="rec"><div class="pick">综合兜底</div><h4>GLM 5.3 Flash</h4><div class="pr">最低 $0.034 / $0.083</div><p>1M 上下文、视觉+视频、工具调用、36 家 provider、EU 路由——<b>没有明显短板</b>，不知道选什么时先用它。</p></div>
+      <div class="rec"><div class="pick">性能兜底</div><h4>DeepSeek V4.1 Flash 1017</h4><div class="pr">$0.15 / $0.60</div><p>同价位能力最强、速度最快、provider 最多。缺点：厂商端数据政策最宽松，敏感场景需指定第三方 provider。</p></div>
+      <div class="rec"><div class="pick">零成本兜底</div><h4>Nemotron 3 Ultra :free</h4><div class="pr">$0 / $0</div><p>1M 上下文的免费推理模型，适合实验和个人小量使用。硬上限：50–1000 次/天限额、53 tok/s。</p></div>
+    </div>
+    <p class="uc-note">升级路径：日常用 GLM Flash / DeepSeek 1017，需要时升到 Haiku（同价）或 Sonnet / Opus（20–40 倍价）。不要长期停留在 GPT-5.6 Luna（已被 GPT-6 Luna 取代且贵一倍）或 Hy4 preview（已被 Hy4 取代）上。</p>
+  </div>
+</section>
+
+<section id="moat">
+  <h2><span class="no">05</span>核心问题：它们靠什么活着，没被同价位替代</h2>
+  <p class="sec-sub">能留在榜上的模型，各有一样竞品拿不走的<b>内在</b>东西——不是「40 家 provider」，而是「同价位 agent 编码最强」「KV 只有 890 字节/token」「1M 检索 98.1%」这类写在权重和架构里的特点。闭源高排名者靠的则是能力天花板、生态入口和每任务成本，同样是内在账，不是供应商数量。</p>
+
+  <h3>每个模型的护城河</h3>
+  <div class="tbl-wrap">
+  <table>
+    <thead><tr><th>模型</th><th>靠什么活着</th></tr></thead>
+    <tbody>
+      <tr><td data-l="模型"><span class="model-name">DeepSeek V4.1 Flash 1017</span></td><td data-l="护城河"><b>同价位 agent 编码最强 + 长上下文成本最低。</b>DeepSWE 77.0（厂商自评）、Vibe Code 87.7%（独立）；CED+CSA2 把全局 KV 压到 890B/token、激活仅 8/16B——这是架构给的成本优势，provider 只是把它卖出来。</td></tr>
+      <tr><td data-l="模型"><span class="model-name">DeepSeek V4.1 Flash（旧版）</span></td><td data-l="护城河"><b>惯性 + 快照锁定。</b>大量应用 pin 住了 0910 快照的 ID 和行为，迁移有成本——但这只是续命，正在被 1017 取代（见下）。</td></tr>
+      <tr><td data-l="模型"><span class="model-name">GLM 5.3 Flash</span></td><td data-l="护城河"><b>自动化/工具编排同价位最强 + 唯一兼顾 1M 与原生视频的 MIT 模型。</b>AutomationBench 48.8、Toolathlon 78.4（厂商自评）；混合线性+稀疏注意力使 KV 降 4.44 倍（相对 GLM 5.3，厂商 claim）。输出价最低是这套架构的结果。</td></tr>
+      <tr><td data-l="模型"><span class="model-name">Hy4</span></td><td data-l="护城河"><b>开放权重里多语言软件工程最强（厂商口径）。</b>SWE-bench Multilingual 82.9（厂商自评）+ 与 CodeBuddy/WorkBuddy 协同设计。但 49B 激活、770GB 权重决定它部署最贵一档，且正式版权重尚未发布、独立复核缺失——不可替代性目前最未经验证。</td></tr>
+      <tr><td data-l="模型"><span class="model-name">GPT-6 Luna</span></td><td data-l="护城河"><b>闭源里最便宜、最快、最省 token 的高频简单任务模型。</b>每任务 $0.07（AA）、家族唯一可关闭推理；靠 OpenAI 内部优化+规模分摊压价，不靠权重公开。代价：硬编码与事实性全榜最弱一档。</td></tr>
+      <tr><td data-l="模型"><span class="model-name">Step 5 Preview</span></td><td data-l="护城河"><b>长上下文推理最强。</b>AA-LCR 88.3%（独立）+ 金融 agent 领先（FrontierFinance 66.4，厂商自评，注：自家 High 档对竞品 Max 档，非同条件）；92 层窄深结构为长程任务而生。可用性 33.87% 是部署侧问题，不改变其内在长板。</td></tr>
+      <tr><td data-l="模型"><span class="model-name">Claude Opus 5.5</span></td><td data-l="护城河"><b>综合智能与长程开放式判断的上限标杆。</b>AA 约 57.6–58（独立）、OSWorld 81.8%（厂商）。但要诚实：它在自家 TB 4.0 上输给半价的 Sonnet，高用量相当部分来自 Claude Code「默认旗舰」地位，而非单项第一。</td></tr>
+      <tr><td data-l="模型"><span class="model-name">MiniMax M3.1 Flash</span></td><td data-l="护城河"><b>金融/办公自动化工具任务同价位顶尖。</b>BankerToolBench 76.2 追平 Opus 5、AutomationBench 62.8 厂商表内第一（厂商自评）；全层稀疏注意力+FP4 专家把 1M 上下文的 KV 读取压到全注意力的约 1/8（社区测算）。注：10 月匿名期曾以 200T+ token 冲榜，部分流量来自测试期。</td></tr>
+      <tr><td data-l="模型"><span class="model-name">Kimi K3.1 Pro</span></td><td data-l="护城河"><b>开放权重里的综合能力天花板。</b>GPQA 94.2、HLE 有工具 70.0（厂商自评）、AA 55.1（独立）；2.8T 规模最接近闭源旗舰，叠加 1M 最大输出（同档唯一）。代价是 104B 激活——开放但不便宜，正是假设的头号反例。</td></tr>
+      <tr><td data-l="模型"><span class="model-name">GPT-6.1 Sol</span></td><td data-l="护城河"><b>「旗舰 95% 的能力、1/5 的价格」。</b>AA 52（独立，Astra 为 53）；TB 4.0 每任务 $1.82，仅为 Opus 的约 1/7（独立）；Codex 默认入口。弱在科学推理与速度。</td></tr>
+      <tr><td data-l="模型"><span class="model-name">GLM 5.3</span></td><td data-l="护城河"><b>网络安全第一 + 「只靠后训练提升 50%」的范例。</b>CyberGym 84.5%（厂商自评）；与 GLM 5.2 同一 743B 底座，全部提升来自 RL 与训练环境设计。注意其许可证已非 MIT、纯文本无视觉；价格两源不一致（AIMap $0.07/$1.40 vs Avenvote 输出 $2.86），未调和。</td></tr>
+      <tr><td data-l="模型"><span class="model-name">Nemotron 3 Ultra :free</span></td><td data-l="护城河"><b>长上下文检索与抗幻觉最强。</b>RULER 1M 94.7%、OmniScience 非幻觉 78.7（厂商自评），美国开放权重旗舰，OpenMDW-1.1 连训练数据与配方都公开。但编码落后同期中国开放模型——$0 救不了能力短板，这正是它只排第 17 的原因。</td></tr>
+      <tr><td data-l="模型"><span class="model-name">Muse Spark 1.3</span></td><td data-l="护城河"><b>1M 上下文长程检索最极端。</b>MRCR 512K–1M 98.1%（厂商 max 档——发布时 gated，普通用户用不到）、DeepSWE 75.4%；Contributor 的 $0.10/$0.20 本质是「数据换折扣」（标准版 $1.25/$4.25）。通用 agent 六项自家测试无一第一。</td></tr>
+      <tr><td data-l="模型"><span class="model-name">Claude Haiku 5.5</span></td><td data-l="护城河"><b>小模型里知识工作与计算机操作最接近大模型。</b>GDPval 为 Sonnet 的 88%、OSWorld 为其 86%（厂商口径），且是 Anthropic 最快的模型。短板在账不在能力：&gt;100k 提示价跳 5 倍、max 档极啰嗦。</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h3>为什么「同价位竞品」结构性打不赢——内在版</h3>
+  <div class="reasons">
+    <div class="reason"><h4><span class="n">1</span>激活参数决定每 token 的硬成本</h4><p>MoE 每 token 只算激活的那部分：8–18B 激活的 DeepSeek/GLM Flash/MiMo 能卖 $0.28–0.60 输出价，49–104B 激活的 Hy4/Kimi/Nemotron Ultra 即便开放权重也压不下来。竞品想更便宜，必须先改架构，不是多找几家供应商。</p></div>
+    <div class="reason"><h4><span class="n">2</span>KV 缓存决定 1M 上下文能不能赚钱</h4><p>长上下文的瓶颈是 KV 显存，不是参数。DeepSeek 的 CSA2 把全局 KV 压到 890B/token（约上代 1/4），GLM 的线性注意力层把 KV 降 4.44 倍，MiniMax 全稀疏注意力只读最优 16 个块——谁压缩得狠，谁的长任务并发就便宜。</p></div>
+    <div class="reason"><h4><span class="n">3</span>量化友好度决定权重能不能塞进更少的卡</h4><p>原生 FP8/FP4（DeepSeek FP4 专家与 KV、MiniMax FP4 专家、Kimi MXFP4 量化感知训练）让数百 GB 权重在出厂时就已压缩；不支持低精度友好的架构，部署成本直接翻倍。</p></div>
+    <div class="reason"><h4><span class="n">4</span>开放权重是放大器：让配方被复制和压价</h4><p>MIT/Apache 的模型（DeepSeek、GLM Flash、MiMo）任何 provider 都能部署，价格被竞争压到官方价以下；但许可证一旦附条件（StepFun、MiniMax、Kimi、GLM 5.3 均有收入门槛或审查义务），或权重缩水、激活过高，放大效应立刻打折。</p></div>
+    <div class="reason"><h4><span class="n">5</span>闭源靠能力上限与每任务成本，不靠开放</h4><p>Opus 靠综合智能上限，Sonnet 靠 TB 4.0 家族第一+半价，GPT-6.1 Sol 靠每任务 $1.82（Opus 的 1/7），Luna 靠每任务 $0.07。它们的共同点是「某个内在指标好到价差被抵消」，与供应商数量无关。</p></div>
+  </div>
+
+  <h3>反例：开放、便宜，却没冲上榜</h3>
+  <ul class="replaced">
+    <li><b>Qwen3.8-Max / Qwen3.8-2.4T-A95B（阿里）</b><span class="why">开放且能力不弱（阿里自报 GPQA 92.8%），但开放版是纯文本、原生上下文仅 262k（托管版才有视觉与 1M），95B 激活成本高，许可证对 MaaS 年收入 &gt;$50M 另有要求，且 OpenRouter 上仅单一 provider——「缩水权重+高激活+严许可证+无价格竞争」四重折扣抵消了开放红利，未进前 20。</span></li>
+    <li><b>Muse Spark Open（Meta，816B/42B）</b><span class="why">美国最强开放模型之一（AA 39，v4.3 口径），但下载需 gated 表单、年收入 &gt;$20M 须另签，托管价 $1.25/$4.25 与闭源 1.3 同价而能力更弱（TB 4.0 8.1% vs 33.3%）——开放版比闭源版贵且弱，没有切换理由，未进前 30。注：它是 1.2 谱系，不是 1.3 的开放版。</span></li>
+    <li><b>MiMo-V2.6-Pro（小米）</b><span class="why">比 Flash 更强、同样 MIT、AA 46 为开放权重最高之一，但 1.02T/42B、$0.435/$0.87；11 月 6 日单日仅第 25 名，Flash 却在 30 日榜第 8。同一家族内，用量向更便宜、更快的 Flash 倾斜——「够用」之后，价格/速度优先于能力。</span></li>
+    <li><b>DeepSeek V4 Pro 0813</b><span class="why">开放 MIT、1.6T 旗舰，七日榜仅第 28 名（1.34T）：自家 V4.1 Flash 1017 在 DeepSWE（77.0 vs 62.7）与 TB 4.0（42.3 vs 12.4）上全面超越且更便宜。开放权重挡不住被自家更便宜的新模型替代。</span></li>
+    <li><b>Nemotron 3 Ultra :free 本身</b><span class="why">免费+开放仍只排第 17：编码（SWE 70.7、TB 2.1 56.4）落后同期中国开放模型。$0 只能消除价格摩擦，不能弥补能力差距。</span></li>
+  </ul>
+
+  <h3>已经被取代的（明确点名）</h3>
+  <ul class="replaced">
+    <li><span class="from">DeepSeek V4.1 Flash（0910）</span><span class="arrow">→</span><b>DeepSeek V4.1 Flash 1017</b><span class="why">同价，1017 在官方 11 项 benchmark 上全部提升（Terminal-Bench 31.2→42.3，DeepSWE 74.2→77.0），厂商已只用 1017 快照服务 <span class="mono">deepseek-flash</span>；30 天口径 1017（135T）已反超旧版（97.6T），取代正在进行中。</span></li>
+    <li><span class="from">Hy4 preview</span><span class="arrow">→</span><b>Hy4</b><span class="why">正式版 11 月 4 日发布后 preview 周环比 −55%，正式版一周 10.06T；preview 的剩余流量是迁移滞后，不是持续需求。</span></li>
+    <li><span class="from">Kimi K3</span><span class="arrow">→</span><b>Kimi K3.1 Pro</b><span class="why">K3 已跌出前 20，K3.1 Pro 一周 +109% 冲到第 10；厂商定位 K3.1 Pro 为 K3 的后继者。</span></li>
+    <li><span class="from">GPT-5.6 Luna / Sol</span><span class="arrow">→</span><b>GPT-6 Luna / GPT-6.1 Sol</b><span class="why">GPT-6 Luna 输入 $0.10，是 GPT-5.6 Luna（$0.20）的一半；GPT-5.6 Sol 的 5 折促销已结束恢复 $4/$20，GPT-6.1 Sol 以 $2/$10 取代其位置。</span></li>
+    <li><span class="from">Claude Sonnet 5 / Opus 5</span><span class="arrow">→</span><b>Sonnet 5.5 / Opus 5.5</b><span class="why">旧版已不在榜单讨论范围内，5.5 系列全面接管 Claude Code 流量。</span></li>
+    <li><span class="from">Gemini 3.8 Flash 的相对衰落</span><span class="arrow">→</span><b>被整个廉价长上下文档集体挤压</b><span class="why">它仍是视觉/多模态的好模型，但按 tokens 已跌出前 20（约第 22 名），而按请求数 Google 仍排第 3——它的流量以短请求为主，在长 agent 任务时代被 DeepSeek/GLM 的 1M 长上下文 + 低价组合挤压，不是被某个单一模型取代。</span></li>
+  </ul>
+</section>
+
+<section id="master">
+  <h2><span class="no">06</span>总表：一页看完</h2>
+  <p class="sec-sub">价位为厂商端价（入/出，$/M），括号内为当日最低价。点价位按钮可只看一档。许可证与参数见第 02 节内在总表——先看那张，再看这张价格表。</p>
+
+  <div class="filter-row" role="group" aria-label="按价位筛选总表">
+    <span class="lbl">价位：</span>
+    <button aria-pressed="true" data-filter="all">全部</button>
+    <button aria-pressed="false" data-filter="free">免费</button>
+    <button aria-pressed="false" data-filter="cheap">廉价</button>
+    <button aria-pressed="false" data-filter="mid">中档</button>
+    <button aria-pressed="false" data-filter="flag">旗舰</button>
+  </div>
+
+  <div class="tbl-wrap">
+  <table id="master-table">
+    <thead><tr><th>模型</th><th class="num">价位 入/出</th><th>核心特点</th><th>最适合</th></tr></thead>
+    <tbody>
+      <tr data-tier="cheap"><td data-l="模型"><span class="model-name">DeepSeek V4.1 Flash 1017</span></td><td class="num" data-l="价位">$0.15 / $0.60（最低 $0.006 / $0.50）</td><td data-l="特点">同价位能力最强（DeepSWE 77%）、最快、40 家 provider、1M 上下文+视觉</td><td data-l="用途">代理式编程（预算有限）、日常聊天/批量</td></tr>
+      <tr data-tier="cheap"><td data-l="模型"><span class="model-name">DeepSeek V4.1 Flash（0910）</span></td><td class="num" data-l="价位">约 $0.20 / $0.60</td><td data-l="特点">旧快照，靠应用锁定续命，正在被 1017 取代</td><td data-l="用途">不推荐新用；存量迁移过渡</td></tr>
+      <tr data-tier="cheap"><td data-l="模型"><span class="model-name">GLM 5.3 Flash</span></td><td class="num" data-l="价位">$0.15 / $0.50（最低 $0.034 / $0.083）</td><td data-l="特点">输出价全榜最低、数学强、视频输入、EU 路由、36 家 provider</td><td data-l="用途">批量处理、日常聊天问答</td></tr>
+      <tr data-tier="mid"><td data-l="模型"><span class="model-name">Hy4</span></td><td class="num" data-l="价位">$0.417 / $1.251（5 折）</td><td data-l="特点">新发布、agent 任务强、首次支持视觉；但单 provider、50 tok/s 最慢</td><td data-l="用途">代理式编程（尝鲜，需容忍速度）</td></tr>
+      <tr data-tier="cheap"><td data-l="模型"><span class="model-name">GPT-6 Luna</span></td><td class="num" data-l="价位">$0.10 / $0.50</td><td data-l="特点">OpenAI 生态、Codex 主力、Flex/Batch 折扣</td><td data-l="用途">批量处理、日常聊天</td></tr>
+      <tr data-tier="mid"><td data-l="模型"><span class="model-name">Step 5 Preview</span></td><td class="num" data-l="价位">$1.00 / $2.70</td><td data-l="特点">StepFun 旗舰、金融/长任务；但可用性 33.87%</td><td data-l="用途">暂不推荐做主力</td></tr>
+      <tr data-tier="flag"><td data-l="模型"><span class="model-name">Claude Opus 5.5</span></td><td class="num" data-l="价位">$4.00 / $20.00</td><td data-l="特点">AA 59.1 第一、Claude Code 主力、创意写作 1532</td><td data-l="用途">代理式编程（预算充足）、数学与复杂推理</td></tr>
+      <tr data-tier="cheap"><td data-l="模型"><span class="model-name">MiniMax M3.1 Flash</span></td><td class="num" data-l="价位">$0.15 / $0.60（半价时段 $0.075 / $0.30）</td><td data-l="特点">243 tok/s 速度前列、视频输入</td><td data-l="用途">代码补全、日常聊天</td></tr>
+      <tr data-tier="mid"><td data-l="模型"><span class="model-name">Kimi K3.1 Pro</span></td><td class="num" data-l="价位">$2.00 / $10.00（最低入 $0.377）</td><td data-l="特点">1M 最大输出、长程推理、AA 46.5、原生视频理解</td><td data-l="用途">长文档/RAG、视觉理解</td></tr>
+      <tr data-tier="mid"><td data-l="模型"><span class="model-name">GPT-6.1 Sol</span></td><td class="num" data-l="价位">$2.00 / $10.00</td><td data-l="特点">AA 54.6 第二、GPQA 94.8%、Codex 主力；但 67 tok/s 慢</td><td data-l="用途">代理式编程、数学推理</td></tr>
+      <tr data-tier="mid"><td data-l="模型"><span class="model-name">GLM 5.3</span></td><td class="num" data-l="价位">$1.40 / $4.40（最低入 $0.07）</td><td data-l="特点">推理常开、第三方超低价、36 家 provider；纯文本</td><td data-l="用途">长文档/RAG、代理式编程（折中）</td></tr>
+      <tr data-tier="cheap"><td data-l="模型"><span class="model-name">DeepSeek V4 Flash 0731</span></td><td class="num" data-l="价位">约 $0.04–0.06 / $0.18–0.30</td><td data-l="特点">上代 Flash，极便宜</td><td data-l="用途">批量处理（存量）</td></tr>
+      <tr data-tier="cheap"><td data-l="模型"><span class="model-name">GPT-5.6 Luna</span></td><td class="num" data-l="价位">$0.20 / $1.20</td><td data-l="特点">上代 Luna，已被 GPT-6 Luna 取代且贵一倍</td><td data-l="用途">不推荐新用</td></tr>
+      <tr data-tier="free"><td data-l="模型"><span class="model-name">Nemotron 3 Ultra :free</span></td><td class="num" data-l="价位">$0 / $0</td><td data-l="特点">$0 的 550B MoE 推理模型、1M 上下文；53 tok/s、限额低、不支持 JSON 强制</td><td data-l="用途">便宜兜底、实验</td></tr>
+      <tr data-tier="free"><td data-l="模型"><span class="model-name">Nemotron 3.5 Super VL :free</span></td><td class="num" data-l="价位">$0 / $0</td><td data-l="特点">免费视觉版（细节未核实）</td><td data-l="用途">便宜兜底（视觉实验）</td></tr>
+      <tr data-tier="cheap"><td data-l="模型"><span class="model-name">Muse Spark 1.3 Contributor</span></td><td class="num" data-l="价位">$0.10 / $0.20</td><td data-l="特点">输出极便宜、多模态；单 provider、延迟高、数据或用于改进产品</td><td data-l="用途">批量处理（非敏感数据）</td></tr>
+      <tr data-tier="cheap"><td data-l="模型"><span class="model-name">Claude Haiku 5.5</span></td><td class="num" data-l="价位">$0.10 / $0.50（&gt;100K prompt 后 5 倍）</td><td data-l="特点">Claude 系最便宜入口、可调 effort、164 tok/s</td><td data-l="用途">日常聊天、批量摘要（短上下文）</td></tr>
+      <tr data-tier="cheap"><td data-l="模型"><span class="model-name">MiMo-V2.6-Flash</span>（30 天榜第 8）</td><td class="num" data-l="价位">$0.14 / $0.28</td><td data-l="特点">MIT、309B/15B 激活、FP8 仅 172.9GB；CyberGym 95.1%（厂商），但 TB 4.0 约 24–29% 最弱一档</td><td data-l="用途">批量处理、最便宜的可用 agent 模型；网络安全类任务</td></tr>
+      <tr data-tier="mid"><td data-l="模型"><span class="model-name">Claude Sonnet 5.5</span></td><td class="num" data-l="价位">$2.00 / $10.00</td><td data-l="特点">AA 54.5、编码 87.4、LMArena 文本 1469；均衡旗舰</td><td data-l="用途">代理式编程、创意写作</td></tr>
+      <tr data-tier="mid"><td data-l="模型"><span class="model-name">Gemini 3.8 Flash</span></td><td class="num" data-l="价位">$0.75 / $3.75（促销，2027 年恢复 $1.50 / $7.50）</td><td data-l="特点">多模态最全（图/视频/PDF/音频）、GPQA 94.9%</td><td data-l="用途">视觉理解、长文档（扫描件）</td></tr>
+    </tbody>
+  </table>
+  </div>
+</section>
+
+<section id="uncertain">
+  <h2><span class="no">07</span>没核实到的地方，明说</h2>
+  <ul class="uncertain">
+    <li><b>AA 分数跨版本不可比：</b>2026-10-27 v5.0 重标尺度后同一模型分数大幅变化（Gemini 3.8 Flash 59→31、GPT-6 Luna 38→28）；本页第二轮数据尽量注明版本（v4.1.1/v4.3/v4.3.2），部分二级来源未注明版本，引用以 AA 原页为准。第一轮页面中的 AA 数字（如 Opus 59.1）与第二轮（57.6–58）口径不同，不可混用。</li>
+    <li><b>Hy4 正式版权重未发布：</b>预览版为 Apache 2.0 开放权重；2026-11-04 正式版新增视觉与计算机操作，但截至 11-03/04 报道权重尚未发布、API 先行。其 benchmark 几乎全为厂商自评，AA 截至 11-03 未收录。</li>
+    <li><b>许可证冲突与价格冲突各一处：</b>DeepSeek 许可证 HF 模型卡为 MIT、个别聚合页写 Apache 2.0，以 HF 为准；GLM 5.3 价格 AIMap（$0.07/$1.40）与 Avenvote（输出 $2.86）无法调和；DeepSeek 最大输出 256K 与 128K 两说未统一；MiMo DeepSWE 模型卡 67.9 与官方 dashboard 65.68 冲突。</li>
+    <li><b>闭源模型参数与架构全部未披露：</b>GPT-6 系、Claude 系、Gemini、Muse Spark 1.3 只能记「未披露」，其部署成本只能从价格与每任务成本反推，不能核查。</li>
+    <li><b>11–20 名未逐项 live 核对：</b>官网 live 打开时前 10 名逐项一致；11–20 名引自 AIMap 对同一官方数据的镜像，未逐项点开官网展开结果核对，但前 10 名完全一致，可信度较高。</li>
+    <li><b>部分模型的速度/可用性未单独抓取：</b>DeepSeek V4.1 Flash（旧版）、Hy4 preview、DeepSeek V4 Flash 0731、GPT-5.6 Luna、Nemotron 3.5 Super VL 的逐 provider 速度与 3 日可用性未在本轮单独核实，表中标注「未单独抓取」处不做断言。</li>
+    <li><b>Nemotron 3.5 Super VL 的上下文与工具支持未核实</b>，名称含 VL，但视觉能力的细节不在本页断言范围内。</li>
+    <li><b>「最低价」是 2026-11-08 当日快照</b>，促销（DeepSeek 第三方约 50% off、MiniMax 半价时段等）随时变化。</li>
+    <li><b>翻译、角色扮演、代码补全没有针对这些模型的可核查公开 benchmark</b>，相关推荐属社区共识/通用能力推断。</li>
+    <li><b>Step 5 Preview 可用性 33.87%</b> 是模型页 3 日统计，原因（provider 故障、限流还是统计口径）未核实，不做归因。</li>
+    <li><b>Hy4 的高调用量构成无法确认：</b>其模型页 Top App 只有 Claude Code 88.6B，远小于周总量 10.06T，流量高度分散或来自未列出的应用。</li>
+    <li><b>Crouton Alpha</b> 的厂商、能力、价格均未知，无法评估；Jev 1.13 不是聊天模型，均未纳入推荐。</li>
+  </ul>
+</section>
+
+<section id="sources">
+  <h2><span class="no">08</span>来源</h2>
+  <ul class="sources">
+    <li><b>官方数据（OpenRouter，2026-11-08 抓取）：</b>排行榜 <a href="https://openrouter.ai/rankings">openrouter.ai/rankings</a>（方法论 + 数据截至 2026-11-07，前 10 名 live 验证）；模型页 <a href="https://openrouter.ai/deepseek/deepseek-v4.1-flash-1017">DeepSeek 1017</a>、<a href="https://openrouter.ai/z-ai/glm-5.3-flash">GLM 5.3 Flash</a>、<a href="https://openrouter.ai/z-ai/glm-5.3">GLM 5.3</a>、<a href="https://openrouter.ai/tencent/hy4">Hy4</a>、<a href="https://openrouter.ai/openai/gpt-6-luna">GPT-6 Luna</a>、<a href="https://openrouter.ai/openai/gpt-6.1-sol">GPT-6.1 Sol</a>、<a href="https://openrouter.ai/anthropic/claude-opus-5.5">Opus 5.5</a>、<a href="https://openrouter.ai/anthropic/claude-sonnet-5.5">Sonnet 5.5</a>、<a href="https://openrouter.ai/anthropic/claude-haiku-5.5">Haiku 5.5</a>、<a href="https://openrouter.ai/moonshotai/kimi-k3.1-pro">Kimi K3.1 Pro</a>、<a href="https://openrouter.ai/minimax/minimax-m3.1-flash">MiniMax M3.1 Flash</a>、<a href="https://openrouter.ai/stepfun/step-5-preview">Step 5 Preview</a>、<a href="https://openrouter.ai/google/gemini-3.8-flash">Gemini 3.8 Flash</a>、<a href="https://openrouter.ai/nvidia/nemotron-3-ultra-550b-a55b:free">Nemotron 3 Ultra :free</a>、<a href="https://openrouter.ai/meta/muse-spark-1.3-contributor">Muse Spark 1.3</a>；免费限额与政策 <a href="https://openrouter.ai/docs/faq">OpenRouter FAQ</a>、<a href="https://openrouter.ai/blog/tutorials/free-llm-apis-compared/">免费额度说明</a>。</li>
+    <li><b>排名镜像（同一官方数据源，CC BY 4.0）：</b><a href="https://aimap.page/en/models/rankings/">aimap.page/en/models/rankings</a>（前 20 名周/30 天 tokens，截至 2026-11-07）。</li>
+    <li><b>厂商端价交叉核对（第三方整理自 OpenRouter endpoints API，2026-10-31）：</b><a href="https://www.teamday.ai/blog/top-ai-models-openrouter-2026">teamday.ai</a>。</li>
+    <li><b>第三方评测：</b>Artificial Analysis 智力/编码指数（经 OpenRouter 排行榜 Benchmarks 栏及 <a href="https://www.benchleader.com/benchmarks/aa_intelligence_index_v5">BenchLeader</a>、<a href="https://llmbenchmark.ai/rankings/intelligence">llmbenchmark.ai</a>，2026-11-07/08）；DeepSeek 1017 vs GLM Flash 对比 <a href="https://www.benchleader.com/compare/deepseek-v4-1-flash-1017-vs-glm-5-3-flash">BenchLeader</a>；DeepSeek 官方 benchmark 表转引 <a href="https://www.michaelleung.info/latest-news/deepseek-v4-1-flash-1017-update">michaelleung.info</a>（厂商自评，注意偏差）；LMArena 创意/文本榜 <a href="https://llmbenchmark.ai/benchmarks/lmarena-creative-writing">llmbenchmark.ai</a>、<a href="https://noometry.com/benchmarks/arena-creative-writing">noometry.com</a>（2026-11-06）。</li>
+    <li><b>第二轮内在比较研究（2026-11-08 抓取，厂商自评与独立第三方已在正文逐项标注）：</b>DeepSeek 技术报告转述 <a href="https://helix.ml/blog/deepseek-v41-flash-explained">helix.ml</a>、HF 模型卡转述 <a href="https://ai-tldr.dev/models/deepseek-v4-1-flash/">ai-tldr.dev</a>；GLM <a href="https://www.progressiverobot.com/2026/08/28/glm-5-3-flash-open-weight-320b-model/">progressiverobot</a>、<a href="https://docs.z.ai/guides/llm/glm-5.3">Z.ai 官方文档</a>、<a href="https://www.layer3labs.io/guides/glm-5-3-explained">layer3labs</a>；Hy4 <a href="https://labindex.ai/outputs/tencent/hy4-preview/">labindex</a>、<a href="https://aiwebcool.com/en/posts/hy4-preview-self-hosting-sop">aiwebcool 自托管配方</a>；Kimi <a href="https://i10x.ai/news/moonshot-kimi-k3-1-pro-open-weights">i10x</a>；Step 5 <a href="https://www.marktechpost.com/2026/10/16/stepfun-releases-step-5-preview-open-weights-600b-moe-27b-active-1m-context/">MarkTechPost</a>；MiniMax <a href="https://aireiter.com/blog/minimax-m3-1-flash-open-weights-guide">aireiter</a>；Claude 家族 <a href="https://openrouter.ai/blog/insights/claude-opus-vs-sonnet-vs-haiku/">OpenRouter 官方对比</a>；Nemotron <a href="https://www.layer3labs.io/guides/nemotron-3-ultra-explained">layer3labs</a>、<a href="https://www.eesel.ai/blog/nemotron-3-5-super-vl">eesel</a>；Muse Spark <a href="https://projedefteri.com/en/blog/muse-spark-1-3-pricing-contributor-tier/">projedefteri</a>；MiMo <a href="https://themodelgap.com/models/mimo-v2-6-flash">themodelgap</a>；反例 Qwen <a href="https://kingy.ai/blog/qwen3-8-max-vs-kimi-k3-vs-deepseek-v4-flash/">kingy.ai</a>；榜单口径 <a href="https://avenvote.com/">avenvote.com</a>。</li>
+    <li><b>数据政策第三方统计：</b><a href="https://vanja.io/openrouter/">vanja.io/openrouter</a>（2026-10-19）；Gemini 3.8 Flash 2027 年恢复标价 <a href="https://aihubmix.com/blog/aihubmix-vs-openrouter-2026-an-openrouter-alternative-without-the-5-5-credit-fee">aihubmix.com</a>（2026-10-26 核查）。</li>
+  </ul>
+</section>
+
+<footer>
+  本页为 2026-11-08 的数据快照：排名、价格和促销都会变，实际选型请以 OpenRouter 模型页当日数据为准。价格均为美元 / 每百万 tokens；「最低价」以请求时实际路由到的 provider 为准。
+</footer>
+
+</div>
+
+<script>
+(function(){
+  // Use-case tabs
+  var tabs = document.querySelectorAll('.uc-tabs [data-uc]');
+  var panels = document.querySelectorAll('.uc-panel');
+  tabs.forEach(function(btn){
+    btn.addEventListener('click', function(){
+      tabs.forEach(function(b){ b.setAttribute('aria-selected','false'); });
+      btn.setAttribute('aria-selected','true');
+      var key = btn.getAttribute('data-uc');
+      panels.forEach(function(p){
+        p.classList.toggle('active', p.getAttribute('data-panel') === key);
+      });
+    });
+  });
+
+  // Master table tier filter
+  var fbtns = document.querySelectorAll('.filter-row [data-filter]');
+  var rows = document.querySelectorAll('#master-table tbody tr');
+  fbtns.forEach(function(btn){
+    btn.addEventListener('click', function(){
+      fbtns.forEach(function(b){ b.setAttribute('aria-pressed','false'); });
+      btn.setAttribute('aria-pressed','true');
+      var f = btn.getAttribute('data-filter');
+      rows.forEach(function(r){
+        var show = (f === 'all') || (r.getAttribute('data-tier') === f);
+        r.classList.toggle('hidden-row', !show);
+      });
+    });
+  });
+})();
+</script>
+</body>
+</html>

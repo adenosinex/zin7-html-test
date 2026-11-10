@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>太平天国人物命运 — 三模型仲裁报告</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;500;700;900&family=Source+Han+Sans+SC:wght@300;400;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f5f0e8;
+  --surface: #ffffff;
+  --surface-alt: #faf6ef;
+  --accent: #b83a2a;
+  --accent-light: #f0d6d2;
+  --accent-dark: #8a1e12;
+  --gold: #c5973e;
+  --gold-light: #f5e6c4;
+  --text-primary: #2c2418;
+  --text-secondary: #5a4e3c;
+  --text-muted: #8c7e6a;
+  --border: #e0d6c4;
+  --border-light: #ede6d8;
+  --shadow: rgba(60, 40, 20, 0.06);
+  --shadow-md: rgba(60, 40, 20, 0.1);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Noto Serif SC', 'Georgia', serif;
+  background: var(--bg);
+  color: var(--text-primary);
+  line-height: 1.85;
+  font-size: 15.5px;
+  min-height: 100vh;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 0;
+}
+
+.page-wrapper {
+  position: relative;
+  z-index: 1;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+/* ── Header ── */
+.header {
+  padding: 80px 0 40px;
+  text-align: center;
+  position: relative;
+}
+
+.header::after {
+  content: '';
+  display: block;
+  width: 60px;
+  height: 3px;
+  background: var(--accent);
+  margin: 32px auto 0;
+}
+
+.header .label {
+  font-family: 'Source Han Sans SC', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 16px;
+}
+
+.header h1 {
+  font-size: 36px;
+  font-weight: 900;
+  line-height: 1.3;
+  color: var(--text-primary);
+  letter-spacing: 1px;
+}
+
+.header .subtitle {
+  font-size: 16px;
+  color: var(--text-secondary);
+  margin-top: 16px;
+  font-weight: 300;
+}
+
+/* ── Section structure ── */
+section {
+  margin-bottom: 56px;
+}
+
+.section-number {
+  font-family: 'Source Han Sans SC', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  color: var(--accent);
+  margin-bottom: 8px;
+  display: block;
+}
+
+h2 {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 24px;
+  line-height: 1.4;
+  position: relative;
+  padding-bottom: 12px;
+}
+
+h2::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 40px;
+  height: 2px;
+  background: var(--gold);
+}
+
+h3 {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 28px 0 12px;
+  line-height: 1.4;
+}
+
+/* ── Cards ── */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border-light);
+  border-radius: 6px;
+  padding: 28px 32px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 12px var(--shadow);
+  opacity: 0;
+  animation: fadeUp 0.6s ease forwards;
+}
+
+.card:nth-child(2) { animation-delay: 0.08s; }
+.card:nth-child(3) { animation-delay: 0.16s; }
+.card:nth-child(4) { animation-delay: 0.24s; }
+.card:nth-child(5) { animation-delay: 0.32s; }
+.card:nth-child(6) { animation-delay: 0.40s; }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Consensus list ── */
+.consensus-item {
+  background: var(--surface);
+  border-left: 3px solid var(--accent);
+  padding: 20px 24px;
+  margin-bottom: 14px;
+  border-radius: 0 6px 6px 0;
+  box-shadow: 0 2px 8px var(--shadow);
+  opacity: 0;
+  animation: fadeUp 0.5s ease forwards;
+}
+
+.consensus-item:nth-child(1) { animation-delay: 0.05s; }
+.consensus-item:nth-child(2) { animation-delay: 0.12s; }
+.consensus-item:nth-child(3) { animation-delay: 0.19s; }
+.consensus-item:nth-child(4) { animation-delay: 0.26s; }
+.consensus-item:nth-child(5) { animation-delay: 0.33s; }
+
+.consensus-item strong {
+  color: var(--accent-dark);
+  font-weight: 700;
+}
+
+.consensus-item p {
+  margin-top: 6px;
+  color: var(--text-secondary);
+  font-size: 14.5px;
+}
+
+/* ── Comparison Table ── */
+.table-wrapper {
+  overflow-x: auto;
+  margin: 20px 0;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  box-shadow: 0 2px 12px var(--shadow);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13.5px;
+  background: var(--surface);
+}
+
+thead th {
+  background: var(--text-primary);
+  color: var(--bg);
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: 1px;
+  padding: 14px 16px;
+  text-align: left;
+  white-space: nowrap;
+}
+
+tbody td {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border-light);
+  vertical-align: top;
+  line-height: 1.7;
+}
+
+tbody tr:last-child td { border-bottom: none; }
+
+tbody tr:nth-child(even) { background: var(--surface-alt); }
+
+tbody td:first-child {
+  font-weight: 700;
+  color: var(--accent-dark);
+  white-space: nowrap;
+  min-width: 110px;
+}
+
+.model-tag {
+  display: inline-block;
+  font-family: 'Source Han Sans SC', sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  padding: 2px 8px;
+  border-radius: 3px;
+  margin-bottom: 4px;
+}
+
+.tag-qwen { background: #e8f0e4; color: #3a6b28; }
+.tag-glm { background: #e4e8f0; color: #284a6b; }
+.tag-mimo { background: #f0e8e4; color: #6b4428; }
+
+/* ── Credibility ranking ── */
+.rank-card {
+  background: var(--surface);
+  border: 1px solid var(--border-light);
+  border-radius: 6px;
+  padding: 24px 28px;
+  margin-bottom: 14px;
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+  box-shadow: 0 2px 10px var(--shadow);
+  opacity: 0;
+  animation: fadeUp 0.5s ease forwards;
+}
+
+.rank-card:nth-child(1) { animation-delay: 0.05s; }
+.rank-card:nth-child(2) { animation-delay: 0.15s; }
+.rank-card:nth-child(3) { animation-delay: 0.25s; }
+
+.rank-number {
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Source Han Sans SC', sans-serif;
+  font-size: 18px;
+  font-weight: 900;
+  border-radius: 50%;
+}
+
+.rank-1 .rank-number { background: var(--gold-light); color: var(--gold); }
+.rank-2 .rank-number { background: #e8e4e0; color: #8a7e6e; }
+.rank-3 .rank-number { background: var(--accent-light); color: var(--accent); }
+
+.rank-card h4 {
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 6px;
+  color: var(--text-primary);
+}
+
+.rank-card p {
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.75;
+}
+
+/* ── Timeline / Phase sections ── */
+.phase-card {
+  background: var(--surface);
+  border: 1px solid var(--border-light);
+  border-radius: 6px;
+  padding: 32px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 12px var(--shadow);
+  position: relative;
+  overflow: hidden;
+  opacity: 0;
+  animation: fadeUp 0.6s ease forwards;
+}
+
+.phase-card:nth-child(1) { animation-delay: 0.05s; }
+.phase-card:nth-child(2) { animation-delay: 0.15s; }
+.phase-card:nth-child(3) { animation-delay: 0.25s; }
+
+.phase-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+}
+
+.phase-1::before { background: var(--gold); }
+.phase-2::before { background: var(--accent); }
+.phase-3::before { background: #4a6741; }
+
+.phase-label {
+  font-family: 'Source Han Sans SC', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+}
+
+.phase-card h3 {
+  font-size: 20px;
+  margin: 0 0 6px;
+  line-height: 1.35;
+}
+
+.phase-date {
+  font-family: 'Source Han Sans SC', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--accent);
+  letter-spacing: 1px;
+  margin-bottom: 16px;
+}
+
+.phase-card ul {
+  list-style: none;
+  padding: 0;
+}
+
+.phase-card li {
+  position: relative;
+  padding-left: 18px;
+  margin-bottom: 10px;
+  font-size: 14.5px;
+  color: var(--text-secondary);
+  line-height: 1.75;
+}
+
+.phase-card li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 9px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--border);
+}
+
+.phase-card li strong {
+  color: var(--text-primary);
+  font-weight: 700;
+}
+
+.highlight {
+  background: var(--gold-light);
+  padding: 1px 6px;
+  border-radius: 3px;
+  font-weight: 500;
+}
+
+.tag-true { background: var(--accent-light); color: var(--accent-dark); padding: 1px 6px; border-radius: 3px; }
+
+/* ── Conclusion box ── */
+.conclusion-box {
+  background: linear-gradient(135deg, #2c2418 0%, #3d3225 100%);
+  color: var(--bg);
+  border-radius: 8px;
+  padding: 40px 36px;
+  margin: 36px 0;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(44, 36, 24, 0.2);
+  opacity: 0;
+  animation: fadeUp 0.7s ease 0.1s forwards;
+}
+
+.conclusion-box::before {
+  content: '';
+  position: absolute;
+  top: -40%;
+  right: -20%;
+  width: 300px;
+  height: 300px;
+  background: radial-gradient(circle, rgba(197, 151, 62, 0.15) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.conclusion-box h2 {
+  color: var(--gold);
+  font-size: 22px;
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+}
+
+.conclusion-box h2::after {
+  background: rgba(197, 151, 62, 0.4);
+}
+
+.conclusion-box p {
+  font-size: 15px;
+  line-height: 2;
+  color: #d6cfc2;
+  margin-bottom: 14px;
+}
+
+.conclusion-box p:last-child { margin-bottom: 0; }
+
+.conclusion-box strong {
+  color: var(--gold);
+}
+
+/* ── Minority views ── */
+.minority-card {
+  background: var(--surface-alt);
+  border: 1px dashed var(--border);
+  border-radius: 6px;
+  padding: 24px 28px;
+  margin-bottom: 14px;
+  opacity: 0;
+  animation: fadeUp 0.5s ease forwards;
+}
+
+.minority-card:nth-child(1) { animation-delay: 0.05s; }
+.minority-card:nth-child(2) { animation-delay: 0.15s; }
+
+.minority-card h4 {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+}
+
+.minority-card p {
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.8;
+}
+
+/* ── Stats bar ── */
+.stats-bar {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 36px;
+}
+
+.stat-item {
+  background: var(--surface);
+  border: 1px solid var(--border-light);
+  border-radius: 6px;
+  padding: 18px 24px;
+  flex: 1;
+  min-width: 180px;
+  text-align: center;
+  box-shadow: 0 2px 8px var(--shadow);
+  opacity: 0;
+  animation: fadeUp 0.5s ease forwards;
+}
+
+.stat-item:nth-child(1) { animation-delay: 0.05s; }
+.stat-item:nth-child(2) { animation-delay: 0.1s; }
+.stat-item:nth-child(3) { animation-delay: 0.15s; }
+.stat-item:nth-child(4) { animation-delay: 0.2s; }
+
+.stat-value {
+  font-family: 'Source Han Sans SC', sans-serif;
+  font-size: 28px;
+  font-weight: 900;
+  color: var(--accent);
+  display: block;
+  line-height: 1.2;
+}
+
+.stat-label {
+  font-family: 'Source Han Sans SC', sans-serif;
+  font-size: 11px;
+  color: var(--text-muted);
+  letter-spacing: 1px;
+  margin-top: 4px;
+  display: block;
+}
+
+/* ── Footer ── */
+.footer {
+  text-align: center;
+  padding: 40px 0 60px;
+  border-top: 1px solid var(--border);
+  margin-top: 40px;
+}
+
+.footer p {
+  font-family: 'Source Han Sans SC', sans-serif;
+  font-size: 11px;
+  color: var(--text-muted);
+  letter-spacing: 1px;
+  line-height: 2;
+}
+
+/* ── Responsive ── */
+@media (max-width: 640px) {
+  .header h1 { font-size: 26px; }
+  .card, .phase-card, .conclusion-box { padding: 20px; }
+  .stats-bar { flex-direction: column; }
+  tbody td { font-size: 12.5px; padding: 10px 12px; }
+}
+</style>
+</head>
+<body>
+
+<div class="page-wrapper">
+
+  <!-- Header -->
+  <header class="header">
+    <div class="label">三模型仲裁分析报告</div>
+    <h1>太平天国人物命运</h1>
+    <div class="subtitle">基于 Qwen 3.5-Flash / GLM 4.5 Air / MiMo 2.5 Pro 三模型回答的系统性对比与整合</div>
+  </header>
+
+  <!-- Stats -->
+  <div class="stats-bar">
+    <div class="stat-item">
+      <span class="stat-value">3</span>
+      <span class="stat-label">源模型</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-value">18646</span>
+      <span class="stat-label">源模型总 Tokens</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-value">66.85s</span>
+      <span class="stat-label">仲裁耗时</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-value">294.82s</span>
+      <span class="stat-label">源模型总耗时</span>
+    </div>
+  </div>
+
+  <!-- Section 1: 共识 -->
+  <section>
+    <span class="section-number">第一章</span>
+    <h2>提炼共识</h2>
+
+    <div class="consensus-item">
+      <strong>人物核心圈层一致</strong>
+      <p>均认定洪秀全、杨秀清、萧朝贵、冯云山、韦昌辉、石达开（首义六王）为早期核心；陈玉成、李秀成、洪仁玕为后期核心。</p>
+    </div>
+
+    <div class="consensus-item">
+      <strong>历史阶段划分统一</strong>
+      <p>都将太平天国历史划分为「兴起、鼎盛、转折（天京事变）、衰亡」四个主要阶段。</p>
+    </div>
+
+    <div class="consensus-item">
+      <strong>关键转折点共识</strong>
+      <p>无一例外地将<span class="highlight">1856年的「天京事变」视为由盛转衰的根本转折点</span>，并认定其摧毁了领导核心，导致人才断层。</p>
+    </div>
+
+    <div class="consensus-item">
+      <strong>关键事件影响逻辑一致</strong>
+      <p>对「冯云山、萧朝贵早逝导致权力失衡」「杨秀清借天父下凡集权埋下冲突祸根」「石达开出走严重削弱实力」「洪秀全后期任人唯亲、拒绝『让城别走』导致灭亡」等事件的因果判断基本一致。</p>
+    </div>
+
+    <div class="consensus-item">
+      <strong>根本性制度缺陷判断一致</strong>
+      <p>均指出太平天国失败的根源在于其「神权与君权」的结构性冲突、缺乏有效的权力制衡与继承机制、以及洪秀全后期领导力的腐朽。李秀成《自述》中「天朝十误」的反思被多次引用，可视为对其内部失败原因的共同认可。</p>
+    </div>
+  </section>
+
+  <!-- Section 2: 分歧 -->
+  <section>
+    <span class="section-number">第二章</span>
+    <h2>分析分歧</h2>
+    <p style="color: var(--text-secondary); margin-bottom: 20px; font-size: 14.5px;">分歧点主要集中在信息呈现的侧重点、对特定人物的解读，以及少数细节上。</p>
+
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>维度</th>
+            <th>Qwen 3.5-Flash</th>
+            <th>GLM 4.5 Air</th>
+            <th>MiMo 2.5 Pro</th>
+            <th>分歧解读</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>核心概念框架</td>
+            <td>独创提出「<strong>重要落选人物</strong>」和「<strong>重要潜在落选人物</strong>」分析框架。</td>
+            <td>对「落选」和「潜在落选」进行了更宽泛的定义和人物列举。</td>
+            <td>使用「早逝的奠基者」「牺牲品」「孤独陨落」分类，未直接使用「落选」概念。</td>
+            <td><strong>视角差异。</strong> Qwen 的分析框架最具原创性和洞察力；后两个模型更偏向传统史实分类。</td>
+          </tr>
+          <tr>
+            <td>人物范畴与定性</td>
+            <td>将秦日纲、陈玉成归入「落选」或「潜在落选」范畴，强调被体制压制。</td>
+            <td>将胡以晃、林凤翔、李开芳等列为重要人物。提到洪宣娇的民间传说并质疑其真实性。</td>
+            <td>未提及胡以晃、洪宣娇。对李世贤有独立介绍。对洪大全描述更详细。</td>
+            <td><strong>重要性判断不同。</strong> 关于洪宣娇、洪大全等边缘人物，不同模型的采纳和定性存在差异。</td>
+          </tr>
+          <tr>
+            <td>洪秀全之死</td>
+            <td>「服毒自尽（一说病死）」，保留学术争议。</td>
+            <td>两次均表述为「自尽」，未呈现争议。</td>
+            <td>「病逝（一说服毒自尽）」，与 Qwen 倾向相反。</td>
+            <td><strong>严谨性差异。</strong> 病死说近年获更多史料支持，但服毒说仍存。Qwen 和 MiMo 的表述更严谨。</td>
+          </tr>
+          <tr>
+            <td>信息呈现形式</td>
+            <td>概念引导下的结构化分析，强化事件影响分析。</td>
+            <td>百科全书式人物传记，信息全面但分析深度较浅。</td>
+            <td>时间线 + 核心人物深度档案 + 影响链分析的嵌套结构，逻辑性最强。</td>
+            <td><strong>深度差异。</strong> MiMo 的分析最为系统深入。Qwen 观点鲜明但精简。GLM 信息量大但框架松散。</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Section 3: 可信度 -->
+  <section>
+    <span class="section-number">第三章</span>
+    <h2>可信度评估</h2>
+
+    <div class="rank-card rank-1">
+      <div class="rank-number">1</div>
+      <div>
+        <h4>最高可信度 — MiMo 2.5 Pro</h4>
+        <p>在史实详实度、分析深度、逻辑系统性和结构清晰度上均表现最佳。人物描述涵盖籍贯、出身、能力、性格、关键抉择和结局的「六要素」，全面均衡。用「影响链」方式分析关键事件，深刻揭示了事件与人物命运的因果联系。对洪秀全之死等有争议的细节处理最为严谨。</p>
+      </div>
+    </div>
+
+    <div class="rank-card rank-2">
+      <div class="rank-number">2</div>
+      <div>
+        <h4>高度可信，且有独特视角 — Qwen 3.5-Flash</h4>
+        <p>在保证核心史实准确的基础上，提出了「落选人物」和「潜在落选人物」这一极具洞察力的分析概念，有力回应了用户问题中的特殊要求。分析虽不如 MiMo 详尽，但观点鲜明，直指「体制性人才浪费」这一核心悲剧。</p>
+      </div>
+    </div>
+
+    <div class="rank-card rank-3">
+      <div class="rank-number">3</div>
+      <div>
+        <h4>基本可信，细节需注意 — GLM 4.5 Air</h4>
+        <p>提供了最广泛的人物列表（如胡以晃、洪宣娇），信息量大。但部分定性（如洪秀全之死的单一表述）严谨性略逊于前两者，且整体分析框架的系统性不强。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Section 4: 综合结论 -->
+  <section>
+    <span class="section-number">第四章</span>
+    <h2>最终综合结论</h2>
+
+    <div class="phase-card phase-1">
+      <div class="phase-label">第一阶段</div>
+      <h3>制度的缺陷与核心的裂痕</h3>
+      <div class="phase-date">1843 — 1852</div>
+      <ul>
+        <li>太平天国运动的成功，源于<strong>洪秀全</strong>（宗教感召）与<strong>冯云山</strong>（实际组织）的完美互补。</li>
+        <li>1848 年，<strong>杨秀清、萧朝贵</strong>借「天父天兄下凡」夺取宗教解释权，在制度层面埋下了 <span class="tag-true">神权高于君权</span> 的致命隐患。</li>
+        <li>1852 年，作为制度设计者和调和剂的<strong>冯云山</strong>、以及唯一能制衡杨秀清的<strong>萧朝贵</strong>先后战死，权力天平彻底失衡。</li>
+        <li>形成洪秀全（虚君）与杨秀清（实权、神权）对峙的<strong>二元结构</strong>。</li>
+      </ul>
+    </div>
+
+    <div class="phase-card phase-2">
+      <div class="phase-label">第二阶段</div>
+      <h3>矛盾的爆发与人才断层</h3>
+      <div class="phase-date">1853 — 1857</div>
+      <ul>
+        <li>定都天京后，杨秀清权欲膨胀，1856 年逼封「万岁」，引爆<strong>天京事变</strong> —— 太平天国人才毁灭的「核爆」。</li>
+        <li><strong>直接牺牲</strong>：核心大脑杨秀清被杀，其数万嫡系精锐被屠。</li>
+        <li><strong>工具反噬</strong>：执行者韦昌辉、秦日纲被作为替罪羊处死。</li>
+        <li><strong>核心出走</strong>：唯一幸存的军事支柱石达开遭猜忌，率十余万精锐负气出走 —— 太平天国最重大的「人才流失」事件。</li>
+        <li>开国元勋和骨干力量被清洗殆尽，形成无法弥补的人才断层。</li>
+      </ul>
+    </div>
+
+    <div class="phase-card phase-3">
+      <div class="phase-label">第三阶段</div>
+      <h3>力挽狂澜与体制的窒息</h3>
+      <div class="phase-date">1858 — 1864</div>
+      <ul>
+        <li>危机之下，年轻将领<strong>陈玉成、李秀成</strong>和思想家<strong>洪仁玕</strong>登上舞台，一度实现「中兴」。</li>
+        <li><strong>洪仁玕</strong>的《资政新篇》虽有远见，却因缺乏根基和战乱环境而无法实施 —— <span class="tag-true">潜在落选</span> 的先进思想。</li>
+        <li><strong>陈玉成</strong>是杰出军事天才，却在安庆失守后被猜忌、贬斥，最终被叛徒出卖 —— 高层决策失误的 <span class="tag-true">悲剧性落选</span>。</li>
+        <li><strong>李秀成</strong>支撑大局，「让城别走」战略被洪秀全拒绝，被迫与必死政权绑定 —— 能力被体制扼杀的 <span class="tag-true">被动落选</span>。</li>
+        <li>1864 年天京陷落，末世英才随之覆灭。</li>
+      </ul>
+    </div>
+
+    <div class="conclusion-box">
+      <h2>结论精髓</h2>
+      <p>太平天国从不缺乏杰出人才——从军事天才石达开、陈玉成到政治改革家洪仁玕。但它失败的根源在于，<strong>其基于宗教迷信和个人独裁的权力结构，天然排斥理性的制度建设和健康的人才更替</strong>。</p>
+      <p>所谓的「落选」，正是这一体制下，<strong>所有不能为己所用的才能都终将被消耗、被清洗、被抛弃的必然结局</strong>。</p>
+    </div>
+  </section>
+
+  <!-- Section 5: 少数派观点 -->
+  <section>
+    <span class="section-number">第五章</span>
+    <h2>保留合理少数派观点</h2>
+    <p style="color: var(--text-secondary); margin-bottom: 20px; font-size: 14.5px;">以下观点虽非主流共识或存在争议，但体现了历史的复杂性和不同解读的可能。</p>
+
+    <div class="minority-card">
+      <h4>关于「洪宣娇」的叙述（来自 GLM 4.5 Air）</h4>
+      <p>模型二将民间传说中的女将洪宣娇作为「潜在落选人物」提出，并推测她若属实或许能推动性别平等。史学界普遍存疑（认为其人其事多为文学演义），但它反映了太平天国研究中「女性角色」这一独特视角，可作为观察这场运动社会主张的一个民间叙事侧面，保留其参考价值。</p>
+    </div>
+
+    <div class="minority-card">
+      <h4>关于「洪大全」的定位（来自 MiMo 2.5 Pro）</h4>
+      <p>模型三详细介绍了洪大全（焦亮），认为他代表的「反清复明」路线若被采纳，可能争取更多士绅支持。此观点触及了太平天国因文化主张（摧毁儒释道、崇拜上帝）而遭到传统精英阶层普遍抵抗的深层战略失误，提供了另一种战略可能性的思考。尽管洪大全其人及与太平天国的真实关系在史学界有争议，但这一视角的分析是有价值的。</p>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <p>ARBITRATION REPORT · QWEN 3.5-FLASH / GLM 4.5 AIR / MIMO 2.5 PRO</p>
+    <p>TOTAL SOURCE TOKENS: 18646 · ARBITRATION TIME: 66.85S · SOURCE TIME: 294.82S</p>
+  </footer>
+
+</div>
+
+</body>
+</html>

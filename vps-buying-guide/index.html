@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VPS 选购经验：先立框架，再看商品</title>
+<style>
+  :root { --ink:#1c2430; --sub:#5a6572; --line:#e3e7ec; --accent:#0b5fa5; --warn:#a33b2e; --casebg:#f4f8fb; --blindbg:#fdf3ec; }
+  * { box-sizing: border-box; }
+  body { margin:0; color:var(--ink); font-family:-apple-system,"PingFang SC","Microsoft YaHei","Noto Sans CJK SC",sans-serif; line-height:1.85; font-size:16.5px; background:#fff; }
+  main { max-width:46rem; margin:0 auto; padding:2.2rem 1.15rem 4rem; }
+  h1 { font-size:1.72rem; line-height:1.4; margin:0 0 .5rem; }
+  .meta { color:var(--sub); font-size:.88rem; margin-bottom:1.6rem; }
+  .lead { font-size:1.04rem; }
+  h2 { font-size:1.28rem; margin:2.6rem 0 .7rem; padding-top:1.4rem; border-top:2px solid var(--line); }
+  h2 .no { color:var(--accent); margin-right:.45rem; }
+  h3 { font-size:1.05rem; margin:1.3rem 0 .3rem; }
+  p { margin:.55rem 0; }
+  .rule { font-size:1.06rem; font-weight:700; }
+  .blind { background:var(--blindbg); border-left:4px solid var(--warn); padding:.55rem .9rem; margin:.8rem 0; font-size:.95rem; }
+  .blind b { color:var(--warn); }
+  .case { background:var(--casebg); border-left:4px solid var(--accent); padding:.7rem 1rem; margin:.9rem 0; font-size:.96rem; }
+  .case .ct { font-weight:700; color:var(--accent); display:block; margin-bottom:.25rem; }
+  .kill { font-weight:700; }
+  table { border-collapse:collapse; width:100%; margin:.9rem 0; font-size:.94rem; }
+  th, td { border:1px solid var(--line); padding:.45rem .6rem; text-align:left; vertical-align:top; }
+  th { background:#f0f3f6; }
+  ul, ol { margin:.4rem 0 .8rem; padding-left:1.4rem; }
+  li { margin:.3rem 0; }
+  .small { color:var(--sub); font-size:.88rem; }
+  .verdict { background:#eef6ee; border:1px solid #cfe3cf; padding:.8rem 1rem; margin:1rem 0; }
+  code { background:#f0f3f6; padding:.05rem .3rem; border-radius:3px; font-size:.92em; }
+</style>
+</head>
+<body>
+<main>
+<h1>VPS 选购经验：先立框架，再看商品</h1>
+<p class="meta">2026 年 11 月 · 一次真实选购的全程复盘（为已有的洛杉矶节点买第二台机） · 文中数字均为 2026-11-09 核查口径，购前需重核；方法可长期复用</p>
+
+<p class="lead">这次要买的东西很明确：一台第二机，给手上的 DediRock 洛杉矶节点（ColoCrossing 机房，AS36352）做<strong>独立备份</strong>，兼作代理落点；用量约 200 GB/月量级，预算 $20/年上下。最终成交的是 Shock Hosting 的洛杉矶 KVM，$20/年。</p>
+<p class="lead">但这篇复盘里真正值钱的不是成交结论，而是过程里被逐个否决的那些「看起来更好」的选项——全场最低价的、名气最大的、回程实测最漂亮的、口碑最顶级的——它们每一个都只输在<strong>一条</strong>核心条件上。所以本文先立框架，再拿案例作证：框架是骨，案例只是挂在骨头上的实证。</p>
+
+<h2><span class="no">〇</span>为什么需要框架：局部好处，与单维极值</h2>
+<p>选购时最危险的东西不是坏商家，而是<strong>局部好处</strong>。局部好处有一个共同特征：它都是某个单一维度上的全场极值——全场最低价、全场最大牌、全场最高配、全场最漂亮的一次实测。极值天然抢眼，人会不自觉地把「这一维最高」误读成「综合最好」，于是评价从多维塌成一维，其他条件还没查，结论已经先下了。</p>
+<table>
+<tr><th>局部好处（单维极值）</th><th>它蒙蔽了什么</th><th>本次实例</th></tr>
+<tr><td>全场最低价</td><td>架构适配与全周期成本</td><td>腾讯云国际站 $10.08/年</td></tr>
+<tr><td>名气与热度最高的特价</td><td>故障相关性</td><td>RackNerd $21.99 洛杉矶特价</td></tr>
+<tr><td>最漂亮的线路实测</td><td>架构是否适配</td><td>六六云 9929 回程实测</td></tr>
+<tr><td>「国人友好」的形象</td><td>IP 声誉的真实分数</td><td>HostDare 标准线 73 分</td></tr>
+<tr><td>顶级口碑</td><td>买不到等于不存在</td><td>BuyVM 常年缺货</td></tr>
+<tr><td>豪华的配置表</td><td>自己的实际所需</td><td>各家 2 核 2G 起步的标称</td></tr>
+</table>
+<p>框架的作用，就是强制把评价拆回多维，并且规定好维度之间是<strong>乘法</strong>而不是加法。下面的八条原则，每一条都对应一种具体的蒙蔽方式：先说清原则，再说清它防的是哪种局部好处，最后给本次的实证。</p>
+
+<h2><span class="no">一</span>乘法律：核心条件任一归零，全盘归零</h2>
+<p class="rule">先写死核心条件清单，逐项判定过或不过；任何一项不过，整体直接出局，不许用其他维度的高分来「平均」。</p>
+<p>本次的核心条件是四条：<strong>架构适配</strong>（IPv6 入站为主的用法能不能落地）、<strong>故障域独立</strong>（与 DediRock 不能同机房同网络）、<strong>声誉轴过关</strong>（IP 绝对声誉不能脏）、<strong>续费真实成本</strong>（全周期价格要在预算内）。这四条是乘法关系：3 条满分、1 条零分，乘积是零。加法思维会说「它这么便宜，缺点忍忍」——但备份机与主力同故障域，等于没买；代理机没有 IPv6 入口，等于没法用。零分项不能靠忍，忍出来的是一台不存在的机器。</p>
+<div class="blind"><b>防的蒙蔽：</b>便宜蒙蔽总账。「便宜得不像话」本身就是最强的单维极值，它会诱使人给硬伤找台阶。</div>
+<div class="case"><span class="ct">实证 · 腾讯云国际站 Lighthouse，$10.08/年</span>
+它是全场价格极值：2 核 2G/40G，$10.08/年（官方新客促销，本次已核实仍在架）。但在乘法下一项项验：<span class="kill">架构归零</span>——国际站 Lighthouse 官方 FAQ 明文不支持 IPv6，本次架构的主入口直接不存在；<span class="kill">用途归零</span>——腾讯对代理用途有主动检测，删机、封号有真实案例与官方限制通告；<span class="kill">成本是假的</span>——$10.08 是首年新客价，续费回原价 $50.4/年。三条核心中了三条，价格再低也是零。<br>
+注：这不等于这台机器一无是处。换一套框架（比如「冷备仓库」：只存备份、不做代理、不需要 IPv6），它可以合格——但那是另立框架重新应聘，不是在原框架里打折放行。</div>
+
+<h2><span class="no">二</span>先定架构，再看商品：商品是来应聘的</h2>
+<p class="rule">需求与用法形态先定死，商品逐项来对；不对的地方是商品的问题，不是需求迁就商品。</p>
+<p>本次架构先于一切商家而定：<strong>IPv6 全端口入站为主入口，出站可走共享的 NAT IPv4 兜底</strong>；代理兼冷备，用量约 200 GB/月。实需也有锚——以 DediRock 的实测用量为准：纯代理节点实际只占 3–5 GB 磁盘，整机接管的上限约 16 GB；内存 512 MB 够纯代理、1 GB 是兼作小服务器的地板。配置表必须拿这把尺子去读，否则会被「2 核 2G 30G」这类标称带着买一台大半闲置的机器。</p>
+<div class="blind"><b>防的蒙蔽：</b>配置表蒙蔽实需；赠品蒙蔽结构。「独享 IPv4 免费送」听着是福利，放到具体架构里可能是毒。</div>
+<div class="case"><span class="ct">实证 · 捆绑独享 IPv4 的「赠品陷阱」</span>
+对 IPv6 入站为主的用法，随机附赠的独享 IPv4 不是福利：双栈系统默认优先走 IPv4 出站，商家随手分的那块 v4 若是脏段（这类段恰恰常见），它会<strong>劫持你的实际出口</strong>，你以为在走干净的 v6，出门却是那块脏 v4。反倒是被很多人看不上的 NAT 形态——v6 全端口入站 + 共享 v4 只作兜底出站——在结构上正是这个架构该有的形状。本次在 $20 整机档位接受了独享 IPv4，买的也不是那块 IP 本身，而是独占与可重新分配（重 roll）的权利：脏了能换，才敢用。</div>
+<div class="case"><span class="ct">实证 · 六六云，第三方实测光鲜</span>
+他人实测（2026-11-03 测评机）数据漂亮：Scamalytics 3 分、回程走 AS9929。但它 <span class="kill">IPv4-only</span>，与 v6 入站架构根本不合；外加公司注册信息全不披露、2026 年内三次硬件故障丢数据的公告。结论：可作欧洲干净落地，不作回国代理主力，未购。线路实测再漂亮，岗位不匹配就是不匹配。</div>
+
+<h2><span class="no">三</span>故障域独立，优先于单机性价比</h2>
+<p class="rule">第二台机的价值写成公式是「1 − 与第一台的故障相关性」。同域的第二台，性能再强、价格再香，备份价值都约等于零。</p>
+<p>独立性要查三层，缺一不可：<strong>牌子</strong>（商家、账单、条款——牌子倒了机器就没了）、<strong>机房</strong>（物理设施——断电火灾是同楼一起停）、<strong>网络 AS</strong>（IP 所属的自治系统——路由与封禁问题按 AS 发生，外界认的也是 AS，不是牌子）。两个牌子共用同一个房东型 AS，在故障和风控眼里就是同一台机器。ColoCrossing（AS36352）正是这样的房东：它本身是正规大机房商，质量没问题，问题只在单点——DediRock 在它体系内，所以一切同体系的候选，做备份都先天不合格。</p>
+<div class="blind"><b>防的蒙蔽：</b>名气蒙蔽相关性。越是热门的便宜大牌，越可能和你的主力挤在同一个房东体系里——热门本身就是一种相关性。</div>
+<div class="case"><span class="ct">实证 · RackNerd $21.99/年 洛杉矶特价</span>
+名气大、价格香、FAQ 明示特价终身续费同价——单看每一条都强。但查到机房：该档位的洛杉矶只有 DC-03，而 DC-03 就是 ColoCrossing（AS36352），与 DediRock <span class="kill">同一个故障域</span>。第二台机的核心使命当场归零，放弃。要买只能买它的非洛杉矶地区（且要接受那是另一条线路、另一组实测）。</div>
+<div class="case"><span class="ct">实证 · HostNamaste，独立性存疑</span>
+促销页面看起来能打，但促销已于 2026-11-08 过期；更要命的是其实际交付过的洛杉矶机器，IP 归属显示为 HostPapa/ColoCrossing 段——交付段混着房东的段，独立性无法自证，放弃。独立性查的是<strong>实际交付</strong>，不是宣传页上的机房列表。</div>
+
+<h2><span class="no">四</span>评价分轴：声誉与可达分开打分，总分不存在</h2>
+<p class="rule">IP 质量永远分两轴记，永不合并成一个总分：（1）绝对声誉轴——欺诈分、黑名单、滥用举报史、被 AI 与流媒体风控盯上的程度；（2）中国可达性轴——从国内能不能顺畅到达。哪轴是主轴，由架构决定。</p>
+<p>本次架构是 v6 入站为主：可达性在入站侧已被架构大半预解决（v6 路径干净是既成事实），剩下真正决定成败的是<strong>声誉轴</strong>——出口 IP 干不干净，决定账号风控与服务可用性。所以声誉是主轴，可达是次轴。反过来若架构是 v4 直连，可达权重就要上调。轴的主次是架构的函数，不是固定教条。</p>
+<p>由此有一条推论必须写死：<strong>中文社区的「被墙」报告，测的主要是 IPv4 可达性，只是次轴的一个样本，永远不能拿它当总分</strong>。一个段被报「被墙」，可能只是 v4 路径不通，其声誉毫无问题；反之没人报被墙的段，声誉也可能脏得不能用。社区反馈是合法的购前证据通道，但要先认清它在测哪根轴。</p>
+<p>声誉轴的查法固定几项：至少两个地理库的国家/城市一致性（城市级分歧无伤，国家级分歧是大问题）；主要黑名单是否干净、是否被标代理/数据中心；AbuseIPDB 看举报的<strong>持续性</strong>（长期持续举报与单次误报是两回事）；Scamalytics 分数必须<strong>追问依据</strong>——是这个 IP 的直接流量数据，还是按整个 AS 推算的，推算分只能当水位参考。还有最重要的一条：<strong>测试 IP 不等于分配 IP</strong>，测试 IP 只用来判断网段水位，最终验收必须查实际分到的那个地址。</p>
+<div class="blind"><b>防的蒙蔽：</b>口碑与形象蒙蔽声誉。「国人友好」「老牌」都是形象，不是分数；分数要自己查、查到分到的那个 IP 为止。</div>
+<div class="case"><span class="ct">实证 · HostDare，形象与分数的反差</span>
+顶着「对国人友好、懂优化线」的形象，一查其官方洛杉矶标准线测试 IP：Scamalytics <span class="kill">73 分</span>，声誉轴直接不合格，放弃（其 CN2 GIA 线当时还缺货，见原则七）。形象是商家给的，分数是数据给的，冲突时听数据的。</div>
+<div class="case"><span class="ct">实证 · Hostodo，价格规格都合适，声誉拖后腿</span>
+$20/年、1 核 1G/20G NVMe、自有 AS399804，纸面齐整。但其网段声誉分参差：测试段模态约 43 分（全候选最差，且须注明其中有 AS 推算口径的水分），个别地区段（底特律）高达 68 且被威胁情报点名；评价平台口碑 1.8/5。结论不是出局，而是<span class="kill">降级备选</span>——分轴的意义正在于此：不是一票否决所有瑕疵，而是让瑕疵落在它该落的轴上、给出对应的处置。</div>
+
+<h2><span class="no">五</span>证据分级：每个数字自带口径与日期</h2>
+<p class="rule">数字按证据等级采信：自测 ＞ 订单事实与官方原文 ＞ 商家页面 ＞ 转述与测评。引用任何关键数字，必须同时注明它是哪一级证据、哪一天核的。</p>
+<p>几条本次反复用到的细则：网页结构化数据（如 JSON-LD 里标的 InStock）不等于页面真库存；聚合站与博主给的「指南价」只是线索，必须回商家自己的商店与配置器读现价；商家页面没写的，不等于不存在，也不能等于存在，记「未确认」；官方知识库的原文优先于一切促销转述。还有候选池纪律：<strong>先按类别把池子扫全，再上口径筛选</strong>——本次五类全扫过（美西老牌常规价、NAT 专营、欧洲老牌、国产优化线、云厂促销），才敢说结论里没有漏网的类别。</p>
+<div class="blind"><b>防的蒙蔽：</b>「言之凿凿」蒙蔽证据等级。数字写在网页上不等于数字是真的；促销文案与脚本生成的标记，最擅长伪装成事实。</div>
+<div class="case"><span class="ct">实证 · 三个差点当真的数字</span>
+其一，某商家产品页脚本数据里标着 InStock，页面上其实根本没有真库存标签，缺货与否只能以购物车为准。其二，Hostodo 的 $12/年只活在往届特价页里，常规款在官网多处一致是 $20/年——把特价页当现价，预算第二年就落空。其三，本次成交的促销码 LEW2GB，逐个计费周期实走配置器才确认：<span class="kill">只有年付一档生效</span>（其余周期优惠为 0），「有码」和「码对你这单生效」是两回事。</div>
+
+<h2><span class="no">六</span>真实成本看全周期，不看首年价</h2>
+<p class="rule">比价只比一个数：全周期总成本。首年价是广告，续费价才是价格；「续费同价」必须有订单级证据，不认宣传口径。</p>
+<p>续费证据的等级同样分明：订单确认邮件里写明的 Recurring Amount 是硬证据；结账页循环合计与首年一致是次硬证据；商家 FAQ 说「特价终身有效」是口径，要留一分余地；条款只写「自动续订」不写价格的，等于没说。还有促销的时间账：限时码是否还在、是否限新客、是否限首台，都要在下单那一刻以购物车为准复核。</p>
+<div class="blind"><b>防的蒙蔽：</b>促销蒙蔽续费。首年 $10 与续费 $50 的组合，三年总账比老老实实 $20 续费同价还贵——便宜只在第一年成立的，不叫便宜。</div>
+<div class="case"><span class="ct">实证 · Shock 的 $20 是怎么做实的（正面案例）</span>
+Shock Hosting 的 SSD-KVM-2GB 常规年付 $50.90，促销码 LEW2GB 压到 $20/年（已核：该码为该商家有记录以来最深的一档 VPS 促销）。关键不在首年价，而在订单确认邮件白纸黑字写明 <span class="kill">Recurring Amount $20、下次到期 2027-11-09</span>——续费同价是订单事实，不是推测。这一条正是它压过若干「首年更便宜」候选的决定性原因之一。腾讯的续费跳回 $50.4 是同一原则的反面，已见原则一，不重复。</div>
+
+<h2><span class="no">七</span>买不到，等于不存在</h2>
+<p class="rule">库存状态与交付形态是商品属性的一部分，与配置、价格同级。缺货的完美商品不是候选，是监视项。</p>
+<p>这一条防的是一种隐蔽的浪费：在买不到的东西上反复做功课、在对比表里给它留着冠军位，最后要么无限期等待，要么退而求其次时心态失衡。处理方式是降格：缺货者移出候选表，挂一个低成本的库存监视，有货了再重新过一遍框架（注意：有货时也要重过，价格与条款可能已变）。</p>
+<div class="blind"><b>防的蒙蔽：</b>口碑蒙蔽可得性。「大家都说好」与「你现在能买到」是两件独立的事，前者再强也不能兑换后者。</div>
+<div class="case"><span class="ct">实证 · ByteVirt 与 BuyVM，两种买不到</span>
+ByteVirt 的美国 NAT 组在形态上其实是全场最贴本次架构的：v6 全端口入站、共享 v4 出站、$6–9/年。但美国组两档<span class="kill">双双售罄</span>。处置：不进候选，挂每 6 小时一次的库存监视至 2026-11-23，有货再议，购买权在我不在监视。BuyVM 则是口碑顶级、常年缺货的老问题，处置相同：列入「有货再说」，不为它推迟已经成立的采购。</div>
+
+<h2><span class="no">八</span>购后验收才是定案：把验收当流程的一半</h2>
+<p class="rule">购前证据天然残缺——尤其是性能，第一梯队候选的标称数字普遍没有实测背书，查无可查。所以流程设计上，验收不是收尾动作，而是选购的一半：下单前先想好验收项，退款窗口就是试用期，不合格立刻退或换。</p>
+<p>验收固定顺序（窗口短的商家要抢时间）：（1）查<strong>实际分配</strong>的 IP——两个地理库对国家城市、黑名单、举报史与持续性、欺诈分及其依据；（2）常用应用逐个实测登录，数据库说美国不等于每个应用都认；（3）测到国内的速度与延迟，分运营商、晚高峰再测一次；（4）核对实际扣款与下期续费金额，与下单前购物车所见一致；（5）给机器定定位：履历薄或条款灰的，只放可重建的服务与异地副本，唯一副本永不放。</p>
+<div class="blind"><b>防的蒙蔽：</b>下单成功蒙蔽选购完成。付款只是把「纸面候选」换成「待验实物」，真正的筛选有一半发生在付款之后、退款窗口之内。</div>
+<div class="case"><span class="ct">实证 · Shock 的购后实录，与一条没人写的教训</span>
+验收结果：实际分配的 IPv4 实测 Scamalytics <span class="kill">0 分</span>；与 DediRock 互测 1.3 ms、iperf3 实测约 930 Mbps——两台标称 1 Gbps 的口都是真口；代理与 API 中转独立部署完成，「只改域名首段即可切换两台」的对等验收通过。教训出在 IPv6 上：商家模板只写了 v6 地址、<span class="kill">不给网关</span>，其官方知识库全库没有 IPv6 网关文档，最后靠主机面板的子页面才拿到网关打通；网段内的 ::1 还被商家自己占用，自配地址要避开。由此多一条购前必问：<strong>IPv6 的完整交付形态——地址、网关、是否 /64——要问清再付款</strong>。</div>
+
+<h2>本次结果速览</h2>
+<div class="verdict">
+<table>
+<tr><th>名次</th><th>商家</th><th>决定性事实</th></tr>
+<tr><td>成交</td><td>Shock Hosting SSD-KVM-2GB（洛杉矶）</td><td>$20/年，订单确认续费同价；自有 AS395092 + CoreSite 机房，与 DediRock 完全独立；实配 IPv4 声誉 0 分；验收全过</td></tr>
+<tr><td>第二</td><td>Ethernet Servers（洛杉矶）</td><td>$30.60/年；独立性与口碑都在，输在价格</td></tr>
+<tr><td>监视中</td><td>ByteVirt 美国 NAT 组</td><td>形态最贴架构，售罄；库存监视至 2026-11-23</td></tr>
+</table>
+<p style="margin:.4rem 0 0">出局原因一览：RackNerd 同故障域；HostDare 声誉 73 分；腾讯云国际站无 IPv6、封代理、续费跳价；HostNamaste 独立性存疑且促销过期；Hostodo 声誉拖累降级备选；六六云 IPv4-only 只作欧洲落地；BuyVM 缺货。</p>
+</div>
+<h3>下次选购的起手清单</h3>
+<p>写死预算、用途与架构形态 → 查牌子/机房/AS 是否与现有节点独立 → IP 分两轴查（声誉为主轴、「被墙」只算次轴样本） → 读条款原文（代理、滥用、终止、退款） → 进购物车核现价、续费与支付方式 → 查公司履历与口碑 → 付款后在退款窗口内按验收顺序测完。常查入口：商家官网 Looking Glass 取现行测试 IP，再查 IPinfo、MaxMind、Scamalytics、AbuseIPDB、Spamhaus。</p>
+<p class="small">记录日期：2026-11-09。本次参与比较的候选共 12 家，结论是当日口径；方法可长期复用，数字下次购买前必须重新核实。</p>
+</main>
+</body>
+</html>

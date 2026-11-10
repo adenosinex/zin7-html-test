@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Markdown → JSON 字符串</title>
+<style>
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0;display:flex;flex-direction:column;height:100vh;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+    background:#f1f5f9;color:#0f172a;
+  }
+  header{
+    display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+    padding:12px 18px;background:#fff;border-bottom:1px solid #e2e8f0;
+  }
+  header h1{font-size:15px;margin:0;font-weight:600}
+  header .sub{font-size:12px;color:#64748b}
+  .logo{width:22px;height:22px;border-radius:6px;background:linear-gradient(135deg,#3b82f6,#8b5cf6)}
+  .app{
+    flex:1;min-height:0;display:grid;grid-template-columns:1fr 1fr;gap:14px;padding:14px;
+  }
+  .pane{
+    display:flex;flex-direction:column;min-height:0;
+    background:#fff;border:1px solid #e2e8f0;border-radius:10px;overflow:hidden;
+  }
+  .pane-head{
+    display:flex;align-items:center;gap:8px;flex-wrap:wrap;
+    padding:8px 10px;border-bottom:1px solid #eef2f7;background:#fafbfd;
+  }
+  .pane-head strong{font-size:13px}
+  .spacer{flex:1}
+  button{
+    font:inherit;font-size:12px;padding:5px 10px;border-radius:6px;
+    border:1px solid #d7dfea;background:#fff;color:#334155;cursor:pointer;
+  }
+  button:hover{background:#f1f5f9}
+  button.primary{background:#3b82f6;border-color:#3b82f6;color:#fff}
+  button.primary:hover{background:#2563eb}
+  label.chk{
+    display:flex;align-items:center;gap:4px;font-size:12px;
+    color:#475569;cursor:pointer;user-select:none;white-space:nowrap;
+  }
+  textarea{
+    flex:1;border:0;outline:0;resize:none;padding:14px;background:#fff;color:#0f172a;
+    font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,"Courier New",monospace;
+    font-size:13px;line-height:1.65;
+  }
+  .output{
+    flex:1;margin:0;padding:14px;overflow:auto;
+    white-space:pre-wrap;word-break:break-all;
+    background:#0f172a;color:#e2e8f0;
+    font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,"Courier New",monospace;
+    font-size:12.5px;line-height:1.6;
+  }
+  .status{
+    padding:6px 12px;font-size:11.5px;color:#64748b;background:#fafbfd;
+    border-top:1px solid #eef2f7;
+  }
+  .status.ok{color:#15803d}
+  .status.bad{color:#b91c1c}
+  .toast{
+    position:fixed;left:50%;bottom:28px;transform:translate(-50%,12px);
+    background:#111827;color:#fff;padding:8px 16px;border-radius:8px;font-size:13px;
+    opacity:0;pointer-events:none;transition:.25s;
+  }
+  .toast.show{opacity:1;transform:translate(-50%,0)}
+  @media (max-width:860px){
+    .app{grid-template-columns:1fr;grid-template-rows:1fr 1fr}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo"></div>
+  <h1>Markdown → JSON 字符串</h1>
+  <span class="sub">整篇文档原样转义成一个合法的 JSON 字符串</span>
+</header>
+
+<div class="app">
+  <!-- 输入 -->
+  <section class="pane">
+    <div class="pane-head">
+      <strong>Markdown 原文</strong>
+      <div class="spacer"></div>
+      <button id="sampleBtn">示例</button>
+      <button id="clearBtn">清空</button>
+    </div>
+    <textarea id="input" spellcheck="false" placeholder="在此粘贴 Markdown 文档…"></textarea>
+    <div class="status" id="inStatus">0 字符</div>
+  </section>
+
+  <!-- 输出 -->
+  <section class="pane">
+    <div class="pane-head">
+      <strong>JSON 结果</strong>
+      <div class="spacer"></div>
+      <label class="chk"><input type="checkbox" id="quoteChk" checked>带外层引号</label>
+      <label class="chk"><input type="checkbox" id="unicodeChk">转义非 ASCII</label>
+      <label class="chk"><input type="checkbox" id="slashChk">转义 /</label>
+      <button id="copyBtn" class="primary">复制</button>
+      <button id="downloadBtn">下载</button>
+    </div>
+    <pre class="output" id="output"></pre>
+    <div class="status" id="outStatus">—</div>
+  </section>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============================================================
+ *  核心：把整段文本转成一个合法的 JSON 字符串
+ * ============================================================ */
+function toJsonString(text, opt) {
+  // 1) JSON.stringify 负责所有必要转义：\  "  换行  制表符  控制字符  等
+  let s = JSON.stringify(String(text));
+
+  // 2) 可选：非 ASCII 全部转成 \uXXXX（仍然是合法 JSON）
+  if (opt.escapeUnicode) {
+    s = s.replace(/[\u007F-\uFFFF]/g, ch =>
+      '\\u' + ch.charCodeAt(0).toString(16).padStart(4, '0')
+    );
+  }
+
+  // 3) 可选：转义斜杠（JSON 不要求，但某些场景需要）
+  if (opt.escapeSlash) {
+    s = s.replace(/\//g, '\\/');
+  }
+
+  // 4) 可选：去掉最外层引号，只保留转义后的内容片段
+  if (!opt.withQuotes && s.length >= 2 && s[0] === '"' && s[s.length - 1] === '"') {
+    s = s.slice(1, -1);
+  }
+
+  return s;
+}
+
+/* ============================================================
+ *  页面逻辑
+ * ============================================================ */
+const SAMPLE = [
+  '# 项目说明',
+  '',
+  '这是一个 **示例** 文档：包含 "双引号"、反斜杠 \\、制表符\t与 emoji 😀。',
+  '',
+  '## 用法',
+  '',
+  '```js',
+  'const a = 1;',
+  'console.log(a);',
+  '```',
+  '',
+  '- 第一项',
+  '- 第二项',
+  '',
+  '| 字段 | 说明 |',
+  '| --- | --- |',
+  '| name | 名称 |',
+  '',
+  '> 引用结束。'
+].join('\n');
+
+const input      = document.getElementById('input');
+const output     = document.getElementById('output');
+const quoteChk   = document.getElementById('quoteChk');
+const unicodeChk = document.getElementById('unicodeChk');
+const slashChk   = document.getElementById('slashChk');
+const inStatus   = document.getElementById('inStatus');
+const outStatus  = document.getElementById('outStatus');
+const toastEl    = document.getElementById('toast');
+
+let timer = null;
+
+function toast(msg) {
+  toastEl.textContent = msg;
+  toastEl.classList.add('show');
+  clearTimeout(toastEl._t);
+  toastEl._t = setTimeout(() => toastEl.classList.remove('show'), 1500);
+}
+
+function convert() {
+  const md = input.value;
+
+  const result = toJsonString(md, {
+    withQuotes:    quoteChk.checked,
+    escapeUnicode: unicodeChk.checked,
+    escapeSlash:   slashChk.checked
+  });
+
+  output.textContent = result;
+
+  // 统计
+  inStatus.textContent = md.length + ' 字符 · ' + (md ? md.split('\n').length : 0) + ' 行';
+
+  // 校验合法性
+  outStatus.classList.remove('ok', 'bad');
+  if (quoteChk.checked) {
+    try {
+      JSON.parse(result);
+      outStatus.textContent = result.length + ' 字符 · ✓ 合法 JSON 字符串';
+      outStatus.classList.add('ok');
+    } catch (e) {
+      outStatus.textContent = '✗ 非法 JSON：' + e.message;
+      outStatus.classList.add('bad');
+    }
+  } else {
+    outStatus.textContent = result.length + ' 字符 · 转义内容片段（无外层引号，不可直接 JSON.parse）';
+  }
+}
+
+function schedule() {
+  clearTimeout(timer);
+  timer = setTimeout(convert, 150);
+}
+
+input.addEventListener('input', schedule);
+quoteChk.addEventListener('change', convert);
+unicodeChk.addEventListener('change', convert);
+slashChk.addEventListener('change', convert);
+
+document.getElementById('sampleBtn').onclick = () => {
+  input.value = SAMPLE;
+  convert();
+};
+document.getElementById('clearBtn').onclick = () => {
+  input.value = '';
+  convert();
+  input.focus();
+};
+
+document.getElementById('copyBtn').onclick = async () => {
+  const text = output.textContent;
+  if (!text) return;
+  try {
+    await navigator.clipboard.writeText(text);
+    toast('已复制到剪贴板');
+  } catch {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    ta.remove();
+    toast('已复制到剪贴板');
+  }
+};
+
+document.getElementById('downloadBtn').onclick = () => {
+  const blob = new Blob([output.textContent], { type: 'application/json;charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = quoteChk.checked ? 'markdown.json' : 'markdown.txt';
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+};
+
+/* 快捷键：Ctrl / Cmd + Enter 立即转换 */
+document.addEventListener('keydown', e => {
+  if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+    e.preventDefault();
+    convert();
+  }
+});
+
+/* 初始化 */
+input.value = SAMPLE;
+convert();
+</script>
+</body>
+</html>

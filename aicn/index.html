@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>中国AI巨头发展数据看板 (2025)</title>
+    <style>
+        :root {
+            --bg: #0b0e14;
+            --surface: #141a24;
+            --surface-raised: #1c2430;
+            --border: #2a3544;
+            --text: #e8edf5;
+            --text-dim: #8896a8;
+            --accent: #4da3ff;
+            --green: #2dd4a8;
+            --amber: #f5b85c;
+            --rose: #f56b8a;
+            --purple: #a78bfa;
+            --radius: 12px;
+            --font: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: var(--font);
+            line-height: 1.6;
+            padding: 40px 20px 80px;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .container { max-width: 1280px; margin: 0 auto; }
+
+        /* Header */
+        .header { margin-bottom: 40px; }
+        .header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            margin-bottom: 8px;
+        }
+        .header h1 span { color: var(--accent); }
+        .header .sub {
+            font-size: 14px;
+            color: var(--text-dim);
+            max-width: 720px;
+        }
+        .header .meta {
+            margin-top: 14px;
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            font-size: 12px;
+            color: var(--text-dim);
+        }
+        .header .meta span { display: flex; align-items: center; gap: 6px; }
+        .dot {
+            display: inline-block;
+            width: 7px; height: 7px;
+            border-radius: 50%;
+            background: var(--green);
+        }
+
+        /* Section title */
+        .section-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin: 48px 0 18px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        /* Overview strip */
+        .overview-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 14px;
+            margin-bottom: 8px;
+        }
+        .ov-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 18px 20px;
+        }
+        .ov-card .ov-label {
+            font-size: 12px;
+            color: var(--text-dim);
+            margin-bottom: 6px;
+        }
+        .ov-card .ov-value {
+            font-size: 24px;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+        }
+        .ov-card .ov-value .unit {
+            font-size: 13px;
+            font-weight: 400;
+            color: var(--text-dim);
+            margin-left: 4px;
+        }
+        .ov-card .ov-note {
+            font-size: 11px;
+            color: var(--text-dim);
+            margin-top: 4px;
+        }
+
+        /* Company cards */
+        .company-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+            gap: 16px;
+        }
+
+        .company-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            overflow: hidden;
+            transition: border-color 0.2s;
+        }
+        .company-card:hover { border-color: #3a4a5e; }
+
+        .cc-head {
+            padding: 18px 20px 14px;
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--border);
+        }
+        .cc-head .name {
+            font-size: 16px;
+            font-weight: 700;
+        }
+        .cc-head .model {
+            font-size: 11px;
+            color: var(--text-dim);
+            margin-top: 2px;
+        }
+        .cc-tag {
+            font-size: 10px;
+            font-weight: 600;
+            padding: 3px 8px;
+            border-radius: 20px;
+            white-space: nowrap;
+        }
+        .tag-full { background: rgba(77,163,255,0.12); color: var(--accent); }
+        .tag-flow { background: rgba(245,184,92,0.12); color: var(--amber); }
+        .tag-eco { background: rgba(45,212,168,0.12); color: var(--green); }
+        .tag-infra { background: rgba(167,139,250,0.12); color: var(--purple); }
+
+        .cc-body { padding: 16px 20px 18px; }
+
+        .metric-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            padding: 7px 0;
+            border-bottom: 1px dashed rgba(255,255,255,0.05);
+            font-size: 13px;
+        }
+        .metric-row:last-child { border-bottom: none; }
+        .metric-row .k { color: var(--text-dim); flex-shrink: 0; margin-right: 12px; }
+        .metric-row .v { font-weight: 600; text-align: right; }
+        .metric-row .v small { font-weight: 400; color: var(--text-dim); font-size: 11px; }
+
+        .highlight-metric {
+            background: rgba(77,163,255,0.06);
+            margin: 4px -8px;
+            padding: 8px;
+            border-radius: 6px;
+            border-bottom: none;
+        }
+
+        /* Comparison table */
+        .table-wrap {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            overflow-x: auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+            min-width: 820px;
+        }
+        thead th {
+            text-align: left;
+            padding: 14px 16px;
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            background: var(--surface-raised);
+            border-bottom: 1px solid var(--border);
+            white-space: nowrap;
+        }
+        tbody td {
+            padding: 13px 16px;
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+            vertical-align: top;
+        }
+        tbody tr:last-child td { border-bottom: none; }
+        tbody tr:hover td { background: rgba(255,255,255,0.015); }
+        .td-company { font-weight: 600; white-space: nowrap; }
+        .td-company small { display: block; font-weight: 400; color: var(--text-dim); font-size: 11px; }
+        .td-num { font-variant-numeric: tabular-nums; white-space: nowrap; }
+        .muted { color: var(--text-dim); font-size: 12px; }
+
+        /* Footnote */
+        .footnote {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border);
+            font-size: 11px;
+            color: var(--text-dim);
+            line-height: 1.8;
+        }
+        .footnote strong { color: var(--text); font-weight: 600; }
+
+        @media (max-width: 600px) {
+            body { padding: 24px 12px 60px; }
+            .header h1 { font-size: 22px; }
+            .company-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <!-- Header -->
+    <div class="header">
+        <h1>中国 AI 巨头 <span>发展数据看板</span></h1>
+        <p class="sub">基于 2025 全年及 2025H2 公开财报、IDC / 沙利文 / 高盛研报数据，对比百度、阿里巴巴、腾讯、字节跳动等主要玩家的 AI 业务营收、用户规模、Token 调用量与市场地位。</p>
+        <div class="meta">
+            <span><span class="dot"></span> 数据截至 2026 年 3 月公开信息</span>
+            <span>口径：人民币，另有标注除外</span>
+            <span>AI 收入口径因公司披露方式不同而存在差异</span>
+        </div>
+    </div>
+
+    <!-- Overview -->
+    <div class="overview-grid">
+        <div class="ov-card">
+            <div class="ov-label">中国企业级大模型日均调用</div>
+            <div class="ov-value">37.0<span class="unit">万亿 tokens</span></div>
+            <div class="ov-note">2025H2，较 H1 的 10.2 万亿增长 263%</div>
+        </div>
+        <div class="ov-card">
+            <div class="ov-label">企业级调用 TOP3 合计份额</div>
+            <div class="ov-value">&gt;70<span class="unit">%</span></div>
+            <div class="ov-note">千问 32.1% · 豆包 21.3% · DeepSeek 18.4%</div>
+        </div>
+        <div class="ov-card">
+            <div class="ov-label">大模型公有云 MaaS 份额第一</div>
+            <div class="ov-value">49.2<span class="unit">%</span></div>
+            <div class="ov-note">字节火山引擎，IDC 口径</div>
+        </div>
+        <div class="ov-card">
+            <div class="ov-label">百度 AI 业务全年营收</div>
+            <div class="ov-value">400<span class="unit">亿元</span></div>
+            <div class="ov-note">Q4 AI 收入占一般性业务 43%</div>
+        </div>
+    </div>
+
+    <!-- Company cards -->
+    <div class="section-title">核心玩家 · 关键数据</div>
+    <div class="company-grid">
+
+        <!-- 百度 -->
+        <div class="company-card">
+            <div class="cc-head">
+                <div>
+                    <div class="name">百度</div>
+                    <div class="model">文心一言 / 文心助手</div>
+                </div>
+                <span class="cc-tag tag-full">全栈自研</span>
+            </div>
+            <div class="cc-body">
+                <div class="metric-row"><span class="k">2025 总营收</span><span class="v">1,291 亿元</span></div>
+                <div class="metric-row"><span class="k">AI 业务营收</span><span class="v">400 亿元</span></div>
+                <div class="metric-row highlight-metric"><span class="k">文心助手月活</span><span class="v">2.02 亿 <small>2025.12</small></span></div>
+                <div class="metric-row"><span class="k">文心一言累计用户</span><span class="v">2 亿</span></div>
+                <div class="metric-row"><span class="k">日均 API 调用</span><span class="v">超 10 亿次</span></div>
+                <div class="metric-row"><span class="k">企业客户</span><span class="v">5 万家</span></div>
+                <div class="metric-row"><span class="k">百度 App 月活</span><span class="v">6.79 亿</span></div>
+                <div class="metric-row"><span class="k">AI 云收入增速</span><span class="v">+34% <small>全年</small></span></div>
+            </div>
+        </div>
+
+        <!-- 阿里巴巴 -->
+        <div class="company-card">
+            <div class="cc-head">
+                <div>
+                    <div class="name">阿里巴巴</div>
+                    <div class="model">通义千问 Qwen</div>
+                </div>
+                <span class="cc-tag tag-full">全栈 + 开源</span>
+            </div>
+            <div class="cc-body">
+                <div class="metric-row"><span class="k">阿里云季度收入</span><span class="v">432.84 亿元 <small>同比 +36%</small></span></div>
+                <div class="metric-row"><span class="k">AI 相关收入增速</span><span class="v">连续 10 季三位数增长</span></div>
+                <div class="metric-row highlight-metric"><span class="k">千问 C 端 MAU</span><span class="v">突破 3 亿 <small>全端</small></span></div>
+                <div class="metric-row"><span class="k">企业级调用份额</span><span class="v">32.1% <small>沙利文 2025H2</small></span></div>
+                <div class="metric-row"><span class="k">Hugging Face 下载</span><span class="v">10 亿次 <small>Qwen 家族</small></span></div>
+                <div class="metric-row"><span class="k">千问 App 首周下载</span><span class="v">超 1,000 万</span></div>
+                <div class="metric-row"><span class="k">2025 资本开支</span><span class="v">同比 +80% <small>9 月季度</small></span></div>
+                <div class="metric-row"><span class="k">AI 购物体验用户</span><span class="v">近 1.4 亿 <small>截至 2 月底</small></span></div>
+            </div>
+        </div>
+
+        <!-- 腾讯 -->
+        <div class="company-card">
+            <div class="cc-head">
+                <div>
+                    <div class="name">腾讯</div>
+                    <div class="model">混元 / 元宝</div>
+                </div>
+                <span class="cc-tag tag-eco">生态渗透</span>
+            </div>
+            <div class="cc-body">
+                <div class="metric-row"><span class="k">2025 全年营收</span><span class="v">7,517.7 亿元</span></div>
+                <div class="metric-row"><span class="k">全年资本开支</span><span class="v">792 亿元 <small>历史新高</small></span></div>
+                <div class="metric-row"><span class="k">全年研发投入</span><span class="v">857.5 亿元 <small>历史新高</small></span></div>
+                <div class="metric-row highlight-metric"><span class="k">腾讯元宝月活</span><span class="v">突破 1 亿</span></div>
+                <div class="metric-row"><span class="k">ima 月活</span><span class="v">超 1,300 万</span></div>
+                <div class="metric-row"><span class="k">QQ 浏览器 AI 累计用户</span><span class="v">超 1.3 亿</span></div>
+                <div class="metric-row"><span class="k">混元 3D 开源下载</span><span class="v">超 300 万</span></div>
+                <div class="metric-row"><span class="k">元宝 AI 生图日调用</span><span class="v">春节增长 30 倍</span></div>
+            </div>
+        </div>
+
+        <!-- 字节跳动 -->
+        <div class="company-card">
+            <div class="cc-head">
+                <div>
+                    <div class="name">字节跳动</div>
+                    <div class="model">豆包 / 火山引擎</div>
+                </div>
+                <span class="cc-tag tag-flow">流量突围</span>
+            </div>
+            <div class="cc-body">
+                <div class="metric-row"><span class="k">豆包月活</span><span class="v">1.72 亿 <small>2025.09</small></span></div>
+                <div class="metric-row"><span class="k">豆包日活</span><span class="v">突破 1 亿 <small>2025 年末</small></span></div>
+                <div class="metric-row highlight-metric"><span class="k">日均 Token 调用</span><span class="v">超 50 万亿 <small>2025.12</small></span></div>
+                <div class="metric-row"><span class="k">MaaS 公有云份额</span><span class="v">49.2% <small>IDC，第一</small></span></div>
+                <div class="metric-row"><span class="k">企业级调用份额</span><span class="v">21.3% <small>沙利文 2025H2</small></span></div>
+                <div class="metric-row"><span class="k">Token 半年增速</span><span class="v">+200%</span></div>
+                <div class="metric-row"><span class="k">即梦 AI 月活</span><span class="v">约 0.1 亿 <small>2025.09</small></span></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Comparison table -->
+    <div class="section-title">横向对比 · 关键指标一览</div>
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>公司 / 主体</th>
+                    <th>核心 AI 产品</th>
+                    <th>AI 相关营收 / 规模</th>
+                    <th>用户 / 调用量级</th>
+                    <th>市场地位 / 份额</th>
+                    <th>战略特征</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="td-company">百度<small>Baidu</small></td>
+                    <td>文心一言 / 文心助手</td>
+                    <td class="td-num">AI 业务营收 400 亿元；AI 云全年 +34%</td>
+                    <td class="td-num">文心助手 MAU 2.02 亿；日均 API 10 亿次</td>
+                    <td>大模型中标项目数 &amp; 金额双第一（2025）</td>
+                    <td class="muted">搜索 + 云 + 自动驾驶全栈落地</td>
+                </tr>
+                <tr>
+                    <td class="td-company">阿里巴巴<small>Alibaba</small></td>
+                    <td>通义千问 Qwen</td>
+                    <td class="td-num">阿里云季度 432.84 亿元；AI 收入连续 10 季三位数增长</td>
+                    <td class="td-num">千问 C 端 MAU 超 3 亿；企业级调用份额 32.1%</td>
+                    <td>企业级大模型调用份额第一（32.1%）；开源模型下载 10 亿次</td>
+                    <td class="muted">全栈 + 开源，对标 Google 路径</td>
+                </tr>
+                <tr>
+                    <td class="td-company">腾讯<small>Tencent</small></td>
+                    <td>混元 / 元宝</td>
+                    <td class="td-num">全年营收 7,517.7 亿元；资本开支 792 亿元</td>
+                    <td class="td-num">元宝 MAU 破 1 亿；ima MAU 超 1,300 万</td>
+                    <td>生态内渗透，微信 / 支付场景深度整合</td>
+                    <td class="muted">克制投入，AI 无缝嵌入社交与产业生态</td>
+                </tr>
+                <tr>
+                    <td class="td-company">字节跳动<small>ByteDance</small></td>
+                    <td>豆包 / 火山引擎</td>
+                    <td class="td-num">MaaS 公有云份额 49.2%（第一）</td>
+                    <td class="td-num">豆包 MAU 1.72 亿；日均 Token 超 50 万亿</td>
+                    <td>MaaS 调用量第一；Token 规模中国第一、全球第三</td>
+                    <td class="muted">C 端流量反哺，低价 + 规模突围</td>
+                </tr>
+                <tr>
+                    <td class="td-company">华为<small>Huawei</small></td>
+                    <td>盘古 / 昇腾</td>
+                    <td class="td-num">AI 业务营收约 480 亿元（2025，含算力与模型）</td>
+                    <td class="td-num">昇腾开发者超 400 万；盘古落地 30+ 行业</td>
+                    <td>昇腾算力国内份额约 67%；政务 / 工业 / 金融云份额第一</td>
+                    <td class="muted">算力底座 + 行业大模型，硬软协同</td>
+                </tr>
+                <tr>
+                    <td class="td-company">DeepSeek<small>深度求索</small></td>
+                    <td>DeepSeek 系列</td>
+                    <td class="td-num">未披露营收；估值预期较高</td>
+                    <td class="td-num">月活曾达 1.94 亿（2025.03），后回落至 1.45 亿（2025.09）</td>
+                    <td>企业级调用份额 18.4%，位列第三</td>
+                    <td class="muted">开源 + 低成本，快速起量后进入调整期</td>
+                </tr>
+                <tr>
+                    <td class="td-company">智谱 AI<small>Zhipu</small></td>
+                    <td>GLM 系列</td>
+                    <td class="td-num">2025 营收 7.24 亿元，同比 +131.9%</td>
+                    <td class="td-num">国内大模型公司收入规模首位（独立口径）</td>
+                    <td>企业级通用大模型收入 3.66 亿元，占比 50.4%</td>
+                    <td class="muted">MaaS 飞轮，专注企业级与智能体</td>
+                </tr>
+                <tr>
+                    <td class="td-company">商汤<small>SenseTime</small></td>
+                    <td>日日新 / 多模态</td>
+                    <td class="td-num">生成式 AI 收入 36.3 亿元，同比 +51%</td>
+                    <td class="td-num">生成式 AI 占总营收 72.4%（2025）</td>
+                    <td>多模态大模型头部厂商之一</td>
+                    <td class="muted">从 CV 向生成式 AI 全面转型</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Footnote -->
+    <div class="footnote">
+        <strong>数据口径说明：</strong>各公司“AI 收入”定义不完全一致。百度“AI 业务营收”含智能云、AI 原生营销等；阿里以阿里云 AI 相关收入及千问生态指标为主；腾讯未单独披露 AI 营收，侧重投入与产品指标；字节以火山引擎 MaaS 份额和豆包 Token 规模为核心参考。用户规模数据来自 QuestMobile 等第三方监测，与公司官方口径可能存在差异。企业级调用份额来自沙利文《中国 GenAI 市场洞察：企业级大模型调用全景研究，2025H2》；MaaS 公有云份额来自 IDC，经高盛研报引用。华为 AI 业务营收含算力基础设施与模型，为调研估算口径。DeepSeek 月活数据来自 QuestMobile，不同月份波动较大。本看板仅作信息聚合，不构成投资建议。
+    </div>
+
+</div>
+</body>
+</html>

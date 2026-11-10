@@ -1,0 +1,1016 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>💎 训练计划 · 深度研判报告</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,600;1,8..60,400&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #faf8f4;
+    --bg-warm: #f5f0e8;
+    --surface: #ffffff;
+    --surface-alt: #f0ebe1;
+    --accent: #b87333;
+    --accent-light: #d4944a;
+    --accent-glow: rgba(184,115,51,0.08);
+    --accent-deep: #8b5a2b;
+    --text-primary: #1a1714;
+    --text-body: #3d3630;
+    --text-muted: #8a7e72;
+    --text-subtle: #b5aa9e;
+    --border: #e6dfd5;
+    --border-light: #f0ebe3;
+    --green: #4a7c59;
+    --green-bg: #eaf2ec;
+    --blue: #3a6b8c;
+    --blue-bg: #e8f0f5;
+    --red: #a04040;
+    --red-bg: #f5eaea;
+    --yellow: #9a7b2e;
+    --yellow-bg: #f5f0e0;
+    --purple: #6b5b8a;
+    --purple-bg: #f0ecf5;
+    --shadow-sm: 0 1px 3px rgba(26,23,20,0.04), 0 1px 2px rgba(26,23,20,0.02);
+    --shadow-md: 0 4px 16px rgba(26,23,20,0.06), 0 2px 4px rgba(26,23,20,0.03);
+    --shadow-lg: 0 12px 40px rgba(26,23,20,0.08), 0 4px 12px rgba(26,23,20,0.04);
+    --radius: 12px;
+    --radius-lg: 20px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Source Serif 4', 'Noto Serif SC', Georgia, serif;
+    background: var(--bg);
+    color: var(--text-body);
+    line-height: 1.8;
+    font-size: 16px;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      radial-gradient(ellipse at 15% 20%, rgba(184,115,51,0.03) 0%, transparent 50%),
+      radial-gradient(ellipse at 85% 80%, rgba(58,107,140,0.03) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .page-wrapper {
+    position: relative;
+    z-index: 1;
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 60px 24px 100px;
+  }
+
+  /* ─── HEADER ─── */
+  .report-header {
+    text-align: center;
+    margin-bottom: 72px;
+    padding-bottom: 48px;
+    border-bottom: 1px solid var(--border);
+    position: relative;
+  }
+
+  .report-header::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 3px;
+    background: var(--accent);
+    border-radius: 2px;
+  }
+
+  .header-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 20px;
+    display: block;
+  }
+
+  .header-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(36px, 5vw, 52px);
+    font-weight: 700;
+    color: var(--text-primary);
+    line-height: 1.15;
+    margin-bottom: 16px;
+  }
+
+  .header-subtitle {
+    font-family: 'Source Serif 4', serif;
+    font-size: 17px;
+    color: var(--text-muted);
+    font-weight: 300;
+    max-width: 560px;
+    margin: 0 auto;
+    line-height: 1.7;
+  }
+
+  .header-meta {
+    display: flex;
+    justify-content: center;
+    gap: 32px;
+    margin-top: 28px;
+    flex-wrap: wrap;
+  }
+
+  .meta-item {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--text-subtle);
+    letter-spacing: 0.08em;
+  }
+
+  .meta-item strong {
+    color: var(--text-muted);
+    font-weight: 500;
+  }
+
+  /* ─── SECTION STRUCTURE ─── */
+  .section {
+    margin-bottom: 56px;
+    animation: fadeUp 0.6s ease both;
+  }
+
+  .section:nth-child(2) { animation-delay: 0.08s; }
+  .section:nth-child(3) { animation-delay: 0.16s; }
+  .section:nth-child(4) { animation-delay: 0.24s; }
+  .section:nth-child(5) { animation-delay: 0.32s; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .section-number {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--accent);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    display: block;
+  }
+
+  .section-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(26px, 3.5vw, 34px);
+    font-weight: 700;
+    color: var(--text-primary);
+    line-height: 1.25;
+    margin-bottom: 24px;
+  }
+
+  .section-lead {
+    font-size: 16.5px;
+    color: var(--text-body);
+    margin-bottom: 24px;
+    max-width: 780px;
+    line-height: 1.85;
+  }
+
+  /* ─── CONSENSUS CARDS ─── */
+  .consensus-grid {
+    display: grid;
+    gap: 20px;
+    margin-top: 8px;
+  }
+
+  .consensus-card {
+    background: var(--surface);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius);
+    padding: 28px 30px;
+    box-shadow: var(--shadow-sm);
+    transition: box-shadow 0.3s ease, transform 0.3s ease;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .consensus-card:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+  }
+
+  .consensus-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    border-radius: 4px 0 0 4px;
+  }
+
+  .consensus-card.type-strength::before { background: var(--accent); }
+  .consensus-card.type-mental::before { background: var(--purple); }
+  .consensus-card.type-combo::before { background: var(--green); }
+  .consensus-card.type-risk::before { background: var(--red); }
+
+  .consensus-card .card-icon {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    display: block;
+  }
+
+  .type-strength .card-icon { color: var(--accent); }
+  .type-mental .card-icon { color: var(--purple); }
+  .type-combo .card-icon { color: var(--green); }
+  .type-risk .card-icon { color: var(--red); }
+
+  .consensus-card h3 {
+    font-family: 'Source Serif 4', serif;
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+    line-height: 1.4;
+  }
+
+  .consensus-card p {
+    font-size: 14.5px;
+    color: var(--text-body);
+    line-height: 1.75;
+  }
+
+  .highlight-plan {
+    display: inline-block;
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    font-weight: 500;
+    padding: 2px 8px;
+    border-radius: 4px;
+    letter-spacing: 0.05em;
+  }
+
+  .highlight-plan.a {
+    background: var(--red-bg);
+    color: var(--red);
+  }
+
+  .highlight-plan.b {
+    background: var(--blue-bg);
+    color: var(--blue);
+  }
+
+  /* ─── DIVERGENCE ─── */
+  .divergence-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    background: var(--surface);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+    margin-top: 8px;
+  }
+
+  .divergence-table thead th {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    background: var(--surface-alt);
+    padding: 16px 20px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .divergence-table tbody td {
+    padding: 20px;
+    border-bottom: 1px solid var(--border-light);
+    vertical-align: top;
+    font-size: 14px;
+    line-height: 1.7;
+  }
+
+  .divergence-table tbody tr:last-child td {
+    border-bottom: none;
+  }
+
+  .divergence-table tbody tr:hover {
+    background: var(--accent-glow);
+  }
+
+  .divergence-table .approach-label {
+    font-family: 'Source Serif 4', serif;
+    font-weight: 600;
+    color: var(--text-primary);
+    white-space: nowrap;
+  }
+
+  .divergence-table .model-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    font-weight: 500;
+    padding: 2px 8px;
+    border-radius: 10px;
+    background: var(--surface-alt);
+    color: var(--text-muted);
+    letter-spacing: 0.05em;
+    display: inline-block;
+    margin-bottom: 6px;
+  }
+
+  .divergence-sub {
+    margin-top: 32px;
+  }
+
+  .divergence-sub h3 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 12px;
+  }
+
+  .divergence-sub p {
+    font-size: 15px;
+    line-height: 1.8;
+    max-width: 780px;
+  }
+
+  .divergence-sub .stance-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    padding: 3px 10px;
+    border-radius: 10px;
+    display: inline-block;
+    margin-right: 6px;
+  }
+
+  .stance-tag.pro-active {
+    background: var(--yellow-bg);
+    color: var(--yellow);
+  }
+
+  .stance-tag.pro-neutral {
+    background: var(--blue-bg);
+    color: var(--blue);
+  }
+
+  /* ─── CREDIBILITY ─── */
+  .cred-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    margin-top: 8px;
+  }
+
+  .cred-card {
+    background: var(--surface);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius);
+    padding: 24px;
+    text-align: center;
+    box-shadow: var(--shadow-sm);
+    transition: box-shadow 0.3s ease;
+  }
+
+  .cred-card:hover {
+    box-shadow: var(--shadow-md);
+  }
+
+  .cred-score {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 36px;
+    font-weight: 700;
+    color: var(--green);
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+
+  .cred-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 10px;
+    display: block;
+  }
+
+  .cred-desc {
+    font-size: 13px;
+    color: var(--text-body);
+    line-height: 1.65;
+  }
+
+  .cred-verdict {
+    margin-top: 24px;
+    background: var(--green-bg);
+    border: 1px solid rgba(74,124,89,0.15);
+    border-radius: var(--radius);
+    padding: 20px 24px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .cred-verdict-icon {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--green);
+    flex-shrink: 0;
+  }
+
+  .cred-verdict p {
+    font-size: 14.5px;
+    color: var(--text-body);
+    line-height: 1.7;
+  }
+
+  .cred-verdict strong {
+    color: var(--green);
+  }
+
+  .cred-verdict .note-inline {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-top: 4px;
+    display: block;
+  }
+
+  /* ─── CONCLUSION HERO ─── */
+  .conclusion-hero {
+    background: linear-gradient(135deg, #faf8f4 0%, #f2ece2 100%);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 40px 36px;
+    box-shadow: var(--shadow-md);
+    margin-bottom: 36px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .conclusion-hero::before {
+    content: '';
+    position: absolute;
+    top: -40%;
+    right: -20%;
+    width: 300px;
+    height: 300px;
+    background: radial-gradient(circle, rgba(184,115,51,0.06) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .conclusion-hero .hero-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 14px;
+    display: block;
+  }
+
+  .conclusion-hero h3 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(22px, 3vw, 28px);
+    font-weight: 700;
+    color: var(--text-primary);
+    line-height: 1.35;
+    margin-bottom: 18px;
+    position: relative;
+  }
+
+  .conclusion-hero p {
+    font-size: 15px;
+    line-height: 1.8;
+    max-width: 720px;
+    position: relative;
+  }
+
+  .source-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 18px;
+    position: relative;
+  }
+
+  .source-pill {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    font-weight: 400;
+    padding: 4px 12px;
+    border-radius: 20px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    letter-spacing: 0.05em;
+  }
+
+  /* ─── WEEKLY PLAN ─── */
+  .week-plan {
+    display: grid;
+    gap: 16px;
+  }
+
+  .day-card {
+    background: var(--surface);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius);
+    padding: 28px 30px;
+    box-shadow: var(--shadow-sm);
+    display: grid;
+    grid-template-columns: 100px 1fr auto;
+    gap: 20px;
+    align-items: start;
+    transition: box-shadow 0.3s ease, transform 0.3s ease;
+  }
+
+  .day-card:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+  }
+
+  .day-card.anchor-day {
+    border-color: var(--accent);
+    box-shadow: var(--shadow-sm), 0 0 0 1px var(--accent);
+  }
+
+  .day-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    padding-top: 2px;
+  }
+
+  .anchor-day .day-label { color: var(--accent); }
+
+  .day-content h4 {
+    font-family: 'Source Serif 4', serif;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 6px;
+  }
+
+  .day-content p {
+    font-size: 14px;
+    color: var(--text-body);
+    line-height: 1.7;
+  }
+
+  .day-specs {
+    text-align: right;
+    flex-shrink: 0;
+  }
+
+  .spec-intensity {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 22px;
+    font-weight: 700;
+    line-height: 1;
+  }
+
+  .anchor-day .spec-intensity { color: var(--accent); }
+  .day-card:not(.anchor-day) .spec-intensity { color: var(--blue); }
+
+  .spec-sets {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--text-subtle);
+    margin-top: 4px;
+    letter-spacing: 0.05em;
+  }
+
+  .day-expect {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid var(--border-light);
+    font-size: 13px;
+    color: var(--text-muted);
+    line-height: 1.65;
+  }
+
+  .day-expect strong {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-subtle);
+    display: block;
+    margin-bottom: 3px;
+  }
+
+  /* ─── MINORITY VIEWS ─── */
+  .minority-card {
+    background: var(--surface);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius);
+    padding: 28px 30px;
+    box-shadow: var(--shadow-sm);
+    margin-bottom: 16px;
+    position: relative;
+    transition: box-shadow 0.3s ease;
+  }
+
+  .minority-card:hover {
+    box-shadow: var(--shadow-md);
+  }
+
+  .minority-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background: var(--text-subtle);
+    border-radius: 4px 0 0 4px;
+  }
+
+  .minority-card .minority-source {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-subtle);
+    margin-bottom: 10px;
+    display: block;
+  }
+
+  .minority-card h3 {
+    font-family: 'Source Serif 4', serif;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+    line-height: 1.4;
+  }
+
+  .minority-card p {
+    font-size: 14.5px;
+    color: var(--text-body);
+    line-height: 1.75;
+  }
+
+  .minority-card .use-case {
+    margin-top: 12px;
+    padding: 12px 16px;
+    background: var(--surface-alt);
+    border-radius: 8px;
+    font-size: 13px;
+    color: var(--text-muted);
+    line-height: 1.65;
+  }
+
+  .minority-card .use-case strong {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-subtle);
+    display: block;
+    margin-bottom: 3px;
+  }
+
+  /* ─── DIVIDER ─── */
+  .section-divider {
+    border: none;
+    height: 1px;
+    background: var(--border);
+    margin: 48px 0;
+    position: relative;
+  }
+
+  .section-divider::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 8px;
+    height: 8px;
+    background: var(--accent);
+    border-radius: 50%;
+  }
+
+  /* ─── FOOTER ─── */
+  .report-footer {
+    text-align: center;
+    padding-top: 48px;
+    border-top: 1px solid var(--border);
+    margin-top: 64px;
+  }
+
+  .footer-text {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--text-subtle);
+    letter-spacing: 0.1em;
+  }
+
+  /* ─── RESPONSIVE ─── */
+  @media (max-width: 700px) {
+    .page-wrapper { padding: 36px 16px 64px; }
+    .day-card {
+      grid-template-columns: 1fr;
+      gap: 10px;
+    }
+    .day-specs {
+      text-align: left;
+      display: flex;
+      gap: 12px;
+      align-items: baseline;
+    }
+    .divergence-table { font-size: 13px; }
+    .divergence-table thead th,
+    .divergence-table tbody td { padding: 12px 14px; }
+    .conclusion-hero { padding: 28px 22px; }
+    .header-meta { gap: 16px; }
+  }
+</style>
+</head>
+<body>
+<div class="page-wrapper">
+
+  <!-- HEADER -->
+  <header class="report-header">
+    <span class="header-label">Multi-Model Synthesis Report</span>
+    <h1 class="header-title">训练计划 · 深度研判</h1>
+    <p class="header-subtitle">基于多份 AI 分析的系统性整合：两种训练策略的科学评估、个性化匹配与最终路径选择</p>
+    <div class="header-meta">
+      <span class="meta-item"><strong>输入</strong> 计划A（低频大强度）vs 计划B（高频中强度）</span>
+      <span class="meta-item"><strong>模型</strong> DeepSeek · GLM · Qwen · MiMo</span>
+      <span class="meta-item"><strong>结论</strong> 混合周期化策略</span>
+    </div>
+  </header>
+
+  <!-- ═══════════════ 1. CONSENSUS ═══════════════ -->
+  <section class="section">
+    <span class="section-number">01 · Consensus</span>
+    <h2 class="section-title">提炼共识</h2>
+    <p class="section-lead">所有模型在以下核心观点上达成了高度一致——</p>
+
+    <div class="consensus-grid">
+      <div class="consensus-card type-strength">
+        <span class="card-icon">01 · 力量增力机制</span>
+        <h3><span class="highlight-plan b">计划B</span> 在纯力量与运动表现的科学增力机制上更优</h3>
+        <p>共识认为，力量是一种神经技能，高频次（每周 3–4 次）的练习能更有效地强化神经适应、巩固动作模式，实现稳定、可持续的力量增长，尤其利于综合运动表现。</p>
+      </div>
+
+      <div class="consensus-card type-mental">
+        <span class="card-icon">02 · 心理匹配</span>
+        <h3><span class="highlight-plan a">计划A</span> 在心理满足感上与你高度匹配</h3>
+        <p>所有分析都精准识别到你将"酸痛感"视为积极反馈的特殊心理模式，认为计划 A 能提供强烈的突破感、新奇感和成就感，完美解决了你对训练"无聊"的担忧。</p>
+      </div>
+
+      <div class="consensus-card type-combo">
+        <span class="card-icon">03 · 最优路径</span>
+        <h3>最佳方案是两者结合，而非二选一</h3>
+        <p>所有回答都否定了单一方案的绝对性，一致推荐采用"混合"或"周期化"策略，将大重量刺激与高频技术巩固相结合，以同时满足生理增力需求与心理偏好。</p>
+      </div>
+
+      <div class="consensus-card type-risk">
+        <span class="card-icon">04 · 风险认知</span>
+        <h3>风险认知一致</h3>
+        <p><span class="highlight-plan a">计划A</span> 有更高的受伤风险和因频率过低导致的力量波动；<span class="highlight-plan b">计划B</span> 则有潜在的累积性疲劳和可能因缺乏刺激而再次感到"无聊"的风险。</p>
+      </div>
+    </div>
+  </section>
+
+  <hr class="section-divider">
+
+  <!-- ═══════════════ 2. DIVERGENCE ═══════════════ -->
+  <section class="section">
+    <span class="section-number">02 · Divergence</span>
+    <h2 class="section-title">分析分歧</h2>
+    <p class="section-lead">尽管结论方向一致，但在实现"结合"的具体路径上存在细微但关键的分歧。</p>
+
+    <table class="divergence-table">
+      <thead>
+        <tr>
+          <th style="width:22%">融合方式</th>
+          <th style="width:20%">模型来源</th>
+          <th>核心逻辑</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="approach-label">双周摇摆周期</span></td>
+          <td><span class="model-tag">DeepSeek V3.2</span></td>
+          <td>第 1 周完全执行计划 A，第 2 周完全执行计划 B，交替进行。这是一种<strong>粗粒度</strong>的切换。</td>
+        </tr>
+        <tr>
+          <td><span class="approach-label">周内线性周期</span></td>
+          <td><span class="model-tag">GLM 4.5</span></td>
+          <td>一个 3–4 周的大周期，包含 2 周基础积累（类似 B）、1 周强度冲击（类似 A）和 1 周恢复。这是一种<strong>更长周期</strong>的规划。</td>
+        </tr>
+        <tr>
+          <td><span class="approach-label">周内波动 / DUP</span></td>
+          <td><span class="model-tag">Qwen</span> <span class="model-tag">MiMo</span></td>
+          <td>在同一周内同时包含大强度日、中等强度日和爆发力/速度日。这是一种<strong>精细化、高频波动</strong>的内嵌式融合。</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="divergence-sub">
+      <h3>对"酸痛"心理偏好的处理深度不同</h3>
+      <p>
+        <span class="stance-tag pro-active">深度响应</span>
+        <strong>Qwen 3.5 Flash</strong> 分析最为深入，直接指出你拥有"'疼痛即进步'的心理暗示（Pain = Gain）"这一巨大红利，并据此更偏向于推荐以"改良后的计划 A"为驱动力。
+      </p>
+      <p style="margin-top:10px;">
+        <span class="stance-tag pro-neutral">中立科学</span>
+        <strong>MiMo 2.5 Pro</strong> 甚至理性提醒"DOMS 不等于训练有效"，本质上仍更偏向将你拉回以计划 B 为基底的更高效增力路径。其他模型虽承认这一偏好，但立场也更偏中立。
+      </p>
+    </div>
+  </section>
+
+  <hr class="section-divider">
+
+  <!-- ═══════════════ 3. CREDIBILITY ═══════════════ -->
+  <section class="section">
+    <span class="section-number">03 · Credibility</span>
+    <h2 class="section-title">判断可信度</h2>
+    <p class="section-lead">综合运动科学原理与你的个性化描述，对各维度可信度进行评估。</p>
+
+    <div class="cred-grid">
+      <div class="cred-card">
+        <div class="cred-score">A+</div>
+        <span class="cred-label">科学准确性</span>
+        <p class="cred-desc">对两种计划的生理机制（神经适应 vs 结构性损伤）的剖析均符合主流运动科学认知</p>
+      </div>
+      <div class="cred-card">
+        <div class="cred-score">A+</div>
+        <span class="cred-label">个性化匹配</span>
+        <p class="cred-desc">极佳地捕捉了你"较高水平、追求表现、享受酸痛、厌恶无聊"的复杂用户画像</p>
+      </div>
+      <div class="cred-card">
+        <div class="cred-score">A</div>
+        <span class="cred-label">逻辑自洽度</span>
+        <p class="cred-desc">各模型均构建了从原理分析、体感对比到最终建议的完整逻辑链</p>
+      </div>
+    </div>
+
+    <div class="cred-verdict">
+      <span class="cred-verdict-icon">✓</span>
+      <div>
+        <p><strong>总体可信度极高。</strong> 路径分歧并非源于知识错误，而是源于对主观偏好（享受酸痛）与客观效率（高频增力）之间权衡比重的不同。这是一个<strong>偏好问题，而非事实问题</strong>。</p>
+        <span class="note-inline">建议路径的分歧本质上反映的是价值取向的差异，而非科学认知的矛盾。</span>
+      </div>
+    </div>
+  </section>
+
+  <hr class="section-divider">
+
+  <!-- ═══════════════ 4. FINAL CONCLUSION ═══════════════ -->
+  <section class="section">
+    <span class="section-number">04 · Final Conclusion</span>
+    <h2 class="section-title">最终综合结论</h2>
+
+    <div class="conclusion-hero">
+      <span class="hero-label">推荐策略</span>
+      <h3>以周内波动周期化（DUP）为骨架，以大强度日为心理锚点的混合策略</h3>
+      <p>这个结论整合了各方观点的最大公约数：采纳共识放弃单一计划，走向周期化混合；采用周内 DUP 模型实现精细化、可持续的全面刺激；刻意保留大强度日以满足心理驱动需求；在其余训练日遵循科学原则安排中等强度技术日和爆发力表现日。</p>
+      <div class="source-pills">
+        <span class="source-pill">← DUP 骨架 来自 MiMo & Qwen</span>
+        <span class="source-pill">← 心理锚点 来自 Qwen</span>
+        <span class="source-pill">← 科学增力共识 来自全员</span>
+      </div>
+    </div>
+
+    <div class="week-plan">
+      <!-- MON -->
+      <div class="day-card anchor-day">
+        <div class="day-label">周一</div>
+        <div class="day-content">
+          <h4>大强度 / 刺激日</h4>
+          <p>主要复合动作——深蹲、硬拉、卧推、推举等</p>
+          <div class="day-expect">
+            <strong>预期收获</strong>
+            满足你对大重量和延迟性肌肉酸痛的积极心理需求，提供神经冲击
+          </div>
+        </div>
+        <div class="day-specs">
+          <div class="spec-intensity">80–85%</div>
+          <div class="spec-sets">1RM · 3–5 组 × 3–5 次</div>
+        </div>
+      </div>
+
+      <!-- WED -->
+      <div class="day-card">
+        <div class="day-label">周三</div>
+        <div class="day-content">
+          <h4>中等强度 / 技术日</h4>
+          <p>与周一相同的主动作或其变式</p>
+          <div class="day-expect">
+            <strong>预期收获</strong>
+            高频巩固动作模式，增加训练容量，身体仅有轻微疲劳，"清爽"无酸痛
+          </div>
+        </div>
+        <div class="day-specs">
+          <div class="spec-intensity">70–75%</div>
+          <div class="spec-sets">1RM · 4 组 × 6–8 次</div>
+        </div>
+      </div>
+
+      <!-- FRI -->
+      <div class="day-card">
+        <div class="day-label">周五</div>
+        <div class="day-content">
+          <h4>爆发力 / 运动表现日</h4>
+          <p>专注动作速度，或进行跳跃、壶铃、药球投掷等爆发力训练</p>
+          <div class="day-expect">
+            <strong>预期收获</strong>
+            将获得的力量直接转化为运动表现，体验不同的神经兴奋感，保持新鲜感
+          </div>
+        </div>
+        <div class="day-specs">
+          <div class="spec-intensity">60%</div>
+          <div class="spec-sets">1RM · 速度主导</div>
+        </div>
+      </div>
+
+      <!-- SAT/SUN -->
+      <div class="day-card">
+        <div class="day-label">周六/日</div>
+        <div class="day-content">
+          <h4>可选 · 主动恢复</h4>
+          <p>低强度自重训练、流瑜伽，或你喜欢的趣味性身体活动</p>
+          <div class="day-expect">
+            <strong>预期收获</strong>
+            保持活跃，促进恢复，避免因完全静止而僵硬，满足"无聊期"的活动需求
+          </div>
+        </div>
+        <div class="day-specs">
+          <div class="spec-intensity" style="font-size:18px;">低强度</div>
+          <div class="spec-sets">自由安排</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <hr class="section-divider">
+
+  <!-- ═══════════════ 5. MINORITY VIEWS ═══════════════ -->
+  <section class="section">
+    <span class="section-number">05 · Minority Views</span>
+    <h2 class="section-title">保留合理少数派观点</h2>
+    <p class="section-lead">以下观点虽非最终推荐的核心路径，但作为有价值的少数派意见予以保留，供你在不同阶段参考。</p>
+
+    <div class="minority-card">
+      <span class="minority-source">DeepSeek V3.2</span>
+      <h3>双周完全切换策略</h3>
+      <p>此方案在"彻底满足心理需求"上更强。如果你感到周内波动太"频繁切换"，希望有一整周沉浸于一种训练哲学，那么进行"一整个高强度周"和"一整个中强度周"的轮转是一个合理且更易执行的替代方案。它牺牲了一点神经适应效率，但换取了更极致的心理体验。</p>
+      <div class="use-case">
+        <strong>适用场景</strong>
+        当你发现 DUP 周内切换过于琐碎，或进入比赛备战期需要更清晰的阶段性目标时。
+      </div>
+    </div>
+
+    <div class="minority-card">
+      <span class="minority-source">MiMo 2.5 Pro</span>
+      <h3>"DOMS ≠ 有效"的冷思考</h3>
+      <p>这一纯粹科学主义观点值得长期铭记。它提醒你，在多个月或数年的训练周期里，应将"酸痛的积极心理"视为维持动力的工具，而非判断训练质量的绝对标准。当你的力量水平再上新阶，需要更精细管理恢复时，随时可以调整或降低大强度日的频率，核心仍然要回归到长期、高频、稳定的技术磨炼上。</p>
+      <div class="use-case">
+        <strong>长期视角</strong>
+        当你力量水平显著提升、恢复管理成为瓶颈时，应逐步降低对酸痛感的心理依赖，回归高频技术巩固为核心。
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="report-footer">
+    <p class="footer-text">Multi-Model Analysis · Synthesized for Personalized Training Optimization</p>
+  </footer>
+
+</div>
+</body>
+</html>

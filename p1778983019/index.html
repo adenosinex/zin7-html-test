@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>徒步装备全攻略 — 重要性排序与方案选配</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Noto+Sans+SC:wght@300;400;500;700&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+        :root{
+            --bg:#0a0e08;
+            --bg-alt:#0f150c;
+            --surface:#141c10;
+            --surface-2:#1a2416;
+            --accent:#d4a843;
+            --accent-bright:#ebc256;
+            --accent-dim:#8a7030;
+            --green:#3a6b35;
+            --green-light:#5a9a4a;
+            --text:#e8e4da;
+            --text-2:#a8a490;
+            --text-muted:#5a5850;
+            --danger:#c04030;
+            --info:#4a8aaa;
+            --mono:'DM Mono','Courier New',monospace;
+            --sans:'Noto Sans SC','Helvetica Neue',sans-serif;
+            --display:'Instrument Serif','Georgia',serif;
+        }
+        html{scroll-behavior:smooth;font-size:16px}
+        body{
+            font-family:var(--sans);
+            background:var(--bg);
+            color:var(--text);
+            line-height:1.8;
+            overflow-x:hidden;
+        }
+        /* Topographic texture */
+        body::before{
+            content:'';position:fixed;inset:0;
+            background-image:url("data:image/svg+xml,%3Csvg width='600' height='600' xmlns='http://www.w3.org/2000/svg'%3E%3Cdefs%3E%3Cpattern id='t' width='60' height='60' patternUnits='userSpaceOnUse'%3E%3Ccircle cx='30' cy='30' r='25' fill='none' stroke='%233a6b35' stroke-width='.3' opacity='.15'/%3E%3Ccircle cx='30' cy='30' r='15' fill='none' stroke='%233a6b35' stroke-width='.2' opacity='.1'/%3E%3Ccircle cx='30' cy='30' r='5' fill='none' stroke='%233a6b35' stroke-width='.15' opacity='.08'/%3E%3C/pattern%3E%3C/defs%3E%3Crect width='600' height='600' fill='url(%23t)'/%3E%3C/svg%3E");
+            opacity:.4;pointer-events:none;z-index:0;
+        }
+        body::after{
+            content:'';position:fixed;inset:0;
+            background:
+                radial-gradient(ellipse at 15% 20%,rgba(58,107,53,.08) 0%,transparent 50%),
+                radial-gradient(ellipse at 85% 70%,rgba(212,168,67,.04) 0%,transparent 45%);
+            pointer-events:none;z-index:0;
+        }
+        main{position:relative;z-index:1}
+
+        /* NAV */
+        nav{
+            position:fixed;top:0;left:0;right:0;z-index:100;
+            padding:1rem 2.5rem;display:flex;justify-content:space-between;align-items:center;
+            background:rgba(10,14,8,.8);backdrop-filter:blur(16px);
+            border-bottom:1px solid rgba(58,107,53,.15);
+        }
+        .nav-logo{
+            font-family:var(--display);font-size:1.3rem;color:var(--accent);
+            letter-spacing:.04em;font-style:italic;
+        }
+        nav ul{list-style:none;display:flex;gap:1.6rem}
+        nav a{
+            color:var(--text-muted);text-decoration:none;
+            font-family:var(--mono);font-size:.7rem;letter-spacing:.08em;
+            text-transform:uppercase;transition:color .25s;
+        }
+        nav a:hover{color:var(--accent)}
+        @media(max-width:768px){nav ul{display:none}}
+
+        /* HERO */
+        .hero{
+            min-height:100vh;display:flex;flex-direction:column;
+            justify-content:center;align-items:center;text-align:center;
+            padding:6rem 2rem 4rem;position:relative;overflow:hidden;
+        }
+        .hero-mtn{
+            position:absolute;bottom:0;left:0;right:0;
+            opacity:.08;pointer-events:none;
+        }
+        .hero-label{
+            font-family:var(--mono);font-size:.7rem;color:var(--green-light);
+            letter-spacing:.25em;text-transform:uppercase;
+            opacity:0;animation:fadeUp .7s ease forwards .1s;
+        }
+        .hero-title{
+            font-family:var(--display);font-size:clamp(2.8rem,7vw,6rem);
+            color:var(--accent);letter-spacing:.02em;
+            margin:.5rem 0;font-style:italic;
+            opacity:0;animation:fadeUp .8s ease forwards .3s;
+        }
+        .hero-sub{
+            font-size:1rem;color:var(--text-2);max-width:500px;
+            opacity:0;animation:fadeUp .8s ease forwards .5s;
+        }
+        .hero-line{
+            width:40px;height:2px;background:var(--accent);
+            margin:1.5rem auto;opacity:0;animation:fadeUp .6s ease forwards .7s;
+        }
+        .hero-scroll{
+            position:absolute;bottom:2rem;
+            font-family:var(--mono);font-size:.6rem;color:var(--text-muted);
+            letter-spacing:.15em;text-transform:uppercase;
+            animation:pulse 2.5s ease infinite;
+        }
+
+        /* SECTIONS */
+        section{padding:5rem 2rem;max-width:1100px;margin:0 auto}
+        .sec-label{
+            font-family:var(--mono);font-size:.65rem;color:var(--green-light);
+            letter-spacing:.25em;text-transform:uppercase;margin-bottom:.4rem;
+        }
+        .sec-title{
+            font-family:var(--display);font-size:clamp(1.8rem,4vw,3rem);
+            color:var(--accent);letter-spacing:.02em;
+            margin-bottom:.8rem;font-style:italic;
+        }
+        .sec-desc{
+            color:var(--text-2);max-width:600px;margin-bottom:2.5rem;font-size:.9rem;
+        }
+
+        /* REVEAL */
+        .reveal{opacity:0;transform:translateY(28px);transition:opacity .65s ease,transform .65s ease}
+        .reveal.visible{opacity:1;transform:translateY(0)}
+        .stagger>.r-item{opacity:0;transform:translateY(18px);transition:opacity .5s ease,transform .5s ease}
+        .stagger.visible>.r-item:nth-child(1){transition-delay:0s;opacity:1;transform:none}
+        .stagger.visible>.r-item:nth-child(2){transition-delay:.08s;opacity:1;transform:none}
+        .stagger.visible>.r-item:nth-child(3){transition-delay:.16s;opacity:1;transform:none}
+        .stagger.visible>.r-item:nth-child(4){transition-delay:.24s;opacity:1;transform:none}
+        .stagger.visible>.r-item:nth-child(5){transition-delay:.32s;opacity:1;transform:none}
+        .stagger.visible>.r-item:nth-child(6){transition-delay:.4s;opacity:1;transform:none}
+        .stagger.visible>.r-item:nth-child(7){transition-delay:.48s;opacity:1;transform:none}
+
+        /* LOGIC BANNER */
+        .logic-banner{
+            background:var(--surface);border:1px solid rgba(212,168,67,.1);
+            border-radius:8px;padding:2rem 2.5rem;margin:2rem 0;
+            position:relative;overflow:hidden;
+        }
+        .logic-banner::before{
+            content:'';position:absolute;left:0;top:0;bottom:0;width:3px;
+            background:linear-gradient(to bottom,var(--accent),var(--green));
+        }
+        .logic-banner h3{
+            font-family:var(--display);font-size:1.4rem;color:var(--accent);
+            font-style:italic;margin-bottom:.5rem;
+        }
+        .logic-banner p{color:var(--text-2);font-size:.9rem}
+
+        /* TIER HEADERS */
+        .tier{
+            display:flex;align-items:center;gap:1rem;
+            margin:3rem 0 1.5rem;
+        }
+        .tier-badge{
+            font-family:var(--display);font-size:1.6rem;
+            color:var(--accent);font-style:italic;
+            background:var(--surface);border:1px solid rgba(212,168,67,.12);
+            width:48px;height:48px;display:flex;align-items:center;justify-content:center;
+            border-radius:50%;flex-shrink:0;
+        }
+        .tier h2{
+            font-family:var(--display);font-size:1.8rem;color:var(--text);
+            font-style:italic;
+        }
+        .tier-line{flex:1;height:1px;background:rgba(58,107,53,.2)}
+
+        /* GEAR CARDS */
+        .gear-card{
+            background:var(--surface);border:1px solid rgba(58,107,53,.1);
+            border-radius:10px;padding:2rem;margin-bottom:2rem;
+            transition:border-color .3s,transform .3s;
+        }
+        .gear-card:hover{border-color:rgba(212,168,67,.2);transform:translateY(-2px)}
+        .gear-header{display:flex;align-items:baseline;gap:.8rem;margin-bottom:.6rem}
+        .gear-num{
+            font-family:var(--display);font-size:2rem;color:var(--accent);
+            font-style:italic;line-height:1;
+        }
+        .gear-name{
+            font-family:var(--display);font-size:1.5rem;color:var(--text);
+            font-style:italic;
+        }
+        .gear-why{
+            font-family:var(--mono);font-size:.7rem;color:var(--green-light);
+            letter-spacing:.08em;text-transform:uppercase;margin-bottom:1rem;
+        }
+        .gear-body{color:var(--text-2);font-size:.88rem}
+
+        /* TABLES */
+        .t-wrap{
+            overflow-x:auto;margin:1rem 0;
+            border:1px solid rgba(58,107,53,.1);border-radius:8px;
+        }
+        table{width:100%;border-collapse:collapse;font-size:.82rem}
+        thead th{
+            background:var(--surface-2);font-family:var(--mono);font-weight:400;
+            font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;
+            color:var(--accent);padding:.7rem 1rem;text-align:left;
+            border-bottom:1px solid rgba(212,168,67,.1);
+        }
+        tbody td{
+            padding:.6rem 1rem;border-bottom:1px solid rgba(255,255,255,.025);
+            color:var(--text-2);
+        }
+        tbody tr:hover{background:rgba(58,107,53,.04)}
+        .t-cat{font-family:var(--mono);font-size:.72rem;color:var(--text-muted)}
+
+        /* PROBLEM BOX */
+        .prob-list{margin:1rem 0}
+        .prob-item{
+            padding:.6rem 0;border-bottom:1px solid rgba(255,255,255,.03);
+            display:flex;gap:.6rem;align-items:flex-start;font-size:.85rem;
+            color:var(--text-2);
+        }
+        .prob-item::before{
+            content:'!';flex-shrink:0;
+            font-family:var(--mono);font-size:.65rem;font-weight:500;
+            color:var(--danger);background:rgba(192,64,48,.1);
+            width:18px;height:18px;display:flex;align-items:center;justify-content:center;
+            border-radius:50%;margin-top:.25rem;
+        }
+        .prob-item strong{color:var(--danger)}
+
+        /* DIVIDER */
+        .divider{
+            display:flex;align-items:center;gap:1rem;margin:4rem 0;
+        }
+        .divider span{
+            font-family:var(--mono);font-size:.6rem;color:var(--text-muted);
+            letter-spacing:.2em;text-transform:uppercase;white-space:nowrap;
+        }
+        .divider::before,.divider::after{
+            content:'';flex:1;height:1px;background:rgba(58,107,53,.15);
+        }
+
+        /* PLAN CARDS */
+        .plan{
+            background:var(--surface);border:1px solid rgba(58,107,53,.12);
+            border-radius:12px;padding:2.5rem;margin-bottom:2.5rem;
+            position:relative;overflow:hidden;
+        }
+        .plan::after{
+            content:'';position:absolute;top:0;left:0;right:0;height:3px;
+            background:linear-gradient(90deg,var(--green),var(--accent));
+        }
+        .plan-tag{
+            font-family:var(--mono);font-size:.65rem;color:var(--green-light);
+            letter-spacing:.2em;text-transform:uppercase;margin-bottom:.3rem;
+        }
+        .plan h3{
+            font-family:var(--display);font-size:1.8rem;color:var(--accent);
+            font-style:italic;margin-bottom:.3rem;
+        }
+        .plan-route{
+            font-size:.85rem;color:var(--text-muted);margin-bottom:1rem;
+            font-style:italic;
+        }
+        .plan-goal{
+            font-size:.88rem;color:var(--text-2);margin-bottom:1.5rem;
+        }
+        .plan-total{
+            display:flex;align-items:baseline;gap:.5rem;margin-top:1.5rem;
+        }
+        .plan-total .label{font-family:var(--mono);font-size:.7rem;color:var(--text-muted)}
+        .plan-total .amount{
+            font-family:var(--display);font-size:2rem;color:var(--accent);
+            font-style:italic;
+        }
+        .plan-risk{
+            background:rgba(192,64,48,.05);border-left:3px solid var(--danger);
+            border-radius:0 6px 6px 0;padding:1rem 1.3rem;margin-top:1.5rem;
+            font-size:.82rem;color:#d09090;
+        }
+        .plan-risk strong{color:var(--danger)}
+        .plan-tip{
+            background:rgba(58,107,53,.06);border-left:3px solid var(--green-light);
+            border-radius:0 6px 6px 0;padding:1rem 1.3rem;margin-top:1rem;
+            font-size:.82rem;color:#90b890;
+        }
+        .plan-tip strong{color:var(--green-light)}
+
+        /* PROGRESSION */
+        .progress{
+            display:flex;align-items:center;gap:0;margin:2rem 0;flex-wrap:wrap;
+            justify-content:center;
+        }
+        .progress-step{
+            background:var(--surface);border:1px solid rgba(212,168,67,.1);
+            padding:.8rem 1.5rem;border-radius:6px;
+            font-family:var(--display);font-size:1.1rem;color:var(--accent);
+            font-style:italic;position:relative;
+        }
+        .progress-arrow{
+            font-family:var(--mono);font-size:.9rem;color:var(--text-muted);
+            padding:0 .3rem;
+        }
+        .progress-note{
+            width:100%;text-align:center;margin-top:1rem;
+            font-family:var(--mono);font-size:.72rem;color:var(--danger);
+            letter-spacing:.1em;
+        }
+
+        /* ADVICE GRID */
+        .advice-grid{
+            display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin:2rem 0;
+        }
+        @media(max-width:768px){.advice-grid{grid-template-columns:1fr}}
+        .advice-box{
+            background:var(--surface);border:1px solid rgba(58,107,53,.1);
+            border-radius:8px;padding:1.5rem;
+        }
+        .advice-box h4{
+            font-family:var(--display);font-size:1.2rem;color:var(--accent);
+            font-style:italic;margin-bottom:.5rem;
+        }
+        .advice-box ul{list-style:none}
+        .advice-box li{
+            padding:.3rem 0;font-size:.85rem;color:var(--text-2);
+            display:flex;gap:.5rem;align-items:flex-start;
+        }
+        .advice-box li::before{
+            content:'';flex-shrink:0;width:5px;height:5px;
+            background:var(--accent);border-radius:50%;margin-top:.5rem;
+        }
+        .advice-box.warn li::before{background:var(--danger)}
+
+        /* FOOTER */
+        footer{
+            border-top:1px solid rgba(58,107,53,.1);
+            padding:3rem 2rem;text-align:center;
+            font-family:var(--mono);font-size:.7rem;color:var(--text-muted);
+            letter-spacing:.1em;
+        }
+
+        /* ANIMATIONS */
+        @keyframes fadeUp{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:translateY(0)}}
+        @keyframes pulse{0%,100%{opacity:.3}50%{opacity:.7}}
+    </style>
+</head>
+<body>
+
+<nav>
+    <div class="nav-logo">徒步装备全攻略</div>
+    <ul>
+        <li><a href="#tiers">重要性排序</a></li>
+        <li><a href="#plans">方案选配</a></li>
+        <li><a href="#path">入坑路径</a></li>
+    </ul>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+    <div class="hero-label">Hiking Equipment Guide</div>
+    <h1 class="hero-title">徒步装备</h1>
+    <p class="hero-sub">你的命和腿靠什么保护，什么就最重要。</p>
+    <div class="hero-line"></div>
+    <svg class="hero-mtn" viewBox="0 0 1400 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M0 300 L200 120 L350 200 L500 60 L650 180 L800 40 L950 160 L1100 80 L1250 170 L1400 100 L1400 300 Z" fill="rgba(58,107,53,.3)"/>
+        <path d="M0 300 L150 180 L300 250 L480 130 L600 220 L780 100 L900 200 L1050 120 L1200 220 L1400 160 L1400 300 Z" fill="rgba(20,28,16,.6)"/>
+    </svg>
+    <div class="hero-scroll">↓ 向下探索</div>
+</div>
+
+<main>
+
+<!-- CORE LOGIC -->
+<section>
+    <div class="sec-label reveal">Core Principle</div>
+    <h2 class="sec-title reveal">核心逻辑</h2>
+    <div class="logic-banner reveal">
+        <h3>保命 > 安全防护 > 舒适</h3>
+        <p>装备重要性的唯一判断标准：<strong style="color:var(--accent)">出问题时后果有多严重</strong>。脚废了走不了路，脱水了几个小时就虚脱，失温了可能致命——这些排前面。肩膀酸了、屁股疼了——这些排后面。</p>
+    </div>
+</section>
+
+<!-- TIER 1 -->
+<section id="tiers">
+    <div class="tier reveal">
+        <div class="tier-badge">1</div>
+        <h2>保命级</h2>
+        <div class="tier-line"></div>
+    </div>
+
+    <!-- Gear 1: Shoes -->
+    <div class="gear-card reveal">
+        <div class="gear-header">
+            <span class="gear-num">01</span>
+            <span class="gear-name">徒步鞋</span>
+        </div>
+        <div class="gear-why">Why #1 — 脚出问题 = 行动能力丧失 = 荒野致命</div>
+        <div class="gear-body">
+            <div class="t-wrap">
+                <table>
+                    <thead><tr><th>类型</th><th>价格</th><th>重量(单只)</th><th>适用场景</th></tr></thead>
+                    <tbody>
+                        <tr><td>软底低帮越野鞋</td><td>200-600</td><td>250-350g</td><td>成熟步道、一日游</td></tr>
+                        <tr><td>中帮防水徒步鞋</td><td>400-1500</td><td>400-550g</td><td>多数三季路线</td></tr>
+                        <tr><td>高帮重装徒步靴</td><td>800-2500</td><td>550-750g</td><td>重装、碎石、高海拔</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="prob-list">
+                <div class="prob-item"><strong>没磨合</strong> — 新鞋直接上山，走到起泡、指甲淤血是最常见惨剧。至少穿2-3周再上路</div>
+                <div class="prob-item"><strong>鞋底太硬/太软</strong> — 硬底走碎石好但走平路累，软底走平路舒服但踩石硌脚</div>
+                <div class="prob-item"><strong>防水膜失效</strong> — GTX防水膜不是永久的，2-3年后性能下降，踩深水照样进水</div>
+                <div class="prob-item"><strong>尺码偏小</strong> — 下坡时脚往前冲，脚趾顶鞋头会黑指甲。买大半码到一码</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gear 2: Backpack -->
+    <div class="gear-card reveal">
+        <div class="gear-header">
+            <span class="gear-num">02</span>
+            <span class="gear-name">背包</span>
+        </div>
+        <div class="gear-why">Why #2 — 所有东西靠它背，不舒服 = 肩/腰/膝盖全废</div>
+        <div class="gear-body">
+            <div class="t-wrap">
+                <table>
+                    <thead><tr><th>类型</th><th>价格</th><th>重量</th><th>容量</th></tr></thead>
+                    <tbody>
+                        <tr><td>日用小包</td><td>50-200</td><td>300-600g</td><td>15-25L</td></tr>
+                        <tr><td>轻装徒步包</td><td>200-800</td><td>0.8-1.5kg</td><td>28-40L</td></tr>
+                        <tr><td>重装背包</td><td>800-2500</td><td>1.5-2.5kg</td><td>50-75L</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="prob-list">
+                <div class="prob-item"><strong>背负系统没调好</strong> — 腰带要卡在髋骨上，不能在腰上。80%的重量应该在胯部，不是肩膀</div>
+                <div class="prob-item"><strong>容量选错</strong> — 小了塞不下，大了东西晃。一日游25L够，多日重装50-65L</div>
+                <div class="prob-item"><strong>没有防雨罩</strong> — 突然下雨里面全湿。背包本身防水性很有限</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gear 3: Water -->
+    <div class="gear-card reveal">
+        <div class="gear-header">
+            <span class="gear-num">03</span>
+            <span class="gear-name">水与净水</span>
+        </div>
+        <div class="gear-why">Why #3 — 脱水比饥饿来得快，野外水源不处理直接喝可能拉到虚脱</div>
+        <div class="gear-body">
+            <div class="t-wrap">
+                <table>
+                    <thead><tr><th>装备</th><th>价格</th><th>重量</th><th>说明</th></tr></thead>
+                    <tbody>
+                        <tr><td>水袋（2-3L）</td><td>30-100</td><td>100-200g</td><td>边走边喝</td></tr>
+                        <tr><td>净水器（挤压式）</td><td>100-400</td><td>60-150g</td><td>过滤细菌/原虫</td></tr>
+                        <tr><td>净水片</td><td>20-50</td><td>几乎忽略</td><td>应急用，等30分钟</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="prob-list">
+                <div class="prob-item"><strong>带水不够</strong> — 夏季高强度徒步每小时需500ml-1L，很多人低估</div>
+                <div class="prob-item"><strong>水源规划失误</strong> — 以为路上有水结果干涸。出发前必须确认水源点</div>
+                <div class="prob-item"><strong>净水器结冰</strong> — 冬季滤芯里的水结冰会破坏滤膜，要贴身保暖</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TIER 2 -->
+    <div class="tier reveal">
+        <div class="tier-badge">2</div>
+        <h2>安全与防护级</h2>
+        <div class="tier-line"></div>
+    </div>
+
+    <!-- Gear 4: Nav -->
+    <div class="gear-card reveal">
+        <div class="gear-header">
+            <span class="gear-num">04</span>
+            <span class="gear-name">导航与通讯</span>
+        </div>
+        <div class="gear-why">迷路在荒野是真正的生死问题</div>
+        <div class="gear-body">
+            <div class="t-wrap">
+                <table>
+                    <thead><tr><th>装备</th><th>价格</th><th>重量</th><th>说明</th></tr></thead>
+                    <tbody>
+                        <tr><td>手机+离线地图</td><td>0</td><td>—</td><td>两步路/奥维，基本必备</td></tr>
+                        <tr><td>充电宝(10000mAh)</td><td>60-150</td><td>200-250g</td><td>续航保障</td></tr>
+                        <tr><td>GPS手持机</td><td>800-3000</td><td>150-250g</td><td>无信号区救命（可选）</td></tr>
+                        <tr><td>对讲机</td><td>100-300</td><td>200-300g</td><td>结伴必备</td></tr>
+                        <tr><td>哨子</td><td>5-10</td><td>5g</td><td>求救，吹比喊省力100倍</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="prob-list">
+                <div class="prob-item"><strong>手机没信号</strong> — 很多山区完全无信号，离线地图必须提前下载</div>
+                <div class="prob-item"><strong>手机低温掉电</strong> — 0°C以下电量骤降，贴身放保暖</div>
+                <div class="prob-item"><strong>不带纸质地图</strong> — 电子设备全没电时，防水地图+指南针是最后保命手段</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gear 5: Clothing -->
+    <div class="gear-card reveal">
+        <div class="gear-header">
+            <span class="gear-num">05</span>
+            <span class="gear-name">衣物系统（三层穿衣法）</span>
+        </div>
+        <div class="gear-why">失温是户外第一杀手</div>
+        <div class="gear-body">
+            <div class="t-wrap">
+                <table>
+                    <thead><tr><th>层次</th><th>功能</th><th>价格</th><th>重量</th><th>常见问题</th></tr></thead>
+                    <tbody>
+                        <tr><td class="t-cat">内层（速干）</td><td>排汗</td><td>30-200</td><td>100-200g</td><td style="color:var(--danger)">纯棉致命——吸汗不干，风一吹失温</td></tr>
+                        <tr><td class="t-cat">中层（保暖）</td><td>抓绒/薄羽绒</td><td>100-800</td><td>200-500g</td><td>抓绒怕风，羽绒怕湿</td></tr>
+                        <tr><td class="t-cat">外层（防护）</td><td>防风防雨</td><td>200-2000</td><td>200-600g</td><td>硬壳闷热，软壳防水差</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="prob-list">
+                <div class="prob-item"><strong>穿棉质内衣</strong> — 户外大忌。棉吸汗后不干，体温被快速带走，导致失温</div>
+                <div class="prob-item"><strong>只带一件外套</strong> — 山上山下温差可达10-15°C，必须可增减</div>
+                <div class="prob-item"><strong>冲锋衣不透气</strong> — 便宜冲锋衣等于穿雨衣爬山，里面全是汗，停下来反而冷</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gear 6: Poles -->
+    <div class="gear-card reveal">
+        <div class="gear-header">
+            <span class="gear-num">06</span>
+            <span class="gear-name">登山杖</span>
+        </div>
+        <div class="gear-why">减轻膝盖负担 30%，上下坡稳定性的关键</div>
+        <div class="gear-body">
+            <div class="t-wrap">
+                <table>
+                    <thead><tr><th>类型</th><th>价格</th><th>重量</th><th>说明</th></tr></thead>
+                    <tbody>
+                        <tr><td>铝合金杖</td><td>50-150/根</td><td>250-300g</td><td>耐操，便宜</td></tr>
+                        <tr><td>碳素杖</td><td>150-500/根</td><td>150-220g</td><td>轻，但怕侧向撞击</td></tr>
+                        <tr><td>折叠杖（Z杖）</td><td>200-600/根</td><td>150-200g</td><td>收纳短，方便</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="prob-list">
+                <div class="prob-item"><strong>只用一根</strong> — 双杖平衡性远好于单杖，尤其下坡</div>
+                <div class="prob-item"><strong>腕带没调好</strong> — 正确用法是手从下方穿入腕带，靠腕带承重而非握死</div>
+                <div class="prob-item"><strong>杖尖磨损不换</strong> — 打滑很危险</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gear 7: First Aid -->
+    <div class="gear-card reveal">
+        <div class="gear-header">
+            <span class="gear-num">07</span>
+            <span class="gear-name">急救与应急</span>
+        </div>
+        <div class="gear-why">小伤在野外都会被放大</div>
+        <div class="gear-body">
+            <div class="t-wrap">
+                <table>
+                    <thead><tr><th>装备</th><th>价格</th><th>重量</th><th>内容</th></tr></thead>
+                    <tbody>
+                        <tr><td>急救包</td><td>30-150</td><td>200-400g</td><td>创可贴、绷带、碘伏、止痛药、抗过敏药、止泻药、弹力绷带</td></tr>
+                        <tr><td>救生毯</td><td>5-15</td><td>50g</td><td>应急保温/降温，极轻极便宜</td></tr>
+                        <tr><td>头灯</td><td>30-200</td><td>50-100g</td><td>必须带，哪怕一日游。天黑没灯=走不了</td></tr>
+                        <tr><td>防晒</td><td>20-80</td><td>50-100g</td><td>高海拔紫外线极强</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="prob-list">
+                <div class="prob-item"><strong>不带急救包</strong> — 崴脚、划伤、水泡，任何小伤在野外都会放大</div>
+                <div class="prob-item"><strong>头灯没电</strong> — 出门前检查，带备用电池</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TIER 3 -->
+    <div class="tier reveal">
+        <div class="tier-badge">3</div>
+        <h2>舒适级</h2>
+        <div class="tier-line"></div>
+    </div>
+
+    <div class="t-wrap reveal" style="margin-bottom:3rem">
+        <table>
+            <thead><tr><th>装备</th><th>价格</th><th>重量</th><th>说明</th></tr></thead>
+            <tbody>
+                <tr><td>护膝</td><td>30-150/对</td><td>100-200g</td><td>长距离下坡保护膝盖，非常推荐</td></tr>
+                <tr><td>墨镜</td><td>50-300</td><td>20-40g</td><td>高海拔雪地防雪盲</td></tr>
+                <tr><td>头巾/魔术巾</td><td>10-30</td><td>30g</td><td>防晒、擦汗、防尘，万用</td></tr>
+                <tr><td>手套</td><td>20-100</td><td>30-80g</td><td>冬季/灌木丛抓握</td></tr>
+                <tr><td>坐垫</td><td>10-30</td><td>30-50g</td><td>休息时垫屁股</td></tr>
+            </tbody>
+        </table>
+    </div>
+</section>
+
+<!-- PLANS -->
+<div class="divider"><span>四套方案选配</span></div>
+
+<section id="plans">
+    <div class="sec-label reveal">Plan Selection</div>
+    <h2 class="sec-title reveal">从入门到高海拔</h2>
+    <p class="sec-desc reveal">根据路线难度和天数，选择对应的装备方案。每一级方案是下一级的基础。</p>
+
+    <!-- Plan A -->
+    <div class="plan reveal">
+        <div class="plan-tag">Plan A · 入门</div>
+        <h3>城市郊山一日游</h3>
+        <div class="plan-route">北京香山/凤凰岭 · 杭州十里琅珰 · 深圳梧桐山 · 成都龙泉山</div>
+        <div class="plan-goal">当天往返，5-15km，爬升 300-800m</div>
+        <div class="t-wrap">
+            <table>
+                <thead><tr><th>装备</th><th>具体</th><th>费用</th></tr></thead>
+                <tbody>
+                    <tr><td>鞋</td><td>低帮越野鞋或旧运动鞋</td><td>0-300</td></tr>
+                    <tr><td>包</td><td>日常背包 15-25L</td><td>0-100</td></tr>
+                    <tr><td>水</td><td>自带 1.5-2L</td><td>0</td></tr>
+                    <tr><td>衣物</td><td>速干T恤 + 薄外套</td><td>50-150</td></tr>
+                    <tr><td>食物</td><td>路餐（面包/饭团/能量棒）</td><td>20</td></tr>
+                    <tr><td>其他</td><td>充电宝、纸巾、创可贴</td><td>0-50</td></tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="plan-total">
+            <span class="label">总计</span>
+            <span class="amount">70 — 620 元</span>
+        </div>
+        <div class="plan-risk"><strong>风险提示：</strong>迷路（岔路多）、体力不支、崴脚</div>
+        <div class="plan-tip"><strong>建议：</strong>下载离线轨迹，结伴而行，量力而行别逞强</div>
+    </div>
+
+    <!-- Plan B -->
+    <div class="plan reveal">
+        <div class="plan-tag">Plan B · 进阶</div>
+        <h3>周末多日轻装徒步</h3>
+        <div class="plan-route">武功山 · 太白山 · 南太行</div>
+        <div class="plan-goal">2-3天，每天 15-25km，有补给点和住宿（住客栈/庇护所）</div>
+        <div class="t-wrap">
+            <table>
+                <thead><tr><th>装备</th><th>具体</th><th>费用</th></tr></thead>
+                <tbody>
+                    <tr><td>鞋</td><td>中帮防水徒步鞋（提前磨合!）</td><td>400-1000</td></tr>
+                    <tr><td>包</td><td>30-40L 轻装包</td><td>200-500</td></tr>
+                    <tr><td>水</td><td>水袋 2L + 水壶</td><td>50-100</td></tr>
+                    <tr><td>衣物</td><td>速干内衣 + 抓绒 + 冲锋衣 + 换洗袜子</td><td>200-600</td></tr>
+                    <tr><td>登山杖</td><td>双杖（铝合金）</td><td>100-300</td></tr>
+                    <tr><td>头灯</td><td>充电式</td><td>50-100</td></tr>
+                    <tr><td>急救包</td><td>基础款</td><td>30-80</td></tr>
+                    <tr><td>护膝</td><td>推荐</td><td>50-150</td></tr>
+                    <tr><td>充电宝</td><td>10000mAh</td><td>60-100</td></tr>
+                    <tr><td>食物</td><td>路餐 + 沿途补给</td><td>50-100/天</td></tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="plan-total">
+            <span class="label">总计</span>
+            <span class="amount">1,000 — 3,000 元</span>
+        </div>
+        <div class="plan-risk"><strong>风险提示：</strong>住宿满房（旺季需提前预订）、天气突变（山区变化快）、补给点间距比预期远、夜间行走</div>
+    </div>
+
+    <!-- Plan C -->
+    <div class="plan reveal">
+        <div class="plan-tag">Plan C · 硬核</div>
+        <h3>多日重装露营</h3>
+        <div class="plan-route">鳌太（需审批）· 狼塔C+V · 贡嘎大环 · 四姑娘山长穿毕</div>
+        <div class="plan-goal">3-7天，自己背帐篷睡袋炊具，无补给</div>
+        <div class="t-wrap">
+            <table>
+                <thead><tr><th>装备</th><th>具体</th><th>费用</th></tr></thead>
+                <tbody>
+                    <tr><td>鞋</td><td>高帮防水徒步靴</td><td>800-2000</td></tr>
+                    <tr><td>包</td><td>55-65L 重装包（有背负系统）</td><td>800-2000</td></tr>
+                    <tr><td>帐篷</td><td>双层双人帐（抗风）</td><td>500-1500</td></tr>
+                    <tr><td>睡袋</td><td>羽绒，温标比最低温低5°C</td><td>500-1500</td></tr>
+                    <tr><td>防潮垫</td><td>R值≥3 充气垫</td><td>200-600</td></tr>
+                    <tr><td>炉具</td><td>气炉 + 套锅 + 钛杯</td><td>100-300</td></tr>
+                    <tr><td>气罐</td><td>按天数算（每天约半罐）</td><td>50-100</td></tr>
+                    <tr><td>水</td><td>水袋 2-3L + 净水器</td><td>150-400</td></tr>
+                    <tr><td>衣物</td><td>三层系统 + 雨衣裤</td><td>400-1500</td></tr>
+                    <tr><td>登山杖</td><td>双杖（碳素或铝合金）</td><td>200-600</td></tr>
+                    <tr><td>头灯</td><td>高亮 + 备用电池</td><td>80-200</td></tr>
+                    <tr><td>急救包</td><td>较完整</td><td>50-150</td></tr>
+                    <tr><td>护膝+手套+墨镜</td><td></td><td>100-300</td></tr>
+                    <tr><td>充电宝</td><td>20000mAh</td><td>100-200</td></tr>
+                    <tr><td>食物</td><td>冻干饭/能量棒/坚果</td><td>100-200/天</td></tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="plan-total">
+            <span class="label">总计</span>
+            <span class="amount">3,500 — 10,000 元</span>
+        </div>
+        <div class="plan-risk">
+            <strong>重大风险：</strong><br>
+            · <strong>失温</strong> — 下雨+大风+疲劳 = 快速失温，重装最致命的风险<br>
+            · <strong>高反</strong> — 海拔3500m以上可能出现，头痛、恶心、呼吸困难<br>
+            · <strong>迷路</strong> — 荒野无明确路径，必须会用 GPS+等高线地图<br>
+            · <strong>装备故障</strong> — 帐篷杆断了、气炉打不着、鞋子开胶，都要有应对方案<br>
+            · <strong>体力不足</strong> — 背15-20kg走高海拔山路，体能要求远超日常运动<br>
+            · <strong>撤退困难</strong> — 没有手机信号，受伤后撤离可能需要数小时甚至一天
+        </div>
+        <div class="plan-tip">
+            <strong>警告：</strong>鳌太、狼塔这类路线每年都有人遇难。重装多日 = 小型探险，必须有经验再上。
+        </div>
+    </div>
+
+    <!-- Plan D -->
+    <div class="plan reveal">
+        <div class="plan-tag">Plan D · 极限</div>
+        <h3>高海拔 / 技术路段</h3>
+        <div class="plan-route">四姑娘山大/二峰 · 哈巴雪山 · 半脊峰</div>
+        <div class="plan-goal">需应对雪线以上，可能涉及冰爪/冰镐</div>
+        <p style="color:var(--text-2);font-size:.88rem;margin-bottom:1rem">在方案 C 基础上增加：</p>
+        <div class="t-wrap">
+            <table>
+                <thead><tr><th>装备</th><th>费用</th></tr></thead>
+                <tbody>
+                    <tr><td>高帮高山靴（兼容冰爪）</td><td>1500-4000</td></tr>
+                    <tr><td>冰爪（全卡/半卡）</td><td>300-800</td></tr>
+                    <tr><td>冰镐</td><td>300-600</td></tr>
+                    <tr><td>安全带 + 头盔（技术路段）</td><td>300-600</td></tr>
+                    <tr><td>高倍防晒 + 唇膏</td><td>50-100</td></tr>
+                    <tr><td>更高蓬松度羽绒服</td><td>800-2000</td></tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="plan-total">
+            <span class="label">额外费用</span>
+            <span class="amount">3,000 — 8,000 元</span>
+        </div>
+        <div class="plan-risk">
+            <strong>所有方案C风险 × 2，加上：</strong><br>
+            · <strong>高反肺水肿/脑水肿</strong> — 海拔4500m以上，不及时下撤会致命<br>
+            · <strong>滑坠</strong> — 冰雪坡面失控滑落，冰爪使用不熟练是最大隐患<br>
+            · <strong>天气窗口</strong> — 冲顶需要好天气，可能等几天才有一个窗口期
+        </div>
+    </div>
+</section>
+
+<!-- PROGRESSION PATH -->
+<div class="divider"><span>入坑路径</span></div>
+
+<section id="path">
+    <div class="sec-label reveal">Progression</div>
+    <h2 class="sec-title reveal">升级路径</h2>
+
+    <div class="progress reveal">
+        <div class="progress-step">方案A · 郊山</div>
+        <div class="progress-arrow">→</div>
+        <div class="progress-step">方案B · 轻装</div>
+        <div class="progress-arrow">→</div>
+        <div class="progress-step">方案C · 重装</div>
+        <div class="progress-arrow">→</div>
+        <div class="progress-step">方案D · 高海拔</div>
+        <div class="progress-note">不要跳级。每一级积累的经验（导航、体能、装备使用、风险判断）都是下一级的基础。</div>
+    </div>
+
+    <div class="advice-grid reveal">
+        <div class="advice-box">
+            <h4>最该花钱的地方</h4>
+            <ul>
+                <li>鞋 — 别省</li>
+                <li>包 — 背负系统好 = 走得远</li>
+                <li>睡眠系统 — 睡不好 = 第二天废</li>
+            </ul>
+        </div>
+        <div class="advice-box warn">
+            <h4>最不该花钱的地方</h4>
+            <ul>
+                <li>一开始买全套高端装备 — 你还不知道自己需要什么</li>
+                <li>过多的"氛围感"装饰 — 灯串、天幕椅、手冲咖啡套装，负重才是真正的敌人</li>
+            </ul>
+        </div>
+    </div>
+</section>
+
+</main>
+
+<footer>
+    徒步装备全攻略 · 具体哪条路线感兴趣可以继续聊，帮你做更细的准备清单
+</footer>
+
+<script>
+document.addEventListener('DOMContentLoaded',()=>{
+    const obs=new IntersectionObserver(entries=>{
+        entries.forEach(e=>{if(e.isIntersecting)e.target.classList.add('visible')})
+    },{threshold:0.08,rootMargin:'0px 0px -30px 0px'});
+    document.querySelectorAll('.reveal,.stagger').forEach(el=>obs.observe(el));
+});
+</script>
+</body>
+</html>

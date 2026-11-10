@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LLM Model Pricing Tracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Instrument+Serif:ital@0;1&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f5f2ec;
+  --surface: #ffffff;
+  --surface-raised: #fffdf9;
+  --surface-hover: #faf7f2;
+  --border: #e6e0d6;
+  --border-light: #d8d0c4;
+  --accent: #b8860b;
+  --accent-hover: #9a7209;
+  --accent-glow: rgba(184,134,11,0.07);
+  --text-primary: #1a1714;
+  --text-secondary: #6b6358;
+  --text-muted: #a09888;
+  --yes-bg: #e8f5ee;
+  --yes-text: #2d7a4f;
+  --no-bg: #fde8e8;
+  --no-text: #9b3b3b;
+  --cheap: #2d7a4f;
+  --expensive: #c0392b;
+  --shadow-sm: 0 1px 3px rgba(26,23,20,0.04), 0 1px 2px rgba(26,23,20,0.02);
+  --shadow-md: 0 4px 16px rgba(26,23,20,0.06), 0 1px 4px rgba(26,23,20,0.03);
+  --shadow-lg: 0 12px 40px rgba(26,23,20,0.1), 0 4px 12px rgba(26,23,20,0.04);
+  --radius: 8px;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: 'DM Mono', monospace;
+  background: var(--bg);
+  color: var(--text-primary);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background:
+    radial-gradient(ellipse at 15% 20%, rgba(184,134,11,0.04) 0%, transparent 50%),
+    radial-gradient(ellipse at 85% 80%, rgba(100,80,50,0.03) 0%, transparent 50%);
+  pointer-events: none;
+}
+.container { max-width: 1480px; margin: 0 auto; padding: 48px 40px 80px; position: relative; }
+
+header { margin-bottom: 40px; animation: fadeUp 0.6s ease forwards; }
+header .brand { display: flex; align-items: baseline; gap: 12px; margin-bottom: 8px; }
+header h1 { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 32px; letter-spacing: -0.8px; }
+header h1 em { font-family: 'Instrument Serif', serif; font-weight: 400; font-style: italic; color: var(--accent); }
+header .subtitle { font-size: 13px; color: var(--text-muted); font-weight: 300; display: flex; align-items: center; gap: 8px; }
+.save-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--cheap); display: inline-block; animation: pulse 2s ease infinite; }
+@keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.25;} }
+
+.toolbar { display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; align-items: center; animation: fadeUp 0.6s ease 0.08s forwards; opacity: 0; }
+.toolbar-left { display: flex; gap: 10px; flex: 1; min-width: 0; flex-wrap: wrap; align-items: center; }
+.search-box { position: relative; min-width: 240px; max-width: 360px; flex: 1; }
+.search-box input {
+  width: 100%; padding: 10px 14px 10px 38px;
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+  color: var(--text-primary); font-family: 'DM Mono', monospace; font-size: 13px;
+  outline: none; transition: border-color 0.2s, box-shadow 0.2s; box-shadow: var(--shadow-sm);
+}
+.search-box input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
+.search-box input::placeholder { color: var(--text-muted); }
+.search-box .icon { position: absolute; left: 13px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 15px; pointer-events: none; }
+.filter-group { display: flex; gap: 4px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 3px; box-shadow: var(--shadow-sm); }
+.filter-btn { padding: 7px 14px; background: transparent; border: none; border-radius: 5px; color: var(--text-muted); font-family: 'DM Mono', monospace; font-size: 12px; cursor: pointer; transition: all 0.2s; white-space: nowrap; }
+.filter-btn:hover { color: var(--text-secondary); }
+.filter-btn.active { background: var(--text-primary); color: var(--bg); font-weight: 500; }
+.toolbar-right { display: flex; gap: 8px; flex-wrap: wrap; }
+.btn {
+  padding: 10px 18px; border: 1px solid var(--border); border-radius: var(--radius);
+  font-family: 'DM Mono', monospace; font-size: 12px; cursor: pointer;
+  transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px;
+  white-space: nowrap; box-shadow: var(--shadow-sm);
+}
+.btn-primary { background: var(--text-primary); border-color: var(--text-primary); color: var(--bg); font-weight: 500; }
+.btn-primary:hover { background: #2a2520; letter-spacing: 0.03em; }
+.btn-accent { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 500; }
+.btn-accent:hover { background: var(--accent-hover); }
+.btn-outline { background: var(--surface); color: var(--text-secondary); }
+.btn-outline:hover { border-color: var(--border-light); color: var(--text-primary); background: var(--surface-hover); }
+.btn-danger { background: var(--surface); border-color: var(--no-text); color: var(--no-text); }
+.btn-danger:hover { background: var(--no-bg); }
+
+.stats-bar { display: flex; gap: 0; margin-bottom: 20px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow-sm); animation: fadeUp 0.6s ease 0.12s forwards; opacity: 0; overflow: hidden; }
+.stat-item { flex: 1; padding: 16px 20px; display: flex; flex-direction: column; gap: 4px; border-right: 1px solid var(--border); min-width: 0; }
+.stat-item:last-child { border-right: none; }
+.stat-label { font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; font-weight: 400; }
+.stat-value { font-size: 13px; color: var(--text-primary); font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.stat-value .accent { color: var(--accent); }
+
+.table-wrapper { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow-md); animation: fadeUp 0.6s ease 0.16s forwards; opacity: 0; }
+.table-scroll { overflow-x: auto; max-height: 68vh; overflow-y: auto; }
+.table-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
+.table-scroll::-webkit-scrollbar-track { background: var(--surface); }
+.table-scroll::-webkit-scrollbar-thumb { background: var(--border-light); border-radius: 3px; }
+.table-scroll::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+table { width: 100%; border-collapse: collapse; min-width: 1060px; }
+thead { position: sticky; top: 0; z-index: 10; }
+thead th {
+  background: var(--surface-raised); padding: 14px 18px; text-align: left;
+  font-size: 10.5px; font-weight: 500; color: var(--text-muted);
+  text-transform: uppercase; letter-spacing: 0.1em; border-bottom: 2px solid var(--border);
+  cursor: pointer; user-select: none; transition: color 0.2s; white-space: nowrap;
+}
+thead th:hover { color: var(--text-primary); }
+thead th.sort-asc::after { content: '  ↑'; color: var(--accent); font-size: 11px; }
+thead th.sort-desc::after { content: '  ↓'; color: var(--accent); font-size: 11px; }
+thead th.no-sort { cursor: default; }
+thead th.no-sort:hover { color: var(--text-muted); }
+tbody tr { border-bottom: 1px solid #efeadf; transition: background 0.15s; }
+tbody tr:hover { background: var(--surface-hover); }
+tbody tr:last-child { border-bottom: none; }
+tbody td { padding: 13px 18px; font-size: 13px; font-weight: 300; vertical-align: middle; }
+td.editable { cursor: pointer; position: relative; }
+td.editable:hover::after { content: '✎'; position: absolute; right: 6px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 10px; opacity: 0.6; }
+td.model-name { font-weight: 400; color: var(--text-primary); min-width: 150px; }
+td.api-name { font-size: 12px; color: var(--text-secondary); font-weight: 300; }
+td.token-col { text-align: right; font-variant-numeric: tabular-nums; }
+td.rate-col { text-align: right; font-variant-numeric: tabular-nums; color: var(--text-secondary); }
+td.rate-col.cheap { color: var(--cheap); font-weight: 400; }
+td.rate-col.expensive { color: var(--expensive); }
+.tag { display: inline-block; padding: 3px 10px; border-radius: 4px; font-size: 11px; font-weight: 400; }
+.tag-sub { background: var(--yes-bg); color: var(--yes-text); }
+.tag-paid { background: var(--no-bg); color: var(--no-text); }
+.dash { color: var(--text-muted); }
+.provider-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 8px; flex-shrink: 0; }
+.model-cell { display: flex; align-items: center; }
+.row-del { background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 14px; padding: 4px 8px; border-radius: 4px; transition: all 0.15s; opacity: 0; }
+tbody tr:hover .row-del { opacity: 0.6; }
+.row-del:hover { color: var(--expensive); background: var(--no-bg); opacity: 1 !important; }
+
+.empty-state { text-align: center; padding: 80px 40px; }
+.empty-state .icon-large { font-size: 48px; margin-bottom: 16px; opacity: 0.2; }
+.empty-state h3 { font-family: 'Syne', sans-serif; font-weight: 600; font-size: 18px; color: var(--text-secondary); margin-bottom: 8px; }
+.empty-state p { font-size: 13px; color: var(--text-muted); font-weight: 300; margin-bottom: 24px; }
+.empty-state .quick-paste { margin-top: 24px; text-align: left; }
+.empty-state .quick-paste textarea {
+  width: 100%; height: 200px;
+  background: var(--bg); border: 2px dashed var(--border); border-radius: var(--radius);
+  color: var(--text-primary); font-family: 'DM Mono', monospace; font-size: 12px;
+  padding: 16px; outline: none; resize: vertical; transition: border-color 0.2s;
+}
+.empty-state .quick-paste textarea:focus { border-color: var(--accent); border-style: solid; }
+.empty-state .quick-paste textarea::placeholder { color: var(--text-muted); }
+.empty-state .quick-paste .hint { font-size: 11px; color: var(--text-muted); margin-top: 8px; margin-bottom: 12px; line-height: 1.6; }
+.empty-state .quick-paste .actions { display: flex; gap: 8px; margin-top: 12px; }
+
+/* Modal */
+.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(26,23,20,0.3); backdrop-filter: blur(6px); z-index: 1000; align-items: center; justify-content: center; }
+.modal-overlay.active { display: flex; }
+.modal {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+  padding: 32px 36px; width: 92%; max-width: 580px; max-height: 85vh; overflow-y: auto;
+  box-shadow: var(--shadow-lg); animation: modalIn 0.3s ease;
+}
+@keyframes modalIn { from { opacity:0; transform:translateY(20px) scale(0.97); } to { opacity:1; transform:translateY(0) scale(1); } }
+.modal h2 { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 20px; margin-bottom: 24px; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+.form-row.full { grid-template-columns: 1fr; }
+.form-group { display: flex; flex-direction: column; gap: 6px; }
+.form-group label { font-size: 10.5px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; font-weight: 400; }
+.form-group input, .form-group select {
+  padding: 10px 14px; background: var(--bg); border: 1px solid var(--border); border-radius: 6px;
+  color: var(--text-primary); font-family: 'DM Mono', monospace; font-size: 13px;
+  outline: none; transition: border-color 0.2s, box-shadow 0.2s;
+}
+.form-group input:focus, .form-group select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
+.form-group input::placeholder { color: var(--text-muted); }
+.form-group select option { background: var(--surface); }
+.modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 24px; }
+
+/* Inline edit */
+.inline-edit {
+  background: var(--bg); border: 1px solid var(--accent); border-radius: 4px;
+  color: var(--text-primary); font-family: 'DM Mono', monospace; font-size: 13px;
+  padding: 5px 8px; width: 100%; outline: none; box-shadow: 0 0 0 3px var(--accent-glow);
+}
+
+/* Batch paste overlay */
+.batch-overlay { display: none; position: fixed; inset: 0; background: rgba(26,23,20,0.3); backdrop-filter: blur(6px); z-index: 1000; align-items: center; justify-content: center; }
+.batch-overlay.active { display: flex; }
+.batch-box {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+  padding: 32px 36px; width: 94%; max-width: 800px; max-height: 88vh; overflow-y: auto;
+  box-shadow: var(--shadow-lg); animation: modalIn 0.3s ease;
+}
+.batch-box h2 { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 20px; margin-bottom: 8px; }
+.batch-box .desc { font-size: 12px; color: var(--text-muted); margin-bottom: 16px; line-height: 1.7; }
+.batch-box .desc strong { color: var(--text-secondary); font-weight: 500; }
+.batch-box .col-order {
+  display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px;
+}
+.batch-box .col-order .col-chip {
+  padding: 4px 10px; background: var(--accent-glow); border: 1px solid var(--border);
+  border-radius: 4px; font-size: 10.5px; color: var(--accent); font-weight: 400;
+}
+.batch-box .col-order .col-chip.optional { border-style: dashed; color: var(--text-muted); background: var(--bg); }
+.batch-box textarea {
+  width: 100%; height: 320px;
+  background: var(--bg); border: 1px solid var(--border); border-radius: 6px;
+  color: var(--text-primary); font-family: 'DM Mono', monospace; font-size: 12px;
+  padding: 16px; outline: none; resize: vertical; transition: border-color 0.2s;
+  line-height: 1.7;
+}
+.batch-box textarea:focus { border-color: var(--accent); }
+.batch-box textarea::placeholder { color: var(--text-muted); font-size: 11px; }
+.batch-box .options {
+  display: flex; align-items: center; gap: 16px; margin-top: 14px; flex-wrap: wrap;
+}
+.batch-box .options label {
+  display: flex; align-items: center; gap: 6px; font-size: 12px;
+  color: var(--text-secondary); cursor: pointer;
+}
+.batch-box .options input[type="checkbox"] { accent-color: var(--accent); }
+.batch-box .batch-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 18px; }
+
+.batch-preview {
+  margin-top: 16px; display: none;
+}
+.batch-preview.visible { display: block; }
+.batch-preview h4 { font-family: 'Syne', sans-serif; font-weight: 600; font-size: 13px; color: var(--text-secondary); margin-bottom: 10px; }
+.batch-preview .preview-scroll {
+  max-height: 200px; overflow-y: auto; border: 1px solid var(--border); border-radius: 6px;
+}
+.batch-preview table { min-width: auto; }
+.batch-preview thead th {
+  padding: 8px 12px; font-size: 9.5px; background: var(--surface-raised);
+  border-bottom: 1px solid var(--border);
+}
+.batch-preview tbody td {
+  padding: 6px 12px; font-size: 11px; font-weight: 300; border-bottom: 1px solid #efeadf;
+}
+.batch-preview tbody tr:last-child td { border-bottom: none; }
+.batch-preview .dup-warn { color: var(--expensive); font-size: 11px; margin-top: 8px; }
+
+/* Toast */
+.toast {
+  position: fixed; bottom: 28px; right: 28px;
+  padding: 12px 22px; background: var(--text-primary); color: var(--bg);
+  border-radius: 8px; font-family: 'DM Mono', monospace; font-size: 13px;
+  z-index: 2000; transform: translateY(80px); opacity: 0;
+  transition: all 0.35s cubic-bezier(0.16,1,0.3,1); box-shadow: var(--shadow-lg);
+}
+.toast.show { transform: translateY(0); opacity: 1; }
+
+.p-openai { background: #10a37f; } .p-anthropic { background: #d97706; }
+.p-deepseek { background: #4f6ef7; } .p-qwen { background: #6d5cff; }
+.p-google { background: #4285f4; } .p-mistral { background: #f97316; }
+.p-meta { background: #0668e1; } .p-glm { background: #14b8a6; }
+.p-unknown { background: #aaa; }
+
+footer { margin-top: 32px; text-align: center; font-size: 11px; color: var(--text-muted); animation: fadeUp 0.6s ease 0.24s forwards; opacity: 0; font-weight: 300; }
+@keyframes fadeUp { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
+
+@media (max-width: 768px) {
+  .container { padding: 24px 16px 60px; }
+  header h1 { font-size: 24px; }
+  .stats-bar { flex-wrap: wrap; }
+  .stat-item { min-width: 50%; border-bottom: 1px solid var(--border); }
+  .stat-item:nth-child(even) { border-right: none; }
+  .toolbar { flex-direction: column; }
+  .toolbar-left, .toolbar-right { width: 100%; }
+  .search-box { max-width: none; }
+  .form-row { grid-template-columns: 1fr; }
+  .batch-box { padding: 20px 20px; }
+  .batch-box .col-order { gap: 4px; }
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <div class="brand"><h1>LLM Pricing <em>Tracker</em></h1></div>
+    <div class="subtitle">Multi-provider model pricing comparison · local save · sortable <span class="save-dot"></span></div>
+  </header>
+
+  <div class="toolbar">
+    <div class="toolbar-left">
+      <div class="search-box">
+        <span class="icon">⌕</span>
+        <input type="text" id="searchInput" placeholder="Search model or API name...">
+      </div>
+      <div class="filter-group">
+        <button class="filter-btn active" data-filter="all">All</button>
+        <button class="filter-btn" data-filter="yes">Subscribed</button>
+        <button class="filter-btn" data-filter="no">Paid</button>
+      </div>
+    </div>
+    <div class="toolbar-right">
+      <button class="btn btn-primary" onclick="openAddModal()">+ Add Model</button>
+      <button class="btn btn-accent" onclick="openBatchModal()">⌨ Paste CSV</button>
+      <button class="btn btn-outline" onclick="exportCSV()">↓ Export CSV</button>
+      <button class="btn btn-danger" onclick="clearAll()">Reset</button>
+    </div>
+  </div>
+
+  <div class="stats-bar">
+    <div class="stat-item"><span class="stat-label">Total Models</span><span class="stat-value" id="statTotal">0</span></div>
+    <div class="stat-item"><span class="stat-label">Subscribed</span><span class="stat-value" id="statSub">0</span></div>
+    <div class="stat-item"><span class="stat-label">Lowest Input</span><span class="stat-value" id="statCheapIn">—</span></div>
+    <div class="stat-item"><span class="stat-label">Lowest Output</span><span class="stat-value" id="statCheapOut">—</span></div>
+    <div class="stat-item"><span class="stat-label">Last Saved</span><span class="stat-value" id="statTime">—</span></div>
+  </div>
+
+  <div class="table-wrapper">
+    <div class="table-scroll" id="tableScroll">
+      <table id="mainTable">
+        <thead>
+          <tr>
+            <th data-key="model">Model Name</th>
+            <th data-key="api">API Name</th>
+            <th data-key="sub">Subscription</th>
+            <th data-key="maxInput" style="text-align:right">Max Input (tokens)</th>
+            <th data-key="inputRate" style="text-align:right">Input $/1M</th>
+            <th data-key="outputRate" style="text-align:right">Output $/1M</th>
+            <th data-key="cacheRate" style="text-align:right">Cache Read $/1M</th>
+            <th class="no-sort" style="width:48px"></th>
+          </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <footer>All data stored locally in your browser · Click column headers to sort · Double-click any cell to edit inline</footer>
+</div>
+
+<!-- Single Add/Edit Modal -->
+<div class="modal-overlay" id="addModal">
+  <div class="modal">
+    <h2 id="modalTitle">Add New Model</h2>
+    <div class="form-row full"><div class="form-group"><label>Model Name</label><input type="text" id="fModel" placeholder="e.g. GPT-4o"></div></div>
+    <div class="form-row full"><div class="form-group"><label>API Name</label><input type="text" id="fApi" placeholder="e.g. openai/gpt-4o"></div></div>
+    <div class="form-row">
+      <div class="form-group"><label>Subscription</label><select id="fSub"><option value="No">No (Pay-per-use)</option><option value="Yes">Yes (Included)</option></select></div>
+      <div class="form-group"><label>Max Input Tokens</label><input type="number" id="fMaxInput" placeholder="e.g. 128000"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Input Rate ($/1M tokens)</label><input type="text" id="fInputRate" placeholder="e.g. 1.70"></div>
+      <div class="form-group"><label>Output Rate ($/1M tokens)</label><input type="text" id="fOutputRate" placeholder="e.g. 10.00"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Cache Read Rate ($/1M tokens)</label><input type="text" id="fCacheRate" placeholder="Optional"></div>
+      <div class="form-group"></div>
+    </div>
+    <input type="hidden" id="fEditIndex" value="-1">
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveModel()">Save Model</button>
+    </div>
+  </div>
+</div>
+
+<!-- Batch CSV Paste Modal -->
+<div class="batch-overlay" id="batchOverlay">
+  <div class="batch-box">
+    <h2>Batch Add via CSV</h2>
+    <div class="desc">
+      Paste CSV data below. Supports header row or plain data rows.
+      Each line = one model. Separate columns with commas.
+    </div>
+    <div class="col-order">
+      <span class="col-chip">Model Name *</span>
+      <span class="col-chip">API Name *</span>
+      <span class="col-chip">Subscription</span>
+      <span class="col-chip">Max Input</span>
+      <span class="col-chip">Input $/1M</span>
+      <span class="col-chip">Output $/1M</span>
+      <span class="col-chip optional">Cache $/1M (optional)</span>
+    </div>
+    <textarea id="batchText" placeholder="Paste your CSV lines here, for example:
+
+GPT-4o,openai/gpt-4o,No,128000,1.70,10.00,
+Claude Sonnet 4,claude-sonnet-4-20250514,No,200000,2.50,15.00,
+DeepSeek Chat (V3),deepseek-chat,Yes,128000,0.10,0.43,
+Gemini 2.5 Pro,gemini-2.5-pro,No,1000000,1.25,10.00,"></textarea>
+    <div class="batch-preview" id="batchPreview">
+      <h4>Preview (<span id="previewCount">0</span> models)</h4>
+      <div class="preview-scroll">
+        <table>
+          <thead><tr><th>Model</th><th>API</th><th>Sub</th><th>Max Input</th><th>Input $</th><th>Output $</th><th>Cache $</th></tr></thead>
+          <tbody id="previewBody"></tbody>
+        </table>
+      </div>
+      <div class="dup-warn" id="dupWarn"></div>
+    </div>
+    <div class="options">
+      <label><input type="checkbox" id="batchReplace"> Replace all existing data</label>
+      <label><input type="checkbox" id="batchSkipDup" checked> Skip duplicates (same API name)</label>
+      <label><input type="checkbox" id="batchHasHeader"> First row is header</label>
+    </div>
+    <div class="batch-actions">
+      <button class="btn btn-outline" onclick="closeBatch()">Cancel</button>
+      <button class="btn btn-outline" onclick="previewBatch()">Preview</button>
+      <button class="btn btn-primary" onclick="executeBatch()">Add to Table</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const STORAGE_KEY = 'llm_pricing_data_v3';
+const TIME_KEY = 'llm_pricing_time_v3';
+
+let data = [];
+let sortKey = null;
+let sortDir = 'asc';
+let filterMode = 'all';
+
+/* ===== Persistence ===== */
+function loadData() {
+  try { const r = localStorage.getItem(STORAGE_KEY); data = r ? JSON.parse(r) : []; }
+  catch(e) { data = []; }
+}
+function saveData() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  localStorage.setItem(TIME_KEY, new Date().toLocaleString('zh-CN'));
+  updateStats();
+}
+
+/* ===== Helpers ===== */
+function getProvider(api) {
+  if (!api) return 'unknown';
+  const a = api.toLowerCase();
+  if (a.includes('openai') || a.includes('gpt') || a.startsWith('o3')) return 'openai';
+  if (a.includes('claude')) return 'anthropic';
+  if (a.includes('deepseek')) return 'deepseek';
+  if (a.includes('qwen')) return 'qwen';
+  if (a.includes('gemini') || a.startsWith('google')) return 'google';
+  if (a.includes('mistral')) return 'mistral';
+  if (a.includes('llama') || a.includes('meta')) return 'meta';
+  if (a.includes('glm') || a.startsWith('z-ai') || a.startsWith('zai')) return 'glm';
+  return 'unknown';
+}
+function fmtNum(n) {
+  if (n >= 10000000) return (n/1000000).toFixed(0)+'M';
+  if (n >= 1000000) return (n/1000000).toFixed(n%1000000===0?0:1)+'M';
+  if (n >= 10000) return (n/1000).toFixed(n%1000===0?0:1)+'K';
+  if (n >= 1000) return (n/1000).toFixed(1)+'K';
+  return String(n);
+}
+function esc(s) { const d=document.createElement('div'); d.textContent=s; return d.innerHTML; }
+
+/* ===== CSV Parser ===== */
+function parseCSVLine(line) {
+  const result = []; let cur = ''; let inQ = false;
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i];
+    if (inQ) {
+      if (ch === '"' && line[i+1] === '"') { cur+='"'; i++; }
+      else if (ch === '"') inQ = false;
+      else cur += ch;
+    } else {
+      if (ch === '"') inQ = true;
+      else if (ch === ',') { result.push(cur); cur=''; }
+      else cur += ch;
+    }
+  }
+  result.push(cur);
+  return result;
+}
+
+function isLikelyHeader(line) {
+  const lower = line.toLowerCase();
+  return lower.includes('model') && (lower.includes('api') || lower.includes('rate') || lower.includes('input'));
+}
+
+function parseRowsToModels(rows, skipFirst) {
+  const models = [];
+  for (let i = 0; i < rows.length; i++) {
+    const raw = rows[i].trim();
+    if (!raw) continue;
+    if (skipFirst && i === 0) continue;
+    if (i === 0 && isLikelyHeader(raw)) continue;
+
+    const cols = parseCSVLine(raw);
+    if (cols.length < 2) continue;
+
+    const model = (cols[0]||'').trim();
+    const api = (cols[1]||'').trim();
+    if (!model || !api) continue;
+
+    const sub = (cols[2]||'').trim().toLowerCase();
+    const subVal = (sub === 'yes' || sub === 'included' || sub === 'true') ? 'Yes' : 'No';
+    const maxInput = parseInt((cols[3]||'').replace(/[^0-9]/g,'')) || 0;
+    const inputRate = parseFloat(cols[4]) || 0;
+    const outputRate = parseFloat(cols[5]) || 0;
+    const cacheRaw = (cols[6]||'').trim();
+    const cacheRate = cacheRaw === '' ? '' : (parseFloat(cacheRaw) || 0);
+
+    models.push({ model, api, sub: subVal, maxInput, inputRate, outputRate, cacheRate });
+  }
+  return models;
+}
+
+/* ===== Render ===== */
+function renderTable() {
+  const tbody = document.getElementById('tableBody');
+  const search = document.getElementById('searchInput').value.toLowerCase().trim();
+
+  let filtered = data.filter((d, i) => {
+    d._idx = i;
+    if (filterMode === 'yes' && d.sub !== 'Yes') return false;
+    if (filterMode === 'no' && d.sub !== 'No') return false;
+    if (search) return d.model.toLowerCase().includes(search) || d.api.toLowerCase().includes(search);
+    return true;
+  });
+
+  if (sortKey) {
+    filtered.sort((a, b) => {
+      let va = a[sortKey], vb = b[sortKey];
+      if (sortKey === 'cacheRate') { va = (va===''||va==null)?Infinity:Number(va); vb = (vb===''||vb==null)?Infinity:Number(vb); }
+      if (typeof va === 'string') { const c=va.localeCompare(vb); return sortDir==='asc'?c:-c; }
+      return sortDir==='asc'?(va-vb):(vb-va);
+    });
+  }
+
+  const inRates = data.map(d=>d.inputRate).filter(r=>r>0);
+  const outRates = data.map(d=>d.outputRate).filter(r=>r>0);
+  const minIn = inRates.length ? Math.min(...inRates) : null;
+  const minOut = outRates.length ? Math.min(...outRates) : null;
+
+  if (data.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="8">
+      <div class="empty-state">
+        <div class="icon-large">📊</div>
+        <h3>No models yet</h3>
+        <p>Add models one by one, or paste CSV text to batch import</p>
+        <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+          <button class="btn btn-primary" onclick="openAddModal()">+ Add Single Model</button>
+          <button class="btn btn-accent" onclick="openBatchModal()">⌨ Paste CSV Batch</button>
+        </div>
+        <div class="quick-paste">
+          <div class="hint">Or paste CSV directly here for quick import:</div>
+          <textarea id="quickPaste" placeholder="GPT-4o,openai/gpt-4o,No,128000,1.70,10.00,
+Claude Sonnet 4,claude-sonnet-4-20250514,No,200000,2.50,15.00,
+DeepSeek Chat (V3),deepseek-chat,Yes,128000,0.10,0.43,"></textarea>
+          <div class="actions">
+            <button class="btn btn-primary" onclick="quickImport()">Parse & Add</button>
+          </div>
+        </div>
+      </div>
+    </td></tr>`;
+    updateStats();
+    return;
+  }
+
+  if (filtered.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="8"><div class="empty-state"><h3>No matching models</h3><p>Try adjusting your search or filter</p></div></td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = '';
+  filtered.forEach(d => {
+    const i = d._idx;
+    const p = getProvider(d.api);
+    const inC = d.inputRate===minIn&&minIn?' cheap':(d.inputRate>=5?' expensive':'');
+    const outC = d.outputRate===minOut&&minOut?' cheap':(d.outputRate>=20?' expensive':'');
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td class="model-name editable" data-f="model" data-i="${i}"><div class="model-cell"><span class="provider-dot p-${p}"></span>${esc(d.model)}</div></td>
+      <td class="api-name editable" data-f="api" data-i="${i}">${esc(d.api)}</td>
+      <td class="editable" data-f="sub" data-i="${i}"><span class="tag ${d.sub==='Yes'?'tag-sub':'tag-paid'}">${d.sub==='Yes'?'Included':'Pay-per-use'}</span></td>
+      <td class="token-col editable" data-f="maxInput" data-i="${i}">${fmtNum(d.maxInput)}</td>
+      <td class="rate-col${inC}" data-f="inputRate" data-i="$${i}">$${Number(d.inputRate).toFixed(2)}</td>
+      <td class="rate-col${outC}" data-f="outputRate" data-i="${i}">$${Number(d.outputRate).toFixed(2)}</td>
+      <td class="rate-col" data-f="cacheRate" data-i="{i}">${d.cacheRate!==''&&d.cacheRate!=null?'$'+Number(d.cacheRate).toFixed(2):'<span class="dash">—</span>'}</td>
+      <td style="text-align:center"><button class="row-del" onclick="deleteRow(${i})" title="Delete">✕</button></td>`;
+    tbody.appendChild(tr);
+  });
+
+  tbody.querySelectorAll('td.editable').forEach(td => {
+    td.addEventListener('dblclick', function() {
+      const idx = parseInt(this.dataset.i);
+      startInlineEdit(this, idx, this.dataset.f);
+    });
+  });
+}
+
+function startInlineEdit(td, idx, field) {
+  const cur = data[idx][field];
+  if (field === 'sub') {
+    data[idx].sub = cur === 'Yes' ? 'No' : 'Yes';
+    saveData(); renderTable();
+    toast(data[idx].sub==='Yes' ? 'Marked as subscribed' : 'Marked as pay-per-use');
+    return;
+  }
+  const input = document.createElement('input');
+  input.type = 'text'; input.className = 'inline-edit';
+  input.value = (cur===''||cur==null) ? '' : cur;
+  const saved = td.innerHTML;
+  td.innerHTML = ''; td.appendChild(input);
+  input.focus(); input.select();
+  function commit() {
+    let v = input.value.trim();
+    if (field==='maxInput') v = parseInt(v.replace(/[^0-9]/g,''))||0;
+    else if (field==='inputRate'||field==='outputRate'||field==='cacheRate') v = v===''?'':(parseFloat(v)||0);
+    data[idx][field] = v; saveData(); renderTable(); toast('Updated');
+  }
+  input.addEventListener('keydown', e => { if(e.key==='Enter')commit(); if(e.key==='Escape'){td.innerHTML=saved;} });
+  input.addEventListener('blur', commit);
+}
+
+/* ===== Stats ===== */
+function updateStats() {
+  const subs = data.filter(d=>d.sub==='Yes').length;
+  const inR = data.map(d=>d.inputRate).filter(r=>r>0);
+  const outR = data.map(d=>d.outputRate).filter(r=>r>0);
+  let cheapIn='—', cheapOut='—';
+  if(inR.length){ const m=Math.min(...inR); const d=data.find(x=>x.inputRate===m); cheapIn=`<span class="accent">$$$${m.toFixed(2)}</span> ${d?esc(d.model):''}`; }
+  if(outR.length){ const m=Math.min(...outR); const d=data.find(x=>x.outputRate===m); cheapOut=`<span class="accent">$${m.toFixed(2)}</span> {d?esc(d.model):''}`; }
+  document.getElementById('statTotal').textContent = data.length;
+  document.getElementById('statSub').textContent = subs;
+  document.getElementById('statCheapIn').innerHTML = cheapIn;
+  document.getElementById('statCheapOut').innerHTML = cheapOut;
+  document.getElementById('statTime').textContent = localStorage.getItem(TIME_KEY)||'—';
+}
+
+/* ===== Single Add ===== */
+function openAddModal() {
+  document.getElementById('modalTitle').textContent = 'Add New Model';
+  ['fModel','fApi','fMaxInput','fInputRate','fOutputRate','fCacheRate'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('fSub').value='No';
+  document.getElementById('fEditIndex').value='-1';
+  document.getElementById('addModal').classList.add('active');
+  setTimeout(()=>document.getElementById('fModel').focus(),100);
+}
+function closeModal() { document.getElementById('addModal').classList.remove('active'); }
+function saveModel() {
+  const model=document.getElementById('fModel').value.trim();
+  const api=document.getElementById('fApi').value.trim();
+  if(!model){toast('Model name required');document.getElementById('fModel').focus();return;}
+  if(!api){toast('API name required');document.getElementById('fApi').focus();return;}
+  const entry={
+    model, api,
+    sub: document.getElementById('fSub').value,
+    maxInput: parseInt(document.getElementById('fMaxInput').value)||0,
+    inputRate: parseFloat(document.getElementById('fInputRate').value)||0,
+    outputRate: parseFloat(document.getElementById('fOutputRate').value)||0,
+    cacheRate: (document.getElementById('fCacheRate').value.trim()==='')?'':(parseFloat(document.getElementById('fCacheRate').value)||0)
+  };
+  const ei = parseInt(document.getElementById('fEditIndex').value);
+  if(ei>=0) data[ei]=entry; else data.push(entry);
+  saveData(); renderTable(); closeModal();
+  toast(ei>=0?'Model updated':'Model added');
+}
+
+/* ===== Delete ===== */
+function deleteRow(i) {
+  if(!confirm(`Delete "${data[i].model}"?`)) return;
+  data.splice(i,1); saveData(); renderTable(); toast('Deleted');
+}
+
+/* ===== Batch CSV ===== */
+function openBatchModal() {
+  document.getElementById('batchText').value='';
+  document.getElementById('batchPreview').classList.remove('visible');
+  document.getElementById('batchReplace').checked=false;
+  document.getElementById('batchSkipDup').checked=true;
+  document.getElementById('batchHasHeader').checked=false;
+  document.getElementById('batchOverlay').classList.add('active');
+  setTimeout(()=>document.getElementById('batchText').focus(),100);
+}
+function closeBatch() { document.getElementById('batchOverlay').classList.remove('active'); }
+
+function previewBatch() {
+  const raw = document.getElementById('batchText').value.trim();
+  if(!raw){toast('Paste CSV text first');return;}
+  const lines = raw.split('\n');
+  const skipHeader = document.getElementById('batchHasHeader').checked;
+  const models = parseRowsToModels(lines, skipHeader);
+  const existingApis = new Set(data.map(d=>d.api));
+  let dups = 0;
+
+  const pb = document.getElementById('previewBody');
+  pb.innerHTML='';
+  models.forEach(m => {
+    const isDup = existingApis.has(m.api);
+    if(isDup) dups++;
+    const tr = document.createElement('tr');
+    tr.style.background = isDup ? 'var(--no-bg)' : '';
+    tr.innerHTML = `<td>${esc(m.model)}</td><td style="font-size:11px;color:var(--text-secondary)">${esc(m.api)}</td>
+      <td><span class="tag ${m.sub==='Yes'?'tag-sub':'tag-paid'}">${m.sub}</span></td>
+      <td style="text-align:right">${fmtNum(m.maxInput)}</td>
+      <td style="text-align:right">$$$${m.inputRate.toFixed(2)}</td>
+      <td style="text-align:right">$${m.outputRate.toFixed(2)}</td>
+      <td style="text-align:right">${m.cacheRate!==''?'$'+Number(m.cacheRate).toFixed(2):'—'}</td>`;
+    pb.appendChild(tr);
+  });
+
+  document.getElementById('previewCount').textContent = models.length;
+  document.getElementById('dupWarn').textContent = dups > 0 ? `${dups} duplicate API name(s) detected (highlighted red) — will be skipped if "Skip duplicates" is checked.` : '';
+  document.getElementById('batchPreview').classList.add('visible');
+}
+
+function executeBatch() {
+  const raw = document.getElementById('batchText').value.trim();
+  if(!raw){toast('Paste CSV text first');return;}
+  const lines = raw.split('\n');
+  const skipHeader = document.getElementById('batchHasHeader').checked;
+  const replace = document.getElementById('batchReplace').checked;
+  const skipDup = document.getElementById('batchSkipDup').checked;
+  const models = parseRowsToModels(lines, skipHeader);
+
+  if(models.length===0){toast('No valid rows found');return;}
+
+  if(replace) {
+    data = models;
+  } else {
+    const existingApis = skipDup ? new Set(data.map(d=>d.api)) : new Set();
+    let added = 0, skipped = 0;
+    models.forEach(m => {
+      if(skipDup && existingApis.has(m.api)) { skipped++; return; }
+      data.push(m);
+      existingApis.add(m.api);
+      added++;
+    });
+    saveData(); renderTable(); closeBatch();
+    toast(`Added ${added} models${skipped ? `, skipped ${skipped} duplicates` : ''}`);
+    return;
+  }
+
+  saveData(); renderTable(); closeBatch();
+  toast(`Replaced with ${data.length} models`);
+}
+
+/* ===== Quick import from empty state ===== */
+function quickImport() {
+  const ta = document.getElementById('quickPaste');
+  if(!ta) return;
+  const raw = ta.value.trim();
+  if(!raw){toast('Paste CSV text first');return;}
+  const lines = raw.split('\n');
+  const models = parseRowsToModels(lines, false);
+  if(models.length===0){toast('No valid rows found');return;}
+  data = models;
+  saveData(); renderTable();
+  toast(`Imported ${data.length} models`);
+}
+
+/* ===== Export CSV ===== */
+function exportCSV() {
+  if(!data.length){toast('No data to export');return;}
+  let csv = 'Model Name,API Name,Included in Subscription,Max Input (tokens),Input Rate ($/1M),Output Rate ($/1M),Cache Read Rate ($/1M)\n';
+  data.forEach(d => {
+    csv += `${d.model},${d.api},${d.sub},${d.maxInput},${d.inputRate},${d.outputRate},${d.cacheRate===''?'':d.cacheRate}\n`;
+  });
+  const blob = new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'llm_pricing_'+new Date().toISOString().slice(0,10)+'.csv';
+  a.click(); URL.revokeObjectURL(a.href);
+  toast('CSV downloaded');
+}
+
+/* ===== Reset ===== */
+function clearAll() {
+  if(!confirm('Delete all models?')) return;
+  data=[]; saveData(); renderTable(); toast('All cleared');
+}
+
+/* ===== Toast ===== */
+function toast(msg) {
+  const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show');
+  clearTimeout(t._tid); t._tid=setTimeout(()=>t.classList.remove('show'),2400);
+}
+
+/* ===== Sort ===== */
+document.querySelectorAll('thead th[data-key]').forEach(th => {
+  th.addEventListener('click', function(){
+    const k=this.dataset.key;
+    if(sortKey===k) sortDir=sortDir==='asc'?'desc':'asc';
+    else { sortKey=k; sortDir='asc'; }
+    document.querySelectorAll('thead th').forEach(h=>h.classList.remove('sort-asc','sort-desc'));
+    this.classList.add(sortDir==='asc'?'sort-asc':'sort-desc');
+    renderTable();
+  });
+});
+
+/* ===== Filter ===== */
+document.querySelectorAll('.filter-btn').forEach(btn => {
+  btn.addEventListener('click', function(){
+    document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+    this.classList.add('active'); filterMode=this.dataset.filter; renderTable();
+  });
+});
+
+/* ===== Search ===== */
+document.getElementById('searchInput').addEventListener('input', renderTable);
+
+/* ===== Live preview on typing ===== */
+document.getElementById('batchText').addEventListener('input', function(){
+  const overlay = document.getElementById('batchOverlay');
+  if(overlay.classList.contains('active')) {
+    clearTimeout(this._debounce);
+    this._debounce = setTimeout(previewBatch, 400);
+  }
+});
+
+/* ===== Keys ===== */
+document.addEventListener('keydown', e => {
+  if(e.key==='Escape'){ closeModal(); closeBatch(); }
+});
+
+/* ===== Init ===== */
+loadData(); renderTable(); updateStats();
+</script>
+</body>
+</html>

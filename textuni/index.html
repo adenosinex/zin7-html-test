@@ -1,0 +1,958 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>视频标题去重工具 · 大小接近版</title>
+<style>
+  * { box-sizing: border-box; }
+  :root {
+    --bg: #f4f6f9;
+    --panel: #ffffff;
+    --border: #e3e7ee;
+    --text: #1f2330;
+    --muted: #7a8296;
+    --accent: #3b6ef6;
+    --accent-soft: #eaf0ff;
+    --green: #17a673;
+    --orange: #e08b1a;
+    --orange-soft: #fdf3e3;
+    --purple: #7c5cf0;
+    --purple-soft: #f0ecff;
+  }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+  .app { max-width: 1240px; margin: 0 auto; padding: 24px 20px 60px; }
+
+  header h1 { font-size: 20px; margin: 0 0 4px; letter-spacing: .3px; }
+  header p { margin: 0 0 18px; color: var(--muted); font-size: 13px; }
+
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 16px;
+  }
+
+  /* ---------- 选项 ---------- */
+  .options {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 14px 18px;
+    align-items: end;
+  }
+  .field { display: flex; flex-direction: column; gap: 6px; }
+  .field label {
+    font-size: 12px; color: var(--muted); font-weight: 600;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .field label .val { color: var(--accent); font-variant-numeric: tabular-nums; }
+  select, input[type=number] {
+    height: 34px; padding: 0 10px; border: 1px solid var(--border);
+    border-radius: 8px; background: #fff; color: var(--text);
+    font-size: 13px; outline: none; font-family: inherit;
+  }
+  select:focus, input[type=number]:focus { border-color: var(--accent); }
+  input[type=range] { width: 100%; accent-color: var(--accent); height: 34px; }
+
+  .check {
+    display: flex; align-items: center; gap: 8px; height: 34px;
+    font-size: 13px; cursor: pointer; user-select: none;
+  }
+  .check input { width: 16px; height: 16px; accent-color: var(--accent); cursor: pointer; }
+
+  .section-title {
+    grid-column: 1 / -1;
+    font-size: 12px; font-weight: 700; color: var(--accent);
+    border-top: 1px dashed var(--border);
+    padding-top: 12px; margin-top: 4px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .section-title::before {
+    content: '';
+    width: 3px; height: 12px;
+    background: var(--accent); border-radius: 2px;
+  }
+  .section-title .opt-tag {
+    font-size: 10px; font-weight: 600; color: var(--muted);
+    background: #eef1f7; border-radius: 4px; padding: 1px 6px;
+    letter-spacing: .3px;
+  }
+
+  .hint-line {
+    grid-column: 1 / -1;
+    font-size: 12px; color: var(--muted);
+    background: #f7f9fc; border-radius: 8px;
+    padding: 8px 12px; line-height: 1.6;
+  }
+  .hint-line code {
+    background: #eef1f7; border-radius: 4px; padding: 0 4px;
+    font-family: ui-monospace, Menlo, Consolas, monospace;
+    font-size: 11.5px;
+  }
+
+  .btn-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 14px; }
+  button {
+    font-family: inherit; font-size: 13px; font-weight: 600;
+    padding: 0 16px; height: 36px; border-radius: 9px;
+    border: 1px solid var(--border); background: #fff; color: var(--text);
+    cursor: pointer; transition: .15s;
+  }
+  button:hover { border-color: #c9d1e0; background: #fafbfd; }
+  button.primary {
+    background: var(--accent); border-color: var(--accent); color: #fff;
+  }
+  button.primary:hover { background: #2f5fe0; }
+
+  /* ---------- 输入输出 ---------- */
+  .panes {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;
+  }
+  @media (max-width: 800px) { .panes { grid-template-columns: 1fr; } }
+
+  .pane {
+    background: var(--panel); border: 1px solid var(--border);
+    border-radius: 12px; overflow: hidden; display: flex; flex-direction: column;
+  }
+  .pane-head {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 14px; border-bottom: 1px solid var(--border);
+    font-size: 13px; font-weight: 600; color: #4a5169;
+  }
+  .pane-head .right { display: flex; align-items: center; gap: 8px; }
+  .pane-head button { height: 28px; padding: 0 10px; font-size: 12px; font-weight: 500; }
+  .badge {
+    font-size: 12px; font-weight: 600; color: var(--muted);
+    background: #f0f2f7; border-radius: 20px; padding: 2px 10px;
+  }
+  .badge.hot { color: var(--purple); background: var(--purple-soft); }
+  textarea {
+    flex: 1; min-height: 340px; resize: vertical;
+    border: none; outline: none; padding: 14px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Courier New", monospace;
+    font-size: 13px; line-height: 1.7; color: var(--text);
+    background: transparent;
+  }
+  textarea::placeholder { color: #b3bacb; }
+
+  /* ---------- 统计 ---------- */
+  .stats {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(125px, 1fr));
+    gap: 12px; margin-bottom: 16px;
+  }
+  .stat {
+    background: var(--panel); border: 1px solid var(--border);
+    border-radius: 12px; padding: 14px 16px;
+  }
+  .stat .k { font-size: 12px; color: var(--muted); margin-bottom: 4px; }
+  .stat .v {
+    font-size: 22px; font-weight: 700; font-variant-numeric: tabular-nums;
+    letter-spacing: -.3px;
+  }
+  .stat.green .v { color: var(--green); }
+  .stat.orange .v { color: var(--orange); }
+  .stat.blue .v { color: var(--accent); }
+  .stat.purple .v { color: var(--purple); }
+
+  /* ---------- 重复组 ---------- */
+  .groups-head {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 12px;
+  }
+  .groups-head h2 { font-size: 15px; margin: 0; }
+  .groups-head .hint { font-size: 12px; color: var(--muted); }
+
+  .group {
+    border: 1px solid var(--border); border-radius: 10px;
+    padding: 10px 12px; margin-bottom: 10px; background: #fcfdff;
+  }
+  .group-head { display: flex; align-items: baseline; gap: 10px; }
+  .group-head .idx {
+    font-size: 11px; font-weight: 700; color: var(--accent);
+    background: var(--accent-soft); border-radius: 6px; padding: 2px 7px;
+    flex-shrink: 0;
+  }
+  .group-head .rep { font-weight: 600; word-break: break-all; }
+  .group-head .cnt {
+    margin-left: auto; flex-shrink: 0; font-size: 12px;
+    color: var(--orange); background: var(--orange-soft);
+    border-radius: 20px; padding: 2px 10px; font-weight: 600;
+  }
+  .members { margin-top: 8px; padding-left: 6px; border-left: 2px solid var(--border); }
+  .members div {
+    font-size: 12.5px; color: var(--muted); padding: 2px 0 2px 10px;
+    word-break: break-all; font-family: ui-monospace, Menlo, Consolas, monospace;
+  }
+  .members div.is-rep { color: var(--text); font-weight: 600; }
+  .members .sz {
+    display: inline-block; font-size: 11px; font-weight: 600;
+    color: var(--purple); background: var(--purple-soft);
+    border-radius: 6px; padding: 0 6px; margin-left: 6px;
+  }
+  .empty-tip { color: var(--muted); font-size: 13px; padding: 8px 0; }
+</style>
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="视频标题去重工具 · 大">
+<link rel="apple-touch-icon" href="./icon-192.png">
+
+</head>
+<body>
+<div class="app">
+
+  <header>
+    <h1>视频标题去重工具 · 大小接近版</h1>
+    <p>去除日期前缀 · 大小列可选 · 大小接近即可，无需相等</p>
+  </header>
+
+  <!-- 选项 -->
+  <div class="card">
+    <div class="options">
+
+      <div class="section-title">基础规则</div>
+
+      <div class="field">
+        <label>相似度阈值 <span class="val" id="thVal">0.75</span></label>
+        <input type="range" id="threshold" min="0.4" max="1" step="0.01" value="0.75">
+      </div>
+
+      <div class="field">
+        <label>最短长度比 <span class="val" id="lrVal">0.50</span></label>
+        <input type="range" id="lenRatio" min="0.2" max="1" step="0.05" value="0.5">
+      </div>
+
+      <div class="field">
+        <label>包含匹配最短标题字数</label>
+        <input type="number" id="minContainLen" min="1" max="20" value="3">
+      </div>
+
+      <div class="field">
+        <label>开头清洗方式</label>
+        <select id="leadMode">
+          <option value="conservative" selected>保守（只去 "01 " "02-" 这类前缀）</option>
+          <option value="aggressive">激进（去掉开头所有符号和数字）</option>
+          <option value="off">不清洗开头</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label>保留的标题</label>
+        <select id="repMode">
+          <option value="first" selected>首次出现的标题</option>
+          <option value="longest">最长的标题</option>
+          <option value="shortest">最短的标题</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label>开关</label>
+        <label class="check"><input type="checkbox" id="stripDate" checked> 去除"2026年3月最新"日期前缀</label>
+      </div>
+
+      <div class="field">
+        <label>&nbsp;</label>
+        <label class="check"><input type="checkbox" id="useContain" checked> 启用包含匹配</label>
+      </div>
+
+      <div class="field">
+        <label>&nbsp;</label>
+        <label class="check"><input type="checkbox" id="useNumKey" checked> 数字不同视为不同视频</label>
+      </div>
+
+      <div class="section-title">
+        大小列规则 <span class="opt-tag">可选功能 · 不填大小也能用</span>
+      </div>
+
+      <div class="hint-line">
+        大小列写法：<code>标题[TAB]大小</code>，例如 <code>西游记 国语版[TAB]2.50</code>。
+        没有大小列时，所有行按“未知大小”处理，只按标题去重，行为与不带大小完全一致。
+        大小<b>接近即可</b>，不需要相等。
+      </div>
+
+      <div class="field">
+        <label>大小接近判定（相对差 ≤） <span class="val" id="ssVal">10%</span></label>
+        <input type="range" id="sizeClosePct" min="0.5" max="50" step="0.5" value="10">
+      </div>
+
+      <div class="field">
+        <label>大小差异过大判定（相对差 ≥） <span class="val" id="shVal">50%</span></label>
+        <input type="range" id="sizeHardPct" min="20" max="200" step="10" value="50">
+      </div>
+
+      <div class="field">
+        <label>大小接近时阈值系数 <span class="val" id="bsVal">0.80</span></label>
+        <input type="range" id="boostClose" min="0.5" max="1" step="0.05" value="0.8">
+      </div>
+
+      <div class="field">
+        <label>开关</label>
+        <label class="check"><input type="checkbox" id="sizeGate" checked> 大小差异过大时拒绝合并</label>
+      </div>
+
+      <div class="field">
+        <label>&nbsp;</label>
+        <label class="check"><input type="checkbox" id="autoRun" checked> 输入时自动去重</label>
+      </div>
+
+    </div>
+
+    <div class="btn-row">
+      <button class="primary" id="runBtn">开始去重</button>
+      <button id="sampleBtn">填入示例</button>
+      <button id="clearBtn">清空</button>
+    </div>
+  </div>
+
+  <!-- 输入输出 -->
+  <div class="panes">
+    <div class="pane">
+      <div class="pane-head">
+        <span>输入 · 每行一个标题（大小列可选）</span>
+        <span class="badge" id="inBadge">0 行</span>
+      </div>
+      <textarea id="input" placeholder="方式一：只写标题&#10;西游记 国语版 高清&#10;西游记 国语版 全集&#10;&#10;方式二：标题 + TAB + 大小&#10;西游记 国语版 高清	2.50&#10;西游记 国语版 高清	2.52&#10;西游记 第2部 国语版	0.236328125"></textarea>
+    </div>
+    <div class="pane">
+      <div class="pane-head">
+        <span>输出去重结果</span>
+        <span class="right">
+          <span class="badge" id="outBadge">0 行</span>
+          <button id="copyBtn">复制</button>
+        </span>
+      </div>
+      <textarea id="output" readonly placeholder="去重结果会显示在这里…"></textarea>
+    </div>
+  </div>
+
+  <!-- 统计 -->
+  <div class="stats" id="stats">
+    <div class="stat"><div class="k">有效输入行</div><div class="v" id="sInput">0</div></div>
+    <div class="stat purple"><div class="k">含大小列</div><div class="v" id="sSize">0</div></div>
+    <div class="stat green"><div class="k">去重后</div><div class="v" id="sOutput">0</div></div>
+    <div class="stat orange"><div class="k">移除重复</div><div class="v" id="sRemoved">0</div></div>
+    <div class="stat orange"><div class="k">重复组</div><div class="v" id="sGroups">0</div></div>
+    <div class="stat blue"><div class="k">耗时</div><div class="v" id="sTime">0 ms</div></div>
+  </div>
+
+  <!-- 重复组明细 -->
+  <div class="card">
+    <div class="groups-head">
+      <h2>重复组明细</h2>
+      <span class="hint" id="groupHint">仅显示被合并的组</span>
+    </div>
+    <div id="groupList"><div class="empty-tip">暂无重复组。</div></div>
+  </div>
+
+</div>
+
+<script>
+/* ============================================================
+ *  1. 基础工具
+ * ============================================================ */
+
+function toHalfWidth(s) {
+  return String(s)
+    .replace(/[\uFF01-\uFF5E]/g, c => String.fromCharCode(c.charCodeAt(0) - 0xFEE0))
+    .replace(/\u3000/g, ' ');
+}
+
+function makeBigrams(str) {
+  const set = new Set();
+  if (!str) return set;
+  if (str.length === 1) { set.add(str); return set; }
+  for (let i = 0; i < str.length - 1; i++) set.add(str.slice(i, i + 2));
+  return set;
+}
+
+function jaccard(A, B) {
+  if (A.size === 0 || B.size === 0) return 0;
+  const small = A.size <= B.size ? A : B;
+  const big   = A.size <= B.size ? B : A;
+  let inter = 0;
+  for (const x of small) if (big.has(x)) inter++;
+  const union = A.size + B.size - inter;
+  return union === 0 ? 0 : inter / union;
+}
+
+/* ============================================================
+ *  2. 日期前缀剥离
+ * ============================================================ */
+
+const DATE_PREFIX_PATTERNS = [
+  /^[\s\p{P}\p{S}]*\d{4}\s*年\s*\d{1,2}\s*月\s*\d{1,2}\s*日\s*(最新|更新|发布|整理|版)?\s*/u,
+  /^[\s\p{P}\p{S}]*\d{4}\s*年\s*\d{1,2}\s*月\s*(最新|更新|发布|整理|版)?\s*/u,
+  /^[\s\p{P}\p{S}]*\d{4}\s*年\s*(最新|更新|发布|整理|版)?\s*/u,
+  /^[\s\p{P}\p{S}]*\d{4}\s*[-./]\s*\d{1,2}\s*[-./]\s*\d{1,2}\s*(最新|更新)?\s*/u,
+  /^[\s\p{P}\p{S}]*\d{4}\s*[-./]\s*\d{1,2}\s*(最新|更新)?\s*/u,
+  /^[\s\p{P}\p{S}]*\d{1,2}\s*月\s*\d{1,2}\s*日\s*(最新|更新)?\s*/u,
+  /^[\s\p{P}\p{S}]*\d{1,2}\s*月\s*(最新|更新|发布|整理)\s*/u,
+  /^[\s\p{P}\p{S}]*(最新|最近|今日|近期|今日更新|今日最新|刚刚)\s*/u,
+];
+
+function stripDatePrefixes(t) {
+  let cur = t;
+  for (let round = 0; round < 4; round++) {
+    const before = cur;
+    for (const p of DATE_PREFIX_PATTERNS) cur = cur.replace(p, '');
+    if (cur === before) break;
+  }
+  return cur;
+}
+
+/* ============================================================
+ *  3. 标题标准化
+ * ============================================================ */
+
+function normalizeTitle(raw, opt) {
+  let t = toHalfWidth(raw).toLowerCase();
+  if (opt.stripDate) t = stripDatePrefixes(t);
+
+  if (opt.leadMode === 'aggressive') {
+    t = t.replace(/^[\s\p{P}\p{S}\d]+/u, '');
+  } else if (opt.leadMode === 'conservative') {
+    t = t.replace(/^[\s\p{P}\p{S}]*(?:\d+[\s\p{P}\p{S}]+)+/u, '');
+  }
+
+  t = t.replace(/\s+/g, '');
+  return t;
+}
+
+function numberKey(norm) {
+  const m = norm.match(/\d+/g);
+  if (!m) return '';
+  return m.map(x => String(parseInt(x, 10))).join(',');
+}
+
+/* ============================================================
+ *  4. 行解析（标题 + 可选 TAB 大小）
+ * ============================================================ */
+
+function parseLine(line) {
+  const idx = line.lastIndexOf('\t');
+
+  if (idx > 0) {
+    const titlePart = line.slice(0, idx).trim();
+    const sizePart  = line.slice(idx + 1).trim();
+
+    if (titlePart && /^[\d.]+$/.test(sizePart)) {
+      const size = parseFloat(sizePart);
+      if (isFinite(size) && size >= 0) {
+        return { raw: line, title: titlePart, size, hasSize: true };
+      }
+    }
+    // TAB 存在但大小格式无效 → 只取 TAB 前的标题
+    if (titlePart) {
+      return { raw: line, title: titlePart, size: 0, hasSize: false };
+    }
+  }
+
+  return { raw: line, title: line.trim(), size: 0, hasSize: false };
+}
+
+/* ============================================================
+ *  5. 大小关系判断（接近即可，不要求相等）
+ * ============================================================ */
+
+/**
+ * 相对差 = |a - b| / max(a, b)
+ *   close : 相对差 ≤ sizeClosePct     —— 大小接近，去重更激进
+ *   hard  : 相对差 ≥ sizeHardPct      —— 大小差异过大，拒绝合并
+ *   mid   : 中间态，按默认规则
+ *   unknown : 任一方没有大小，按默认规则
+ */
+function sizeRelation(a, b, opt) {
+  if (!a.hasSize || !b.hasSize) return 'unknown';
+  const maxV = Math.max(a.size, b.size, 1e-9);
+  const diff = Math.abs(a.size - b.size) / maxV;
+  if (diff <= opt.sizeClosePct / 100) return 'close';
+  if (diff >= opt.sizeHardPct  / 100) return 'hard';
+  return 'mid';
+}
+
+/* ============================================================
+ *  6. 判断是否重复
+ * ============================================================ */
+
+function isDuplicate(a, b, opt) {
+  // (1) 数字指纹不同 → 不同视频（第1部 vs 第2部）
+  if (opt.useNumKey && a.nk !== b.nk) return false;
+
+  const la = a.norm.length, lb = b.norm.length;
+  if (la === 0 || lb === 0) return la === lb;
+
+  const short = la <= lb ? a.norm : b.norm;
+  const long  = la <= lb ? b.norm : a.norm;
+
+  // (2) 大小关系
+  const rel = sizeRelation(a, b, opt);
+
+  // 大小差异过大，且标题不完全一致 → 拒绝合并
+  // （标题完全一致时，无论大小差异多大都视为同一条）
+  if (opt.sizeGate && rel === 'hard' && short !== long) return false;
+
+  // (3) 根据大小关系调整阈值
+  //     close  → 阈值放宽（乘系数），包含匹配门槛也降低
+  //     mid / hard / unknown → 默认阈值
+  let threshold  = opt.threshold;
+  let containMin = opt.minContainLen;
+
+  if (rel === 'close') {
+    threshold  *= opt.boostClose;
+    containMin  = Math.max(2, containMin - 1);
+  }
+
+  // (4) 包含匹配（强规则）
+  if (opt.useContain && short.length >= containMin) {
+    if (long.indexOf(short) !== -1) return true;
+  }
+
+  // (5) 长度差太大直接跳过
+  if (short.length / long.length < opt.minLenRatio) return false;
+
+  // (6) bigram Jaccard 兜底
+  return jaccard(a.grams, b.grams) >= threshold;
+}
+
+/* ============================================================
+ *  7. 并查集
+ * ============================================================ */
+
+class UnionFind {
+  constructor(n) {
+    this.parent = new Int32Array(n);
+    for (let i = 0; i < n; i++) this.parent[i] = i;
+  }
+  find(x) {
+    let root = x;
+    while (this.parent[root] !== root) root = this.parent[root];
+    while (this.parent[x] !== root) {
+      const next = this.parent[x];
+      this.parent[x] = root;
+      x = next;
+    }
+    return root;
+  }
+  union(a, b) {
+    const ra = this.find(a), rb = this.find(b);
+    if (ra !== rb) this.parent[rb] = ra;
+  }
+}
+
+/* ============================================================
+ *  8. 候选对生成
+ * ============================================================ */
+
+function buildCandidatePairs(entries) {
+  const n = entries.length;
+  const pairs = [];
+
+  if (n <= 1000) {
+    for (let i = 0; i < n; i++) {
+      for (let j = i + 1; j < n; j++) pairs.push(i, j);
+    }
+    return pairs;
+  }
+
+  const index = new Map();
+  for (let i = 0; i < n; i++) {
+    for (const g of entries[i].grams) {
+      let arr = index.get(g);
+      if (!arr) index.set(g, arr = []);
+      arr.push(i);
+    }
+  }
+
+  const commonLimit = Math.max(50, n * 0.5);
+
+  for (let i = 0; i < n; i++) {
+    const cnt = new Map();
+    for (const g of entries[i].grams) {
+      const arr = index.get(g);
+      if (!arr || arr.length > commonLimit) continue;
+      for (let k = 0; k < arr.length; k++) {
+        const j = arr[k];
+        if (j <= i) continue;
+        cnt.set(j, (cnt.get(j) || 0) + 1);
+      }
+    }
+    for (const [j, c] of cnt) {
+      if (c >= 2) pairs.push(i, j);
+    }
+  }
+
+  const shortIds = [];
+  for (let i = 0; i < n; i++) {
+    if (entries[i].norm.length <= 4) shortIds.push(i);
+  }
+  if (shortIds.length <= 800) {
+    for (let a = 0; a < shortIds.length; a++) {
+      for (let b = a + 1; b < shortIds.length; b++) {
+        pairs.push(shortIds[a], shortIds[b]);
+      }
+    }
+  }
+
+  return pairs;
+}
+
+/* ============================================================
+ *  9. DOM 引用
+ * ============================================================ */
+
+const inputEl   = document.getElementById('input');
+const outputEl  = document.getElementById('output');
+const inBadge   = document.getElementById('inBadge');
+const outBadge  = document.getElementById('outBadge');
+const groupList = document.getElementById('groupList');
+
+const elThreshold   = document.getElementById('threshold');
+const elLenRatio    = document.getElementById('lenRatio');
+const elMinContain  = document.getElementById('minContainLen');
+const elLeadMode    = document.getElementById('leadMode');
+const elRepMode     = document.getElementById('repMode');
+const elStripDate   = document.getElementById('stripDate');
+const elUseContain  = document.getElementById('useContain');
+const elUseNumKey   = document.getElementById('useNumKey');
+const elAutoRun     = document.getElementById('autoRun');
+
+const elSizeClosePct = document.getElementById('sizeClosePct');
+const elSizeHardPct  = document.getElementById('sizeHardPct');
+const elBoostClose   = document.getElementById('boostClose');
+const elSizeGate     = document.getElementById('sizeGate');
+
+const thVal = document.getElementById('thVal');
+const lrVal = document.getElementById('lrVal');
+const ssVal = document.getElementById('ssVal');
+const shVal = document.getElementById('shVal');
+const bsVal = document.getElementById('bsVal');
+
+/* ============================================================
+ *  10. 选项读取
+ * ============================================================ */
+
+function readOptions() {
+  return {
+    threshold:     parseFloat(elThreshold.value),
+    minLenRatio:   parseFloat(elLenRatio.value),
+    minContainLen: Math.max(1, parseInt(elMinContain.value, 10) || 3),
+    leadMode:      elLeadMode.value,
+    repMode:       elRepMode.value,
+    stripDate:     elStripDate.checked,
+    useContain:    elUseContain.checked,
+    useNumKey:     elUseNumKey.checked,
+    sizeClosePct:  parseFloat(elSizeClosePct.value),
+    sizeHardPct:   parseFloat(elSizeHardPct.value),
+    boostClose:    parseFloat(elBoostClose.value),
+    sizeGate:      elSizeGate.checked,
+  };
+}
+
+/* ============================================================
+ *  11. 主流程
+ * ============================================================ */
+
+function runDedupe() {
+  const t0  = performance.now();
+  const opt = readOptions();
+
+  const rawLines = inputEl.value.split(/\r?\n/);
+
+  /* ---------- 解析输入 ---------- */
+  const entries = [];
+  let withSizeCount = 0;
+
+  for (let i = 0; i < rawLines.length; i++) {
+    const raw = rawLines[i];
+    if (!raw.trim()) continue;
+
+    const parsed = parseLine(raw);
+    if (!parsed.title) continue;
+
+    const norm = normalizeTitle(parsed.title, opt);
+
+    entries.push({
+      idx: entries.length,
+      lineNo: i + 1,
+      raw: parsed.raw,
+      title: parsed.title,
+      norm: norm,
+      nk: opt.useNumKey ? numberKey(norm) : '',
+      size: parsed.size,
+      hasSize: parsed.hasSize,
+      grams: null,
+    });
+
+    if (parsed.hasSize) withSizeCount++;
+  }
+
+  inBadge.textContent = entries.length + ' 行';
+  inBadge.classList.toggle('hot', withSizeCount > 0);
+
+  if (entries.length === 0) {
+    outputEl.value = '';
+    outBadge.textContent = '0 行';
+    setStats({ input: 0, withSize: 0, output: 0, removed: 0, groups: 0, ms: performance.now() - t0 });
+    groupList.innerHTML = '<div class="empty-tip">暂无重复组。</div>';
+    document.getElementById('groupHint').textContent = '仅显示被合并的组';
+    return;
+  }
+
+  /* ---------- 预计算 bigram ---------- */
+  for (let i = 0; i < entries.length; i++) {
+    entries[i].grams = makeBigrams(entries[i].norm);
+  }
+
+  /* ---------- 找候选对并合并 ---------- */
+  const uf    = new UnionFind(entries.length);
+  const pairs = buildCandidatePairs(entries);
+
+  for (let p = 0; p < pairs.length; p += 2) {
+    const i = pairs[p], j = pairs[p + 1];
+    if (isDuplicate(entries[i], entries[j], opt)) {
+      uf.union(i, j);
+    }
+  }
+
+  /* ---------- 分组 ---------- */
+  const groupMap = new Map();
+  for (let i = 0; i < entries.length; i++) {
+    const root = uf.find(i);
+    let g = groupMap.get(root);
+    if (!g) groupMap.set(root, g = []);
+    g.push(entries[i]);
+  }
+
+  const groups = Array.from(groupMap.values());
+  const firstLine = g => {
+    let m = Infinity;
+    for (let i = 0; i < g.length; i++) if (g[i].lineNo < m) m = g[i].lineNo;
+    return m;
+  };
+  groups.sort((a, b) => firstLine(a) - firstLine(b));
+
+  /* ---------- 选代表 & 输出 ---------- */
+  const pickRep = members => {
+    if (opt.repMode === 'longest') {
+      let best = members[0];
+      for (const m of members) if (m.title.length > best.title.length) best = m;
+      return best;
+    }
+    if (opt.repMode === 'shortest') {
+      let best = members[0];
+      for (const m of members) if (m.title.length < best.title.length) best = m;
+      return best;
+    }
+    return members[0];
+  };
+
+  const outputLines = [];
+  const dupGroups   = [];
+
+  for (const g of groups) {
+    const rep = pickRep(g);
+    outputLines.push(rep.raw);
+    if (g.length > 1) dupGroups.push({ rep, members: g });
+  }
+
+  outputEl.value = outputLines.join('\n');
+  outBadge.textContent = outputLines.length + ' 行';
+
+  /* ---------- 统计 ---------- */
+  setStats({
+    input:    entries.length,
+    withSize: withSizeCount,
+    output:   outputLines.length,
+    removed:  entries.length - outputLines.length,
+    groups:   dupGroups.length,
+    ms:       performance.now() - t0,
+  });
+
+  /* ---------- 渲染 ---------- */
+  renderGroups(dupGroups);
+}
+
+function setStats(s) {
+  document.getElementById('sInput').textContent   = s.input;
+  document.getElementById('sSize').textContent    = s.withSize;
+  document.getElementById('sOutput').textContent  = s.output;
+  document.getElementById('sRemoved').textContent = s.removed;
+  document.getElementById('sGroups').textContent  = s.groups;
+  document.getElementById('sTime').textContent    = s.ms.toFixed(1) + ' ms';
+}
+
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+  }[c]));
+}
+
+function fmtSize(v) {
+  if (!isFinite(v)) return '';
+  if (v === 0) return '0';
+  return v < 0.01 ? v.toExponential(3) : String(+v.toFixed(4));
+}
+
+function renderGroups(dupGroups) {
+  if (dupGroups.length === 0) {
+    groupList.innerHTML = '<div class="empty-tip">没有发现重复标题 🎉</div>';
+    document.getElementById('groupHint').textContent = '没有重复组';
+    return;
+  }
+
+  const MAX_GROUPS  = 200;
+  const MAX_MEMBERS = 20;
+  const shown = dupGroups.slice(0, MAX_GROUPS);
+
+  let html = '';
+  shown.forEach((g, gi) => {
+    const rep = g.rep;
+    const members = g.members;
+
+    let memberHtml = '';
+    members.slice(0, MAX_MEMBERS).forEach(m => {
+      const isRep = m === rep;
+      const sz = m.hasSize ? `<span class="sz">${fmtSize(m.size)}</span>` : '';
+      memberHtml += `<div class="${isRep ? 'is-rep' : ''}">${isRep ? '★ ' : '· '}${escapeHtml(m.title)}${sz}</div>`;
+    });
+    if (members.length > MAX_MEMBERS) {
+      memberHtml += `<div>… 还有 ${members.length - MAX_MEMBERS} 条</div>`;
+    }
+
+    const repSz = rep.hasSize ? `<span class="sz">${fmtSize(rep.size)}</span>` : '';
+
+    html += `
+      <div class="group">
+        <div class="group-head">
+          <span class="idx">#${gi + 1}</span>
+          <span class="rep">${escapeHtml(rep.title)}${repSz}</span>
+          <span class="cnt">${members.length} 条</span>
+        </div>
+        <div class="members">${memberHtml}</div>
+      </div>`;
+  });
+
+  if (dupGroups.length > MAX_GROUPS) {
+    html += `<div class="empty-tip">仅显示前 ${MAX_GROUPS} 组，共 ${dupGroups.length} 组。</div>`;
+  }
+
+  groupList.innerHTML = html;
+  document.getElementById('groupHint').textContent = `共 ${dupGroups.length} 个重复组`;
+}
+
+/* ============================================================
+ *  12. 事件绑定
+ * ============================================================ */
+
+elThreshold.addEventListener('input', () => {
+  thVal.textContent = parseFloat(elThreshold.value).toFixed(2);
+  scheduleRun();
+});
+elLenRatio.addEventListener('input', () => {
+  lrVal.textContent = parseFloat(elLenRatio.value).toFixed(2);
+  scheduleRun();
+});
+elSizeClosePct.addEventListener('input', () => {
+  ssVal.textContent = parseFloat(elSizeClosePct.value).toFixed(1) + '%';
+  scheduleRun();
+});
+elSizeHardPct.addEventListener('input', () => {
+  shVal.textContent = parseFloat(elSizeHardPct.value).toFixed(0) + '%';
+  scheduleRun();
+});
+elBoostClose.addEventListener('input', () => {
+  bsVal.textContent = parseFloat(elBoostClose.value).toFixed(2);
+  scheduleRun();
+});
+
+[elMinContain, elLeadMode, elRepMode, elStripDate, elUseContain,
+ elUseNumKey, elSizeGate].forEach(el => {
+  el.addEventListener('change', runDedupe);
+});
+
+let timer = null;
+function scheduleRun() {
+  if (!elAutoRun.checked) return;
+  clearTimeout(timer);
+  timer = setTimeout(runDedupe, 350);
+}
+
+inputEl.addEventListener('input', () => {
+  const lines = inputEl.value
+    ? inputEl.value.split(/\r?\n/).filter(l => l.trim()).length
+    : 0;
+  inBadge.textContent = lines + ' 行';
+  scheduleRun();
+});
+
+document.getElementById('runBtn').addEventListener('click', runDedupe);
+
+document.getElementById('copyBtn').addEventListener('click', async () => {
+  if (!outputEl.value) return;
+  const btn = document.getElementById('copyBtn');
+  try {
+    await navigator.clipboard.writeText(outputEl.value);
+    btn.textContent = '已复制 ✓';
+  } catch (e) {
+    outputEl.select();
+    document.execCommand('copy');
+    btn.textContent = '已复制 ✓';
+  }
+  setTimeout(() => { btn.textContent = '复制'; }, 1500);
+});
+
+document.getElementById('clearBtn').addEventListener('click', () => {
+  inputEl.value = '';
+  outputEl.value = '';
+  inBadge.textContent = '0 行';
+  inBadge.classList.remove('hot');
+  outBadge.textContent = '0 行';
+  setStats({ input: 0, withSize: 0, output: 0, removed: 0, groups: 0, ms: 0 });
+  groupList.innerHTML = '<div class="empty-tip">暂无重复组。</div>';
+  document.getElementById('groupHint').textContent = '仅显示被合并的组';
+});
+
+document.getElementById('sampleBtn').addEventListener('click', () => {
+  inputEl.value = [
+    '2026年3月最新 西游记 国语版 高清',
+    '2026年2月最新 西游记 国语版 高清',
+    '西游记 国语版 全集',
+    '2025年最新 西游记 国语版',
+    '西游记 国语版 高清\t2.50',
+    '西游记 国语版 高清\t2.52',
+    '西游记 国语版 全集\t2.51',
+    '西游记 国语版 全集\t3.80',
+    '01 西游记 第2部 国语版\t0.236328125',
+    '西游记 第2部 国语版 完整版\t0.2363',
+    '西游记 第2部 国语版\t5.00',
+    '03 西游记 第3部 粤语',
+    '西游记后传 国语版',
+    '西游记 后传 国语 全集',
+    '2026年3月 火影忍者 第1集\t0.236',
+    '火影忍者 第1集\t0.2363',
+    '最新 火影忍者 第2集\t0.25',
+    '火影忍者 第2集\t0.50',
+    '甄嬛传 国语 全集\t10.5',
+    '2026年1月最新 甄嬛传 国语 全集\t10.52',
+    '甄嬛传 国语 全集 未删减\t10.6'
+  ].join('\n');
+  inBadge.textContent = '21 行';
+  runDedupe();
+});
+
+/* 初始状态 */
+thVal.textContent = parseFloat(elThreshold.value).toFixed(2);
+lrVal.textContent = parseFloat(elLenRatio.value).toFixed(2);
+ssVal.textContent = parseFloat(elSizeClosePct.value).toFixed(1) + '%';
+shVal.textContent = parseFloat(elSizeHardPct.value).toFixed(0) + '%';
+bsVal.textContent = parseFloat(elBoostClose.value).toFixed(2);
+</script>
+
+</body>
+</html>

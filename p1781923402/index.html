@@ -1,0 +1,1248 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🖼️ 民用户外驱虫终极方案</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700;900&family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f5f0e8;
+    --bg-warm: #faf6ee;
+    --surface: #ffffff;
+    --surface-alt: #f0ebe0;
+    --accent: #2d6a4f;
+    --accent-light: #52b788;
+    --accent-dark: #1b4332;
+    --warning: #c0392b;
+    --warning-bg: #fdf0ef;
+    --warning-border: #e74c3c;
+    --text-primary: #1a1a1a;
+    --text-secondary: #4a4540;
+    --text-muted: #8a8580;
+    --border: #e0d8cc;
+    --shadow: rgba(30, 20, 10, 0.08);
+    --layer1: #2d6a4f;
+    --layer2: #40916c;
+    --layer3: #52b788;
+    --layer4: #74c69d;
+    --gold: #b8860b;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Noto Sans SC', sans-serif;
+    background: var(--bg);
+    color: var(--text-primary);
+    line-height: 1.8;
+    font-size: 16px;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 9999;
+  }
+
+  .container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+
+  /* Hero */
+  .hero {
+    padding: 80px 0 60px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -100px;
+    right: -200px;
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, rgba(45,106,79,0.06) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--accent);
+    color: white;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    padding: 6px 18px;
+    border-radius: 100px;
+    margin-bottom: 28px;
+    animation: fadeUp 0.6s ease forwards;
+  }
+
+  .hero h1 {
+    font-family: 'Noto Serif SC', serif;
+    font-size: clamp(2.2rem, 5vw, 3.6rem);
+    font-weight: 900;
+    color: var(--accent-dark);
+    line-height: 1.2;
+    margin-bottom: 16px;
+    animation: fadeUp 0.6s ease 0.1s forwards;
+    opacity: 0;
+  }
+
+  .hero-sub {
+    font-size: 1.1rem;
+    color: var(--text-secondary);
+    max-width: 560px;
+    margin: 0 auto;
+    animation: fadeUp 0.6s ease 0.2s forwards;
+    opacity: 0;
+  }
+
+  /* Warning Box */
+  .warning-box {
+    background: var(--warning-bg);
+    border: 2px solid var(--warning-border);
+    border-radius: 16px;
+    padding: 32px 36px;
+    margin: 40px 0;
+    position: relative;
+    animation: fadeUp 0.6s ease 0.3s forwards;
+    opacity: 0;
+  }
+
+  .warning-box::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 5px;
+    background: var(--warning-border);
+    border-radius: 16px 0 0 16px;
+  }
+
+  .warning-icon {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+
+  .warning-icon svg {
+    flex-shrink: 0;
+  }
+
+  .warning-icon span {
+    font-family: 'Noto Serif SC', serif;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--warning);
+  }
+
+  .warning-box p {
+    color: #5a2d2d;
+    font-size: 0.95rem;
+    line-height: 1.9;
+  }
+
+  .warning-box strong {
+    color: var(--warning);
+  }
+
+  .warning-box ul {
+    list-style: none;
+    margin: 12px 0;
+    padding: 0;
+  }
+
+  .warning-box ul li {
+    padding: 4px 0;
+    padding-left: 20px;
+    position: relative;
+    color: #5a2d2d;
+  }
+
+  .warning-box ul li::before {
+    content: '✕';
+    position: absolute;
+    left: 0;
+    color: var(--warning);
+    font-weight: 700;
+    font-size: 0.85rem;
+  }
+
+  /* Section */
+  .section {
+    margin: 48px 0;
+  }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 28px;
+  }
+
+  .section-number {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Noto Serif SC', serif;
+    font-weight: 900;
+    font-size: 1.1rem;
+    color: white;
+    flex-shrink: 0;
+  }
+
+  .section-title {
+    font-family: 'Noto Serif SC', serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--accent-dark);
+  }
+
+  /* Layer Cards */
+  .layer-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 32px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 20px var(--shadow);
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    opacity: 0;
+    animation: fadeUp 0.5s ease forwards;
+  }
+
+  .layer-card:nth-child(1) { animation-delay: 0.1s; }
+  .layer-card:nth-child(2) { animation-delay: 0.2s; }
+  .layer-card:nth-child(3) { animation-delay: 0.3s; }
+  .layer-card:nth-child(4) { animation-delay: 0.4s; }
+
+  .layer-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 40px rgba(30,20,10,0.12);
+  }
+
+  .layer-card::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+  }
+
+  .layer-card.l1::after { background: var(--layer1); }
+  .layer-card.l2::after { background: var(--layer2); }
+  .layer-card.l3::after { background: var(--layer3); }
+  .layer-card.l4::after { background: var(--layer4); }
+
+  .layer-top {
+    display: flex;
+    align-items: flex-start;
+    gap: 20px;
+    margin-bottom: 16px;
+  }
+
+  .layer-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 1.6rem;
+  }
+
+  .l1 .layer-icon { background: #e8f5e9; }
+  .l2 .layer-icon { background: #e0f2f1; }
+  .l3 .layer-icon { background: #e8f8f0; }
+  .l4 .layer-icon { background: #f1f8e9; }
+
+  .layer-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+
+  .l1 .layer-label { color: var(--layer1); }
+  .l2 .layer-label { color: var(--layer2); }
+  .l3 .layer-label { color: var(--layer3); }
+  .l4 .layer-label { color: #66bb6a; }
+
+  .layer-name {
+    font-family: 'Noto Serif SC', serif;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text-primary);
+  }
+
+  .layer-desc {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    margin-top: 12px;
+    line-height: 1.9;
+  }
+
+  .layer-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 16px;
+  }
+
+  .layer-tag {
+    background: var(--surface-alt);
+    border: 1px solid var(--border);
+    padding: 4px 14px;
+    border-radius: 100px;
+    font-size: 0.82rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+  }
+
+  .layer-protect {
+    margin-top: 18px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .protect-bar-bg {
+    flex: 1;
+    height: 8px;
+    background: var(--surface-alt);
+    border-radius: 100px;
+    overflow: hidden;
+  }
+
+  .protect-bar {
+    height: 100%;
+    border-radius: 100px;
+    transition: width 1.5s ease;
+  }
+
+  .protect-pct {
+    font-family: 'Noto Serif SC', serif;
+    font-weight: 700;
+    font-size: 0.95rem;
+    min-width: 48px;
+    text-align: right;
+  }
+
+  /* Layer Diagram */
+  .layer-diagram {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 48px 32px;
+    margin: 48px 0;
+    box-shadow: 0 2px 20px var(--shadow);
+    text-align: center;
+  }
+
+  .diagram-title {
+    font-family: 'Noto Serif SC', serif;
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--accent-dark);
+    margin-bottom: 36px;
+  }
+
+  .shield-container {
+    position: relative;
+    width: 300px;
+    height: 360px;
+    margin: 0 auto;
+  }
+
+  .shield-ring {
+    position: absolute;
+    border-radius: 50%;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+  }
+
+  .shield-ring:hover {
+    filter: brightness(1.1);
+  }
+
+  .ring-4 {
+    width: 300px;
+    height: 300px;
+    background: rgba(116, 198, 157, 0.12);
+    border: 2.5px solid rgba(116, 198, 157, 0.5);
+    animation: pulseRing 3s ease-in-out infinite;
+  }
+
+  .ring-3 {
+    width: 236px;
+    height: 236px;
+    background: rgba(82, 183, 136, 0.15);
+    border: 2.5px solid rgba(82, 183, 136, 0.6);
+    animation: pulseRing 3s ease-in-out 0.5s infinite;
+  }
+
+  .ring-2 {
+    width: 172px;
+    height: 172px;
+    background: rgba(64, 145, 108, 0.18);
+    border: 2.5px solid rgba(64, 145, 108, 0.7);
+    animation: pulseRing 3s ease-in-out 1s infinite;
+  }
+
+  .ring-1 {
+    width: 108px;
+    height: 108px;
+    background: rgba(45, 106, 79, 0.22);
+    border: 3px solid var(--accent);
+    animation: pulseRing 3s ease-in-out 1.5s infinite;
+  }
+
+  .ring-core {
+    width: 56px;
+    height: 56px;
+    background: var(--accent);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    color: white;
+    box-shadow: 0 4px 20px rgba(45,106,79,0.3);
+  }
+
+  @keyframes pulseRing {
+    0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+    50% { transform: translate(-50%, -50%) scale(1.03); opacity: 0.85; }
+  }
+
+  .shield-labels {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 32px;
+  }
+
+  .shield-label {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    font-size: 0.88rem;
+    color: var(--text-secondary);
+  }
+
+  .shield-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  /* Effectiveness Table */
+  .effect-table {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+    margin: 40px 0;
+    box-shadow: 0 2px 20px var(--shadow);
+  }
+
+  .effect-table-header {
+    background: var(--accent-dark);
+    color: white;
+    padding: 16px 28px;
+    font-family: 'Noto Serif SC', serif;
+    font-weight: 700;
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .effect-row {
+    display: flex;
+    align-items: center;
+    padding: 14px 28px;
+    border-bottom: 1px solid var(--border);
+    transition: background 0.2s ease;
+  }
+
+  .effect-row:last-child {
+    border-bottom: none;
+  }
+
+  .effect-row:hover {
+    background: rgba(45,106,79,0.03);
+  }
+
+  .effect-row.highlight {
+    background: rgba(45,106,79,0.06);
+    font-weight: 600;
+  }
+
+  .effect-row.champion {
+    background: rgba(45,106,79,0.1);
+    font-weight: 700;
+  }
+
+  .effect-method {
+    flex: 1;
+    font-size: 0.95rem;
+  }
+
+  .effect-bar-wrap {
+    width: 200px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .effect-bar-bg {
+    flex: 1;
+    height: 10px;
+    background: #eee8db;
+    border-radius: 100px;
+    overflow: hidden;
+  }
+
+  .effect-bar-fill {
+    height: 100%;
+    border-radius: 100px;
+    background: linear-gradient(90deg, var(--accent-light), var(--accent));
+    transition: width 1.5s ease;
+  }
+
+  .effect-pct {
+    font-family: 'Noto Serif SC', serif;
+    font-weight: 700;
+    font-size: 0.9rem;
+    color: var(--accent-dark);
+    min-width: 40px;
+    text-align: right;
+  }
+
+  /* Cost Section */
+  .cost-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+    margin: 28px 0;
+  }
+
+  .cost-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 24px;
+    text-align: center;
+    box-shadow: 0 2px 16px var(--shadow);
+    transition: transform 0.3s ease;
+    opacity: 0;
+    animation: fadeUp 0.5s ease forwards;
+  }
+
+  .cost-card:nth-child(1) { animation-delay: 0.1s; }
+  .cost-card:nth-child(2) { animation-delay: 0.2s; }
+  .cost-card:nth-child(3) { animation-delay: 0.3s; }
+  .cost-card:nth-child(4) { animation-delay: 0.4s; }
+
+  .cost-card:hover { transform: translateY(-2px); }
+
+  .cost-emoji {
+    font-size: 2rem;
+    margin-bottom: 10px;
+  }
+
+  .cost-name {
+    font-weight: 700;
+    font-size: 1rem;
+    margin-bottom: 6px;
+    color: var(--text-primary);
+  }
+
+  .cost-price {
+    font-family: 'Noto Serif SC', serif;
+    font-weight: 700;
+    font-size: 1.6rem;
+    color: var(--accent);
+  }
+
+  .cost-unit {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-top: 2px;
+  }
+
+  .cost-note {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    margin-top: 8px;
+  }
+
+  /* Total Cost */
+  .total-cost {
+    background: linear-gradient(135deg, var(--accent-dark), var(--accent));
+    border-radius: 20px;
+    padding: 40px;
+    text-align: center;
+    color: white;
+    margin: 32px 0;
+    box-shadow: 0 8px 40px rgba(45,106,79,0.2);
+  }
+
+  .total-label {
+    font-size: 0.9rem;
+    opacity: 0.85;
+    margin-bottom: 8px;
+    letter-spacing: 0.1em;
+  }
+
+  .total-price {
+    font-family: 'Noto Serif SC', serif;
+    font-size: 3rem;
+    font-weight: 900;
+    line-height: 1.1;
+  }
+
+  .total-sub {
+    font-size: 0.95rem;
+    opacity: 0.8;
+    margin-top: 8px;
+  }
+
+  .total-daily {
+    display: inline-block;
+    margin-top: 16px;
+    background: rgba(255,255,255,0.2);
+    padding: 8px 24px;
+    border-radius: 100px;
+    font-weight: 600;
+    font-size: 0.95rem;
+  }
+
+  /* Upgrade Section */
+  .upgrade-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 32px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 20px var(--shadow);
+    opacity: 0;
+    animation: fadeUp 0.5s ease forwards;
+  }
+
+  .upgrade-card:nth-child(1) { animation-delay: 0.1s; }
+  .upgrade-card:nth-child(2) { animation-delay: 0.2s; }
+
+  .upgrade-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 16px;
+  }
+
+  .upgrade-badge {
+    background: linear-gradient(135deg, #b8860b, #daa520);
+    color: white;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 4px 12px;
+    border-radius: 100px;
+  }
+
+  .upgrade-title {
+    font-family: 'Noto Serif SC', serif;
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--text-primary);
+  }
+
+  .upgrade-desc {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    line-height: 1.9;
+  }
+
+  .upgrade-stats {
+    display: flex;
+    gap: 20px;
+    margin-top: 16px;
+    flex-wrap: wrap;
+  }
+
+  .upgrade-stat {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.88rem;
+    color: var(--text-muted);
+  }
+
+  .upgrade-stat strong {
+    color: var(--text-primary);
+    font-weight: 700;
+  }
+
+  .mosquito-net-images {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin: 20px 0 8px;
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  .mosquito-net-images img {
+    width: 100%;
+    height: 160px;
+    object-fit: cover;
+    border-radius: 8px;
+    transition: transform 0.3s ease;
+    cursor: pointer;
+  }
+
+  .mosquito-net-images img:hover {
+    transform: scale(1.03);
+  }
+
+  /* Forest Performance */
+  .perf-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin: 28px 0;
+  }
+
+  .perf-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 24px 20px;
+    text-align: center;
+    box-shadow: 0 2px 16px var(--shadow);
+  }
+
+  .perf-icon {
+    font-size: 2rem;
+    margin-bottom: 10px;
+  }
+
+  .perf-label {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+  }
+
+  .perf-value {
+    font-family: 'Noto Serif SC', serif;
+    font-size: 1.6rem;
+    font-weight: 900;
+    color: var(--accent);
+  }
+
+  .perf-note {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    margin-top: 4px;
+  }
+
+  /* Enemy List */
+  .enemy-list {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin: 16px 0;
+  }
+
+  .enemy-tag {
+    background: #fff3e0;
+    border: 1px solid #ffe0b2;
+    color: #e65100;
+    padding: 6px 16px;
+    border-radius: 100px;
+    font-size: 0.88rem;
+    font-weight: 600;
+  }
+
+  /* Footer */
+  .footer {
+    text-align: center;
+    padding: 48px 0;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    border-top: 1px solid var(--border);
+    margin-top: 60px;
+  }
+
+  /* Animations */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Responsive */
+  @media (max-width: 640px) {
+    .perf-grid { grid-template-columns: 1fr; }
+    .cost-grid { grid-template-columns: 1fr; }
+    .effect-bar-wrap { width: 120px; }
+    .mosquito-net-images { grid-template-columns: repeat(2, 1fr); }
+    .shield-container { width: 240px; height: 300px; }
+    .ring-4 { width: 240px; height: 240px; }
+    .ring-3 { width: 190px; height: 190px; }
+    .ring-2 { width: 140px; height: 140px; }
+    .ring-1 { width: 90px; height: 90px; }
+    .ring-core { width: 46px; height: 46px; font-size: 1.2rem; }
+    .total-price { font-size: 2.2rem; }
+    .hero { padding: 50px 0 40px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- Hero -->
+  <header class="hero">
+    <div class="hero-badge">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      专业户外防护指南
+    </div>
+    <h1>民用户外驱虫<br>终极方案</h1>
+    <p class="hero-sub">四层防护体系，从长衣长裤到防蚊帐，系统性解决森林、溪流、热带环境下的蚊虫困扰</p>
+  </header>
+
+  <!-- Warning -->
+  <div class="warning-box">
+    <div class="warning-icon">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#c0392b" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      <span>重要纠正：不要在营地周围喷DEET</span>
+    </div>
+    <p>DEET的设计用途是<strong>喷皮肤</strong>和<strong>喷衣物</strong>（部分材质慎用），而不是空间驱蚊。</p>
+    <ul>
+      <li>喷在地面、树木、帐篷周围——效果很差</li>
+      <li>挥发快，成本高，对环境不友好</li>
+      <li>DEET无法形成有效防护圈</li>
+    </ul>
+    <p style="margin-top:10px;">真正能形成营地防护圈的是<strong>氯菊酯类空间驱虫设备</strong>或<strong>热蒸发驱蚊器</strong>。</p>
+  </div>
+
+  <!-- Four Layers -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-number" style="background:var(--accent);">4</div>
+      <div class="section-title">四层防护体系</div>
+    </div>
+
+    <!-- Layer 1 -->
+    <div class="layer-card l1">
+      <div class="layer-top">
+        <div class="layer-icon">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--layer1)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+        </div>
+        <div>
+          <div class="layer-label">第一层 · 物理屏障</div>
+          <div class="layer-name">长衣长裤</div>
+        </div>
+      </div>
+      <div class="layer-desc">
+        贡献率极高——蚊子首先要能接触到皮肤。对于森林环境，长袖速干衣 + 长裤 + 中高帮袜的组合，往往能减少<strong>80%以上</strong>叮咬机会。
+      </div>
+      <div class="layer-tags">
+        <span class="layer-tag">长袖速干衣</span>
+        <span class="layer-tag">长裤</span>
+        <span class="layer-tag">中高帮袜</span>
+      </div>
+      <div class="layer-protect">
+        <span class="protect-pct" style="color:var(--layer1);">80%</span>
+        <div class="protect-bar-bg">
+          <div class="protect-bar" style="width:80%;background:var(--layer1);"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Layer 2 -->
+    <div class="layer-card l2">
+      <div class="layer-top">
+        <div class="layer-icon">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--layer2)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        </div>
+        <div>
+          <div class="layer-label">第二层 · 化学屏障</div>
+          <div class="layer-name">氯菊酯处理衣物</div>
+        </div>
+      </div>
+      <div class="layer-desc">
+        很多人忽视的神器。处理衣服、裤子、袜子、帽子后，蚊子落上去会<strong>驱避 → 失去活动能力 → 死亡</strong>。尤其对蜱虫效果极强，热带探险队和军队广泛使用。
+      </div>
+      <div class="layer-tags">
+        <span class="layer-tag">衣服</span>
+        <span class="layer-tag">裤子</span>
+        <span class="layer-tag">袜子</span>
+        <span class="layer-tag">帽子</span>
+        <span class="layer-tag">强效抗蜱虫</span>
+      </div>
+      <div class="layer-protect">
+        <span class="protect-pct" style="color:var(--layer2);">+15%</span>
+        <div class="protect-bar-bg">
+          <div class="protect-bar" style="width:15%;background:var(--layer2);"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Layer 3 -->
+    <div class="layer-card l3">
+      <div class="layer-top">
+        <div class="layer-icon">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--layer3)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
+        </div>
+        <div>
+          <div class="layer-label">第三层 · 裸露皮肤防护</div>
+          <div class="layer-name">20% 派卡瑞丁</div>
+        </div>
+      </div>
+      <div class="layer-desc">
+        喷涂手背、手腕、脖子、耳后、面部周边（避开眼睛），持续<strong>6~10小时</strong>。对于一般徒步已经绰绰有余。
+      </div>
+      <div class="layer-tags">
+        <span class="layer-tag">手背</span>
+        <span class="layer-tag">手腕</span>
+        <span class="layer-tag">脖子</span>
+        <span class="layer-tag">耳后</span>
+        <span class="layer-tag">6~10h</span>
+      </div>
+      <div class="layer-protect">
+        <span class="protect-pct" style="color:var(--layer3);">+3%</span>
+        <div class="protect-bar-bg">
+          <div class="protect-bar" style="width:100%;background:linear-gradient(90deg,var(--layer2),var(--layer3));"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Layer 4 -->
+    <div class="layer-card l4">
+      <div class="layer-top">
+        <div class="layer-icon">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#66bb6a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+        </div>
+        <div>
+          <div class="layer-label">第四层 · 睡眠防护</div>
+          <div class="layer-name">防蚊帐</div>
+        </div>
+      </div>
+      <div class="layer-desc">
+        睡眠阶段近乎无敌。很多热带病传播发生在夜间，睡觉时防蚊帐的价值<strong>远高于</strong>白天驱虫液。
+      </div>
+      <div class="layer-tags">
+        <span class="layer-tag">夜间防护</span>
+        <span class="layer-tag">阻断传播</span>
+        <span class="layer-tag">可使用数年</span>
+      </div>
+      <div class="layer-protect">
+        <span class="protect-pct" style="color:#66bb6a;">~100%</span>
+        <div class="protect-bar-bg">
+          <div class="protect-bar" style="width:100%;background:linear-gradient(90deg,var(--layer3),#66bb6a);"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Shield Diagram -->
+  <div class="layer-diagram">
+    <div class="diagram-title">防护盾构示意图</div>
+    <div class="shield-container">
+      <div class="shield-ring ring-4"></div>
+      <div class="shield-ring ring-3"></div>
+      <div class="shield-ring ring-2"></div>
+      <div class="shield-ring ring-1"></div>
+      <div class="shield-ring ring-core">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="white" stroke="none"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+      </div>
+    </div>
+    <div class="shield-labels">
+      <div class="shield-label">
+        <div class="shield-dot" style="background:#74c69d;"></div>
+        最外层 · 防蚊帐（睡眠 ~100%）
+      </div>
+      <div class="shield-label">
+        <div class="shield-dot" style="background:#52b788;"></div>
+        第三层 · 派卡瑞丁（裸露皮肤）
+      </div>
+      <div class="shield-label">
+        <div class="shield-dot" style="background:#40916c;"></div>
+        第二层 · 氯菊酯衣物（趋避+灭杀）
+      </div>
+      <div class="shield-label">
+        <div class="shield-dot" style="background:#2d6a4f;"></div>
+        核心层 · 长衣长裤（物理阻隔）
+      </div>
+    </div>
+  </div>
+
+  <!-- Effectiveness Comparison -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-number" style="background:var(--gold);">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="white" stroke="none"><path d="M18 2l-6 4-6-4-6 4v14l6-4 6 4 6-4V2zM12 13l-6-4v10l6 4V13z"/></svg>
+      </div>
+      <div class="section-title">防护效果对比</div>
+    </div>
+
+    <div class="effect-table">
+      <div class="effect-table-header">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/></svg>
+        不同方案防护水平
+      </div>
+      <div class="effect-row">
+        <div class="effect-method">花露水</div>
+        <div class="effect-bar-wrap">
+          <div class="effect-bar-bg"><div class="effect-bar-fill" style="width:20%;"></div></div>
+          <div class="effect-pct">20%</div>
+        </div>
+      </div>
+      <div class="effect-row">
+        <div class="effect-method">驱蚊贴</div>
+        <div class="effect-bar-wrap">
+          <div class="effect-bar-bg"><div class="effect-bar-fill" style="width:20%;"></div></div>
+          <div class="effect-pct">20%</div>
+        </div>
+      </div>
+      <div class="effect-row">
+        <div class="effect-method">长袖衣物</div>
+        <div class="effect-bar-wrap">
+          <div class="effect-bar-bg"><div class="effect-bar-fill" style="width:60%;"></div></div>
+          <div class="effect-pct">60%</div>
+        </div>
+      </div>
+      <div class="effect-row highlight">
+        <div class="effect-method">派卡瑞丁</div>
+        <div class="effect-bar-wrap">
+          <div class="effect-bar-bg"><div class="effect-bar-fill" style="width:80%;"></div></div>
+          <div class="effect-pct">80%</div>
+        </div>
+      </div>
+      <div class="effect-row highlight">
+        <div class="effect-method">长袖 + 派卡瑞丁</div>
+        <div class="effect-bar-wrap">
+          <div class="effect-bar-bg"><div class="effect-bar-fill" style="width:95%;"></div></div>
+          <div class="effect-pct">95%</div>
+        </div>
+      </div>
+      <div class="effect-row champion">
+        <div class="effect-method">长袖 + 氯菊酯 + 派卡瑞丁</div>
+        <div class="effect-bar-wrap">
+          <div class="effect-bar-bg"><div class="effect-bar-fill" style="width:98%;"></div></div>
+          <div class="effect-pct">98%</div>
+        </div>
+      </div>
+      <div class="effect-row champion">
+        <div class="effect-method">再加防蚊帐</div>
+        <div class="effect-bar-wrap">
+          <div class="effect-bar-bg"><div class="effect-bar-fill" style="width:100%;"></div></div>
+          <div class="effect-pct">99%+</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Forest Performance -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-number" style="background:#6d4c41;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="white" stroke="none"><path d="M17 12h-5l5 6H7l5-6H2l10-12 10 12z"/></svg>
+      </div>
+      <div class="section-title">森林水边实战表现</div>
+    </div>
+
+    <p style="color:var(--text-secondary);margin-bottom:20px;font-size:0.95rem;">适用场景：重庆山区溪流 · 海南热带林 · 东南亚森林 · 雨后河谷</p>
+
+    <div class="perf-grid">
+      <div class="perf-card">
+        <div class="perf-icon">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/></svg>
+        </div>
+        <div class="perf-label">裸露皮肤</div>
+        <div class="perf-value">-90%</div>
+        <div class="perf-note">叮咬减少</div>
+      </div>
+      <div class="perf-card">
+        <div class="perf-icon">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        </div>
+        <div class="perf-label">衣服覆盖区</div>
+        <div class="perf-value">~100%</div>
+        <div class="perf-note">几乎完全阻隔</div>
+      </div>
+      <div class="perf-card">
+        <div class="perf-icon">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.5"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+        </div>
+        <div class="perf-label">睡眠防护</div>
+        <div class="perf-value">~100%</div>
+        <div class="perf-note">防蚊帐守护</div>
+      </div>
+    </div>
+
+    <p style="color:var(--text-secondary);font-size:0.95rem;margin-bottom:14px;">采用这套方案后，你遇到的问题更多会变成：</p>
+    <div class="enemy-list">
+      <span class="enemy-tag">蠓虫（小黑飞）</span>
+      <span class="enemy-tag">蜱虫</span>
+      <span class="enemy-tag">隐翅虫</span>
+    </div>
+    <p style="color:var(--text-secondary);font-size:0.95rem;margin-top:12px;">氯菊酯对以上虫害<strong>同样有效</strong>。</p>
+  </div>
+
+  <!-- Upgrades -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-number" style="background:linear-gradient(135deg,#b8860b,#daa520);">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="white" stroke="none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+      </div>
+      <div class="section-title">进阶升级</div>
+    </div>
+
+    <!-- Head Net -->
+    <div class="upgrade-card">
+      <div class="upgrade-header">
+        <div class="upgrade-badge">进阶装备</div>
+        <div class="upgrade-title">防蚊头网</div>
+      </div>
+      <div class="upgrade-desc">
+        最变态的装备之一。蚊虫爆发时效果直接封神，很多北欧、加拿大、阿拉斯加徒步者必带。
+      </div>
+      <div class="mosquito-net-images">
+        <img src="https://images.openai.com/static-rsc-4/XsYBTSzbtevVXoIvKkRUHRwAV4yZQei_-AeBzKVdrDeqe8XKYL1RsGB6KeHdBPy238UdyDxTXraXiyhqGAxGnJbDf9RIRHZDHb5Dhlq_lwzan6TFTDqxXLmv723SIrUk-EPwTAg8-Pwclg80rwniwQUcZp_FjL3mcXw80IZ-PU_5wzq_cUgpE2DxTOLBEiFR?purpose=fullsize" alt="防蚊头网展示1" loading="lazy">
+        <img src="https://images.openai.com/static-rsc-4/IhfM5zSPGgoq4arZa6yYeTjGVTLGk05KkLScG-lSIIGZ-fBECvzDYmR3J-HTnT_rudcRgdjLJxURqgnpHt_jcxJ36HWvhJcETEmj7e0i0rLRwHKye_iQ36GfjICFObjXlk-G7Iw0H5_YgGdurgXpzIbHJHJ-KfSrWGS8wEKpKA1w0QM6v6hg7uRiejEbGqne?purpose=fullsize" alt="防蚊头网展示2" loading="lazy">
+        <img src="https://images.openai.com/static-rsc-4/kRczR8SvnPi1e-dxLvMJDnsWGa-GR1U-s4N0KT1jqJDftuu9GN22GlazqpzPm6GIVICPMx9duQJ7zMSSQ120a0D9RhB-GLNB1aBRmIsziy14E3XEhxKgdxkLtT6LSpmhvpjQgFaLeD5nUuvH2dMBSNPlLkQU0LnNfjzgd8OhRV6q2_wscPDnwxR-7MCf6gi-?purpose=fullsize" alt="防蚊头网展示3" loading="lazy">
+        <img src="https://images.openai.com/static-rsc-4/TbhSGgun41TG33i1MggHX0k_7wqSPwNv8-bZ7WJfqiIrdENCFVAbdBs2-vOAKIpWqtxBPVmYz9Q4N668xvZRiw1FurO9gU0lsj69dlJsfmhRWb8DvPxLzFoLyc_TEdjmwl6WGf9g22oUGA01OM0CrhLelR7K4NBk6viOyYfd6ph3jMK76Pd9K4K6Dz4aciWv?purpose=fullsize" alt="防蚊头网展示4" loading="lazy">
+        <img src="https://images.openai.com/static-rsc-4/KhEqqMZkoCta0_BeJTWlXdBU8IFxngrQjlAcsDS-UMcJyb7iahpnDTF0UIXIIiDx1QbYdZciWnzu4F4Vi8U-xB-WOPc06rtycfb1tagQB7IMUQLesIFb2ZKy8nAlqEg4OOIWsezL74gEeVP9cUXtyA5FVPI0F1LbcDCxbBdYbfclru8_6aWsokgao3EiW9Fu?purpose=fullsize" alt="防蚊头网展示5" loading="lazy">
+        <img src="https://images.openai.com/static-rsc-4/2lHTtFYYHeBIBT2fQ6w9Wil3mpkCtUu3eopq6dkjvh6DAJdKoYccfJMwf7WhVvNXpCva2VR03PNgE1-cj9XgwXBB30okpqARIQFTXvVYkv9OiFdMcks_fWA-sS0pxaSspkIsQVxFEOk147jL2SWdX3CtQrmafhaopHfTip1yptEPBQSUsAAGW4krofDtj3tt?purpose=fullsize" alt="防蚊头网展示6" loading="lazy">
+      </div>
+      <div class="upgrade-stats">
+        <div class="upgrade-stat">重量：<strong>20~40克</strong></div>
+        <div class="upgrade-stat">价格：<strong>10~30元</strong></div>
+        <div class="upgrade-stat">适用：<strong>蚊虫爆发期</strong></div>
+      </div>
+    </div>
+
+    <!-- Spatial Repellent -->
+    <div class="upgrade-card">
+      <div class="upgrade-header">
+        <div class="upgrade-badge">营地装备</div>
+        <div class="upgrade-title">空间驱蚊设备</div>
+      </div>
+      <div class="upgrade-desc">
+        丁烷加热驱蚊器 / 热蒸发驱蚊器，在营地形成<strong>数米保护圈</strong>。适合露营做饭、钓鱼、静坐场景，但徒步移动时意义不大。
+      </div>
+      <div class="upgrade-stats">
+        <div class="upgrade-stat">保护范围：<strong>数米半径</strong></div>
+        <div class="upgrade-stat">适用：<strong>营地静态活动</strong></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Cost -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-number" style="background:#5d4037;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="white" stroke="none"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1.41 16.09V20h-2.67v-1.93c-1.71-.36-3.16-1.46-3.27-3.4h1.96c.1 1.05.82 1.87 2.65 1.87 1.96 0 2.4-.98 2.4-1.59 0-.83-.44-1.61-2.67-2.14-2.48-.6-4.18-1.62-4.18-3.67 0-1.72 1.39-2.84 3.11-3.21V4h2.67v1.95c1.86.45 2.79 1.86 2.85 3.39H14.3c-.05-1.11-.64-1.87-2.22-1.87-1.5 0-2.4.68-2.4 1.64 0 .84.65 1.39 2.67 1.94s4.18 1.36 4.18 3.85c0 1.89-1.44 2.99-3.12 3.19z"/></svg>
+      </div>
+      <div class="section-title">3天成本估算（单人）</div>
+    </div>
+
+    <div class="cost-grid">
+      <div class="cost-card">
+        <div class="cost-emoji">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.5"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="M12 6v6l4 2"/></svg>
+        </div>
+        <div class="cost-name">派卡瑞丁</div>
+        <div class="cost-price">10~20</div>
+        <div class="cost-unit">元 / 3天</div>
+        <div class="cost-note">100ml装 · 三天用量15~30ml</div>
+      </div>
+      <div class="cost-card">
+        <div class="cost-emoji">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        </div>
+        <div class="cost-name">氯菊酯</div>
+        <div class="cost-price">2~5</div>
+        <div class="cost-unit">元 / 3天</div>
+        <div class="cost-note">浓缩液 · 可处理3~5套衣物</div>
+      </div>
+      <div class="cost-card">
+        <div class="cost-emoji">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.5"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+        </div>
+        <div class="cost-name">防蚊帐</div>
+        <div class="cost-price">≈0</div>
+        <div class="cost-unit">元 / 3天</div>
+        <div class="cost-note">50~150元购入 · 可使用数年</div>
+      </div>
+      <div class="cost-card">
+        <div class="cost-emoji">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.5"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 7V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v3"/></svg>
+        </div>
+        <div class="cost-name">长衣长裤</div>
+        <div class="cost-price">0</div>
+        <div class="cost-unit">额外成本</div>
+        <div class="cost-note">本来就需要 · 不额外计算</div>
+      </div>
+    </div>
+
+    <div class="total-cost">
+      <div class="total-label">装备已购齐 · 三天消耗品总成本</div>
+      <div class="total-price">15~25 元</div>
+      <div class="total-sub">覆盖四层完整防护体系</div>
+      <div class="total-daily">每天仅需 5~8 元</div>
+    </div>
+  </div>
+
+  <!-- Conclusion -->
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:36px 32px;margin:48px 0;box-shadow:0 2px 20px var(--shadow);text-align:center;">
+    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.5" style="margin-bottom:16px;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>
+    <h3 style="font-family:'Noto Serif SC',serif;font-size:1.3rem;color:var(--accent-dark);margin-bottom:12px;">结论</h3>
+    <p style="color:var(--text-secondary);max-width:560px;margin:0 auto;font-size:0.95rem;line-height:1.9;">
+      对于经常骑行、徒步、爬山的户外爱好者，这套配置已属于<strong style="color:var(--accent);">专业户外队伍级别</strong>。除非进入亚马逊雨林、婆罗洲雨林之类极端环境，否则驱虫方面基本不会成为限制因素。
+    </p>
+  </div>
+
+  <footer class="footer">
+    户外驱虫方案指南 · 安全出行 · 科学防护
+  </footer>
+
+</div>
+
+</body>
+</html>

@@ -1,0 +1,1961 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>溯溪风险全景图</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700;900&family=Noto+Sans+SC:wght@300;400;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-deep: #060b11;
+    --bg-surface: #0c1219;
+    --bg-card: #111a24;
+    --bg-card-hover: #162030;
+    --accent-red: #ff3b3b;
+    --accent-orange: #ff8c32;
+    --accent-yellow: #ffd639;
+    --accent-blue: #38bdf8;
+    --accent-cyan: #22d3ee;
+    --accent-teal: #2dd4bf;
+    --text-primary: #e8edf3;
+    --text-secondary: #8b99a8;
+    --text-muted: #4a5568;
+    --border-subtle: rgba(255,255,255,0.06);
+    --glow-red: rgba(255,59,59,0.15);
+    --glow-orange: rgba(255,140,50,0.12);
+    --glow-yellow: rgba(255,214,57,0.1);
+    --glow-blue: rgba(56,189,248,0.1);
+    --water-gradient: linear-gradient(180deg, #0c1219 0%, #0a1628 40%, #081824 100%);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html {
+    scroll-behavior: smooth;
+    font-size: 16px;
+  }
+
+  body {
+    background: var(--bg-deep);
+    color: var(--text-primary);
+    font-family: 'Noto Sans SC', sans-serif;
+    font-weight: 300;
+    line-height: 1.8;
+    overflow-x: hidden;
+  }
+
+  /* ── Grain overlay ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.5'/%3E%3C/svg%3E");
+    opacity: 0.025;
+    pointer-events: none;
+    z-index: 9999;
+  }
+
+  /* ── Scrollbar ── */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg-deep); }
+  ::-webkit-scrollbar-thumb { background: var(--accent-blue); border-radius: 3px; }
+
+  /* ── Animations ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(40px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @keyframes slideInLeft {
+    from { opacity: 0; transform: translateX(-60px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+
+  @keyframes slideInRight {
+    from { opacity: 0; transform: translateX(60px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+
+  @keyframes pulseGlow {
+    0%, 100% { opacity: 0.4; }
+    50% { opacity: 1; }
+  }
+
+  @keyframes waterFlow {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+  }
+
+  @keyframes ripple {
+    0% { transform: scale(0.8); opacity: 0.6; }
+    50% { transform: scale(1.1); opacity: 0.3; }
+    100% { transform: scale(1.4); opacity: 0; }
+  }
+
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    20% { transform: translateX(-4px) rotate(-1deg); }
+    40% { transform: translateX(4px) rotate(1deg); }
+    60% { transform: translateX(-3px) rotate(-0.5deg); }
+    80% { transform: translateX(3px) rotate(0.5deg); }
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-12px); }
+  }
+
+  @keyframes dashFlow {
+    to { stroke-dashoffset: -24; }
+  }
+
+  .reveal {
+    opacity: 0;
+    transform: translateY(40px);
+    transition: opacity 0.8s ease, transform 0.8s ease;
+  }
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* ── Hero Section ── */
+  .hero {
+    position: relative;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    background: var(--water-gradient);
+  }
+
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse at 30% 70%, rgba(56,189,248,0.08) 0%, transparent 50%),
+      radial-gradient(ellipse at 70% 30%, rgba(45,212,191,0.06) 0%, transparent 50%),
+      radial-gradient(ellipse at 50% 100%, rgba(255,59,59,0.04) 0%, transparent 40%);
+    z-index: 1;
+  }
+
+  .hero-water-lines {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    z-index: 0;
+  }
+
+  .water-line {
+    position: absolute;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(56,189,248,0.2), transparent);
+    animation: waterFlow 8s linear infinite;
+  }
+
+  .hero-content {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+    padding: 2rem;
+    max-width: 900px;
+    animation: fadeIn 1.5s ease;
+  }
+
+  .hero-icon {
+    margin-bottom: 2rem;
+  }
+
+  .hero-title {
+    font-family: 'Noto Serif SC', serif;
+    font-weight: 900;
+    font-size: clamp(2.5rem, 6vw, 4.5rem);
+    letter-spacing: 0.08em;
+    line-height: 1.2;
+    margin-bottom: 1.5rem;
+    background: linear-gradient(135deg, var(--text-primary) 0%, var(--accent-cyan) 50%, var(--accent-blue) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .hero-subtitle {
+    font-size: clamp(1rem, 2vw, 1.3rem);
+    color: var(--text-secondary);
+    max-width: 700px;
+    margin: 0 auto 2rem;
+    line-height: 2;
+  }
+
+  .hero-subtitle strong {
+    color: var(--accent-orange);
+    font-weight: 700;
+    -webkit-text-fill-color: var(--accent-orange);
+  }
+
+  .hero-scroll-hint {
+    position: absolute;
+    bottom: 3rem;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 2;
+    animation: float 2s ease-in-out infinite;
+  }
+
+  .hero-scroll-hint svg {
+    width: 32px;
+    height: 32px;
+    stroke: var(--text-muted);
+  }
+
+  /* ── Section common ── */
+  .section {
+    padding: 6rem 1.5rem;
+    position: relative;
+  }
+
+  .section-inner {
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  .section-header {
+    margin-bottom: 4rem;
+    text-align: center;
+  }
+
+  .section-tier-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    padding: 0.4rem 1.2rem;
+    border-radius: 100px;
+    margin-bottom: 1.5rem;
+  }
+
+  .tier-fatal .section-tier-label {
+    background: var(--glow-red);
+    color: var(--accent-red);
+    border: 1px solid rgba(255,59,59,0.25);
+  }
+  .tier-common .section-tier-label {
+    background: var(--glow-orange);
+    color: var(--accent-orange);
+    border: 1px solid rgba(255,140,50,0.25);
+  }
+  .tier-hidden .section-tier-label {
+    background: var(--glow-yellow);
+    color: var(--accent-yellow);
+    border: 1px solid rgba(255,214,57,0.2);
+  }
+  .tier-structure .section-tier-label {
+    background: var(--glow-blue);
+    color: var(--accent-blue);
+    border: 1px solid rgba(56,189,248,0.25);
+  }
+
+  .section-title {
+    font-family: 'Noto Serif SC', serif;
+    font-weight: 900;
+    font-size: clamp(1.8rem, 4vw, 2.8rem);
+    line-height: 1.3;
+    margin-bottom: 1rem;
+  }
+
+  .section-desc {
+    color: var(--text-secondary);
+    font-size: 1.05rem;
+    max-width: 650px;
+    margin: 0 auto;
+    line-height: 1.9;
+  }
+
+  /* ── Divider ── */
+  .section-divider {
+    position: relative;
+    height: 1px;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+  .section-divider::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, transparent, var(--border-subtle), transparent);
+  }
+
+  /* ── Risk Card ── */
+  .risk-card {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    gap: 2.5rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: 20px;
+    padding: 2.5rem;
+    margin-bottom: 2rem;
+    transition: background 0.3s ease, border-color 0.3s ease, transform 0.3s ease;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .risk-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    border-radius: 4px 0 0 4px;
+    transition: height 0.3s ease;
+  }
+
+  .tier-fatal .risk-card::before { background: var(--accent-red); }
+  .tier-common .risk-card::before { background: var(--accent-orange); }
+  .tier-hidden .risk-card::before { background: var(--accent-yellow); }
+  .tier-structure .risk-card::before { background: var(--accent-blue); }
+
+  .risk-card:hover {
+    background: var(--bg-card-hover);
+    transform: translateY(-2px);
+  }
+
+  .risk-illustration {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 220px;
+    border-radius: 16px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .tier-fatal .risk-illustration { background: linear-gradient(135deg, rgba(255,59,59,0.06), rgba(255,59,59,0.02)); }
+  .tier-common .risk-illustration { background: linear-gradient(135deg, rgba(255,140,50,0.06), rgba(255,140,50,0.02)); }
+  .tier-hidden .risk-illustration { background: linear-gradient(135deg, rgba(255,214,57,0.06), rgba(255,214,57,0.02)); }
+  .tier-structure .risk-illustration { background: linear-gradient(135deg, rgba(56,189,248,0.06), rgba(56,189,248,0.02)); }
+
+  .risk-illustration svg {
+    width: 100%;
+    height: 100%;
+    max-height: 220px;
+  }
+
+  .risk-content {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .risk-number {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    margin-bottom: 0.6rem;
+  }
+
+  .tier-fatal .risk-number { color: var(--accent-red); }
+  .tier-common .risk-number { color: var(--accent-orange); }
+  .tier-hidden .risk-number { color: var(--accent-yellow); }
+  .tier-structure .risk-number { color: var(--accent-blue); }
+
+  .risk-title {
+    font-family: 'Noto Serif SC', serif;
+    font-weight: 700;
+    font-size: 1.4rem;
+    margin-bottom: 1rem;
+  }
+
+  .risk-text {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    line-height: 1.9;
+    margin-bottom: 1rem;
+  }
+
+  .risk-signs {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+  }
+
+  .risk-sign {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.7rem;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+  }
+
+  .risk-sign-bullet {
+    flex-shrink: 0;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    margin-top: 0.55rem;
+  }
+
+  .tier-fatal .risk-sign-bullet { background: var(--accent-red); box-shadow: 0 0 8px var(--accent-red); }
+  .tier-common .risk-sign-bullet { background: var(--accent-orange); }
+  .tier-hidden .risk-sign-bullet { background: var(--accent-yellow); }
+  .tier-structure .risk-sign-bullet { background: var(--accent-blue); }
+
+  /* ── Combination cards ── */
+  .combo-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin-top: 3rem;
+  }
+
+  .combo-card {
+    background: var(--bg-card);
+    border: 1px solid rgba(255,59,59,0.15);
+    border-radius: 16px;
+    padding: 2rem;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.3s ease, border-color 0.3s ease;
+  }
+
+  .combo-card:hover {
+    transform: translateY(-4px);
+    border-color: rgba(255,59,59,0.35);
+  }
+
+  .combo-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 50% 120%, rgba(255,59,59,0.06) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .combo-icon {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .combo-title {
+    font-family: 'Noto Serif SC', serif;
+    font-weight: 700;
+    font-size: 1.15rem;
+    margin-bottom: 0.8rem;
+    color: var(--accent-red);
+  }
+
+  .combo-desc {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    line-height: 1.7;
+  }
+
+  /* ── Logic diagram ── */
+  .logic-section {
+    background: var(--bg-surface);
+    border-top: 1px solid var(--border-subtle);
+    border-bottom: 1px solid var(--border-subtle);
+  }
+
+  .logic-chain {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 0.8rem;
+    margin: 3rem 0;
+  }
+
+  .logic-node {
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: 12px;
+    padding: 1rem 1.5rem;
+    font-size: 0.95rem;
+    font-weight: 400;
+    white-space: nowrap;
+    transition: transform 0.3s;
+  }
+  .logic-node:hover { transform: scale(1.05); }
+
+  .logic-node.cause { border-color: rgba(255,140,50,0.3); color: var(--accent-orange); }
+  .logic-node.result { border-color: rgba(255,59,59,0.3); color: var(--accent-red); }
+
+  .logic-arrow {
+    color: var(--text-muted);
+    font-size: 1.3rem;
+  }
+
+  .logic-callout {
+    max-width: 700px;
+    margin: 3rem auto 0;
+    padding: 2rem 2.5rem;
+    background: linear-gradient(135deg, rgba(255,59,59,0.06), rgba(255,59,59,0.02));
+    border: 1px solid rgba(255,59,59,0.15);
+    border-radius: 16px;
+    text-align: center;
+  }
+
+  .logic-callout p {
+    font-family: 'Noto Serif SC', serif;
+    font-weight: 700;
+    font-size: 1.15rem;
+    line-height: 1.8;
+    color: var(--text-primary);
+  }
+
+  .logic-callout .highlight {
+    color: var(--accent-red);
+  }
+
+  /* ── Checklist ── */
+  .checklist {
+    max-width: 700px;
+    margin: 3rem auto 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+  }
+
+  .checklist-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 1.2rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: 14px;
+    padding: 1.5rem 1.8rem;
+    transition: border-color 0.3s, transform 0.3s;
+  }
+
+  .checklist-item:hover {
+    border-color: var(--accent-teal);
+    transform: translateX(6px);
+  }
+
+  .checklist-icon {
+    flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 700;
+    font-size: 1rem;
+    background: rgba(45,212,191,0.1);
+    color: var(--accent-teal);
+    border: 1px solid rgba(45,212,191,0.2);
+  }
+
+  .checklist-text {
+    font-size: 1rem;
+    line-height: 1.7;
+  }
+
+  .checklist-text strong {
+    color: var(--text-primary);
+    font-weight: 700;
+  }
+
+  .checklist-text span {
+    color: var(--text-secondary);
+    display: block;
+    font-size: 0.88rem;
+    margin-top: 0.3rem;
+  }
+
+  .checklist-verdict {
+    text-align: center;
+    margin-top: 2rem;
+    padding: 1.5rem;
+    background: rgba(45,212,191,0.06);
+    border: 1px solid rgba(45,212,191,0.15);
+    border-radius: 14px;
+    color: var(--accent-teal);
+    font-weight: 700;
+    font-size: 1.05rem;
+  }
+
+  /* ── Snake section ── */
+  .snake-section { background: var(--bg-surface); }
+
+  .snake-verdict-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin: 2rem 0 3rem;
+  }
+
+  .snake-verdict-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: 14px;
+    padding: 1.5rem;
+    text-align: center;
+    transition: transform 0.3s;
+  }
+  .snake-verdict-card:hover { transform: translateY(-3px); }
+
+  .snake-verdict-card .icon { font-size: 2rem; margin-bottom: 0.6rem; }
+  .snake-verdict-card .label {
+    font-weight: 700;
+    font-size: 1rem;
+    margin-bottom: 0.3rem;
+  }
+  .snake-verdict-card .note {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+  }
+
+  .snake-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin-top: 2rem;
+  }
+
+  .snake-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: 16px;
+    padding: 2rem;
+    transition: transform 0.3s;
+  }
+  .snake-card:hover { transform: translateY(-3px); }
+
+  .snake-card-title {
+    font-family: 'Noto Serif SC', serif;
+    font-weight: 700;
+    font-size: 1.15rem;
+    margin-bottom: 1rem;
+  }
+
+  .snake-card ul {
+    list-style: none;
+    padding: 0;
+  }
+
+  .snake-card li {
+    padding: 0.4rem 0;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .snake-card li::before {
+    content: '›';
+    color: var(--accent-teal);
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  /* ── Animal risk tiers ── */
+  .animal-tiers {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin: 3rem 0;
+  }
+
+  .animal-tier {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: 14px;
+    padding: 1.5rem 2rem;
+    transition: transform 0.3s;
+  }
+  .animal-tier:hover { transform: translateX(6px); }
+
+  .animal-tier-medal {
+    font-size: 2rem;
+    flex-shrink: 0;
+  }
+
+  .animal-tier-content h4 {
+    font-weight: 700;
+    font-size: 1rem;
+    margin-bottom: 0.3rem;
+  }
+
+  .animal-tier-content p {
+    color: var(--text-secondary);
+    font-size: 0.88rem;
+  }
+
+  .animal-tier.gold { border-color: rgba(255,214,57,0.25); }
+  .animal-tier.gold h4 { color: var(--accent-yellow); }
+  .animal-tier.silver { border-color: rgba(192,192,192,0.2); }
+  .animal-tier.silver h4 { color: #c0c0c0; }
+  .animal-tier.bronze { border-color: rgba(205,127,50,0.2); }
+  .animal-tier.bronze h4 { color: #cd7f32; }
+
+  /* ── Safety tips ── */
+  .safety-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-top: 2rem;
+  }
+
+  .safety-card {
+    background: var(--bg-card);
+    border: 1px solid rgba(45,212,191,0.15);
+    border-radius: 16px;
+    padding: 2rem;
+    text-align: center;
+    transition: transform 0.3s, border-color 0.3s;
+  }
+  .safety-card:hover {
+    transform: translateY(-4px);
+    border-color: rgba(45,212,191,0.35);
+  }
+
+  .safety-card .safety-icon {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .safety-card h4 {
+    font-family: 'Noto Serif SC', serif;
+    font-weight: 700;
+    font-size: 1.05rem;
+    margin-bottom: 0.8rem;
+    color: var(--accent-teal);
+  }
+
+  .safety-card p {
+    color: var(--text-secondary);
+    font-size: 0.88rem;
+    line-height: 1.7;
+  }
+
+  /* ── Footer ── */
+  .footer {
+    text-align: center;
+    padding: 4rem 1.5rem;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    border-top: 1px solid var(--border-subtle);
+  }
+
+  .footer-quote {
+    font-family: 'Noto Serif SC', serif;
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+    margin-bottom: 1rem;
+    line-height: 1.8;
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 768px) {
+    .risk-card {
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+      padding: 1.8rem;
+    }
+    .risk-illustration {
+      min-height: 180px;
+    }
+    .section {
+      padding: 4rem 1rem;
+    }
+    .logic-chain {
+      flex-direction: column;
+    }
+    .logic-arrow {
+      transform: rotate(90deg);
+    }
+    .animal-tier {
+      flex-direction: column;
+      text-align: center;
+    }
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════ HERO ═══════════════════ -->
+<section class="hero">
+  <div class="hero-water-lines">
+    <div class="water-line" style="top:20%; width:60%; animation-delay:0s;"></div>
+    <div class="water-line" style="top:35%; width:80%; animation-delay:2s;"></div>
+    <div class="water-line" style="top:55%; width:50%; animation-delay:4s;"></div>
+    <div class="water-line" style="top:75%; width:70%; animation-delay:1s;"></div>
+    <div class="water-line" style="top:90%; width:40%; animation-delay:3s;"></div>
+  </div>
+
+  <div class="hero-content">
+    <div class="hero-icon">
+      <!-- Canyon cross-section illustration -->
+      <svg width="180" height="100" viewBox="0 0 180 100" fill="none">
+        <path d="M0 95 L20 40 L45 35 L55 60 L70 25 L90 20 L110 55 L125 30 L145 45 L165 20 L180 95Z"
+              fill="rgba(56,189,248,0.08)" stroke="rgba(56,189,248,0.3)" stroke-width="1.5"/>
+        <path d="M0 95 Q30 80, 55 85 Q80 90, 105 82 Q130 75, 155 88 Q170 93, 180 95 L180 100 L0 100Z"
+              fill="rgba(56,189,248,0.15)" stroke="none"/>
+        <path d="M55 60 Q58 70, 55 85" stroke="rgba(56,189,248,0.4)" stroke-width="1" stroke-dasharray="3 3"/>
+        <path d="M110 55 Q108 65, 105 82" stroke="rgba(56,189,248,0.4)" stroke-width="1" stroke-dasharray="3 3"/>
+        <circle cx="80" cy="50" r="3" fill="rgba(255,214,57,0.6)">
+          <animate attributeName="opacity" values="1;0.3;1" dur="2s" repeatCount="indefinite"/>
+        </circle>
+        <circle cx="105" cy="42" r="2" fill="rgba(255,59,59,0.6)">
+          <animate attributeName="opacity" values="1;0.3;1" dur="1.5s" repeatCount="indefinite"/>
+        </circle>
+        <!-- Water arrows -->
+        <path d="M30 78 L50 80 L45 76 M50 80 L45 84" stroke="rgba(56,189,248,0.5)" stroke-width="1.2" fill="none"/>
+        <path d="M120 72 L140 75 L135 71 M140 75 L135 79" stroke="rgba(56,189,248,0.5)" stroke-width="1.2" fill="none"/>
+      </svg>
+    </div>
+    <h1 class="hero-title">溯溪风险全景图</h1>
+    <p class="hero-subtitle">
+      风险不在"水"，而在 <strong>水 + 地形 + 判断失误</strong> 叠加后的不可控性。<br>
+      真正出事的往往不是大瀑布，而是<strong>看起来很平静的小河段</strong>。
+    </p>
+  </div>
+
+  <div class="hero-scroll-hint">
+    <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round">
+      <path d="M12 5v14M5 12l7 7 7-7"/>
+    </svg>
+  </div>
+</section>
+
+<!-- ═══════════════════ FATAL RISKS ═══════════════════ -->
+<section class="section tier-fatal" id="fatal">
+  <div class="section-inner">
+    <div class="section-header reveal">
+      <div class="section-tier-label">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L1 21h22L12 2zm0 3.99L19.53 19H4.47L12 5.99zM11 16h2v2h-2v-2zm0-6h2v5h-2v-5z"/></svg>
+        致命级 · FATAL
+      </div>
+      <h2 class="section-title">致命风险</h2>
+      <p class="section-desc">少见，但一旦发生很难自救。这三个风险构成了溯溪中"不可逆"的事故来源。</p>
+    </div>
+
+    <!-- Risk 1: Flash Flood -->
+    <div class="risk-card reveal">
+      <div class="risk-illustration">
+        <svg viewBox="0 0 300 220" fill="none">
+          <!-- Sky -->
+          <rect x="0" y="0" width="300" height="80" fill="rgba(255,59,59,0.04)"/>
+          <!-- Rain -->
+          <line x1="40" y1="10" x2="35" y2="35" stroke="rgba(56,189,248,0.3)" stroke-width="1.5">
+            <animate attributeName="y1" values="10;35" dur="0.8s" repeatCount="indefinite"/>
+            <animate attributeName="y2" values="35;60" dur="0.8s" repeatCount="indefinite"/>
+            <animate attributeName="opacity" values="0.6;0" dur="0.8s" repeatCount="indefinite"/>
+          </line>
+          <line x1="90" y1="5" x2="85" y2="30" stroke="rgba(56,189,248,0.3)" stroke-width="1.5">
+            <animate attributeName="y1" values="5;30" dur="0.7s" repeatCount="indefinite"/>
+            <animate attributeName="y2" values="30;55" dur="0.7s" repeatCount="indefinite"/>
+            <animate attributeName="opacity" values="0.6;0" dur="0.7s" repeatCount="indefinite"/>
+          </line>
+          <line x1="150" y1="15" x2="145" y2="40" stroke="rgba(56,189,248,0.3)" stroke-width="1.5">
+            <animate attributeName="y1" values="15;40" dur="0.9s" repeatCount="indefinite"/>
+            <animate attributeName="y2" values="40;65" dur="0.9s" repeatCount="indefinite"/>
+            <animate attributeName="opacity" values="0.6;0" dur="0.9s" repeatCount="indefinite"/>
+          </line>
+          <line x1="210" y1="8" x2="205" y2="33" stroke="rgba(56,189,248,0.3)" stroke-width="1.5">
+            <animate attributeName="y1" values="8;33" dur="0.75s" repeatCount="indefinite"/>
+            <animate attributeName="y2" values="33;58" dur="0.75s" repeatCount="indefinite"/>
+            <animate attributeName="opacity" values="0.6;0" dur="0.75s" repeatCount="indefinite"/>
+          </line>
+          <line x1="260" y1="12" x2="255" y2="37" stroke="rgba(56,189,248,0.3)" stroke-width="1.5">
+            <animate attributeName="y1" values="12;37" dur="0.85s" repeatCount="indefinite"/>
+            <animate attributeName="y2" values="37;62" dur="0.85s" repeatCount="indefinite"/>
+            <animate attributeName="opacity" values="0.6;0" dur="0.85s" repeatCount="indefinite"/>
+          </line>
+          <!-- Clouds -->
+          <ellipse cx="80" cy="30" rx="45" ry="18" fill="rgba(100,120,140,0.3)"/>
+          <ellipse cx="60" cy="25" rx="30" ry="14" fill="rgba(100,120,140,0.25)"/>
+          <ellipse cx="200" cy="25" rx="50" ry="20" fill="rgba(100,120,140,0.3)"/>
+          <ellipse cx="220" cy="20" rx="35" ry="15" fill="rgba(100,120,140,0.25)"/>
+          <!-- Canyon walls -->
+          <path d="M0 80 L0 220 L60 220 L50 160 L55 130 L40 100 L70 80Z" fill="rgba(80,60,50,0.4)" stroke="rgba(255,59,59,0.15)" stroke-width="1"/>
+          <path d="M300 80 L300 220 L240 220 L250 155 L245 125 L260 95 L230 80Z" fill="rgba(80,60,50,0.4)" stroke="rgba(255,59,59,0.15)" stroke-width="1"/>
+          <!-- Water rising - wave 1 -->
+          <path d="M60 190 Q100 180, 150 188 Q200 196, 240 185" stroke="rgba(56,189,248,0.4)" stroke-width="2" fill="none">
+            <animate attributeName="d" values="M60 190 Q100 180, 150 188 Q200 196, 240 185;M60 175 Q100 165, 150 173 Q200 181, 240 170;M60 190 Q100 180, 150 188 Q200 196, 240 185" dur="4s" repeatCount="indefinite"/>
+          </path>
+          <!-- Water rising - filled -->
+          <path d="M60 190 Q100 180, 150 188 Q200 196, 240 185 L240 220 L60 220Z" fill="rgba(56,189,248,0.12)">
+            <animate attributeName="d" values="M60 190 Q100 180, 150 188 Q200 196, 240 185 L240 220 L60 220Z;M60 175 Q100 165, 150 173 Q200 181, 240 170 L240 220 L60 220Z;M60 190 Q100 180, 150 188 Q200 196, 240 185 L240 220 L60 220Z" dur="4s" repeatCount="indefinite"/>
+          </path>
+          <!-- Surge wave -->
+          <path d="M80 185 L120 170 L160 185 L200 168 L230 182" stroke="rgba(255,59,59,0.5)" stroke-width="2.5" stroke-linecap="round">
+            <animate attributeName="d" values="M80 185 L120 170 L160 185 L200 168 L230 182;M80 170 L120 155 L160 170 L200 153 L230 167;M80 185 L120 170 L160 185 L200 168 L230 182" dur="3s" repeatCount="indefinite"/>
+          </path>
+          <!-- Person silhouette -->
+          <circle cx="148" cy="148" r="6" fill="rgba(255,214,57,0.7)"/>
+          <line x1="148" y1="154" x2="148" y2="172" stroke="rgba(255,214,57,0.7)" stroke-width="2.5" stroke-linecap="round"/>
+          <line x1="148" y1="160" x2="140" y2="168" stroke="rgba(255,214,57,0.7)" stroke-width="2" stroke-linecap="round"/>
+          <line x1="148" y1="160" x2="156" y2="155" stroke="rgba(255,214,57,0.7)" stroke-width="2" stroke-linecap="round"/>
+          <!-- Warning -->
+          <text x="150" y="130" text-anchor="middle" fill="rgba(255,59,59,0.7)" font-family="JetBrains Mono" font-size="10" font-weight="700">
+            WARNING
+            <animate attributeName="opacity" values="1;0.3;1" dur="1.5s" repeatCount="indefinite"/>
+          </text>
+        </svg>
+      </div>
+      <div class="risk-content">
+        <div class="risk-number">RISK 01</div>
+        <h3 class="risk-title">山洪暴涨</h3>
+        <p class="risk-text">
+          溯溪的最高风险。上游下雨，下游毫无预警，几分钟到几十分钟内水位暴涨。人在峡谷中可能被完全"锁住"——两侧是绝壁，前方是洪水。
+        </p>
+        <div class="risk-signs">
+          <div class="risk-sign">
+            <span class="risk-sign-bullet"></span>
+            <span><strong>水变浑</strong> — 清水突然混浊是山洪前兆</span>
+          </div>
+          <div class="risk-sign">
+            <span class="risk-sign-bullet"></span>
+            <span><strong>水声突然变大</strong> — 远处传来轰鸣声</span>
+          </div>
+          <div class="risk-sign">
+            <span class="risk-sign-bullet"></span>
+            <span><strong>水位快速上升</strong> — 短时间内肉眼可见涨水</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Risk 2: Undertow Pool -->
+    <div class="risk-card reveal">
+      <div class="risk-illustration">
+        <svg viewBox="0 0 300 220" fill="none">
+          <!-- Pool basin -->
+          <ellipse cx="150" cy="160" rx="130" ry="50" fill="rgba(56,189,248,0.06)" stroke="rgba(56,189,248,0.15)" stroke-width="1"/>
+          <!-- Water surface -->
+          <ellipse cx="150" cy="140" rx="120" ry="30" fill="rgba(56,189,248,0.1)" stroke="rgba(56,189,248,0.2)" stroke-width="1"/>
+          <!-- Waterfall from above -->
+          <path d="M150 0 L148 60 Q150 65, 152 60 L150 0" fill="rgba(56,189,248,0.25)" stroke="rgba(56,189,248,0.4)" stroke-width="1"/>
+          <path d="M145 55 Q150 70, 155 55" stroke="rgba(56,189,248,0.4)" stroke-width="1.5"/>
+          <!-- Splash -->
+          <circle cx="150" cy="70" r="5" fill="none" stroke="rgba(56,189,248,0.3)" stroke-width="1">
+            <animate attributeName="r" values="5;15;20" dur="1.5s" repeatCount="indefinite"/>
+            <animate attributeName="opacity" values="0.5;0.2;0" dur="1.5s" repeatCount="indefinite"/>
+          </circle>
+          <circle cx="150" cy="70" r="3" fill="none" stroke="rgba(56,189,248,0.3)" stroke-width="1">
+            <animate attributeName="r" values="3;12;18" dur="1.5s" begin="0.5s" repeatCount="indefinite"/>
+            <animate attributeName="opacity" values="0.5;0.2;0" dur="1.5s" begin="0.5s" repeatCount="indefinite"/>
+          </circle>
+          <!-- Circular current arrows -->
+          <path d="M90 135 Q90 110, 130 108 Q170 106, 190 125 Q210 144, 190 155" stroke="rgba(255,59,59,0.5)" stroke-width="1.5" fill="none" stroke-dasharray="4 3">
+            <animate attributeName="stroke-dashoffset" from="0" to="-28" dur="2s" repeatCount="indefinite"/>
+          </path>
+          <path d="M190 155 Q170 170, 130 165 Q90 160, 90 135" stroke="rgba(255,59,59,0.5)" stroke-width="1.5" fill="none" stroke-dasharray="4 3">
+            <animate attributeName="stroke-dashoffset" from="0" to="-28" dur="2s" repeatCount="indefinite"/>
+          </path>
+          <!-- Circular arrow tips -->
+          <polygon points="190,121 195,129 185,127" fill="rgba(255,59,59,0.5)">
+            <animate attributeName="opacity" values="1;0.3;1" dur="2s" repeatCount="indefinite"/>
+          </polygon>
+          <polygon points="94,138 88,131 98,132" fill="rgba(255,59,59,0.5)">
+            <animate attributeName="opacity" values="1;0.3;1" dur="2s" repeatCount="indefinite"/>
+          </polygon>
+          <!-- Person trapped -->
+          <circle cx="140" cy="130" r="5" fill="rgba(255,214,57,0.7)"/>
+          <line x1="140" y1="135" x2="140" y2="148" stroke="rgba(255,214,57,0.7)" stroke-width="2"/>
+          <line x1="135" y1="142" x2="145" y2="142" stroke="rgba(255,214,57,0.7)" stroke-width="2" stroke-linecap="round"/>
+          <!-- Down arrows showing pull -->
+          <path d="M135 145 L135 158" stroke="rgba(255,59,59,0.6)" stroke-width="1.5">
+            <animate attributeName="opacity" values="1;0.2;1" dur="1s" repeatCount="indefinite"/>
+          </path>
+          <path d="M145 145 L145 158" stroke="rgba(255,59,59,0.6)" stroke-width="1.5">
+            <animate attributeName="opacity" values="1;0.2;1" dur="1s" repeatCount="indefinite"/>
+          </path>
+          <!-- Label -->
+          <text x="150" y="198" text-anchor="middle" fill="rgba(255,59,59,0.5)" font-family="JetBrains Mono" font-size="9" font-weight="700">CIRCULAR CURRENT — NO ESCAPE</text>
+        </svg>
+      </div>
+      <div class="risk-content">
+        <div class="risk-number">RISK 02</div>
+        <h3 class="risk-title">回流潭 / 负压水域</h3>
+        <p class="risk-text">
+          在瀑布下方或狭窄峡谷段常见。水面看起来平静，实际存在循环回拉的水流。人一旦被卷入，会被持续"压住"在水面以下，无法浮出。
+        </p>
+        <div class="risk-signs">
+          <div class="risk-sign">
+            <span class="risk-sign-bullet"></span>
+            <span>瀑布正下方的<strong>静水区</strong>是高危区域</span>
+          </div>
+          <div class="risk-sign">
+            <span class="risk-sign-bullet"></span>
+            <span>水面上漂浮物<strong>原地打转</strong>不走 = 存在回流</span>
+          </div>
+          <div class="risk-sign">
+            <span class="risk-sign-bullet"></span>
+            <span>入水前先<strong>扔树叶</strong>观察水流方向</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Risk 3: Slip & Fall -->
+    <div class="risk-card reveal">
+      <div class="risk-illustration">
+        <svg viewBox="0 0 300 220" fill="none">
+          <!-- Cliff / drop -->
+          <path d="M0 100 L80 100 L90 105 L90 220 L0 220Z" fill="rgba(80,60,50,0.4)" stroke="rgba(255,140,50,0.2)" stroke-width="1"/>
+          <path d="M90 105 L100 108 L100 220 L90 220Z" fill="rgba(80,60,50,0.3)"/>
+          <!-- Water below -->
+          <path d="M100 180 Q150 175, 200 180 Q250 185, 300 178 L300 220 L100 220Z" fill="rgba(56,189,248,0.12)"/>
+          <path d="M100 180 Q150 175, 200 180 Q250 185, 300 178" stroke="rgba(56,189,248,0.3)" stroke-width="1.5"/>
+          <!-- Rocks in water -->
+          <ellipse cx="160" cy="185" rx="18" ry="8" fill="rgba(100,80,60,0.5)" stroke="rgba(255,59,59,0.3)" stroke-width="1"/>
+          <ellipse cx="230" cy="182" rx="14" ry="7" fill="rgba(100,80,60,0.5)" stroke="rgba(255,59,59,0.3)" stroke-width="1"/>
+          <ellipse cx="195" cy="188" rx="12" ry="5" fill="rgba(100,80,60,0.4)"/>
+          <!-- Wet moss on ledge -->
+          <path d="M50 100 Q60 97, 70 100" stroke="rgba(100,200,100,0.3)" stroke-width="3" stroke-linecap="round"/>
+          <circle cx="55" cy="98" r="2" fill="rgba(100,200,100,0.3)"/>
+          <circle cx="65" cy="99" r="1.5" fill="rgba(100,200,100,0.25)"/>
+          <!-- Person falling -->
+          <g>
+            <circle cx="75" cy="82" r="5" fill="rgba(255,214,57,0.8)"/>
+            <line x1="75" y1="87" x2="75" y2="102" stroke="rgba(255,214,57,0.8)" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="75" y1="92" x2="68" y2="85" stroke="rgba(255,214,57,0.8)" stroke-width="2" stroke-linecap="round"/>
+            <line x1="75" y1="92" x2="84" y2="87" stroke="rgba(255,214,57,0.8)" stroke-width="2" stroke-linecap="round"/>
+            <line x1="75" y1="102" x2="68" y2="112" stroke="rgba(255,214,57,0.8)" stroke-width="2" stroke-linecap="round"/>
+            <line x1="75" y1="102" x2="83" y2="110" stroke="rgba(255,214,57,0.8)" stroke-width="2" stroke-linecap="round"/>
+            <animate attributeName="transform" type="translate" values="0,0; 0,4; 0,0" dur="2s" repeatCount="indefinite"/>
+          </g>
+          <!-- Fall trajectory -->
+          <path d="M78 102 Q100 130, 155 178" stroke="rgba(255,59,59,0.4)" stroke-width="1.5" stroke-dasharray="5 4" fill="none"/>
+          <!-- Impact marks -->
+          <circle cx="155" cy="178" r="12" fill="none" stroke="rgba(255,59,59,0.4)" stroke-width="1.5">
+            <animate attributeName="r" values="5;15;20" dur="2s" repeatCount="indefinite"/>
+            <animate attributeName="opacity" values="0.6;0.2;0" dur="2s" repeatCount="indefinite"/>
+          </circle>
+          <!-- Height marker -->
+          <line x1="95" y1="105" x2="95" y2="178" stroke="rgba(255,59,59,0.4)" stroke-width="1" stroke-dasharray="3 3"/>
+          <text x="98" y="145" fill="rgba(255,59,59,0.6)" font-family="JetBrains Mono" font-size="10" font-weight="700">3-5m</text>
+          <!-- Warning label -->
+          <text x="200" y="155" text-anchor="middle" fill="rgba(255,59,59,0.5)" font-family="JetBrains Mono" font-size="9" font-weight="700">IMPACT UNCONTROLLABLE</text>
+          <text x="200" y="168" text-anchor="middle" fill="rgba(255,59,59,0.35)" font-family="JetBrains Mono" font-size="8">HIDDEN ROCKS BELOW</text>
+        </svg>
+      </div>
+      <div class="risk-content">
+        <div class="risk-number">RISK 03</div>
+        <h3 class="risk-title">滑坠 + 落差冲击</h3>
+        <p class="risk-text">
+          湿滑岩石极其危险。2–5米的落差已经足以让人失控。关键问题不是高度本身，而是<strong>落点不可控</strong>——你不知道水下是什么。
+        </p>
+        <div class="risk-signs">
+          <div class="risk-sign">
+            <span class="risk-sign-bullet"></span>
+            <span>青苔岩面 + 积水 = <strong>近乎零摩擦力</strong></span>
+          </div>
+          <div class="risk-sign">
+            <span class="risk-sign-bullet"></span>
+            <span>水下暗石在<strong>撞击瞬间</strong>造成二次伤害</span>
+          </div>
+          <div class="risk-sign">
+            <span class="risk-sign-bullet"></span>
+            <span>落差处先<strong>扔石头</strong>听声音判断水深</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ═══════════════════ COMMON RISKS ═══════════════════ -->
+<section class="section tier-common" id="common">
+  <div class="section-inner">
+    <div class="section-header reveal">
+      <div class="section-tier-label">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>
+        常见级 · FREQUENT
+      </div>
+      <h2 class="section-title">高频风险</h2>
+      <p class="section-desc">最常见、最高概率的受伤来源。几乎每次溯溪都可能遭遇。</p>
+    </div>
+
+    <!-- Risk 4: Sprain -->
+    <div class="risk-card reveal">
+      <div class="risk-illustration">
+        <svg viewBox="0 0 300 220" fill="none">
+          <!-- Rocky terrain -->
+          <path d="M0 160 Q30 140, 60 155 Q80 165, 100 150 Q120 135, 150 148 Q180 160, 200 145 Q230 130, 260 150 Q280 160, 300 155 L300 220 L0 220Z" fill="rgba(80,60,50,0.3)"/>
+          <!-- Green algae patches -->
+          <ellipse cx="70" cy="152" rx="15" ry="4" fill="rgba(80,180,80,0.15)"/>
+          <ellipse cx="180" cy="148" rx="12" ry="3" fill="rgba(80,180,80,0.12)"/>
+          <ellipse cx="250" cy="150" rx="10" ry="3" fill="rgba(80,180,80,0.1)"/>
+          <!-- Thin water film -->
+          <path d="M0 158 Q40 155, 80 158 Q120 162, 160 156 Q200 150, 240 156 Q270 160, 300 157" stroke="rgba(56,189,248,0.2)" stroke-width="1"/>
+          <!-- Person slipping -->
+          <g>
+            <!-- Foot on slippery rock -->
+            <path d="M120 145 L135 143 L138 148 L118 150Z" fill="rgba(255,140,50,0.4)" stroke="rgba(255,140,50,0.6)" stroke-width="1"/>
+            <!-- Body losing balance -->
+            <circle cx="128" cy="115" r="6" fill="rgba(255,214,57,0.7)"/>
+            <line x1="128" y1="121" x2="125" y2="142" stroke="rgba(255,214,57,0.7)" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="125" y1="130" x2="115" y2="122" stroke="rgba(255,214,57,0.7)" stroke-width="2" stroke-linecap="round"/>
+            <line x1="125" y1="130" x2="140" y2="135" stroke="rgba(255,214,57,0.7)" stroke-width="2" stroke-linecap="round"/>
+            <!-- Injured knee highlight -->
+            <circle cx="125" cy="135" r="10" fill="none" stroke="rgba(255,59,59,0.6)" stroke-width="2" stroke-dasharray="4 2">
+              <animate attributeName="r" values="10;14;10" dur="1.5s" repeatCount="indefinite"/>
+              <animate attributeName="opacity" values="0.8;0.3;0.8" dur="1.5s" repeatCount="indefinite"/>
+            </circle>
+            <!-- Sliding motion lines -->
+            <line x1="140" y1="145" x2="160" y2="148" stroke="rgba(255,140,50,0.4)" stroke-width="1" stroke-dasharray="3 3"/>
+            <line x1="138" y1="150" x2="158" y2="153" stroke="rgba(255,140,50,0.4)" stroke-width="1" stroke-dasharray="3 3"/>
+          </g>
+          <!-- Stat label -->
+          <rect x="180" y="80" width="100" height="36" rx="6" fill="rgba(255,140,50,0.08)" stroke="rgba(255,140,50,0.2)" stroke-width="1"/>
+          <text x="230" y="95" text-anchor="middle" fill="rgba(255,140,50,0.7)" font-family="JetBrains Mono" font-size="10" font-weight="700">#1 伤害源</text>
+          <text x="230" y="108" text-anchor="middle" fill="rgba(255,140,50,0.4)" font-family="JetBrains Mono" font-size="8">ANKLE & KNEE</text>
+        </svg>
+      </div>
+      <div class="risk-content">
+        <div class="risk-number">RISK 04</div>
+        <h3 class="risk-title">滑倒扭伤</h3>
+        <p class="risk-text">
+          溯溪中的<strong>第一大伤害源</strong>。青苔岩面、水下看不清的结构、频繁变化的重心——三者叠加让滑倒几乎不可避免。崴脚或膝盖扭伤后，你直接失去行动能力，在峡谷中进退两难。
+        </p>
+        <div class="risk-signs">
+          <div class="risk-sign">
+            <span class="risk-sign-bullet"></span>
+            <span>脚踝是最脆弱的关节，其次是膝盖</span>
+          </div>
+          <div class="risk-sign">
+            <span class="risk-sign-bullet"></span>
+            <span>负重情况下扭伤后果<strong>成倍放大</strong></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Risk 5: Submerged Rocks -->
+    <div class="risk-card reveal">
+      <div class="risk-illustration">
+        <svg viewBox="0 0 300 220" fill="none">
+          <!-- Water surface -->
+          <path d="M0 100 Q50 95, 100 100 Q150 105, 200 98 Q250 92, 300 100" stroke="rgba(56,189,248,0.4)" stroke-width="2"/>
+          <!-- Water body -->
+          <path d="M0 100 Q50 95, 100 100 Q150 105, 200 98 Q250 92, 300 100 L300 220 L0 220Z" fill="rgba(56,189,248,0.06)"/>
+          <!-- Submerged rocks - barely visible -->
+          <ellipse cx="100" cy="160" rx="30" ry="15" fill="rgba(80,60,50,0.2)" stroke="rgba(80,60,50,0.15)" stroke-width="1"/>
+          <ellipse cx="200" cy="155" rx="25" ry="12" fill="rgba(80,60,50,0.2)" stroke="rgba(80,60,50,0.15)" stroke-width="1"/>
+          <ellipse cx="150" cy="170" rx="20" ry="10" fill="rgba(80,60,50,0.18)"/>
+          <!-- Depth distortion - rocks look deeper -->
+          <text x="100" y="195" text-anchor="middle" fill="rgba(255,59,59,0.3)" font-family="JetBrains Mono" font-size="8">看起来很深</text>
+          <text x="200" y="190" text-anchor="middle" fill="rgba(255,59,59,0.3)" font-family="JetBrains Mono" font-size="8">实际很浅</text>
+          <!-- Leg hitting rock -->
+          <line x1="145" y1="80" x2="148" y2="155" stroke="rgba(255,214,57,0.7)" stroke-width="3" stroke-linecap="round">
+            <animate attributeName="x2" values="148;148;150" dur="2s" repeatCount="indefinite"/>
+          </line>
+          <!-- Impact star -->
+          <g transform="translate(148,152)">
+            <line x1="-10" y1="0" x2="10" y2="0" stroke="rgba(255,59,59,0.8)" stroke-width="2"/>
+            <line x1="0" y1="-10" x2="0" y2="10" stroke="rgba(255,59,59,0.8)" stroke-width="2"/>
+            <line x1="-7" y1="-7" x2="7" y2="7" stroke="rgba(255,59,59,0.6)" stroke-width="1.5"/>
+            <line x1="7" y1="-7" x2="-7" y2="7" stroke="rgba(255,59,59,0.6)" stroke-width="1.5"/>
+            <animate attributeName="opacity" values="0;1;0" dur="2s" repeatCount="indefinite"/>
+          </g>
+          <!-- Body labels -->
+          <g>
+            <rect x="40" y="40" width="70" height="22" rx="4" fill="rgba(255,140,50,0.08)" stroke="rgba(255,140,50,0.2)" stroke-width="1"/>
+            <text x="75" y="55" text-anchor="middle" fill="rgba(255,140,50,0.7)" font-family="JetBrains Mono" font-size="9">膝盖撞击</text>
+          </g>
+          <g>
+            <rect x="190" y="40" width="70" height="22" rx="4" fill="rgba(255,140,50,0.08)" stroke="rgba(255,140,50,0.2)" stroke-width="1"/>
+            <text x="225" y="55" text-anchor="middle" fill="rgba(255,140,50,0.7)" font-family="JetBrains Mono" font-size="9">胫骨撞击</text>
+          </g>
+          <!-- Perspective lines showing depth illusion -->
+          <line x1="60" y1="100" x2="80" y2="160" stroke="rgba(56,189,248,0.1)" stroke-width="1" stroke-dasharray="3 4"/>
+          <line x1="240" y1="100" x2="220" y2="155" stroke="rgba(56,189,248,0.1)" stroke-width="1" stroke-dasharray="3 4"/>
+          <text x="150" y="210" text-anchor="middle" fill="rgba(56,189,248,0.3)" font-family="JetBrains Mono" font-size="9" font-style="italic">水是"放大冲击缓冲误导器"</text>
+        </svg>
+      </div>
+      <div class="risk-content">
+        <div class="risk-number">RISK 05</div>
+        <h3 class="risk-title">水下暗石撞击</h3>
+        <p class="risk-text">
+          水是<strong>"放大冲击缓冲误导器"</strong>——看起来深的地方可能有石头。跳跃入水或快速移动时，膝盖、胫骨、足底是最常见的撞击部位。水的折射还会扭曲你对深度的判断。
+        </p>
+        <div class="risk-signs">
+          <div class="risk-sign">
+            <span class="risk-sign-bullet"></span>
+            <span>入水前<strong>先扔石头</strong>听声音判断深度</span>
+          </div>
+          <div class="risk-sign">
+            <span class="risk-sign-bullet"></span>
+            <span>永远假设水比看起来的<strong>浅 30%</strong></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Risk 6: Blisters -->
+    <div class="risk-card reveal">
+      <div class="risk-illustration">
+        <svg viewBox="0 0 300 220" fill="none">
+          <!-- Foot outline -->
+          <path d="M100 180 Q90 160, 95 130 Q100 100, 115 80 Q125 65, 140 60 Q155 55, 165 65 Q175 75, 180 90 Q185 105, 185 130 Q186 155, 190 180" stroke="rgba(255,140,50,0.5)" stroke-width="2" fill="rgba(255,140,50,0.04)"/>
+          <!-- Toe bumps -->
+          <ellipse cx="120" cy="68" rx="8" ry="6" fill="none" stroke="rgba(255,140,50,0.3)" stroke-width="1"/>
+          <ellipse cx="135" cy="60" rx="8" ry="6" fill="none" stroke="rgba(255,140,50,0.3)" stroke-width="1"/>
+          <ellipse cx="150" cy="57" rx="8" ry="6" fill="none" stroke="rgba(255,140,50,0.3)" stroke-width="1"/>
+          <ellipse cx="163" cy="62" rx="7" ry="6" fill="none" stroke="rgba(255,140,50,0.3)" stroke-width="1"/>
+          <!-- Blister zones highlighted -->
+          <ellipse cx="140" cy="55" rx="18" ry="8" fill="rgba(255,59,59,0.15)" stroke="rgba(255,59,59,0.4)" stroke-width="1.5" stroke-dasharray="3 2">
+            <animate attributeName="opacity" values="0.6;1;0.6" dur="2s" repeatCount="indefinite"/>
+          </ellipse>
+          <text x="140" y="42" text-anchor="middle" fill="rgba(255,59,59,0.6)" font-family="JetBrains Mono" font-size="8">脚趾</text>
+          <!-- Heel blister -->
+          <ellipse cx="145" cy="175" rx="20" ry="10" fill="rgba(255,59,59,0.15)" stroke="rgba(255,59,59,0.4)" stroke-width="1.5" stroke-dasharray="3 2">
+            <animate attributeName="opacity" values="0.6;1;0.6" dur="2s" begin="0.5s" repeatCount="indefinite"/>
+          </ellipse>
+          <text x="145" y="200" text-anchor="middle" fill="rgba(255,59,59,0.6)" font-family="JetBrains Mono" font-size="8">脚跟</text>
+          <!-- Water drops -->
+          <circle cx="110" cy="120" r="2" fill="rgba(56,189,248,0.4)">
+            <animate attributeName="cy" values="120;180;120" dur="3s" repeatCount="indefinite"/>
+            <animate attributeName="opacity" values="0.6;0;0.6" dur="3s" repeatCount="indefinite"/>
+          </circle>
+          <circle cx="170" cy="110" r="2" fill="rgba(56,189,248,0.4)">
+            <animate attributeName="cy" values="110;175;110" dur="2.5s" repeatCount="indefinite"/>
+            <animate attributeName="opacity" values="0.6;0;0.6" dur="2.5s" repeatCount="indefinite"/>
+          </circle>
+          <!-- Friction arrows -->
+          <path d="M105 140 L90 140" stroke="rgba(255,140,50,0.4)" stroke-width="1.5" marker-end="none"/>
+          <path d="M90 140 L90 130" stroke="rgba(255,140,50,0.4)" stroke-width="1" stroke-dasharray="2 2"/>
+          <text x="80" y="125" text-anchor="middle" fill="rgba(255,140,50,0.4)" font-family="JetBrains Mono" font-size="8">摩擦</text>
+          <!-- Formula -->
+          <rect x="170" y="95" width="110" height="40" rx="8" fill="rgba(255,140,50,0.06)" stroke="rgba(255,140,50,0.15)" stroke-width="1"/>
+          <text x="225" y="112" text-anchor="middle" fill="rgba(255,140,50,0.7)" font-family="JetBrains Mono" font-size="10" font-weight="700">湿 + 摩擦</text>
+          <text x="225" y="128" text-anchor="middle" fill="rgba(255,59,59,0.6)" font-family="JetBrains Mono" font-size="10" font-weight="700">= 加速损伤</text>
+        </svg>
+      </div>
+      <div class="risk-content">
+        <div class="risk-number">RISK 06</div>
+        <h3 class="risk-title">磨伤 + 水泡</h3>
+        <p class="risk-text">
+          "湿 + 摩擦 = 加速损伤"。长时间在水中行走，湿透的鞋袜不断摩擦皮肤，水泡和磨伤形成速度比干燥环境快数倍。最严重时甚至能磨到出血。
+        </p>
+        <div class="risk-signs">
+          <div class="risk-sign">
+            <span class="risk-sign-bullet"></span>
+            <span>典型部位：<strong>脚跟、脚趾、大腿内侧</strong></span>
+          </div>
+          <div class="risk-sign">
+            <span class="risk-sign-bullet"></span>
+            <span>穿速干袜 + 凡士林涂抹高频摩擦区</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ═══════════════════ HIDDEN RISKS ═══════════════════ -->
+<section class="section tier-hidden" id="hidden">
+  <div class="section-inner">
+    <div class="section-header reveal">
+      <div class="section-tier-label">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
+        隐性级 · HIDDEN
+      </div>
+      <h2 class="section-title">隐性风险</h2>
+      <p class="section-desc">最容易被忽略的杀手。它们不会立刻暴露，而是在不知不觉中削弱你的判断和体能，直到某一个瞬间叠加爆发。</p>
+    </div>
+
+    <!-- Risk 7: Hypothermia -->
+    <div class="risk-card reveal">
+      <div class="risk-illustration">
+        <svg viewBox="0 0 300 220" fill="none">
+          <!-- Thermometer -->
+          <rect x="140" y="30" width="20" height="140" rx="10" fill="rgba(56,189,248,0.06)" stroke="rgba(56,189,248,0.3)" stroke-width="1.5"/>
+          <circle cx="150" cy="180" r="22" fill="rgba(56,189,248,0.08)" stroke="rgba(56,189,248,0.3)" stroke-width="1.5"/>
+          <!-- Mercury level dropping -->
+          <rect x="145" y="80" width="10" height="95" rx="5" fill="rgba(56,189,248,0.3)"/>
+          <circle cx="150" cy="180" r="15" fill="rgba(56,189,248,0.3)"/>
+          <!-- Drop animation -->
+          <rect x="145" y="80" width="10" height="95" rx="5" fill="rgba(56,189,248,0.15)">
+            <animate attributeName="y" values="80;110;80" dur="6s" repeatCount="indefinite"/>
+            <animate attributeName="height" values="95;65;95" dur="6s" repeatCount="indefinite"/>
+          </rect>
+          <!-- Scale marks -->
+          <line x1="162" y1="50" x2="170" y2="50" stroke="rgba(56,189,248,0.2)" stroke-width="1"/>
+          <line x1="162" y1="80" x2="170" y2="80" stroke="rgba(56,189,248,0.2)" stroke-width="1"/>
+          <line x1="162" y1="110" x2="170" y2="110" stroke="rgba(56,189,248,0.2)" stroke-width="1"/>
+          <line x1="162" y1="140" x2="170" y2="140" stroke="rgba(56,189,248,0.2)" stroke-width="1"/>
+          <!-- Body effects - cascading -->
+          <g transform="translate(200, 40)">
+            <rect x="0" y="0" width="80" height="28" rx="6" fill="rgba(56,189,248,0.06)" stroke="rgba(56,189,248,0.2)" stroke-width="1"/>
+            <text x="40" y="18" text-anchor="middle" fill="rgba(56,189,248,0.6)" font-family="JetBrains Mono" font-size="9">心率上升</text>
+            <line x1="40" y1="28" x2="40" y2="48" stroke="rgba(255,59,59,0.3)" stroke-width="1" stroke-dasharray="3 3"/>
+            <polygon points="37,45 43,45 40,50" fill="rgba(255,59,59,0.3)"/>
+          </g>
+          <g transform="translate(200, 90)">
+            <rect x="0" y="0" width="80" height="28" rx="6" fill="rgba(255,59,59,0.06)" stroke="rgba(255,59,59,0.2)" stroke-width="1"/>
+            <text x="40" y="18" text-anchor="middle" fill="rgba(255,59,59,0.6)" font-family="JetBrains Mono" font-size="9">判断力↓↓</text>
+            <line x1="40" y1="28" x2="40" y2="48" stroke="rgba(255,59,59,0.3)" stroke-width="1" stroke-dasharray="3 3"/>
+            <polygon points="37,45 43,45 40,50" fill="rgba(255,59,59,0.3)"/>
+          </g>
+          <g transform="translate(200, 140)">
+            <rect x="0" y="0" width="80" height="28" rx="6" fill="rgba(255,59,59,0.1)" stroke="rgba(255,59,59,0.3)" stroke-width="1"/>
+            <text x="40" y="18" text-anchor="middle" fill="rgba(255,59,59,0.8)" font-family="JetBrains Mono" font-size="9" font-weight="700">体力崩盘</text>
+          </g>
+          <!-- Wind lines -->
+          <path d="M30 60 L60 58" stroke="rgba(56,189,248,0.2)" stroke-width="1.5"/>
+          <path d="M25 80 L55 78" stroke="rgba(56,189,248,0.2)" stroke-width="1.5"/>
+          <path d="M35 100 L65 98" stroke="rgba(56,189,248,0.2)" stroke-width="1.5"/>
+          <text x="50" y="125" text-anchor="middle" fill="rgba(56,189,248,0.3)" font-family="JetBrains Mono" font-size="9">风 + 湿衣</text>
+          <!-- Note -->
+          <text x="80" y="210" text-anchor="middle" fill="rgba(255,214,57,0.5)" font-family="JetBrains Mono" font-size="9">热带也会发生</text>
+        </svg>
+      </div>
+      <div class="risk-content">
+        <div class="risk-number">RISK 07</div>
+        <h3 class="risk-title">体温流失</h3>
+        <p class="risk-text">
+          这不是"冷"的问题，而是<strong>长时间泡水 + 风 + 湿衣服</strong>的三重失温。即使在热带地区也会发生。后果是一个递进的崩塌链：心率上升 → 判断力下降 → 体力快速耗尽。
+        </p>
+        <div class="risk-signs">
+          <div class="risk-sign">
+            <span class="risk-sign-bullet"></span>
+            <span>核心体温每降 1°C，认知能力下降约 15%</span>
+          </div>
+          <div class="risk-sign">
+            <span class="risk-sign-bullet"></span>
+            <span>带一件<strong>压缩救生毯</strong>（几十克）可能救命</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Risk 8: Judgment -->
+    <div class="risk-card reveal">
+      <div class="risk-illustration">
+        <svg viewBox="0 0 300 220" fill="none">
+          <!-- Brain outline -->
+          <path d="M100 120 Q80 100, 85 75 Q90 50, 110 40 Q130 30, 150 35 Q170 30, 185 45 Q200 55, 205 80 Q210 100, 195 115 Q210 130, 200 150 Q190 165, 170 170 Q150 175, 130 170 Q110 165, 100 150 Q90 135, 100 120Z" fill="rgba(255,214,57,0.06)" stroke="rgba(255,214,57,0.3)" stroke-width="1.5"/>
+          <!-- Internal confusion pattern -->
+          <path d="M120 80 Q130 70, 145 80 Q155 90, 165 75" stroke="rgba(255,59,59,0.3)" stroke-width="1" fill="none" stroke-dasharray="3 3">
+            <animate attributeName="stroke-dashoffset" from="0" to="-18" dur="2s" repeatCount="indefinite"/>
+          </path>
+          <path d="M115 100 Q135 110, 155 100 Q170 90, 180 105" stroke="rgba(255,59,59,0.3)" stroke-width="1" fill="none" stroke-dasharray="3 3">
+            <animate attributeName="stroke-dashoffset" from="0" to="-18" dur="2.5s" repeatCount="indefinite"/>
+          </path>
+          <path d="M125 120 Q140 130, 160 120 Q175 110, 180 125" stroke="rgba(255,59,59,0.3)" stroke-width="1" fill="none" stroke-dasharray="3 3">
+            <animate attributeName="stroke-dashoffset" from="0" to="-18" dur="3s" repeatCount="indefinite"/>
+          </path>
+          <!-- Noise lines (water sounds) -->
+          <g opacity="0.4">
+            <path d="M220 60 Q225 55, 230 60 Q235 65, 240 60" stroke="rgba(56,189,248,0.5)" stroke-width="1.5" fill="none"/>
+            <path d="M225 80 Q230 75, 235 80 Q240 85, 245 80" stroke="rgba(56,189,248,0.4)" stroke-width="1.5" fill="none"/>
+            <path d="M218 100 Q223 95, 228 100 Q233 105, 238 100" stroke="rgba(56,189,248,0.3)" stroke-width="1.5" fill="none"/>
+          </g>
+          <text x="235" y="125" fill="rgba(56,189,248,0.4)" font-family="JetBrains Mono" font-size="8">水流声</text>
+          <!-- Chain of bad decisions -->
+          <g transform="translate(30, 50)">
+            <rect x="0" y="0" width="60" height="22" rx="4" fill="rgba(255,59,59,0.08)" stroke="rgba(255,59,59,0.2)" stroke-width="1"/>
+            <text x="30" y="15" text-anchor="middle" fill="rgba(255,59,59,0.6)" font-family="JetBrains Mono" font-size="8">路线误判</text>
+            <line x1="30" y1="22" x2="30" y2="35" stroke="rgba(255,59,59,0.3)" stroke-width="1" stroke-dasharray="2 2"/>
+            <polygon points="27,33 33,33 30,37" fill="rgba(255,59,59,0.3)"/>
+          </g>
+          <g transform="translate(30, 88)">
+            <rect x="0" y="0" width="60" height="22" rx="4" fill="rgba(255,59,59,0.1)" stroke="rgba(255,59,59,0.25)" stroke-width="1"/>
+            <text x="30" y="15" text-anchor="middle" fill="rgba(255,59,59,0.7)" font-family="JetBrains Mono" font-size="8">低估水流</text>
+            <line x1="30" y1="22" x2="30" y2="35" stroke="rgba(255,59,59,0.3)" stroke-width="1" stroke-dasharray="2 2"/>
+            <polygon points="27,33 33,33 30,37" fill="rgba(255,59,59,0.3)"/>
+          </g>
+          <g transform="translate(30, 126)">
+            <rect x="0" y="0" width="60" height="22" rx="4" fill="rgba(255,59,59,0.15)" stroke="rgba(255,59,59,0.3)" stroke-width="1"/>
+            <text x="30" y="15" text-anchor="middle" fill="rgba(255,59,59,0.8)" font-family="JetBrains Mono" font-size="8" font-weight="700">硬走</text>
+          </g>
+          <!-- Exclamation -->
+          <text x="150" y="200" text-anchor="middle" fill="rgba(255,214,57,0.4)" font-family="JetBrains Mono" font-size="9">注意力被地形和声音持续消耗</text>
+        </svg>
+      </div>
+      <div class="risk-content">
+        <div class="risk-number">RISK 08</div>
+        <h3 class="risk-title">判断力下降</h3>
+        <p class="risk-text">
+          这是<strong>最危险的隐性风险</strong>。水流声掩盖环境变化，复杂地形持续消耗注意力，体力下降进一步侵蚀决策能力。表现：路线判断错误 → 低估水流 → 继续硬走。每一步都在把概率推向事故。
+        </p>
+        <div class="risk-signs">
+          <div class="risk-sign">
+            <span class="risk-sign-bullet"></span>
+            <span>体力消耗后做的决策<strong>几乎一定偏冒险</strong></span>
+          </div>
+          <div class="risk-sign">
+            <span class="risk-sign-bullet"></span>
+            <span>设一个"体力红线"——到线就回头，不讨论</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Risk 9: Equipment -->
+    <div class="risk-card reveal">
+      <div class="risk-illustration">
+        <svg viewBox="0 0 300 220" fill="none">
+          <!-- Phone outline -->
+          <rect x="100" y="40" width="55" height="100" rx="8" fill="rgba(56,189,248,0.04)" stroke="rgba(56,189,248,0.2)" stroke-width="1.5"/>
+          <rect x="106" y="50" width="43" height="70" rx="2" fill="rgba(56,189,248,0.03)" stroke="rgba(56,189,248,0.1)" stroke-width="0.5"/>
+          <!-- Water inside phone -->
+          <path d="M106 90 Q115 85, 127 90 Q140 95, 149 88 L149 120 L106 120Z" fill="rgba(56,189,248,0.15)">
+            <animate attributeName="d" values="M106 90 Q115 85, 127 90 Q140 95, 149 88 L149 120 L106 120Z;M106 85 Q115 90, 127 85 Q140 80, 149 87 L149 120 L106 120Z;M106 90 Q115 85, 127 90 Q140 95, 149 88 L149 120 L106 120Z" dur="3s" repeatCount="indefinite"/>
+          </path>
+          <!-- Glitch lines on screen -->
+          <line x1="108" y1="65" x2="147" y2="65" stroke="rgba(255,59,59,0.4)" stroke-width="1.5">
+            <animate attributeName="opacity" values="0;1;0" dur="0.3s" begin="2s" repeatCount="indefinite"/>
+          </line>
+          <line x1="108" y1="78" x2="147" y2="78" stroke="rgba(255,59,59,0.3)" stroke-width="1">
+            <animate attributeName="opacity" values="0;1;0" dur="0.2s" begin="2.1s" repeatCount="indefinite"/>
+          </line>
+          <!-- Sad face on screen -->
+          <circle cx="120" cy="70" r="2" fill="rgba(255,59,59,0.4)"/>
+          <circle cx="137" cy="70" r="2" fill="rgba(255,59,59,0.4)"/>
+          <path d="M118 82 Q127 77, 138 82" stroke="rgba(255,59,59,0.4)" stroke-width="1.5" fill="none"/>
+          <!-- Water drops around -->
+          <circle cx="80" cy="70" r="3" fill="rgba(56,189,248,0.2)">
+            <animate attributeName="cy" values="70;100;70" dur="4s" repeatCount="indefinite"/>
+          </circle>
+          <circle cx="170" cy="55" r="2" fill="rgba(56,189,248,0.2)">
+            <animate attributeName="cy" values="55;85;55" dur="3.5s" repeatCount="indefinite"/>
+          </circle>
+          <!-- Waterproof bag torn -->
+          <g transform="translate(185, 50)">
+            <rect x="0" y="0" width="70" height="50" rx="6" fill="rgba(255,140,50,0.06)" stroke="rgba(255,140,50,0.2)" stroke-width="1"/>
+            <text x="35" y="20" text-anchor="middle" fill="rgba(255,140,50,0.6)" font-family="JetBrains Mono" font-size="8">防水袋</text>
+            <!-- Tear -->
+            <path d="M20 15 L25 25 L18 35 L28 42" stroke="rgba(255,59,59,0.6)" stroke-width="1.5" fill="none"/>
+            <text x="35" y="45" text-anchor="middle" fill="rgba(255,59,59,0.5)" font-family="JetBrains Mono" font-size="7">破损</text>
+          </g>
+          <!-- Sand in shoe -->
+          <g transform="translate(185, 120)">
+            <path d="M10 40 Q0 30, 5 20 Q10 10, 20 8 Q30 5, 40 10 Q50 15, 55 28 Q58 38, 50 40Z" fill="rgba(255,140,50,0.06)" stroke="rgba(255,140,50,0.2)" stroke-width="1"/>
+            <!-- Sand grains -->
+            <circle cx="20" cy="30" r="1.5" fill="rgba(200,180,120,0.4)"/>
+            <circle cx="30" cy="33" r="1" fill="rgba(200,180,120,0.3)"/>
+            <circle cx="25" cy="25" r="1.2" fill="rgba(200,180,120,0.35)"/>
+            <circle cx="35" cy="28" r="1" fill="rgba(200,180,120,0.3)"/>
+            <circle cx="38" cy="35" r="1.3" fill="rgba(200,180,120,0.35)"/>
+            <text x="30" y="55" text-anchor="middle" fill="rgba(255,140,50,0.5)" font-family="JetBrains Mono" font-size="8">鞋子进砂</text>
+          </g>
+          <!-- Warning text -->
+          <text x="150" y="210" text-anchor="middle" fill="rgba(255,214,57,0.4)" font-family="JetBrains Mono" font-size="9">每一件装备都可能在关键时刻失效</text>
+        </svg>
+      </div>
+      <div class="risk-content">
+        <div class="risk-number">RISK 09</div>
+        <h3 class="risk-title">装备失效</h3>
+        <p class="risk-text">
+          溯溪环境对装备的摧毁速度远超预期。手机进水失去导航和求救能力，防水袋破损导致备用衣物全湿，鞋子进砂磨脚导致移动能力下降。每一件"小事"在峡谷中都会被放大。
+        </p>
+        <div class="risk-signs">
+          <div class="risk-sign">
+            <span class="risk-sign-bullet"></span>
+            <span>关键装备用<strong>双重防水</strong>（防水袋 + 密封舱）</span>
+          </div>
+          <div class="risk-sign">
+            <span class="risk-sign-bullet"></span>
+            <span>手机放入防水袋前<strong>先拍一张离线地图</strong></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ═══════════════════ STRUCTURAL RISKS ═══════════════════ -->
+<section class="section tier-structure" id="structure">
+  <div class="section-inner">
+    <div class="section-header reveal">
+      <div class="section-tier-label">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M20 6h-4V4c0-1.11-.89-2-2-2h-4c-1.11 0-2 .89-2 2v2H4c-1.11 0-1.99.89-1.99 2L2 19c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2zm-6 0h-4V4h4v2z"/></svg>
+        结构性 · STRUCTURAL
+      </div>
+      <h2 class="section-title">结构性风险</h2>
+      <p class="section-desc">溯溪的本质问题——线路特性本身就在制造风险。</p>
+    </div>
+
+    <!-- Risk 10: One-way Canyon -->
+    <div class="risk-card reveal">
+      <div class="risk-illustration">
+        <svg viewBox="0 0 300 220" fill="none">
+          <!-- Canyon walls narrowing -->
+          <path d="M0 0 L80 0 L100 50 L110 100 L120 150 L130 200 L135 220 L0 220Z" fill="rgba(80,60,50,0.35)" stroke="rgba(56,189,248,0.1)" stroke-width="1"/>
+          <path d="M300 0 L220 0 L200 50 L190 100 L180 150 L170 200 L165 220 L300 220Z" fill="rgba(80,60,50,0.35)" stroke="rgba(56,189,248,0.1)" stroke-width="1"/>
+          <!-- Water path narrowing -->
+          <path d="M120 10 Q150 15, 180 10" stroke="rgba(56,189,248,0.3)" stroke-width="1.5" fill="none"/>
+          <path d="M110 60 Q150 68, 190 60" stroke="rgba(56,189,248,0.3)" stroke-width="1.5" fill="none"/>
+          <path d="M100 110 Q150 122, 200 110" stroke="rgba(56,189,248,0.3)" stroke-width="1.5" fill="none"/>
+          <path d="M95 160 Q150 175, 205 160" stroke="rgba(56,189,248,0.35)" stroke-width="1.5" fill="none"/>
+          <path d="M100 200 Q150 215, 200 200" stroke="rgba(56,189,248,0.4)" stroke-width="2" fill="none"/>
+          <!-- Water filling up -->
+          <path d="M110 60 Q150 68, 190 60 L195 100 Q150 115, 105 100Z" fill="rgba(56,189,248,0.06)"/>
+          <path d="M100 110 Q150 122, 200 110 L205 160 Q150 178, 95 160Z" fill="rgba(56,189,248,0.08)"/>
+          <path d="M95 160 Q150 175, 205 160 L200 200 Q150 218, 100 200Z" fill="rgba(56,189,248,0.12)"/>
+          <!-- Person walking upstream -->
+          <circle cx="150" cy="100" r="5" fill="rgba(255,214,57,0.7)"/>
+          <line x1="150" y1="105" x2="150" y2="120" stroke="rgba(255,214,57,0.7)" stroke-width="2"/>
+          <!-- Arrow pointing up (entering) -->
+          <path d="M150 80 L150 60" stroke="rgba(45,212,191,0.6)" stroke-width="2" stroke-linecap="round"/>
+          <polygon points="146,63 154,63 150,56" fill="rgba(45,212,191,0.6)"/>
+          <text x="160" y="52" fill="rgba(45,212,191,0.6)" font-family="JetBrains Mono" font-size="8">进入容易</text>
+          <!-- Struggle at bottom -->
+          <g transform="translate(135, 185)">
+            <path d="M0 0 L-8 10 M0 0 L8 10 M0 0 L-12 3 M0 0 L12 3" stroke="rgba(255,59,59,0.5)" stroke-width="1.5" stroke-linecap="round">
+              <animate attributeName="opacity" values="1;0.3;1" dur="1s" repeatCount="indefinite"/>
+            </path>
+          </g>
+          <text x="150" y="178" text-anchor="middle" fill="rgba(255,59,59,0.6)" font-family="JetBrains Mono" font-size="9" font-weight="700">回不去</text>
+          <!-- Progress arrows -->
+          <path d="M150 130 L150 155" stroke="rgba(255,59,59,0.3)" stroke-width="1.5" stroke-dasharray="4 3" fill="none"/>
+          <text x="70" y="210" fill="rgba(255,214,57,0.4)" font-family="JetBrains Mono" font-size="9">体力 ↓↓</text>
+          <text x="215" y="210" fill="rgba(255,59,59,0.4)" font-family="JetBrains Mono" font-size="9">坡度 ↑↑</text>
+          <!-- Width labels -->
+          <text x="150" y="25" text-anchor="middle" fill="rgba(56,189,248,0.3)" font-family="JetBrains Mono" font-size="8">宽</text>
+          <text x="150" y="215" text-anchor="middle" fill="rgba(56,189,248,0.4)" font-family="JetBrains Mono" font-size="8">窄</text>
+        </svg>
+      </div>
+      <div class="risk-content">
+        <div class="risk-number">RISK 10</div>
+        <h3 class="risk-title">单向峡谷效应</h3>
+        <p class="risk-text">
+          很多溯溪线路的核心矛盾：<strong>进去容易，出来难</strong>。上游更陡、回撤路线被水切断、体力下降后无法回头。你在体力最好的时候顺流而上，却要在体力最差的时候逆流返回。
+        </p>
+        <div class="risk-signs">
+          <div class="risk-sign">
+            <span class="risk-sign-bullet"></span>
+            <span>出发前<strong>在地图上标记所有可撤离点</strong></span>
+          </div>
+          <div class="risk-sign">
+            <span class="risk-sign-bullet"></span>
+            <span>用<strong>1/3 体力法则</strong>：去程最多用 1/3 体力</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ═══════════════════ DANGEROUS COMBINATIONS ═══════════════════ -->
+<section class="section tier-fatal" id="combos">
+  <div class="section-inner">
+    <div class="section-header reveal">
+      <div class="section-tier-label">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L1 21h22L12 2zm0 3.99L19.53 19H4.47L12 5.99z"/></svg>
+        致命组合 · COMBOS
+      </div>
+      <h2 class="section-title">最容易出事的三种组合</h2>
+      <p class="section-desc">单一风险或许可控，但当多个因素同时出现时，风险不是相加，而是相乘。</p>
+    </div>
+
+    <div class="combo-grid">
+      <div class="combo-card reveal">
+        <div class="combo-icon">
+          <svg width="60" height="60" viewBox="0 0 60 60" fill="none">
+            <circle cx="30" cy="20" r="12" fill="none" stroke="rgba(56,189,248,0.5)" stroke-width="2"/>
+            <path d="M20 20 Q25 10, 30 20 Q35 30, 40 20" stroke="rgba(56,189,248,0.3)" stroke-width="1.5" fill="none"/>
+            <path d="M22 32 L18 45 Q30 52, 42 45 L38 32" stroke="rgba(255,59,59,0.5)" stroke-width="2" fill="none"/>
+            <path d="M15 40 L10 48" stroke="rgba(56,189,248,0.3)" stroke-width="1.5"/>
+            <path d="M45 40 L50 48" stroke="rgba(56,189,248,0.3)" stroke-width="1.5"/>
+            <text x="30" y="55" text-anchor="middle" fill="rgba(255,59,59,0.5)" font-family="JetBrains Mono" font-size="7">SOLO</text>
+          </svg>
+        </div>
+        <h3 class="combo-title">下雨 + 峡谷 + 单人</h3>
+        <p class="combo-desc">
+          山洪风险 + 无任何外部支援。单人进入峡谷，手机可能没信号，即使出事也无法通知外界。这是所有组合中最致命的一种。
+        </p>
+      </div>
+
+      <div class="combo-card reveal">
+        <div class="combo-icon">
+          <svg width="60" height="60" viewBox="0 0 60 60" fill="none">
+            <!-- Person jumping -->
+            <circle cx="30" cy="15" r="5" fill="rgba(255,214,57,0.7)"/>
+            <line x1="30" y1="20" x2="30" y2="32" stroke="rgba(255,214,57,0.7)" stroke-width="2"/>
+            <line x1="30" y1="25" x2="22" y2="20" stroke="rgba(255,214,57,0.7)" stroke-width="1.5" stroke-linecap="round"/>
+            <line x1="30" y1="25" x2="38" y2="18" stroke="rgba(255,214,57,0.7)" stroke-width="1.5" stroke-linecap="round"/>
+            <!-- Water surface -->
+            <path d="M5 40 Q20 36, 35 40 Q50 44, 55 40" stroke="rgba(56,189,248,0.4)" stroke-width="1.5"/>
+            <!-- Hidden rock -->
+            <ellipse cx="32" cy="46" rx="10" ry="5" fill="rgba(80,60,50,0.4)" stroke="rgba(255,59,59,0.5)" stroke-width="1.5" stroke-dasharray="3 2"/>
+            <text x="32" y="56" text-anchor="middle" fill="rgba(255,59,59,0.5)" font-family="JetBrains Mono" font-size="7">暗石</text>
+          </svg>
+        </div>
+        <h3 class="combo-title">跳水 + 未探底</h3>
+        <p class="combo-desc">
+          水面看起来很深但可能有暗石。跳水者对深度的判断完全依赖视觉，而水的折射会让深度被高估 25-30%。后果可能是脊柱损伤。
+        </p>
+      </div>
+
+      <div class="combo-card reveal">
+        <div class="combo-icon">
+          <svg width="60" height="60" viewBox="0 0 60 60" fill="none">
+            <!-- Wet person -->
+            <circle cx="30" cy="18" r="5" fill="rgba(255,214,57,0.6)"/>
+            <line x1="30" y1="23" x2="30" y2="38" stroke="rgba(255,214,57,0.6)" stroke-width="2"/>
+            <!-- Shivering waves -->
+            <path d="M24 28 Q22 25, 20 28 Q18 31, 16 28" stroke="rgba(56,189,248,0.4)" stroke-width="1.5" fill="none"/>
+            <path d="M36 28 Q38 25, 40 28 Q42 31, 44 28" stroke="rgba(56,189,248,0.4)" stroke-width="1.5" fill="none"/>
+            <!-- Wind -->
+            <path d="M45 15 L55 13" stroke="rgba(56,189,248,0.3)" stroke-width="1.5"/>
+            <path d="M43 25 L55 23" stroke="rgba(56,189,248,0.3)" stroke-width="1.5"/>
+            <path d="M44 35 L55 33" stroke="rgba(56,189,248,0.3)" stroke-width="1.5"/>
+            <!-- Water drops -->
+            <circle cx="25" cy="30" r="1.5" fill="rgba(56,189,248,0.3)"/>
+            <circle cx="35" cy="32" r="1" fill="rgba(56,189,248,0.25)"/>
+            <!-- Brain fading -->
+            <circle cx="30" cy="18" r="8" fill="none" stroke="rgba(255,59,59,0.3)" stroke-width="1" stroke-dasharray="2 2">
+              <animate attributeName="opacity" values="0.6;0.1;0.6" dur="2s" repeatCount="indefinite"/>
+            </circle>
+            <!-- Time -->
+            <text x="30" y="55" text-anchor="middle" fill="rgba(255,59,59,0.4)" font-family="JetBrains Mono" font-size="7">3-5 小时</text>
+          </svg>
+        </div>
+        <h3 class="combo-title">长时间湿 + 冷风</h3>
+        <p class="combo-desc">
+          不需要极端低温，只需 3-5 小时的湿衣服 + 山谷风即可导致体力崩盘。体力下降直接引发判断错误，错误判断又导致更深的困境——典型的事故链。
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ═══════════════════ RISK LOGIC ═══════════════════ -->
+<section class="section logic-section" id="logic">
+  <div class="section-inner">
+    <div class="section-header reveal">
+      <div class="section-tier-label" style="background: rgba(255,59,59,0.1); color: var(--accent-red); border: 1px solid rgba(255,59,59,0.2);">
+        核心逻辑 · CORE LOGIC
+      </div>
+      <h2 class="section-title">风险不是概率问题</h2>
+      <p class="section-desc">溯溪和跑步不同。跑步错一步还能调整，溯溪一次错误 = 直接进入事故链，代价是跳跃式上升的。</p>
+    </div>
+
+    <!-- Logic chain -->
+    <div class="logic-chain reveal">
+      <div class="logic-node cause">判断错误</div>
+      <span class="logic-arrow">→</span>
+      <div class="logic-node cause">滑倒 / 进入危险水域</div>
+      <span class="logic-arrow">→</span>
+      <div class="logic-node cause">受伤 / 体温流失</div>
+      <span class="logic-arrow">→</span>
+      <div class="logic-node result">行动力丧失</div>
+      <span class="logic-arrow">→</span>
+      <div class="logic-node result">无法撤离</div>
+    </div>
+
+    <div class="logic-callout reveal">
+      <p>
+        溯溪最大的风险不是水深，而是<br>
+        <span class="highlight">流速 + 地形 + 判断错误</span><br><br>
+        最危险的不是瀑布，而是<br>
+        <span class="highlight">看起来安全的浅水区</span><br><br>
+        核心原则不是"敢不敢"，而是<br>
+        <span class="highlight">能不能退</span>
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════ CHECKLIST ═══════════════════ -->
+<section class="section" id="checklist">
+  <div class="section-inner">
+    <div class="section-header reveal">
+      <div class="section-tier-label" style="background: rgba(45,212,191,0.1); color: var(--accent-teal); border: 1px solid rgba(45,212,191,0.2);">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg>
+        出发前 · PRE-TRIP
+      </div>
+      <h2 class="section-title">三句保命判断</h2>
+      <p class="section-desc">进入任何溯溪点前，认真回答这三个问题。只要有一个答案是"否"——不建议深入。</p>
+    </div>
+
+    <div class="checklist">
+      <div class="checklist-item reveal">
+        <div class="checklist-icon">1</div>
+        <div class="checklist-text">
+          <strong>上游天气是否可控？</strong>
+          <span>不只看脚下天气，要查上游 30-50km 范围的降雨预报。山区天气变化快，即使现在晴天，上游可能正在下雨。</span>
+        </div>
+      </div>
+
+      <div class="checklist-item reveal">
+        <div class="checklist-icon">2</div>
+        <div class="checklist-text">
+          <strong>是否有退路？</strong>
+          <span>沿途有没有可以上岸撤离的点？如果水位上涨 50cm，你的回程路线是否会被切断？提前在地图上标记。</span>
+        </div>
+      </div>
+
+      <div class="checklist-item reveal">
+        <div class="checklist-icon">3</div>
+        <div class="checklist-text">
+          <strong>水流是否"站不稳"？</strong>
+          <span>如果你在水中无法稳定站立或行走，说明水流已经超过你的能力上限。不要用"再试试看"来挑战物理定律。</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="checklist-verdict reveal">
+      只要有一个"否" —— 不建议深入。这不是胆量问题，是生存数学。
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ═══════════════════ SNAKE SECTION ═══════════════════ -->
+<section class="section snake-section" id="snakes">
+  <div class="section-inner">
+    <div class="section-header reveal">
+      <div class="section-tier-label" style="background: rgba(45,212,191,0.1); color: var(--accent-teal); border: 1px solid rgba(45,212,191,0.2);">
+        动物风险 · WILDLIFE
+      </div>
+      <h2 class="section-title">蛇类：存在但非主要威胁</h2>
+      <p class="section-desc">有，但在溯溪里属于低频风险项。整体优先级远低于水流和地形，但不能完全忽略。</p>
+    </div>
+
+    <!-- Verdict cards -->
+    <div class="snake-verdict-grid reveal">
+      <div class="snake-verdict-card">
+        <div class="icon">
+          <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
+            <path d="M6 28 Q10 20, 16 18 Q22 16, 24 10 Q26 4, 30 6" stroke="rgba(100,200,100,0.5)" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+            <circle cx="30" cy="6" r="2" fill="rgba(100,200,100,0.6)"/>
+            <path d="M28 4 L32 2 M28 8 L32 10" stroke="rgba(255,59,59,0.5)" stroke-width="1" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div class="label" style="color: var(--accent-teal);">概率不高</div>
+        <div class="note">可能遇到，但不是主要威胁</div>
+      </div>
+      <div class="snake-verdict-card">
+        <div class="icon">
+          <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
+            <circle cx="18" cy="18" r="14" fill="none" stroke="rgba(56,189,248,0.3)" stroke-width="1.5"/>
+            <path d="M12 18 L18 12 L24 18 L18 24Z" fill="rgba(56,189,248,0.15)" stroke="rgba(56,189,248,0.3)" stroke-width="1"/>
+          </svg>
+        </div>
+        <div class="label" style="color: var(--accent-blue);">核心水道风险低</div>
+        <div class="note">蛇很少在强水流中停留</div>
+      </div>
+      <div class="snake-verdict-card">
+        <div class="icon">
+          <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
+            <path d="M8 28 L18 8 L28 28Z" fill="none" stroke="rgba(255,140,50,0.4)" stroke-width="1.5"/>
+            <line x1="18" y1="14" x2="18" y2="22" stroke="rgba(255,140,50,0.5)" stroke-width="2" stroke-linecap="round"/>
+            <circle cx="18" cy="25" r="1.5" fill="rgba(255,140,50,0.5)"/>
+          </svg>
+        </div>
+        <div class="label" style="color: var(--accent-orange);">边缘区注意</div>
+        <div class="note">河岸草丛、倒木、石缝</div>
+      </div>
+    </div>
+
+    <!-- Animal risk tiers -->
+    <h3 style="font-family: 'Noto Serif SC', serif; font-weight: 700; font-size: 1.3rem; margin-bottom: 1.5rem; text-align: center;">动物风险真实排序</h3>
+
+    <div class="animal-tiers">
+      <div class="animal-tier gold reveal">
+        <div class="animal-tier-medal">🥇</div>
+        <div class="animal-tier-content">
+          <h4>第一层：现实威胁</h4>
+          <p>滑倒 + 落水 + 扭伤 — 这才是每次出行都会面对的"动物"。</p>
+        </div>
+      </div>
+      <div class="animal-tier silver reveal">
+        <div class="animal-tier-medal">🥈</div>
+        <div class="animal-tier-content">
+          <h4>第二层：偶发</h4>
+          <p>蜂类（黄蜂/马蜂）· 蚂蟥（部分山地）· 刺植物划伤</p>
+        </div>
+      </div>
+      <div class="animal-tier bronze reveal">
+        <div class="animal-tier-medal">🥉</div>
+        <div class="animal-tier-content">
+          <h4>第三层：低概率但要知道</h4>
+          <p>毒蛇（蝮蛇类为主）· 蜈蚣（夜间石缝）</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Snake species & prevention -->
+    <div class="snake-grid">
+      <div class="snake-card reveal">
+        <h3 class="snake-card-title">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent-teal)" stroke-width="2" style="vertical-align: middle; margin-right: 0.4rem;"><path d="M6 20 Q10 12, 16 10 Q22 8, 22 4"/><circle cx="22" cy="4" r="1.5" fill="var(--accent-teal)"/></svg>
+          重庆东北部常见蛇类
+        </h3>
+        <ul>
+          <li>蝮蛇类 — 最常见毒蛇风险</li>
+          <li>乌梢蛇 — 无毒，体型较大</li>
+          <li>竹叶青 — 部分山区可能有</li>
+          <li>多数蛇不会主动攻击</li>
+          <li>攻击几乎来自"踩到/惊扰"</li>
+        </ul>
+      </div>
+
+      <div class="snake-card reveal">
+        <h3 class="snake-card-title">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent-teal)" stroke-width="2" style="vertical-align: middle; margin-right: 0.4rem;"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg>
+          高风险环境
+        </h3>
+        <ul>
+          <li>干湿交界地带（岩石晒台、河边草丛）</li>
+          <li>静水 + 灌木边缘</li>
+          <li>倒木下方、不明洞口</li>
+          <li>夜间 / 清晨温度低时段</li>
+        </ul>
+      </div>
+
+      <div class="snake-card reveal">
+        <h3 class="snake-card-title">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent-teal)" stroke-width="2" style="vertical-align: middle; margin-right: 0.4rem;"><circle cx="12" cy="12" r="10"/><path d="M12 8v5M12 16v0"/></svg>
+          实用预防措施
+        </h3>
+        <ul>
+          <li>避免踩"盲区"（草丛边缘、倒木下）</li>
+          <li>用登山杖"敲击式移动"提前警示</li>
+          <li>穿高帮鞋 / 包脚鞋 — 最有效措施</li>
+          <li>夜间避免溯溪（动物 + 地形双风险）</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════ SAFETY TIPS ═══════════════════ -->
+<section class="section" id="safety">
+  <div class="section-inner">
+    <div class="section-header reveal">
+      <div class="section-tier-label" style="background: rgba(45,212,191,0.1); color: var(--accent-teal); border: 1px solid rgba(45,212,191,0.2);">
+        安全守则 · SAFETY
+      </div>
+      <h2 class="section-title">降低蛇咬风险</h2>
+    </div>
+
+    <div class="safety-grid">
+      <div class="safety-card reveal">
+        <div class="safety-icon">
+          <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+            <circle cx="24" cy="24" r="18" fill="none" stroke="var(--accent-teal)" stroke-width="2"/>
+            <path d="M18 18 L30 18 L30 30 L18 30Z" fill="none" stroke="var(--accent-teal)" stroke-width="1.5"/>
+            <line x1="24" y1="21" x2="24" y2="28" stroke="var(--accent-teal)" stroke-width="2" stroke-linecap="round"/>
+            <circle cx="24" cy="15" r="1.5" fill="var(--accent-teal)"/>
+          </svg>
+        </div>
+        <h4>避免盲区</h4>
+        <p>不踩草丛边缘石头、不翻倒木、不探不明洞口。给看不见的区域留足安全距离。</p>
+      </div>
+
+      <div class="safety-card reveal">
+        <div class="safety-icon">
+          <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+            <line x1="24" y1="8" x2="24" y2="40" stroke="var(--accent-teal)" stroke-width="2" stroke-linecap="round"/>
+            <circle cx="24" cy="8" r="4" fill="none" stroke="var(--accent-teal)" stroke-width="1.5"/>
+            <path d="M20 35 L24 40 L28 35" stroke="var(--accent-teal)" stroke-width="1.5" fill="none"/>
+            <path d="M18 30 Q24 26, 30 30" stroke="var(--accent-teal)" stroke-width="1" stroke-dasharray="2 2"/>
+          </svg>
+        </div>
+        <h4>敲击移动</h4>
+        <p>用登山杖或石头轻敲前方路径。振动会给隐藏的动物提前警示，大多数蛇会在你到达前离开。</p>
+      </div>
+
+      <div class="safety-card reveal">
+        <div class="safety-icon">
+          <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+            <path d="M14 38 Q12 28, 16 20 Q20 12, 24 10 Q28 12, 32 20 Q36 28, 34 38" fill="none" stroke="var(--accent-teal)" stroke-width="2"/>
+            <line x1="14" y1="38" x2="34" y2="38" stroke="var(--accent-teal)" stroke-width="2"/>
+            <path d="M18 26 L30 26" stroke="var(--accent-teal)" stroke-width="1.5"/>
+            <path d="M20 30 L28 30" stroke="var(--accent-teal)" stroke-width="1"/>
+          </svg>
+        </div>
+        <h4>高帮包脚鞋</h4>
+        <p>最有效的单一预防措施。覆盖脚踝的鞋子将蛇咬概率极大降低，同时保护脚踝防扭伤。</p>
+      </div>
+
+      <div class="safety-card reveal">
+        <div class="safety-icon">
+          <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+            <circle cx="24" cy="24" r="16" fill="none" stroke="var(--accent-teal)" stroke-width="2"/>
+            <path d="M24 12 L24 24 L32 30" stroke="var(--accent-teal)" stroke-width="2" stroke-linecap="round" fill="none"/>
+            <circle cx="24" cy="8" r="1" fill="var(--accent-teal)"/>
+            <circle cx="36" cy="24" r="1" fill="var(--accent-teal)"/>
+            <circle cx="24" cy="40" r="1" fill="var(--accent-teal)"/>
+            <circle cx="12" cy="24" r="1" fill="var(--accent-teal)"/>
+          </svg>
+        </div>
+        <h4>避免夜间溯溪</h4>
+        <p>夜间是蛇类活跃时段，同时地形可视性大幅下降。动物风险 + 地形风险叠加，危险系数成倍增长。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════ FOOTER ═══════════════════ -->
+<footer class="footer">
+  <p class="footer-quote">
+    溯溪不是"敢不敢"的问题，<br>
+    而是"能不能退"的问题。
+  </p>
+  <p>溯溪风险全景图 · 安全出行 · 量力而行</p>
+</footer>
+
+<script>
+// ── Intersection Observer for reveal animations ──
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach((entry, index) => {
+    if (entry.isIntersecting) {
+      setTimeout(() => {
+        entry.target.classList.add('visible');
+      }, index * 80);
+      observer.unobserve(entry.target);
+    }
+  });
+}, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+// ── Smooth parallax on hero ──
+window.addEventListener('scroll', () => {
+  const scrollY = window.scrollY;
+  const hero = document.querySelector('.hero-content');
+  if (hero && scrollY < window.innerHeight) {
+    hero.style.transform = `translateY(${scrollY * 0.25}px)`;
+    hero.style.opacity = 1 - (scrollY / window.innerHeight) * 0.8;
+  }
+}, { passive: true });
+</script>
+
+</body>
+</html>

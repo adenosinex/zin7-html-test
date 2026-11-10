@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🔧 小说文本敏感词清洗工具</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<style>
+:root {
+    --bg: #f3f4f6; --panel: #ffffff; --border: #e5e7eb;
+    --text: #1f2937; --muted: #6b7280; --primary: #3b82f6;
+    --danger: #ef4444; --success: #10b981;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background: var(--bg); color: var(--text); height: 100vh; display: flex; flex-direction: column;
+}
+
+/* Header */
+header {
+    background: var(--panel); border-bottom: 1px solid var(--border);
+    padding: 12px 24px; display: flex; align-items: center; justify-content: space-between;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+h1 { font-size: 18px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+.header-actions { display: flex; gap: 10px; }
+
+/* Layout */
+.main-container {
+    flex: 1; display: grid; grid-template-columns: 320px 1fr; overflow: hidden;
+}
+@media (max-width: 900px) { .main-container { grid-template-columns: 1fr; grid-template-rows: auto 1fr; } }
+
+/* Sidebar: Rules */
+.sidebar {
+    background: var(--panel); border-right: 1px solid var(--border);
+    display: flex; flex-direction: column; overflow: hidden;
+}
+.sidebar-header {
+    padding: 12px 16px; border-bottom: 1px solid var(--border);
+    font-weight: 600; font-size: 14px; display: flex; justify-content: space-between; align-items: center;
+}
+.rule-list { flex: 1; overflow-y: auto; padding: 10px; }
+.rule-item {
+    background: #f9fafb; border: 1px solid var(--border); border-radius: 6px;
+    padding: 10px; margin-bottom: 8px; position: relative; transition: all 0.2s;
+}
+.rule-item:hover { border-color: var(--primary); }
+.rule-item.disabled { opacity: 0.5; background: #f3f4f6; }
+.rule-row { display: flex; gap: 8px; margin-bottom: 6px; align-items: center; }
+.rule-input {
+    flex: 1; padding: 6px 8px; border: 1px solid var(--border); border-radius: 4px;
+    font-size: 13px; outline: none;
+}
+.rule-input:focus { border-color: var(--primary); }
+.rule-type {
+    width: 70px; padding: 6px; border: 1px solid var(--border); border-radius: 4px;
+    font-size: 12px; background: #fff;
+}
+.rule-actions { display: flex; justify-content: space-between; align-items: center; margin-top: 4px; }
+.btn-icon {
+    background: none; border: none; cursor: pointer; color: var(--muted);
+    padding: 4px; border-radius: 4px; font-size: 14px;
+}
+.btn-icon:hover { background: #e5e7eb; color: var(--text); }
+.btn-icon.del:hover { color: var(--danger); background: #fee2e2; }
+.toggle-switch {
+    width: 36px; height: 20px; background: #d1d5db; border-radius: 20px;
+    position: relative; cursor: pointer; transition: 0.2s;
+}
+.toggle-switch::after {
+    content: ''; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px;
+    background: #fff; border-radius: 50%; transition: 0.2s;
+}
+.toggle-switch.active { background: var(--primary); }
+.toggle-switch.active::after { left: 18px; }
+
+.add-rule-btn {
+    margin: 10px; padding: 10px; border: 1px dashed var(--border); border-radius: 6px;
+    background: transparent; color: var(--muted); cursor: pointer; font-size: 13px;
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+}
+.add-rule-btn:hover { border-color: var(--primary); color: var(--primary); background: #eff6ff; }
+
+/* Content Area */
+.content-area {
+    display: flex; flex-direction: column; overflow: hidden; background: #f9fafb;
+}
+.tabs {
+    display: flex; background: var(--panel); border-bottom: 1px solid var(--border);
+}
+.tab {
+    padding: 12px 24px; cursor: pointer; font-size: 14px; font-weight: 500;
+    border-bottom: 2px solid transparent; color: var(--muted);
+}
+.tab.active { color: var(--primary); border-bottom-color: var(--primary); background: #eff6ff; }
+
+.tab-panel { flex: 1; display: none; flex-direction: column; padding: 20px; overflow-y: auto; }
+.tab-panel.active { display: flex; }
+
+/* Text Editor */
+.editor-wrap { display: flex; gap: 20px; height: 100%; }
+.editor-col { flex: 1; display: flex; flex-direction: column; gap: 8px; }
+.editor-label { font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; }
+textarea {
+    flex: 1; padding: 12px; border: 1px solid var(--border); border-radius: 8px;
+    font-family: "Cascadia Code", "Fira Code", monospace; font-size: 13px; line-height: 1.6;
+    resize: none; outline: none; background: #fff;
+}
+textarea:focus { border-color: var(--primary); box-shadow: 0 0 0 2px rgba(59,130,246,0.1); }
+
+/* Batch Process */
+.batch-controls {
+    background: var(--panel); padding: 20px; border-radius: 8px; border: 1px solid var(--border);
+    margin-bottom: 20px; display: flex; flex-direction: column; gap: 15px;
+}
+.file-drop {
+    border: 2px dashed var(--border); border-radius: 8px; padding: 30px; text-align: center;
+    cursor: pointer; transition: 0.2s; color: var(--muted);
+}
+.file-drop:hover { border-color: var(--primary); background: #eff6ff; color: var(--primary); }
+.file-list { margin-top: 10px; max-height: 200px; overflow-y: auto; font-size: 13px; }
+.file-item { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #f3f4f6; }
+.status-badge {
+    padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 600;
+}
+.status-pending { background: #f3f4f6; color: var(--muted); }
+.status-done { background: #d1fae5; color: var(--success); }
+
+/* Buttons */
+.btn {
+    padding: 8px 16px; border-radius: 6px; border: none; font-size: 13px; font-weight: 500;
+    cursor: pointer; transition: 0.2s; display: inline-flex; align-items: center; gap: 6px;
+}
+.btn-primary { background: var(--primary); color: #fff; }
+.btn-primary:hover { background: #2563eb; }
+.btn-secondary { background: #fff; border: 1px solid var(--border); color: var(--text); }
+.btn-secondary:hover { background: #f9fafb; border-color: var(--muted); }
+.btn-danger { background: #fff; border: 1px solid #fecaca; color: var(--danger); }
+.btn-danger:hover { background: #fef2f2; }
+
+/* Toast */
+.toast {
+    position: fixed; bottom: 20px; right: 20px; background: #1f2937; color: #fff;
+    padding: 12px 20px; border-radius: 8px; font-size: 13px; opacity: 0; transform: translateY(20px);
+    transition: 0.3s; z-index: 1000;
+}
+.toast.show { opacity: 1; transform: translateY(0); }
+</style>
+</head>
+<body>
+
+<header>
+    <h1>🛡️ 小说文本清洗工具</h1>
+    <div class="header-actions">
+        <button class="btn btn-secondary" onclick="exportRules()">📤 导出规则</button>
+        <label class="btn btn-secondary" style="cursor:pointer">
+            📥 导入规则 <input type="file" accept=".json" onchange="importRules(this)" style="display:none">
+        </label>
+        <button class="btn btn-danger" onclick="resetRules()">🔄 重置默认</button>
+    </div>
+</header>
+
+<div class="main-container">
+    <!-- Sidebar: Rules -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <span>替换规则 (<span id="ruleCount">0</span>)</span>
+        </div>
+        <div class="rule-list" id="ruleList"></div>
+        <button class="add-rule-btn" onclick="addRule()">+ 添加新规则</button>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="content-area">
+        <div class="tabs">
+            <div class="tab active" onclick="switchTab('single')">📝 单文本测试</div>
+            <div class="tab" onclick="switchTab('batch')">📂 批量文件处理</div>
+        </div>
+
+        <!-- Single Text Panel -->
+        <div id="panel-single" class="tab-panel active">
+            <div class="editor-wrap">
+                <div class="editor-col">
+                    <div class="editor-label">原始文本</div>
+                    <textarea id="srcText" placeholder="在此粘贴需要清洗的文本..."></textarea>
+                </div>
+                <div class="editor-col">
+                    <div class="editor-label">清洗结果</div>
+                    <textarea id="dstText" readonly placeholder="结果将显示在这里..."></textarea>
+                </div>
+            </div>
+            <div style="margin-top: 10px; display: flex; justify-content: flex-end;">
+                <button class="btn btn-primary" onclick="processSingle()">🚀 立即清洗</button>
+            </div>
+        </div>
+
+        <!-- Batch Panel -->
+        <div id="panel-batch" class="tab-panel">
+            <div class="batch-controls">
+                <div class="file-drop" onclick="document.getElementById('fileInput').click()">
+                    <div style="font-size: 24px; margin-bottom: 8px;">📂</div>
+                    <div>点击选择文件或拖拽文件夹到这里</div>
+                    <div style="font-size: 12px; margin-top: 4px; opacity: 0.7;">支持 .txt 文件</div>
+                    <input type="file" id="fileInput" multiple webkitdirectory directory style="display:none" onchange="handleFiles(this.files)">
+                </div>
+                
+                <div id="fileListContainer" style="display:none">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px">
+                        <strong>文件列表 (<span id="fileCount">0</span>)</strong>
+                        <button class="btn btn-primary" onclick="processBatch()">🚀 开始批量清洗并下载 ZIP</button>
+                    </div>
+                    <div class="file-list" id="fileList"></div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// =========================================================================== //
+// 默认规则配置
+// =========================================================================== //
+const DEFAULT_RULES = [
+    { id: 1, type: 'regex', find: '十六岁(?P<de>[的左右上下]?)', replace: '这个年纪$<de>', enabled: true },
+    { id: 2, type: 'regex', find: '\\b16岁(?P<de>[的左右上下]?)', replace: '这个年纪$<de>', enabled: true },
+    { id: 3, type: 'regex', find: '(?:一[四五六七八九]|[二三]十)岁(?P<de>[的左右上下]?)', replace: '这个年纪$<de>', enabled: true },
+    { id: 4, type: 'text', find: '小萝莉', replace: '女孩', enabled: true },
+    { id: 5, type: 'text', find: '萝莉', replace: '女孩', enabled: true },
+    { id: 6, type: 'text', find: '刚开始发育', replace: '当时', enabled: true },
+    { id: 7, type: 'text', find: '刚刚发育', replace: '当时', enabled: true },
+    { id: 8, type: 'text', find: '正在发育', replace: '当时', enabled: true },
+    { id: 9, type: 'text', find: '稚嫩的', replace: '年轻的', enabled: true },
+    { id: 10, type: 'text', find: '稚嫩', replace: '年轻', enabled: true },
+    { id: 11, type: 'text', find: '小孩子一样', replace: '有些拘谨', enabled: true },
+    { id: 12, type: 'text', find: '像个小孩子一样', replace: '显得有些拘谨', enabled: true },
+    { id: 13, type: 'text', find: '小孩子家的', replace: '这样的话', enabled: true },
+    { id: 14, type: 'text', find: '小孩子', replace: '女孩', enabled: true },
+];
+
+let rules = [];
+let batchFiles = [];
+
+// =========================================================================== //
+// 初始化与存储
+// =========================================================================== //
+function init() {
+    const saved = localStorage.getItem('cleaner_rules');
+    if (saved) {
+        try { rules = JSON.parse(saved); } catch(e) { rules = [...DEFAULT_RULES]; }
+    } else {
+        rules = [...DEFAULT_RULES];
+    }
+    renderRules();
+    
+    // 绑定单文本实时输入（可选，这里用按钮触发更稳妥）
+    document.getElementById('srcText').addEventListener('input', debounce(processSingle, 500));
+}
+
+function saveRules() {
+    localStorage.setItem('cleaner_rules', JSON.stringify(rules));
+    renderRules();
+}
+
+// =========================================================================== //
+// 规则管理 UI
+// =========================================================================== //
+function renderRules() {
+    const list = document.getElementById('ruleList');
+    document.getElementById('ruleCount').textContent = rules.length;
+    list.innerHTML = '';
+
+    rules.forEach((rule, index) => {
+        const div = document.createElement('div');
+        div.className = `rule-item ${rule.enabled ? '' : 'disabled'}`;
+        div.innerHTML = `
+            <div class="rule-row">
+                <select class="rule-type" onchange="updateRule(${index}, 'type', this.value)">
+                    <option value="text" ${rule.type==='text'?'selected':''}>文本</option>
+                    <option value="regex" ${rule.type==='regex'?'selected':''}>正则</option>
+                </select>
+                <input class="rule-input" placeholder="查找内容" value="${escHtml(rule.find)}" onchange="updateRule(${index}, 'find', this.value)">
+            </div>
+            <div class="rule-row">
+                <input class="rule-input" placeholder="替换为" value="${escHtml(rule.replace)}" onchange="updateRule(${index}, 'replace', this.value)">
+            </div>
+            <div class="rule-actions">
+                <div class="toggle-switch ${rule.enabled ? 'active' : ''}" onclick="toggleRule(${index})"></div>
+                <button class="btn-icon del" onclick="deleteRule(${index})" title="删除">🗑</button>
+            </div>
+        `;
+        list.appendChild(div);
+    });
+}
+
+function addRule() {
+    rules.push({ id: Date.now(), type: 'text', find: '', replace: '', enabled: true });
+    saveRules();
+    // 滚动到底部
+    setTimeout(() => {
+        const list = document.getElementById('ruleList');
+        list.scrollTop = list.scrollHeight;
+    }, 100);
+}
+
+function deleteRule(index) {
+    if(confirm('确定删除这条规则吗？')) {
+        rules.splice(index, 1);
+        saveRules();
+    }
+}
+
+function updateRule(index, field, value) {
+    rules[index][field] = value;
+    saveRules();
+}
+
+function toggleRule(index) {
+    rules[index].enabled = !rules[index].enabled;
+    saveRules();
+}
+
+function resetRules() {
+    if(confirm('确定重置为默认规则吗？自定义规则将丢失。')) {
+        rules = [...DEFAULT_RULES];
+        saveRules();
+        showToast('已重置为默认规则');
+    }
+}
+
+// =========================================================================== //
+// 核心清洗逻辑
+// =========================================================================== //
+function cleanText(text) {
+    let result = text;
+    
+    rules.forEach(rule => {
+        if (!rule.enabled || !rule.find) return;
+        
+        try {
+            if (rule.type === 'regex') {
+                // 处理命名组语法转换: Python (?P<name>...) -> JS (?<name>...)
+                let jsPattern = rule.find.replace(/\(\?P<(\w+)>/g, '(?<$1>');
+                const regex = new RegExp(jsPattern, 'g');
+                // JS replace 支持 $<name> 语法
+                result = result.replace(regex, rule.replace);
+            } else {
+                // 普通文本替换
+                while (result.includes(rule.find)) {
+                    result = result.replace(rule.find, rule.replace);
+                }
+            }
+        } catch (e) {
+            console.warn(`规则执行失败 [${rule.find}]:`, e);
+        }
+    });
+    
+    return result;
+}
+
+function processSingle() {
+    const src = document.getElementById('srcText').value;
+    if (!src) return;
+    const dst = cleanText(src);
+    document.getElementById('dstText').value = dst;
+}
+
+// =========================================================================== //
+// 批量处理
+// =========================================================================== //
+function handleFiles(files) {
+    batchFiles = Array.from(files).filter(f => f.name.endsWith('.txt'));
+    renderFileList();
+}
+
+function renderFileList() {
+    const container = document.getElementById('fileListContainer');
+    const list = document.getElementById('fileList');
+    const count = document.getElementById('fileCount');
+    
+    if (batchFiles.length === 0) {
+        container.style.display = 'none';
+        return;
+    }
+    
+    container.style.display = 'block';
+    count.textContent = batchFiles.length;
+    list.innerHTML = '';
+    
+    batchFiles.forEach((file, idx) => {
+        const div = document.createElement('div');
+        div.className = 'file-item';
+        div.id = `file-status-${idx}`;
+        div.innerHTML = `
+            <span>${file.name} <small style="color:#9ca3af">(${formatSize(file.size)})</small></span>
+            <span class="status-badge status-pending">等待处理</span>
+        `;
+        list.appendChild(div);
+    });
+}
+
+async function processBatch() {
+    if (batchFiles.length === 0) return;
+    
+    const zip = new JSZip();
+    const folder = zip.folder("cleaned_novels");
+    
+    showToast(`开始处理 ${batchFiles.length} 个文件...`);
+    
+    for (let i = 0; i < batchFiles.length; i++) {
+        const file = batchFiles[i];
+        const statusEl = document.querySelector(`#file-status-${i} .status-badge`);
+        
+        try {
+            const text = await file.text();
+            const cleaned = cleanText(text);
+            
+            // 添加到 ZIP
+            folder.file(file.name, cleaned);
+            
+            if (statusEl) {
+                statusEl.textContent = '已完成';
+                statusEl.className = 'status-badge status-done';
+            }
+        } catch (e) {
+            console.error(e);
+            if (statusEl) {
+                statusEl.textContent = '失败';
+                statusEl.style.background = '#fee2e2';
+                statusEl.style.color = '#ef4444';
+            }
+        }
+    }
+    
+    showToast('处理完成，正在生成 ZIP...');
+    
+    // 生成并下载 ZIP
+    const content = await zip.generateAsync({ type: "blob" });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(content);
+    link.download = `cleaned_novels_${new Date().getTime()}.zip`;
+    link.click();
+    
+    showToast('✅ 下载已开始');
+}
+
+// =========================================================================== //
+// 导入导出
+// =========================================================================== //
+function exportRules() {
+    const dataStr = JSON.stringify(rules, null, 2);
+    const blob = new Blob([dataStr], { type: "application/json" });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `cleaner_rules_${new Date().getTime()}.json`;
+    link.click();
+    showToast('规则已导出');
+}
+
+function importRules(input) {
+    const file = input.files[0];
+    if (!file) return;
+    
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        try {
+            const imported = JSON.parse(e.target.result);
+            if (Array.isArray(imported)) {
+                rules = imported;
+                saveRules();
+                showToast('✅ 规则导入成功');
+            } else {
+                alert('文件格式错误');
+            }
+        } catch (err) {
+            alert('JSON 解析失败');
+        }
+    };
+    reader.readAsText(file);
+    input.value = ''; // reset
+}
+
+// =========================================================================== //
+// 辅助函数
+// =========================================================================== //
+function switchTab(tabName) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    
+    event.target.classList.add('active');
+    document.getElementById(`panel-${tabName}`).classList.add('active');
+}
+
+function escHtml(str) {
+    return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+function formatSize(bytes) {
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+    return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+}
+
+function showToast(msg) {
+    const toast = document.getElementById('toast');
+    toast.textContent = msg;
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 3000);
+}
+
+function debounce(func, wait) {
+    let timeout;
+    return function(...args) {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => func.apply(this, args), wait);
+    };
+}
+
+// Start
+init();
+</script>
+</body>
+</html>

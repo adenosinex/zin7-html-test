@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🌟 正则匹配提取器 · 智能分类输出</title>
+    <style>
+        :root {
+            --bg: #f5f6f8;
+            --card-bg: #ffffff;
+            --text: #2c3e50;
+            --text-secondary: #5a6c7d;
+            --border: #e0e5ea;
+            --accent: #4a6cf7;
+            --accent-hover: #3651d5;
+            --accent-light: #eef1fd;
+            --danger: #e74c3c;
+            --danger-light: #fdecea;
+            --success: #27ae60;
+            --success-light: #eafaf1;
+            --warning: #e67e22;
+            --warning-light: #fdf2e4;
+            --shadow: 0 2px 16px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.08);
+            --radius: 12px;
+            --radius-sm: 8px;
+            --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            --font-mono: 'SF Mono', 'Cascadia Code', 'Consolas', 'Monaco', 'Menlo', 'Source Code Pro', monospace;
+            --font-sans: 'Inter', 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-sans);
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            background-image:
+                radial-gradient(ellipse at 15% 20%, rgba(74, 108, 247, 0.04) 0%, transparent 55%),
+                radial-gradient(ellipse at 85% 75%, rgba(39, 174, 96, 0.03) 0%, transparent 55%),
+                radial-gradient(ellipse at 50% 50%, rgba(0, 0, 0, 0.015) 0%, transparent 70%);
+        }
+
+        .container {
+            width: 100%;
+            max-width: 960px;
+            background: var(--card-bg);
+            border-radius: 20px;
+            box-shadow: var(--shadow-lg);
+            padding: 36px 32px 28px;
+            border: 1px solid var(--border);
+            transition: box-shadow var(--transition);
+        }
+
+        .container:hover {
+            box-shadow: var(--shadow-lg), 0 0 0 1px rgba(74, 108, 247, 0.06);
+        }
+
+        /* 头部 */
+        .header {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 28px;
+            flex-wrap: wrap;
+        }
+        .header .icon-circle {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: var(--accent-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            flex-shrink: 0;
+            color: var(--accent);
+        }
+        .header h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            color: var(--text);
+            margin: 0;
+        }
+        .header .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            background: var(--warning-light);
+            color: var(--warning);
+            letter-spacing: 0.02em;
+            white-space: nowrap;
+        }
+
+        /* 两列布局：左侧输入，右侧双结果 */
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 16px;
+        }
+        @media (max-width: 750px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+            .container {
+                padding: 22px 16px 18px;
+                border-radius: 16px;
+            }
+            .header h1 {
+                font-size: 1.25rem;
+            }
+        }
+
+        /* 区块 */
+        .section {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+        .section-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 700;
+            font-size: 0.82rem;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            color: var(--text-secondary);
+            user-select: none;
+        }
+        .section-label .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+            flex-shrink: 0;
+        }
+        .dot.input-dot {
+            background: var(--accent);
+        }
+        .dot.separator-dot {
+            background: #27ae60;
+        }
+        .dot.supplement-dot {
+            background: #8e44ad;
+        }
+        .dot.regex-dot {
+            background: var(--warning);
+        }
+
+        /* 文本域与输入 */
+        textarea,
+        input[type="text"] {
+            width: 100%;
+            font-family: var(--font-mono);
+            font-size: 0.88rem;
+            line-height: 1.6;
+            padding: 13px 15px;
+            border: 2px solid var(--border);
+            border-radius: var(--radius-sm);
+            background: #fafbfc;
+            color: var(--text);
+            resize: vertical;
+            transition: all var(--transition);
+            outline: none;
+        }
+        textarea {
+            min-height: 110px;
+        }
+        textarea:focus,
+        input[type="text"]:focus {
+            border-color: var(--accent);
+            background: #fff;
+            box-shadow: 0 0 0 4px rgba(74, 108, 247, 0.07);
+        }
+        .output-separator {
+            background: #f9fafb;
+            border-color: #d5e0d8;
+            color: #1a3c2a;
+        }
+        .output-separator.has-results {
+            border-color: #a3d4b3;
+            background: #fcfdfc;
+        }
+        .output-separator.no-results {
+            border-color: #e8d5d5;
+            background: #fdfafa;
+            color: #8b6b6b;
+        }
+        .output-supplement {
+            background: #faf9fc;
+            border-color: #d9cfe0;
+            color: #3d2c4a;
+        }
+        .output-supplement.has-results {
+            border-color: #c1a9d4;
+            background: #fefcff;
+        }
+        .output-supplement.no-results {
+            border-color: #e8d5d5;
+            background: #fdfafa;
+            color: #8b6b6b;
+        }
+        input[type="text"] {
+            min-height: auto;
+            padding: 12px 16px;
+            font-size: 0.86rem;
+            letter-spacing: 0.01em;
+            border-radius: var(--radius-sm);
+            background: #fdfaf6;
+            border-color: #e8d9c0;
+            color: #5c3d1e;
+        }
+        input[type="text"]:focus {
+            border-color: #e67e22;
+            box-shadow: 0 0 0 4px rgba(230, 126, 34, 0.06);
+            background: #fffefb;
+        }
+
+        /* 按钮 */
+        .button-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 4px;
+        }
+        button {
+            font-family: var(--font-sans);
+            font-weight: 600;
+            font-size: 0.8rem;
+            padding: 9px 16px;
+            border: none;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            letter-spacing: 0.02em;
+            transition: all var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            white-space: nowrap;
+            user-select: none;
+            background: #fff;
+            color: var(--text);
+            border: 2px solid var(--border);
+        }
+        button:active {
+            transform: scale(0.97);
+        }
+        .btn-primary {
+            background: var(--accent);
+            color: #fff;
+            border-color: var(--accent);
+            box-shadow: 0 2px 8px rgba(74, 108, 247, 0.25);
+        }
+        .btn-primary:hover {
+            background: var(--accent-hover);
+            border-color: var(--accent-hover);
+            box-shadow: 0 4px 16px rgba(74, 108, 247, 0.35);
+        }
+        .btn-copy-separator {
+            color: var(--success);
+            border-color: #b8dcc8;
+        }
+        .btn-copy-separator:hover {
+            background: var(--success-light);
+            border-color: var(--success);
+        }
+        .btn-copy-supplement {
+            color: #8e44ad;
+            border-color: #d9cfe0;
+        }
+        .btn-copy-supplement:hover {
+            background: #f6f0fa;
+            border-color: #8e44ad;
+        }
+        .btn-clear {
+            color: var(--danger);
+            border-color: #e8cccc;
+        }
+        .btn-clear:hover {
+            background: var(--danger-light);
+            border-color: var(--danger);
+        }
+        .copied {
+            animation: pulseCopy 0.5s ease;
+        }
+        @keyframes pulseCopy {
+            0%,
+            100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.04);
+            }
+        }
+
+        /* 统计信息 */
+        .stats {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            align-items: center;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            min-height: 20px;
+            margin-top: 2px;
+            font-weight: 500;
+        }
+        .stats .count {
+            font-weight: 700;
+            font-family: var(--font-mono);
+        }
+        .count-separator {
+            color: #27ae60;
+        }
+        .count-supplement {
+            color: #8e44ad;
+        }
+        .stats .sep {
+            color: #ccc;
+            margin: 0 2px;
+        }
+
+        .hint {
+            font-size: 0.72rem;
+            color: #999;
+            margin-top: 2px;
+            letter-spacing: 0.02em;
+            line-height: 1.5;
+        }
+        .hint code {
+            background: #f5f5f5;
+            padding: 2px 7px;
+            border-radius: 4px;
+            font-size: 0.76rem;
+            font-family: var(--font-mono);
+            color: #666;
+        }
+
+        .toast {
+            position: fixed;
+            top: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #2c3e50;
+            color: #fff;
+            padding: 10px 24px;
+            border-radius: 30px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            z-index: 1000;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+        }
+        .toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(4px);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- 头部 -->
+        <div class="header">
+            <div class="icon-circle">🔍</div>
+            <h1>正则匹配提取器</h1>
+            <span class="badge">分类输出 · 自动补分隔符</span>
+        </div>
+
+        <!-- 正则表达式输入 -->
+        <div class="section" style="margin-bottom: 16px;">
+            <label class="section-label">
+                <span class="dot regex-dot"></span> 正则表达式
+            </label>
+            <input
+            type="text"
+            id="regexInput"
+            value="[a-zA-Z]{3,4}-?\d{3,4}"
+            placeholder="输入正则，如：[a-zA-Z]{3,4}-?\d{3,4}"
+            spellcheck="false"
+            autocomplete="off"
+            >
+            <span class="hint">
+                默认匹配：3-4个字母 + 可选连字符 + 3-4个数字<br>
+                示例：<code>ABC-1234</code>（原样输出到结果1）、<code>DEFG567</code>（补“-”后输出到结果2）
+            </span>
+        </div>
+
+        <!-- 两列：输入 | 双结果 -->
+        <div class="main-grid">
+            <!-- 左侧：输入文本 -->
+            <div class="section">
+                <label class="section-label" for="inputText">
+                    <span class="dot input-dot"></span> 待匹配文本
+                </label>
+                <textarea
+                id="inputText"
+                placeholder="在此粘贴或输入文本...
+                    示例：
+                    产品编号: ABC-1234, DEFG567, XYZ8901
+                    批次: BATCH2024, ITEM-999, KIT0042"
+                    spellcheck="false"
+                >产品编号: ABC-1234, DEFG567, XYZ8901, Hello-999
+                    批次: BATCH2024, ITEM-999, KIT0042
+                    混合: abc1234, Test-5678, PROJ2025, REF8842</textarea>
+                <div class="button-row">
+                    <button class="btn-primary" id="btnMatch" title="执行匹配 (Ctrl+Enter)">
+                        ⚡ 匹配提取
+                    </button>
+                    <button class="btn-clear" id="btnClearInput" title="清空输入文本">
+                        🗑 清空输入
+                    </button>
+                </div>
+            </div>
+
+            <!-- 右侧：两个输出结果 -->
+            <div style="display: flex; flex-direction: column; gap: 16px;">
+                <!-- 结果1：原始带分隔符的条目 -->
+                <div class="section">
+                    <label class="section-label" for="outputSeparator">
+                        <span class="dot separator-dot"></span> 结果1：原样带分隔符
+                    </label>
+                    <textarea
+                    id="outputSeparator"
+                    class="output-separator"
+                    placeholder="原本就包含 '-' 的匹配项（原样输出）..."
+                    readonly
+                    spellcheck="false"
+                ></textarea>
+                <div class="stats" id="statsSeparator">
+                    <span>就绪</span>
+                </div>
+                <div class="button-row">
+                    <button class="btn-copy-separator" id="btnCopySeparator" title="复制结果1">
+                        📋 复制结果1
+                    </button>
+                    <button class="btn-clear" id="btnClearSeparator" title="清空结果1">
+                        ✕ 清空
+                    </button>
+                </div>
+            </div>
+
+            <!-- 结果2：无分隔符并已补 '-' 的条目 -->
+            <div class="section">
+                <label class="section-label" for="outputSupplement">
+                    <span class="dot supplement-dot"></span> 结果2：补充分隔符后
+                </label>
+                <textarea
+                id="outputSupplement"
+                class="output-supplement"
+                placeholder="原本不含 '-' 的匹配项（自动补 '-' 后输出）..."
+                readonly
+                spellcheck="false"
+            ></textarea>
+            <div class="stats" id="statsSupplement">
+                <span>就绪</span>
+            </div>
+            <div class="button-row">
+                <button class="btn-copy-supplement" id="btnCopySupplement" title="复制结果2">
+                    📋 复制结果2
+                </button>
+                <button class="btn-clear" id="btnClearSupplement" title="清空结果2">
+                    ✕ 清空
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Toast 提示 -->
+<div class="toast" id="toast"></div>
+
+<script>
+    (function() {
+        // DOM 元素
+        const regexInput = document.getElementById('regexInput');
+        const inputText = document.getElementById('inputText');
+        const outputSeparator = document.getElementById('outputSeparator');
+        const outputSupplement = document.getElementById('outputSupplement');
+        const statsSeparator = document.getElementById('statsSeparator');
+        const statsSupplement = document.getElementById('statsSupplement');
+        const btnMatch = document.getElementById('btnMatch');
+        const btnCopySeparator = document.getElementById('btnCopySeparator');
+        const btnCopySupplement = document.getElementById('btnCopySupplement');
+        const btnClearInput = document.getElementById('btnClearInput');
+        const btnClearSeparator = document.getElementById('btnClearSeparator');
+        const btnClearSupplement = document.getElementById('btnClearSupplement');
+        const toast = document.getElementById('toast');
+
+        let toastTimer = null;
+
+        function showToast(message, duration = 2000) {
+            if (toastTimer) clearTimeout(toastTimer);
+            toast.textContent = message;
+            toast.classList.add('show');
+            toastTimer = setTimeout(() => {
+                toast.classList.remove('show');
+                toastTimer = null;
+            }, duration);
+        }
+
+        // 核心匹配与分类逻辑
+        function performMatch() {
+            const regexStr = regexInput.value.trim();
+            const text = inputText.value;
+
+            // 重置样式与状态
+            outputSeparator.classList.remove('has-results', 'no-results');
+            outputSupplement.classList.remove('has-results', 'no-results');
+
+            if (!regexStr) {
+                outputSeparator.value = '';
+                outputSupplement.value = '';
+                statsSeparator.innerHTML = '<span style="color:#e74c3c;">⚠ 请输入正则表达式</span>';
+                statsSupplement.innerHTML = '<span style="color:#e74c3c;">⚠ 请输入正则表达式</span>';
+                outputSeparator.classList.add('no-results');
+                outputSupplement.classList.add('no-results');
+                return;
+            }
+
+            if (!text) {
+                outputSeparator.value = '';
+                outputSupplement.value = '';
+                statsSeparator.innerHTML = '<span style="color:#999;">📝 请输入待匹配文本</span>';
+                statsSupplement.innerHTML = '<span style="color:#999;">📝 请输入待匹配文本</span>';
+                return;
+            }
+
+            let regex;
+            try {
+                let flags = 'g';
+                let pattern = regexStr;
+                const flagMatch = regexStr.match(/^\/(.+)\/([gimsuy]*)$/);
+                if (flagMatch) {
+                    pattern = flagMatch[1];
+                    flags = flagMatch[2] || 'g';
+                    if (!flags.includes('g')) flags += 'g';
+                }
+                regex = new RegExp(pattern, flags);
+            } catch (e) {
+                outputSeparator.value = '';
+                outputSupplement.value = '';
+                const errMsg = `❌ 正则无效：${escapeHtml(e.message)}`;
+                statsSeparator.innerHTML = `<span style="color:#e74c3c;">${errMsg}</span>`;
+                statsSupplement.innerHTML = `<span style="color:#e74c3c;">${errMsg}</span>`;
+                outputSeparator.classList.add('no-results');
+                outputSupplement.classList.add('no-results');
+                return;
+            }
+
+            // 获取所有匹配项
+            const rawMatches = [];
+            regex.lastIndex = 0;
+            let match;
+            while ((match = regex.exec(text)) !== null) {
+                rawMatches.push(match[0]);
+                if (match[0].length === 0) {
+                    regex.lastIndex++;
+                    if (regex.lastIndex > text.length) break;
+                }
+            }
+
+            // 分类：包含 '-' 的放入 separatorList，不包含的放入 supplementList 并补 '-'
+            const separatorList = [];
+            const supplementList = [];
+
+            rawMatches.forEach(item => {
+                if (item.includes('-')) {
+                    separatorList.push(item);
+                } else {
+                    // 对于无分隔符的项，尝试在字母和数字之间插入 '-'（适用于默认模式）
+                    // 采用 replace 匹配“字母+数字”的结构，保留原样如果不符合该结构
+                    const formatted = item.replace(/^([a-zA-Z]+)(\d+)$/, '$1-$2');
+                    supplementList.push(formatted);
+                }
+            });
+
+            // 更新结果1：带分隔符的原样输出
+            if (separatorList.length > 0) {
+                outputSeparator.value = separatorList.join('\n');
+                outputSeparator.classList.add('has-results');
+                statsSeparator.innerHTML = `<span>✅ 带分隔符 <span class="count count-separator">${separatorList.length}</span> 条（原样）</span>`;
+            } else {
+                outputSeparator.value = '';
+                outputSeparator.classList.add('no-results');
+                statsSeparator.innerHTML = '<span style="color:#999;">😕 无带分隔符的匹配项</span>';
+            }
+
+            // 更新结果2：补充了分隔符的输出
+            if (supplementList.length > 0) {
+                outputSupplement.value = supplementList.join('\n');
+                outputSupplement.classList.add('has-results');
+                statsSupplement.innerHTML = `<span>✨ 已补分隔符 <span class="count count-supplement">${supplementList.length}</span> 条</span>`;
+            } else {
+                outputSupplement.value = '';
+                outputSupplement.classList.add('no-results');
+                statsSupplement.innerHTML = '<span style="color:#999;">😕 无需要补分隔符的匹配项</span>';
+            }
+        }
+
+        function escapeHtml(str) {
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
+
+        // 通用复制
+        function copyText(text, successMsg, buttonElement) {
+            if (!text) {
+                showToast('⚠ 没有可复制的内容');
+                return;
+            }
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(text).then(() => {
+                    showToast(successMsg);
+                    if (buttonElement) {
+                        buttonElement.classList.add('copied');
+                        setTimeout(() => buttonElement.classList.remove('copied'), 600);
+                    }
+                }).catch(() => {
+                    fallbackCopy(text, successMsg, buttonElement);
+                });
+            } else {
+                fallbackCopy(text, successMsg, buttonElement);
+            }
+        }
+
+        function fallbackCopy(text, successMsg, buttonElement) {
+            const ta = document.createElement('textarea');
+            ta.value = text;
+            ta.style.position = 'fixed';
+            ta.style.left = '-9999px';
+            ta.style.top = '-9999px';
+            ta.style.opacity = '0';
+            document.body.appendChild(ta);
+            ta.focus();
+            ta.select();
+            try {
+                const success = document.execCommand('copy');
+                if (success) {
+                    showToast(successMsg);
+                    if (buttonElement) {
+                        buttonElement.classList.add('copied');
+                        setTimeout(() => buttonElement.classList.remove('copied'), 600);
+                    }
+                } else {
+                    showToast('❌ 复制失败，请手动选择复制');
+                }
+            } catch (e) {
+                showToast('❌ 复制失败，请手动选择复制');
+            }
+            document.body.removeChild(ta);
+        }
+
+        function copySeparator() {
+            const text = outputSeparator.value;
+            const lines = text ? text.split('\n').length : 0;
+            copyText(text, `✅ 已复制结果1（带分隔符） ${lines} 条`, btnCopySeparator);
+        }
+
+        function copySupplement() {
+            const text = outputSupplement.value;
+            const lines = text ? text.split('\n').length : 0;
+            copyText(text, `✅ 已复制结果2（补充分隔符） ${lines} 条`, btnCopySupplement);
+        }
+
+        function clearInput() {
+            inputText.value = '';
+            inputText.focus();
+            showToast('🗑 输入文本已清空');
+            performMatch();
+        }
+
+        function clearSeparator() {
+            outputSeparator.value = '';
+            outputSeparator.classList.remove('has-results', 'no-results');
+            statsSeparator.innerHTML = '<span>结果1已清空</span>';
+            showToast('✕ 结果1已清空');
+        }
+
+        function clearSupplement() {
+            outputSupplement.value = '';
+            outputSupplement.classList.remove('has-results', 'no-results');
+            statsSupplement.innerHTML = '<span>结果2已清空</span>';
+            showToast('✕ 结果2已清空');
+        }
+
+        // 事件绑定
+        btnMatch.addEventListener('click', performMatch);
+        btnCopySeparator.addEventListener('click', copySeparator);
+        btnCopySupplement.addEventListener('click', copySupplement);
+        btnClearInput.addEventListener('click', clearInput);
+        btnClearSeparator.addEventListener('click', clearSeparator);
+        btnClearSupplement.addEventListener('click', clearSupplement);
+
+        // 快捷键
+        document.addEventListener('keydown', function(e) {
+            if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                e.preventDefault();
+                performMatch();
+            }
+            // Ctrl+Shift+1 复制结果1
+            if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === '!') {
+                e.preventDefault();
+                copySeparator();
+            }
+            // Ctrl+Shift+2 复制结果2
+            if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === '@') {
+                e.preventDefault();
+                copySupplement();
+            }
+        });
+
+        // 点击输出框自动全选
+        outputSeparator.addEventListener('click', function() {
+            if (outputSeparator.value) outputSeparator.select();
+        });
+        outputSeparator.addEventListener('focus', function() {
+            if (outputSeparator.value) outputSeparator.select();
+        });
+        outputSupplement.addEventListener('click', function() {
+            if (outputSupplement.value) outputSupplement.select();
+        });
+        outputSupplement.addEventListener('focus', function() {
+            if (outputSupplement.value) outputSupplement.select();
+        });
+
+        // 实时匹配防抖
+        let debounceTimer;
+        const debouncedMatch = function() {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(performMatch, 400);
+        };
+        regexInput.addEventListener('input', debouncedMatch);
+        inputText.addEventListener('input', debouncedMatch);
+
+        // 初始执行
+        performMatch();
+
+        console.log('✅ 正则匹配提取器（分类版）已就绪');
+        console.log('   📌 结果1：原本带分隔符的原样输出');
+        console.log('   📌 结果2：无分隔符的自动补“-”后输出');
+        console.log('   💡 快捷键：Ctrl+Enter 匹配 | Ctrl+Shift+1 复制结果1 | Ctrl+Shift+2 复制结果2');
+    })();
+</script>
+</body>
+</html>

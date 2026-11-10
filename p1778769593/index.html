@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔍 🚴‍♂️ 专属体能与训练肌群图鉴</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --accent-color: #e67e22;
+            --hover-color: #34495e;
+            --bg-color: #f4f5f7;
+            --panel-bg: #ffffff;
+            --text-dark: #2c3e50;
+            --text-light: #7f8c8d;
+            --muscle-default: #d1d5db;
+        }
+
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: system-ui, -apple-system, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-dark);
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+
+        .dashboard-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .dashboard-header h1 {
+            margin: 0 0 10px 0;
+            font-size: 28px;
+            color: var(--primary-color);
+        }
+
+        .dashboard-header p {
+            margin: 0;
+            color: var(--text-light);
+        }
+
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        /* 左侧：SVG 人体图 */
+        .visual-panel {
+            flex: 1;
+            min-width: 320px;
+            background: var(--panel-bg);
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            align-self: flex-start;
+            position: sticky;
+            top: 20px;
+        }
+
+        svg {
+            width: 100%;
+            height: auto;
+            max-height: 550px;
+            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));
+        }
+
+        .muscle-group polygon {
+            fill: var(--muscle-default);
+            stroke: var(--panel-bg);
+            stroke-width: 2;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+        }
+
+        .muscle-group:hover polygon {
+            fill: var(--hover-color);
+            transform: scale(1.02);
+            transform-origin: center;
+        }
+
+        .muscle-group.active polygon {
+            fill: var(--accent-color);
+        }
+
+        /* 右侧：数据看板 */
+        .data-panel {
+            flex: 1.2;
+            min-width: 320px;
+            background: var(--panel-bg);
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .empty-state {
+            text-align: center;
+            color: var(--text-light);
+            font-size: 16px;
+            margin: auto 0;
+        }
+
+        .data-content {
+            display: none;
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        .data-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .muscle-title {
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--primary-color);
+            margin: 0 0 15px 0;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #edf2f7;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .stars {
+            color: var(--accent-color);
+            font-size: 18px;
+            letter-spacing: 2px;
+        }
+
+        .data-item {
+            margin-bottom: 15px;
+        }
+
+        .data-label {
+            font-size: 13px;
+            font-weight: bold;
+            color: var(--text-light);
+            text-transform: uppercase;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .data-value {
+            font-size: 15px;
+            line-height: 1.6;
+            color: var(--text-dark);
+        }
+
+        /* 动作标签组 */
+        .tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .tag {
+            background: #fdf2e9;
+            color: var(--accent-color);
+            padding: 8px 14px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: bold;
+            border: 1px solid #fae5d3;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .tag:hover {
+            background: var(--accent-color);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(230, 126, 34, 0.2);
+        }
+
+        /* 折叠详情区：整体剖析 */
+        .detail-toggle {
+            display: inline-block;
+            background: var(--bg-color);
+            color: var(--text-dark);
+            border: none;
+            padding: 10px 16px;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.2s;
+            width: 100%;
+            text-align: center;
+            margin-top: 5px;
+        }
+
+        .detail-toggle:hover {
+            background: #e2e8f0;
+        }
+
+        .detail-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), padding 0.4s ease, opacity 0.4s ease;
+            background: #f8f9fa;
+            border-radius: 8px;
+            margin-top: 10px;
+            opacity: 0;
+            font-size: 14px;
+            line-height: 1.7;
+            color: #4a5568;
+        }
+
+        .detail-content.expanded {
+            max-height: 300px;
+            padding: 15px 20px;
+            opacity: 1;
+            border-left: 4px solid var(--text-light);
+        }
+
+        /* 模态框：具体动作详情 */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.6);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            backdrop-filter: blur(3px);
+        }
+
+        .modal-overlay.active {
+            display: flex;
+            opacity: 1;
+        }
+
+        .modal-content {
+            background: white;
+            width: 90%;
+            max-width: 500px;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            transform: translateY(20px);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .modal-overlay.active .modal-content {
+            transform: translateY(0);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #edf2f7;
+            padding-bottom: 10px;
+        }
+
+        .modal-header h3 {
+            margin: 0;
+            color: var(--primary-color);
+            font-size: 20px;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: #a0aec0;
+            cursor: pointer;
+            line-height: 1;
+        }
+
+        .modal-close:hover { color: #e53e3e; }
+
+        .modal-body .info-block {
+            margin-bottom: 15px;
+        }
+
+        .modal-body .info-block:last-child { margin-bottom: 0; }
+
+        .modal-body h4 {
+            margin: 0 0 5px 0;
+            font-size: 13px;
+            color: var(--text-light);
+            text-transform: uppercase;
+        }
+
+        .modal-body p {
+            margin: 0;
+            font-size: 15px;
+            line-height: 1.6;
+            color: var(--text-dark);
+            background: #f8f9fa;
+            padding: 10px 12px;
+            border-radius: 6px;
+        }
+
+        .modal-body p.warning {
+            border-left: 3px solid #e53e3e;
+            background: #fff5f5;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="dashboard-header">
+        <h1>🚴‍♂️ 专属体能与训练肌群图鉴</h1>
+        <p>街健静力、重装徒步、骑行耐久与后链强化的精细化运动解剖分析</p>
+    </div>
+
+    <div class="container">
+        <!-- 左侧 SVG 交互区 -->
+        <div class="visual-panel">
+            <svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+                <ellipse cx="100" cy="380" rx="40" ry="8" fill="#e2e8f0" />
+                <ellipse cx="300" cy="380" rx="40" ry="8" fill="#e2e8f0" />
+
+                <text x="100" y="395" text-anchor="middle" font-size="14" fill="#7f8c8d" font-weight="bold">正面 (Front)</text>
+                <text x="300" y="395" text-anchor="middle" font-size="14" fill="#7f8c8d" font-weight="bold">背面 (后链 Back)</text>
+
+                <!-- 正面 -->
+                <polygon points="90,20 110,20 115,50 100,65 85,50" fill="#cbd5e1" />
+                <g class="muscle-group" id="svg-shoulders" onclick="showData('shoulders')">
+                    <polygon points="65,70 135,70 145,100 125,110 75,110 55,100" />
+                </g>
+                <g class="muscle-group" id="svg-chest" onclick="showData('chest')">
+                    <polygon points="75,115 125,115 120,160 100,170 80,160" />
+                </g>
+                <g class="muscle-group" id="svg-core" onclick="showData('core')">
+                    <polygon points="82,165 118,165 115,220 100,230 85,220" />
+                </g>
+                <g class="muscle-group" id="svg-arms-front" onclick="showData('arms')">
+                    <polygon points="65,115 72,160 55,210 45,200 50,110" />
+                    <polygon points="135,115 128,160 145,210 155,200 150,110" />
+                </g>
+                <g class="muscle-group" id="svg-legs-front" onclick="showData('legs')">
+                    <polygon points="85,225 98,230 95,350 75,350 65,270" />
+                    <polygon points="115,225 102,230 105,350 125,350 135,270" />
+                </g>
+
+                <!-- 背面 -->
+                <polygon points="290,20 310,20 315,50 300,65 285,50" fill="#cbd5e1" />
+                <g class="muscle-group" id="svg-shoulders-back" onclick="showData('shoulders')">
+                    <polygon points="265,70 335,70 345,100 325,120 275,120 255,100" />
+                </g>
+                <g class="muscle-group" id="svg-back" onclick="showData('back')">
+                    <polygon points="275,125 325,125 320,200 300,220 280,200" />
+                </g>
+                <g class="muscle-group" id="svg-arms-back" onclick="showData('arms')">
+                    <polygon points="260,105 250,160 235,210 225,200 245,75" />
+                    <polygon points="340,105 350,160 365,210 375,200 355,75" />
+                </g>
+                <g class="muscle-group" id="svg-legs-back" onclick="showData('legs')">
+                    <polygon points="278,205 322,205 328,240 300,250 272,240" />
+                    <polygon points="272,245 298,252 295,350 275,350 260,280" />
+                    <polygon points="328,245 302,252 305,350 325,350 340,280" />
+                </g>
+            </svg>
+        </div>
+
+        <!-- 右侧 数据看板 -->
+        <div class="data-panel">
+            <div id="empty-state" class="empty-state">
+                👆 点击左侧肌群色块，查看定制训练解析
+            </div>
+
+            <div id="data-content" class="data-content">
+                <div class="muscle-title">
+                    <span id="d-name">--</span>
+                    <span id="d-stars" class="stars">--</span>
+                </div>
+
+                <div class="data-item">
+                    <div class="data-label">⚡ 核心作用</div>
+                    <div class="data-value" id="d-brief">--</div>
+                </div>
+
+                <div class="data-item">
+                    <div class="data-label">🎯 专项训练动作 (点击查看详情)</div>
+                    <div class="tags" id="d-exercises"></div>
+                </div>
+
+                <button class="detail-toggle" onclick="toggleDetail()" id="btn-toggle">
+                    展开该部位整体剖析 🔽
+                </button>
+                <div class="detail-content" id="d-overview">
+                    <!-- 整体概略介绍 -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 弹窗模态框：具体动作详情 -->
+    <div class="modal-overlay" id="exercise-modal" onclick="closeModal(event)">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="m-name">动作名称</h3>
+                <button class="modal-close" onclick="forceCloseModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="info-block">
+                    <h4>🎯 动作特点与功能</h4>
+                    <p id="m-feature">--</p>
+                </div>
+                <div class="info-block">
+                    <h4>📊 重量与次数特点</h4>
+                    <p id="m-protocol">--</p>
+                </div>
+                <div class="info-block">
+                    <h4>🔍 动作细节</h4>
+                    <p id="m-cues">--</p>
+                </div>
+                <div class="info-block">
+                    <h4>⚠️ 注意事项</h4>
+                    <p id="m-precautions" class="warning">--</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= 定制数据与逻辑 ================= -->
+    <script>
+        const muscleData = {
+            chest: { 
+                name: "胸部肌群 (Chest)", 
+                rating: 4,
+                brief: "上肢水平推力的主发力源，街健动态向心与静力支撑的控制核心。",
+                overview: "胸部肌群在当前体系中承担两大独立任务：一是极限静力支撑（建立极端的肩胸前侧链刚性），二是克服体重的动态推力爆发。动作安排摒弃了传统的健美孤立训练，全部以复合推力闭环为主，考验绝对张力与神经募集效率。",
+                exercises: [
+                    {
+                        name: "伪俄挺 (Pseudo-planche)",
+                        feature: "极端的闭链静力/等长收缩，强化肩胛前伸稳定与胸肌整体张力。",
+                        protocol: "自重 5组 x 5次（或转换为计秒静力，追求高质量募集而非力竭）。",
+                        cues: "双手反转或外旋，保持含胸拔背（肩胛骨极度前伸），核心收紧锁定，身体重心大幅度前倾。",
+                        precautions: "手腕与三角肌前束压力极大，练前务必活动腕关节；肩峰如有刺痛需立刻减小前倾幅度退阶。"
+                    },
+                    {
+                        name: "双杠臂屈伸",
+                        feature: "自重动态复合推力，主攻胸大肌下束及整体厚度，弥补静力训练缺乏的全程收缩。",
+                        protocol: "自重或负重，单次容量可偏高，注重离心控制与向心爆发。",
+                        cues: "下放时吸气控制，身体微前倾以将受力集中于胸部而非肱三头肌，推起时沉肩锁定。",
+                        precautions: "底部切忌过度拉伸导致肩关节前侧受压，推起锁定瞬间避免肘部过度超伸卡死骨骼。"
+                    },
+                    {
+                        name: "双力臂底部推起",
+                        feature: "爆发性瞬时推力，连接拉力与支撑状态的过渡枢纽。",
+                        protocol: "穿插于双力臂训练中，通常跟随 5x3 的节奏。",
+                        cues: "翻腕完成的瞬间，借助身体前倾的惯性，胸肌与三头肌瞬间爆发将身体推离单杠上方。",
+                        precautions: "长距离骑行伏把姿势极易导致胸小肌短缩，此类强推力训练后，必须利用单杠进行胸部静态拉伸防圆肩。"
+                    }
+                ]
+            },
+            back: { 
+                name: "背部与上后链 (Back)", 
+                rating: 5,
+                brief: "上肢拉力发动机，突破街健瓶颈与强化核心支撑力的定海神针。",
+                overview: "背部的训练逻辑从极限爆发到绝对厚度。双力臂考验瞬间的神经募集，单杠引体作为常规垂直拉力指标，而杠铃划船则用于弥补街健体系中极易缺失的水平拉力，防止圆肩驼背，彻底稳固后链。",
+                exercises: [
+                    {
+                        name: "双力臂 (Muscle-up)",
+                        feature: "上肢极限爆发拉力，打破常规健美的慢速控制，强调背阔肌瞬间收缩功率。",
+                        protocol: "高爆发低次数，5组 x 3次，保证每次拉起的质量与高度。",
+                        cues: "启动前保持轻微骨盆后倾，起步瞬间背阔肌爆发收缩，手腕保持深握或虚握（False grip）以利于翻腕。",
+                        precautions: "爆发拉力极易借力，注意收紧核心，避免腰椎过度超伸代偿；极度消耗神经系统，需安排在训练初期。"
+                    },
+                    {
+                        name: "单杠引体向上",
+                        feature: "垂直拉力的绝对基石，强化背阔肌宽度与大圆肌协同发力。",
+                        protocol: "自重常规组或负重，动作全程控制，不依赖打腿借力。",
+                        cues: "起始状态沉肩（肩胛骨下沉回旋），全程想象肘部向后下方“砸”向腰部，而非单纯用手拉。",
+                        precautions: "底部不要完全放松死悬垂（Dead hang）以免肩峰撞击，需保持背部基础张力（Active hang）。"
+                    },
+                    {
+                        name: "杠铃划船",
+                        feature: "水平拉力补强，增加背部中下段厚度（菱形肌、中下斜方肌）。",
+                        protocol: "健身房后链日主项，中大重量，严格控制躯干角度。",
+                        cues: "屈髋俯身，脊柱保持中立，铃杆贴着大腿拉向小腹，顶峰收缩时用力挤压两片肩胛骨。",
+                        precautions: "如果腘绳肌或下背部疲劳，可替换为胸贴斜板划船，以免腰椎承受剪切力受损。"
+                    }
+                ]
+            },
+            shoulders: { 
+                name: "肩部肌群 (Deltoids)", 
+                rating: 4,
+                brief: "街健静力动作的绝对承重轴，上肢全方位力量传导的中继站。",
+                overview: "肩部训练兼顾了高压支撑与长效保养。前束在伪俄挺中被极度压榨，因此需要弹力带面拉来精准强化后束与肩袖，以防圆肩。同时，骑行与徒步支撑极大地考验了三角肌的等长收缩耐力。",
+                exercises: [
+                    {
+                        name: "伪俄挺前倾支撑",
+                        feature: "极限孤立刺激三角肌前束，肩关节在极度不利力学下的支撑训练。",
+                        protocol: "穿插于伪俄挺 5x5 中，或作为静力计秒训练。",
+                        cues: "前锯肌发力推实地面，肩关节保持屈曲状态下的高张力对抗，肘眼朝前锁定。",
+                        precautions: "极易导致肩峰下撞击！练前必须用轻阻力弹力带进行内外旋激活，肩部酸痛立刻停止。"
+                    },
+                    {
+                        name: "弹力带面拉 (Face Pull)",
+                        feature: "肩袖健康护身符，精准强化三角肌后束与肩胛骨外旋能力。",
+                        protocol: "低重量、高次数控制，如 3组 x 15次，侧重肌肉感受与充血。",
+                        cues: "将弹力带拉向面部/额头，末端将双手向外展开（肩外旋），感受后肩的强烈收缩。",
+                        precautions: "切忌使用大重量导致斜方肌上束代偿耸肩，动作需缓慢且带有顶峰停顿。"
+                    },
+                    {
+                        name: "骑行/徒步等长抗疲劳",
+                        feature: "长时间中低强度等长收缩，强化肩部耐力与结构稳定性。",
+                        protocol: "结合 Z2 骑行或 10小时户外徒步实际场景进行。",
+                        cues: "骑行时沉肩微曲肘，利用肌肉张力缓冲震动；徒步时通过调节胸带与肩带，分散三角肌压迫。",
+                        precautions: "长距离户外后，肩颈容易僵硬，需配合泡沫轴放松斜方肌上束及肩颈筋膜。"
+                    }
+                ]
+            },
+            core: { 
+                name: "核心肌群 (Core & Abs)", 
+                rating: 5,
+                brief: "力量上下传导的唯一纽带，抗形变、稳定重心与维持气动姿势的基础。",
+                overview: "核心的本质不是卷曲，而是刚性串联。街健的静力控制强化抗伸展能力，溯溪徒步要求动态不平衡下的抗扭转，而结合 18小时断食的真空腹训练则深度刺激腹横肌，三者形成了由内而外的核心控制体系。",
+                exercises: [
+                    {
+                        name: "街健核心控制 (抗伸展)",
+                        feature: "维持躯干刚性，确保上下肢力量无损耗传导。",
+                        protocol: "融入所有静力及动态动作中，不作为单独大容量卷腹训练。",
+                        cues: "主动进行骨盆后倾（PPT），肋骨下沉收紧，将身体“锁”成一块不弯折的钢板。",
+                        precautions: "避免过度频繁的大幅度卷腹导致腰椎间盘压力增大，核心训练应以“抗形变”为主。"
+                    },
+                    {
+                        name: "溯溪动态平衡 (抗扭转)",
+                        feature: "复杂地形下的瞬时重心转移与制动控制。",
+                        protocol: "实地户外探索（10h 驾驶+徒步范围内）。",
+                        cues: "在湿滑溪石间跳跃时，腹斜肌与深层核心瞬间收紧制动，维持落点平衡。",
+                        precautions: "户外行进中核心疲劳会导致崴脚或滑倒风险激增，需合理分配体能。"
+                    },
+                    {
+                        name: "空腹真空腹训练",
+                        feature: "极度强化腹横肌与内脏悬吊能力，缩小腰围视觉。",
+                        protocol: "利用 18小时断食的早晨空腹状态，每次呼气后收紧维持 15-20 秒，重复数次。",
+                        cues: "将肚脐拼命向脊柱方向贴近，并向上提拉肋骨，保持胸式浅呼吸。",
+                        precautions: "饱腹状态严禁进行；初期可能会引起轻微头晕，需量力而行。"
+                    }
+                ]
+            },
+            arms: { 
+                name: "手臂肌群 (Arms)", 
+                rating: 3,
+                brief: "推拉力量的终端执行者，极限抓握力与肘关节锁定的关键。",
+                overview: "手臂主要作为大肌群的协同发力者。农夫行走挑战极限握力与前臂耐力，单双杠锁定考验二三头的静力支撑。手臂专项不仅服务于街健，更直接反哺户外溯溪与攀爬的抓握需求。",
+                exercises: [
+                    {
+                        name: "单手农夫行走",
+                        feature: "挑战极限握力、前臂屈肌耐力及核心抗侧屈能力。",
+                        protocol: "大重量极限界限，28kg，3组 x 40秒以上。",
+                        cues: "单手提重物，挺胸沉肩，目视前方，步伐稳健不摇晃，感受小臂充血至力竭。",
+                        precautions: "放下哑铃/壶铃时需屈髋深蹲，切忌弯腰直腿放下，以免拉伤腰部。"
+                    },
+                    {
+                        name: "单双杠静力锁定",
+                        feature: "肘关节周边的结缔组织强化与二三头肌等长收缩。",
+                        protocol: "结合日常街健推拉动作的起止点进行停留。",
+                        cues: "双杠推起顶部三头肌收缩锁定；单杠悬垂及引体顶部二头肌保持高张力。",
+                        precautions: "锁定并非让关节锁死卡住骨骼，必须保持肌肉发力包裹关节，防超伸。"
+                    },
+                    {
+                        name: "户外溯溪攀爬辅助",
+                        feature: "不规则岩点的随机抓握与拉拽。",
+                        protocol: "实地户外应用场景。",
+                        cues: "依赖农夫行走建立的握力基础，进行短距爆发攀拉。",
+                        precautions: "高强度的街健配合户外极易导致前臂疲劳积蓄。如有肘内外侧酸痛先兆，需立刻筋膜放松防网球肘。"
+                    }
+                ]
+            },
+            legs: { 
+                name: "下肢与后链 (Legs & Glutes)", 
+                rating: 5,
+                brief: "人体最大能量库，长距离移动底盘与爆发力输出引擎。",
+                overview: "为弥补街健易致的上下肢失衡，此体系着重重塑后链底盘。通过健身房臀推建立绝对力量，Z2骑行拉升慢肌耐力与燃脂，溯溪单腿爬升考验复杂地形稳定。三者针对不同能量系统，各有侧重，完美闭环。",
+                exercises: [
+                    {
+                        name: "杠铃臀推 (Hip Thrust)",
+                        feature: "最直接粗暴的臀大肌绝对力量刺激，全面激活后链引擎。",
+                        protocol: "健身房专属大重量主项：90kg，4组 x 8次。",
+                        cues: "肩胛骨下角卡住长凳，下巴微收，顶端用臀部发力挤压锁定骨盆，小腿垂直地面。",
+                        precautions: "切忌用腰椎过度超伸去顶起重量；动作全程核心收紧，下降时臀部跟随下沉。"
+                    },
+                    {
+                        name: "Z2 长距骑行",
+                        feature: "强化股四头肌肌耐力，拉升心肺基础，促进线粒体代谢。",
+                        protocol: "超高次数的低强度耐力输出，保持 Zone 2 心率区间。",
+                        cues: "注重高踏频与“画圆”踩踏，利用臀部发力带动大腿下踩，减少膝关节单纯的伸缩摩擦。",
+                        precautions: "长期骑行易致髂腰肌与股直肌短缩，骑行结束后务必进行深度弓箭步拉伸防骨盆前倾。"
+                    },
+                    {
+                        name: "溯溪徒步攀爬",
+                        feature: "复杂地形下的单腿不对称发力、脚踝稳定与本体感觉考验。",
+                        protocol: "实地户外长时输出（结合10h行程）。",
+                        cues: "跨越落差时，注重前脚全脚掌踩实，臀大肌与股四头肌联合发力单腿蹬伸。",
+                        precautions: "膝盖在下坡时承受数倍体重冲击，需利用登山杖分担，且微屈膝缓冲，严禁直腿砸地。"
+                    }
+                ]
+            }
+        };
+
+        let currentMuscleId = null;
+        let isDetailExpanded = false;
+
+        function showData(muscleId) {
+            // UI 反馈
+            document.querySelectorAll('.muscle-group').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll(`.muscle-group[id*="${muscleId}"]`).forEach(el => el.classList.add('active'));
+
+            currentMuscleId = muscleId;
+            const data = muscleData[muscleId];
+            if (!data) return;
+
+            document.getElementById('empty-state').style.display = 'none';
+            const contentPanel = document.getElementById('data-content');
+            
+            contentPanel.classList.remove('active');
+            void contentPanel.offsetWidth; 
+            contentPanel.classList.add('active');
+
+            // 基础信息
+            document.getElementById('d-name').innerText = data.name;
+            document.getElementById('d-brief').innerText = data.brief;
+            document.getElementById('d-stars').innerText = '🔥'.repeat(data.rating);
+
+            // 生成动作 Tag，并绑定点击事件触发 Modal
+            const sportsContainer = document.getElementById('d-exercises');
+            sportsContainer.innerHTML = '';
+            data.exercises.forEach((ex, index) => {
+                const tag = document.createElement('div');
+                tag.className = 'tag';
+                tag.innerHTML = `<span>▶</span> ${ex.name}`;
+                tag.onclick = () => openExerciseModal(muscleId, index);
+                sportsContainer.appendChild(tag);
+            });
+
+            // 整体剖析信息
+            document.getElementById('d-overview').innerText = data.overview;
+            
+            // 重置折叠状态
+            isDetailExpanded = false;
+            document.getElementById('d-overview').classList.remove('expanded');
+            document.getElementById('btn-toggle').innerText = '展开该部位整体剖析 🔽';
+        }
+
+        function toggleDetail() {
+            const detailPanel = document.getElementById('d-overview');
+            const btn = document.getElementById('btn-toggle');
+            isDetailExpanded = !isDetailExpanded;
+            
+            if (isDetailExpanded) {
+                detailPanel.classList.add('expanded');
+                btn.innerText = '收起整体剖析 🔼';
+            } else {
+                detailPanel.classList.remove('expanded');
+                btn.innerText = '展开该部位整体剖析 🔽';
+            }
+        }
+
+        // ================= 模态框逻辑 =================
+        const modal = document.getElementById('exercise-modal');
+
+        function openExerciseModal(mId, index) {
+            const exData = muscleData[mId].exercises[index];
+            if(!exData) return;
+
+            // 填充模态框数据
+            document.getElementById('m-name').innerText = exData.name;
+            document.getElementById('m-feature').innerText = exData.feature;
+            document.getElementById('m-protocol').innerText = exData.protocol;
+            document.getElementById('m-cues').innerText = exData.cues;
+            document.getElementById('m-precautions').innerText = exData.precautions;
+
+            // 显示
+            modal.classList.add('active');
+        }
+
+        function forceCloseModal() {
+            modal.classList.remove('active');
+        }
+
+        function closeModal(event) {
+            // 点击遮罩层空白处关闭
+            if (event.target === modal) {
+                forceCloseModal();
+            }
+        }
+    </script>
+</body>
+</html>

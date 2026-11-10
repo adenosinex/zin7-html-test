@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI 上下文优化器 · 结构化路径压缩</title>
+    <style>
+        :root {
+            --bg: #0b0f14;
+            --surface: #131820;
+            --surface2: #1a212b;
+            --border: #2a3240;
+            --border-light: #353f4f;
+            --text: #e4ecf2;
+            --text2: #a3b3c2;
+            --text3: #6b7888;
+            --accent: #5b9cf5;
+            --accent-bg: rgba(91,156,245,0.08);
+            --green: #3ec97e;
+            --green-bg: rgba(62,201,126,0.1);
+            --orange: #f0a54a;
+            --radius: 12px;
+            --radius-sm: 8px;
+            --radius-xs: 5px;
+            --font-mono: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', 'SF Mono', Consolas, monospace;
+            --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Inter, 'Noto Sans SC', system-ui, sans-serif;
+            --transition: 0.2s ease;
+        }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: var(--font-sans);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .header {
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            flex-shrink: 0;
+        }
+        .header h1 { font-size:1.3rem; font-weight:700; color:#fff; }
+        .header .sub { font-size:0.78rem; color:var(--text3); }
+        .main {
+            flex: 1;
+            display: flex;
+            overflow: hidden;
+        }
+        .panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: var(--surface);
+            border-right: 1px solid var(--border);
+            min-width: 0;
+        }
+        .panel:last-child { border-right: none; }
+        .panel-header {
+            padding: 12px 18px;
+            background: var(--surface2);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            flex-shrink: 0;
+        }
+        .panel-title { font-weight:600; font-size:0.9rem; display:flex; align-items:center; gap:8px; }
+        .badge { font-size:0.7rem; padding:3px 9px; border-radius:20px; font-weight:600; }
+        .badge-input { background:var(--accent-bg); color:var(--accent); }
+        .badge-output { background:var(--green-bg); color:var(--green); }
+        .btn {
+            padding: 7px 14px;
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-xs);
+            background: transparent;
+            color: var(--text2);
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-weight: 500;
+            transition: all var(--transition);
+            white-space: nowrap;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-family: var(--font-sans);
+        }
+        .btn:hover { border-color:#5a6880; color:#fff; background:rgba(255,255,255,0.03); }
+        .btn-primary { background:#238636; border-color:#2ea043; color:#fff; font-weight:600; }
+        .btn-primary:hover { background:#2ea043; box-shadow:0 0 12px rgba(62,201,126,0.3); }
+        .btn-accent { background:var(--accent-bg); border-color:rgba(91,156,245,0.4); color:var(--accent); }
+        .btn-accent:hover { background:rgba(91,156,245,0.15); box-shadow:0 0 12px rgba(91,156,245,0.25); }
+        .btn-sm { padding:5px 10px; font-size:0.73rem; }
+        textarea {
+            flex: 1;
+            width: 100%;
+            border: none;
+            background: transparent;
+            color: #d5e0eb;
+            font-family: var(--font-mono);
+            font-size: 0.78rem;
+            line-height: 1.7;
+            padding: 16px;
+            resize: none;
+            outline: none;
+            tab-size: 2;
+        }
+        textarea::placeholder { color:var(--text3); font-size:0.75rem; }
+        .output-area {
+            flex: 1;
+            padding: 16px;
+            font-family: var(--font-mono);
+            font-size: 0.77rem;
+            line-height: 1.65;
+            color: #d0dae5;
+            white-space: pre-wrap;
+            overflow-y: auto;
+            background: var(--surface);
+        }
+        .output-area .dir { color:#7cb7f7; font-weight:600; }
+        .output-area .ext-list { color:#f0a54a; }
+        .output-area .comment { color:#546374; font-style:italic; }
+        .output-empty { color:var(--text3); display:flex; align-items:center; justify-content:center; height:100%; font-family:var(--font-sans); font-size:0.85rem; }
+        .stats-row {
+            display: flex;
+            gap: 8px;
+            padding: 10px 14px;
+            background: var(--surface2);
+            border-top: 1px solid var(--border);
+            flex-shrink: 0;
+            flex-wrap: wrap;
+        }
+        .stat-mini {
+            flex: 1;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xs);
+            padding: 6px 8px;
+            text-align: center;
+            min-width: 60px;
+        }
+        .stat-mini .val { font-weight:700; font-size:1rem; font-family:var(--font-mono); }
+        .stat-mini .lbl { font-size:0.6rem; color:var(--text3); text-transform:uppercase; }
+        .stat-mini.saved .val { color:var(--green); font-size:1.2rem; }
+        .progress-wrap {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: transparent;
+            pointer-events: none;
+        }
+        .progress-bar {
+            height: 100%;
+            background: var(--accent);
+            width: 0%;
+            transition: width 0.2s ease;
+        }
+        .toast {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-120px);
+            background: #238636;
+            color: #fff;
+            padding: 10px 22px;
+            border-radius: 24px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            z-index: 999;
+            transition: transform 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            pointer-events: none;
+        }
+        .toast.show { transform: translateX(-50%) translateY(0); }
+        .input-toolbar {
+            padding: 8px 14px;
+            background: var(--surface2);
+            border-top: 1px solid var(--border);
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            flex-shrink: 0;
+            flex-wrap: wrap;
+        }
+        .hint { font-size:0.7rem; color:var(--text3); margin-left:auto; }
+        @media (max-width: 800px) {
+            .main { flex-direction:column; }
+            .panel { border-right:none; border-bottom:1px solid var(--border); flex:1; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div style="font-size:1.5rem;">⚡</div>
+        <div>
+            <h1>AI 上下文优化器</h1>
+            <div class="sub">结构化路径压缩 · 智能合并重复文件名 · 减少 Token</div>
+        </div>
+        <div style="margin-left:auto; display:flex; gap:8px;">
+            <button class="btn btn-sm" onclick="loadExample()">💡 示例</button>
+            <button class="btn btn-sm" onclick="clearAll()">🗑 清空</button>
+        </div>
+    </div>
+
+    <div class="main">
+        <!-- 输入面板 -->
+        <div class="panel" id="inputPanel">
+            <div class="panel-header">
+                <span class="panel-title"><span class="badge badge-input">📥 输入</span> 文件路径列表</span>
+                <button class="btn btn-primary btn-sm" id="compressBtn" onclick="runCompression()">🔄 执行压缩</button>
+            </div>
+            <textarea id="inputTextarea" placeholder="粘贴路径，每行一个...&#10;支持：D:\Project\src\Video.jsx&#10;/home/user/main.py&#10;快手暴露版/__快手暴露版.h&#10;电视剧/电视剧-第一集.mp4"></textarea>
+            <div class="input-toolbar">
+                <label class="btn btn-sm" style="cursor:pointer;">📄 上传文件<input type="file" accept=".txt,.csv,.md,.log" multiple style="display:none;" onchange="handleFileUpload(event)"></label>
+                <label class="btn btn-sm" style="cursor:pointer;">📁 选择文件夹<input type="file" webkitdirectory directory multiple style="display:none;" onchange="handleFolderSelect(event)"></label>
+                <span class="hint" id="inputHint">共 0 行</span>
+            </div>
+            <div class="progress-wrap" id="progressWrap"><div class="progress-bar" id="progressBar"></div></div>
+        </div>
+
+        <!-- 输出面板 -->
+        <div class="panel">
+            <div class="panel-header">
+                <span class="panel-title"><span class="badge badge-output">📤 输出</span> 压缩结果</span>
+                <div style="display:flex; gap:6px;">
+                    <button class="btn btn-accent btn-sm" id="copyOutputBtn" onclick="copyOutput()">📋 复制结果</button>
+                    <button class="btn btn-sm" id="copyPromptBtn" onclick="copyAIPrompt()">🤖 复制AI包</button>
+                </div>
+            </div>
+            <div class="output-area" id="outputArea">
+                <div class="output-empty">👈 输入路径并点击「执行压缩」</div>
+            </div>
+            <div class="stats-row">
+                <div class="stat-mini"><div class="val" id="statFiles">-</div><div class="lbl">文件数</div></div>
+                <div class="stat-mini"><div class="val" id="statCharsOrig">-</div><div class="lbl">原字符</div></div>
+                <div class="stat-mini"><div class="val" id="statCharsComp">-</div><div class="lbl">压缩字符</div></div>
+                <div class="stat-mini"><div class="val" id="statTokensOrig">-</div><div class="lbl">原Token</div></div>
+                <div class="stat-mini"><div class="val" id="statTokensComp">-</div><div class="lbl">压Token</div></div>
+                <div class="stat-mini saved"><div class="val" id="statSaved">-</div><div class="lbl">节省</div></div>
+            </div>
+        </div>
+    </div>
+    <div class="toast" id="toast"></div>
+
+    <script>
+        (function() {
+            const $ = s => document.querySelector(s);
+            const inputTextarea = $('#inputTextarea');
+            const outputArea = $('#outputArea');
+            const progressBar = $('#progressBar');
+            const progressWrap = $('#progressWrap');
+            const toast = $('#toast');
+            const compressBtn = $('#compressBtn');
+            const inputHint = $('#inputHint');
+
+            // 无意义目录
+            const IGNORE_DIRS = new Set([
+                'src','lib','dist','build','node_modules','public','assets','utils','helpers','common','vendor',
+                '__pycache__','.git','test','tests','docs','temp','tmp','cache','out','target','bin','obj',
+                'static','resources','img','images','css','js'
+            ]);
+
+            function estimateToken(text) {
+                if(!text) return 0;
+                const chinese = (text.match(/[\u4e00-\u9fa5]/g)||[]).length;
+                return Math.round(chinese*0.8 + (text.length-chinese)/4);
+            }
+
+            function cleanName(s) {
+                return s.replace(/^[\W_]+|[\W_]+$/g, '') || s;
+            }
+
+            function getExt(filename) {
+                const dot = filename.lastIndexOf('.');
+                if(dot<=0) return {stem:filename, ext:''};
+                return {stem:filename.substring(0,dot), ext:filename.substring(dot+1).toLowerCase()};
+            }
+
+            function parsePath(line) {
+                const t = line.trim();
+                if(!t||t.startsWith('#')) return null;
+                const n = t.replace(/\\/g,'/').replace(/^[A-Za-z]:\//,'');
+                const parts = n.split('/').filter(p=>p&&p!=='.');
+                if(!parts.length) return null;
+                return {
+                    original: t,
+                    parts,
+                    fileName: parts[parts.length-1],
+                    dirParts: parts.slice(0,-1)
+                };
+            }
+
+            function buildTree(paths) {
+                const root = {name:'', children:{}, files:[], depth:0};
+                for(const pp of paths) {
+                    let cur = root;
+                    const all = [...pp.dirParts, pp.fileName];
+                    for(let i=0;i<all.length;i++) {
+                        const part = all[i];
+                        const isLast = i===all.length-1;
+                        if(isLast) {
+                            if(!cur.files.find(f=>f.name===part)) cur.files.push({name:part});
+                        } else {
+                            if(!cur.children[part]) cur.children[part] = {name:part, children:{}, files:[], depth:cur.depth+1};
+                            cur = cur.children[part];
+                        }
+                    }
+                }
+                return root;
+            }
+
+            function groupFiles(files, parentDir) {
+                if(!files.length) return [];
+                const groups = {};
+                for(const f of files) {
+                    const {stem, ext} = getExt(f.name);
+                    const key = cleanName(stem).toLowerCase();
+                    if(!groups[key]) groups[key] = {baseName:cleanName(stem)||stem, exts:[], count:0};
+                    groups[key].exts.push(ext);
+                    groups[key].count++;
+                }
+                const parentKey = cleanName(parentDir).toLowerCase();
+                const result = [];
+                for(const [key, g] of Object.entries(groups)) {
+                    const uniq = [...new Set(g.exts.filter(e=>e))].sort();
+                    g.exts = uniq;
+                    const merged = (key === parentKey);
+                    result.push({
+                        baseName: g.baseName,
+                        extensions: uniq,
+                        count: g.count,
+                        merged
+                    });
+                }
+                result.sort((a,b)=> (b.merged-a.merged) || a.baseName.localeCompare(b.baseName));
+                return result;
+            }
+
+            function compressTree(root) {
+                const lines = [];
+                function render(node, indent, prefix, isLast) {
+                    const conn = prefix + (isLast?'└── ':'├── ');
+                    const subIndent = indent + (isLast?'    ':'│   ');
+                    if(node.name) {
+                        const groups = groupFiles(node.files, node.name);
+                        const hasChildren = Object.keys(node.children).length>0 || groups.length>0;
+                        lines.push(indent + conn + `<span class="dir">${esc(node.name)}</span>:`);
+                        for(const g of groups) {
+                            const filePrefix = subIndent;
+                            if(g.merged) {
+                                const extStr = g.extensions.join(', ');
+                                lines.push(filePrefix + `└── <span class="ext-list">[${esc(extStr)}]</span>` + (g.count>1?` <span class="comment">×${g.count}</span>`:''));
+                            } else if(g.extensions.length>1) {
+                                lines.push(filePrefix + `├── ${esc(g.baseName)}.{<span class="ext-list">${esc(g.extensions.join(','))}</span>}`);
+                            } else if(g.extensions.length===1) {
+                                lines.push(filePrefix + `├── ${esc(g.baseName)}.${esc(g.extensions[0])}`);
+                            } else {
+                                lines.push(filePrefix + `├── ${esc(g.baseName)}`);
+                            }
+                        }
+                        const kids = Object.values(node.children).sort((a,b)=>a.name.localeCompare(b.name));
+                        for(let i=0;i<kids.length;i++) {
+                            render(kids[i], subIndent, '', i===kids.length-1 && groups.length===0);
+                        }
+                    } else {
+                        const groups = groupFiles(node.files, '');
+                        for(const g of groups) {
+                            if(g.extensions.length>1) lines.push(indent + `${esc(g.baseName)}.{<span class="ext-list">${esc(g.extensions.join(','))}</span>}`);
+                            else if(g.extensions.length===1) lines.push(indent + esc(g.baseName+'.'+g.extensions[0]));
+                            else lines.push(indent + esc(g.baseName));
+                        }
+                        const kids = Object.values(node.children).sort((a,b)=>a.name.localeCompare(b.name));
+                        for(let i=0;i<kids.length;i++) render(kids[i], indent, '', i===kids.length-1 && groups.length===0);
+                    }
+                }
+                render(root, '', '', true);
+                return lines.join('\n');
+            }
+
+            function esc(s) {
+                const d = document.createElement('div');
+                d.textContent = s;
+                return d.innerHTML;
+            }
+
+            function filterPaths(paths) {
+                return paths.map(p=>({...p, dirParts: p.dirParts.filter(d=>!IGNORE_DIRS.has(d.toLowerCase()))}));
+            }
+
+            async function runCompressionAsync(lines) {
+                const total = lines.length;
+                const parsed = [];
+                const CHUNK = 1500;
+                for(let i=0; i<total; i+=CHUNK) {
+                    const chunk = lines.slice(i, i+CHUNK);
+                    for(const l of chunk) {
+                        const p = parsePath(l);
+                        if(p) parsed.push(p);
+                    }
+                    progressBar.style.width = Math.min(100, Math.round((i+chunk.length)/total*100)) + '%';
+                    if(i+CHUNK < total) await new Promise(r=>requestAnimationFrame(r));
+                }
+                const filtered = filterPaths(parsed);
+                const tree = buildTree(filtered);
+                const html = compressTree(tree);
+                const plain = html.replace(/<[^>]*>/g, '');
+                const origText = lines.join('\n');
+                const origTokens = estimateToken(origText);
+                const compTokens = estimateToken(plain);
+                return {
+                    html,
+                    plain,
+                    origChars: origText.length,
+                    compChars: plain.length,
+                    origTokens,
+                    compTokens,
+                    saved: origTokens>0 ? Math.round((1-compTokens/origTokens)*1000)/10 : 0,
+                    fileCount: parsed.length
+                };
+            }
+
+            window.runCompression = async function() {
+                if(compressBtn.disabled) return;
+                const raw = inputTextarea.value.trim();
+                if(!raw) {
+                    outputArea.innerHTML = '<div class="output-empty">⚠️ 请输入路径</div>';
+                    resetStats();
+                    return;
+                }
+                const lines = raw.split(/[\r\n]+/).filter(l=>l.trim());
+                inputHint.textContent = `共 ${lines.length} 行`;
+                compressBtn.disabled = true;
+                compressBtn.textContent = '⏳ 处理中...';
+                progressWrap.style.display = 'block';
+                progressBar.style.width = '0%';
+                outputArea.innerHTML = '<div class="output-empty">⏳ 压缩中...</div>';
+                try {
+                    const res = await runCompressionAsync(lines);
+                    outputArea.innerHTML = res.html;
+                    updateStats(res);
+                    // 存储纯文本以便复制
+                    outputArea.dataset.plain = res.plain;
+                } catch(e) {
+                    console.error(e);
+                    outputArea.innerHTML = '<div class="output-empty">❌ 压缩出错，请检查格式</div>';
+                    resetStats();
+                } finally {
+                    compressBtn.disabled = false;
+                    compressBtn.textContent = '🔄 执行压缩';
+                    progressWrap.style.display = 'none';
+                }
+            };
+
+            // 通用的安全复制函数（兼容非HTTPS环境）
+            function safeCopy(text) {
+                return new Promise((resolve, reject) => {
+                    if (navigator.clipboard && navigator.clipboard.writeText) {
+                        navigator.clipboard.writeText(text).then(resolve).catch(() => {
+                            fallbackCopy(text) ? resolve() : reject();
+                        });
+                    } else {
+                        fallbackCopy(text) ? resolve() : reject();
+                    }
+                });
+            }
+
+            function fallbackCopy(text) {
+                const textarea = document.createElement('textarea');
+                textarea.value = text;
+                textarea.style.position = 'fixed';
+                textarea.style.left = '-9999px';
+                textarea.style.top = '-9999px';
+                document.body.appendChild(textarea);
+                textarea.focus();
+                textarea.select();
+                try {
+                    const success = document.execCommand('copy');
+                    document.body.removeChild(textarea);
+                    return success;
+                } catch (e) {
+                    document.body.removeChild(textarea);
+                    return false;
+                }
+            }
+
+            window.copyOutput = function() {
+                let text = outputArea.dataset.plain || outputArea.textContent || '';
+                text = text.trim();
+                if(!text || text.includes('👈 输入路径')) {
+                    showToast('⚠️ 请先执行压缩');
+                    return;
+                }
+                safeCopy(text).then(() => {
+                    showToast('✅ 压缩结果已复制');
+                    pulse($('#copyOutputBtn'));
+                }).catch(() => {
+                    showToast('❌ 复制失败，请手动复制');
+                });
+            };
+
+            window.copyAIPrompt = function() {
+                let text = outputArea.dataset.plain || outputArea.textContent || '';
+                text = text.trim();
+                if(!text || text.includes('👈 输入路径')) {
+                    showToast('⚠️ 请先执行压缩');
+                    return;
+                }
+                const prompt = '【目录压缩】\n\n结构:\n' + text + '\n\n【任务】\n请分析这个项目结构。';
+                safeCopy(prompt).then(() => {
+                    showToast('🤖 AI Prompt包已复制');
+                    pulse($('#copyPromptBtn'));
+                }).catch(() => {
+                    showToast('❌ 复制失败，请手动复制');
+                });
+            };
+
+            function updateStats(r) {
+                $('#statFiles').textContent = r.fileCount;
+                $('#statCharsOrig').textContent = r.origChars.toLocaleString();
+                $('#statCharsComp').textContent = r.compChars.toLocaleString();
+                $('#statTokensOrig').textContent = r.origTokens.toLocaleString();
+                $('#statTokensComp').textContent = r.compTokens.toLocaleString();
+                const el = $('#statSaved');
+                el.textContent = r.saved + '%';
+                el.style.transform = 'scale(1.2)';
+                setTimeout(()=> el.style.transform = '', 300);
+            }
+            function resetStats() {
+                ['statFiles','statCharsOrig','statCharsComp','statTokensOrig','statTokensComp','statSaved'].forEach(id=>$('#'+id).textContent='-');
+            }
+
+            function showToast(msg) {
+                toast.textContent = msg;
+                toast.classList.add('show');
+                clearTimeout(toast._t);
+                toast._t = setTimeout(()=>toast.classList.remove('show'), 1800);
+            }
+            function pulse(btn) {
+                if(!btn) return;
+                btn.style.transform = 'scale(1.05)';
+                btn.style.boxShadow = '0 0 10px rgba(91,156,245,0.4)';
+                setTimeout(()=>{ btn.style.transform=''; btn.style.boxShadow=''; }, 200);
+            }
+
+            window.loadExample = function() {
+                const ex = [
+                    '快手暴露版—全网独家视觉盛宴/__快手暴露版—全网独家视觉盛宴.h',
+                    '快手暴露版—全网独家视觉盛宴/__快手暴露版—全网独家视觉盛宴.j',
+                    '快手暴露版—全网独家视觉盛宴/__快手暴露版—全网独家视觉盛宴.p',
+                    '快手暴露版—全网独家视觉盛宴/__快手暴露版—全网独家视觉盛宴.u',
+                    'D:\\Project\\VideoManager\\src\\components\\VideoPlayer\\VideoPlayer.jsx',
+                    'D:\\Project\\VideoManager\\src\\components\\VideoPlayer\\VideoControl.jsx',
+                    'D:\\Project\\VideoManager\\src\\components\\VideoPlayer\\VideoList.jsx',
+                    'D:\\Project\\VideoManager\\src\\components\\FileManager\\FileList.jsx',
+                    'D:\\Project\\VideoManager\\src\\components\\FileManager\\FileSort.jsx',
+                    '电视剧/电视剧-第一集.mp4',
+                    '电视剧/电视剧-第二集.mp4',
+                    '电视剧/电视剧-第三集.mp4',
+                    '旅行西藏2024照片/旅行西藏2024照片1.jpg',
+                    '旅行西藏2024照片/旅行西藏2024照片2.jpg',
+                    '旅行西藏2024照片/旅行西藏2024照片3.jpg',
+                ].join('\n');
+                inputTextarea.value = ex;
+                inputHint.textContent = `共 ${ex.split('\n').filter(l=>l.trim()).length} 行`;
+                runCompression();
+            };
+
+            window.clearAll = function() {
+                inputTextarea.value = '';
+                outputArea.innerHTML = '<div class="output-empty">👈 输入路径并点击「执行压缩」</div>';
+                delete outputArea.dataset.plain;
+                inputHint.textContent = '共 0 行';
+                resetStats();
+                showToast('🗑 已清空');
+            };
+
+            window.handleFileUpload = function(e) {
+                const files = e.target.files;
+                if(!files.length) return;
+                Promise.all([...files].map(f=>new Promise(r=>{const rd=new FileReader();rd.onload=e=>r(e.target.result);rd.readAsText(f);})))
+                .then(contents=>{
+                    inputTextarea.value = contents.join('\n');
+                    const lines = inputTextarea.value.split(/[\r\n]+/).filter(l=>l.trim());
+                    inputHint.textContent = `共 ${lines.length} 行`;
+                    runCompression();
+                });
+            };
+
+            window.handleFolderSelect = function(e) {
+                const files = e.target.files;
+                if(!files.length) return;
+                const paths = [...files].map(f=>f.webkitRelativePath||f.name);
+                inputTextarea.value = paths.join('\n');
+                inputHint.textContent = `共 ${paths.length} 行`;
+                runCompression();
+            };
+
+            // 拖拽支持
+            const panel = $('#inputPanel');
+            panel.addEventListener('dragover', e=>{e.preventDefault(); panel.style.opacity='0.8';});
+            panel.addEventListener('dragleave', ()=> panel.style.opacity='');
+            panel.addEventListener('drop', e=>{
+                e.preventDefault();
+                panel.style.opacity='';
+                const dt = e.dataTransfer;
+                if(dt.files.length) {
+                    if(dt.files[0].type.match(/text|json|csv/)) {
+                        const r = new FileReader();
+                        r.onload = ev=>{
+                            inputTextarea.value = ev.target.result;
+                            const lines = inputTextarea.value.split(/[\r\n]+/).filter(l=>l.trim());
+                            inputHint.textContent = `共 ${lines.length} 行`;
+                            runCompression();
+                        };
+                        r.readAsText(dt.files[0]);
+                    } else {
+                        const paths = [...dt.files].map(f=>f.webkitRelativePath||f.name);
+                        inputTextarea.value = paths.join('\n');
+                        inputHint.textContent = `共 ${paths.length} 行`;
+                        runCompression();
+                    }
+                }
+            });
+
+            inputTextarea.addEventListener('input', ()=>{
+                const lines = inputTextarea.value.split(/[\r\n]+/).filter(l=>l.trim());
+                inputHint.textContent = `共 ${lines.length} 行`;
+            });
+
+            // Ctrl+Enter 压缩
+            document.addEventListener('keydown', e=>{
+                if((e.ctrlKey||e.metaKey) && e.key==='Enter') {
+                    e.preventDefault();
+                    runCompression();
+                }
+            });
+
+            // 自动加载示例
+            setTimeout(()=>{ if(!inputTextarea.value.trim()) loadExample(); }, 300);
+        })();
+    </script>
+</body>
+</html>
