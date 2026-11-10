@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>需要验证</title>
+<style>
+body{margin:0;background:#f5f6f8;font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;color:#1c2333}
+.zc{background:#fff;border-radius:14px;padding:22px 20px;max-width:400px;margin:48px auto 0;box-shadow:0 2px 10px rgba(16,24,40,.08)}
+.zc h1{font-size:18px;margin:0 0 8px}
+.zc p{font-size:13px;color:#68707f;line-height:1.6;margin:0 0 14px}
+.zc .tag{display:inline-block;font-size:11px;color:#68707f;border:1px solid #d4d9e1;border-radius:20px;padding:2px 9px;margin-bottom:12px}
+.zc form{display:flex;gap:8px}
+.zc input{flex:1;font-size:16px;padding:11px 12px;border:1px solid #d4d9e1;border-radius:10px;min-width:0}
+.zc button{font-size:15px;padding:11px 16px;border:0;border-radius:10px;background:#1c2333;color:#fff;cursor:pointer}
+.zc .big{width:100%;margin-bottom:10px}
+.zc .err{color:#c0392b;font-size:13px;min-height:18px;margin-top:10px}
+.zc .meta{margin-top:12px;font-size:12px}
+.zc .meta a{color:#68707f}
+</style>
+</head>
+<body>
+<div class="zc">
+  <span class="tag">分类验证 · 档二（加密）</span>
+  <h1>此页内容已加密</h1>
+  <p>本页正文经 AES-256-GCM 加密，托管处只有密文。输入密码在本机解密；解密成功后可记住本机，之后点按钮即可打开（不会自动呈现）。</p>
+  <button class="big" id="openbtn" hidden>点击加载内容</button>
+  <button class="big" id="pwbtn">输入密码解锁</button>
+  <div id="pwzone" hidden>
+    <form id="pwform"><input id="pw" type="password" autocomplete="off" placeholder="输入密码"><button type="submit">解密</button></form>
+  </div>
+  <div class="err" id="err"></div>
+  <div class="meta"><a href="#" id="forget" hidden>忘记本机密钥</a></div>
+</div>
+<script id="zgblob" type="application/json">{"v": 1, "iter": 600000, "salt": "I0UwFkwcfQXSS2b4H9osCw==", "iv": "jHajCxnYQUSpR0iJ", "ct": "Bm8es2iijxhz7Ss3iF5+RZT7UKyp/bilK0rvO6RcviLwBIDmUg9827crX5XZLMEw22oEOnp8jvCmYNK6iYrlgf8n/q2GgzHTr7vU4ukBg7CTjrFwajIU0cMsz9SAKtPVB7QawvnOGq8LBn6T0K+Ufr6WL39ZgqgOASZJ6SYSgXlAYHARFbx7lDNnkTXCenG8rO29CvXdRUsCF7mSsEL5kmKE3nv+su0aTpNdAJszc73S3nXjP4IfXTqC52c3H2Fjazzh2FFhmlgdqG3pHQ12hEgf0vjHRDrbvOKaH+NUAL2F8tSNst3n/V04tnyYO6pKZiekPjSUkuBve/mHp4EnYZokuSOHCl4ZV78keEhSmMphLyjVxp03FTfLMOVZUx9P9ilh6bOfp2FrNUbkfSenXzTr12yP7gsG85tKCkq9J4pSO5LPdvU1bElNDuhJ+Xo9sDg0amlllhbYjUsRkn/MPIdfBjOIDveAb5vaYgzUDT+PPPLV6L8whb93ld0xYXnm"}</script>
+<script>
+(function(){
+  var BLOB = JSON.parse(document.getElementById('zgblob').textContent);
+  var LSKEY = 'zin7_gate_key_v1__wbtest-embed';
+  var err = document.getElementById('err');
+  var openbtn = document.getElementById('openbtn');
+  var pwbtn = document.getElementById('pwbtn');
+  var pwzone = document.getElementById('pwzone');
+  var forget = document.getElementById('forget');
+  function b64dec(s){ var bin = atob(s); var u = new Uint8Array(bin.length); for (var i=0;i<bin.length;i++) u[i]=bin.charCodeAt(i); return u; }
+  function b64enc(u){ var s=''; for (var i=0;i<u.length;i++) s+=String.fromCharCode(u[i]); return btoa(s); }
+  function render(buf){
+    var text = new TextDecoder('utf-8').decode(buf);
+    document.open(); document.write(text); document.close();
+  }
+  function tryDecrypt(key){
+    return crypto.subtle.decrypt({name:'AES-GCM', iv: b64dec(BLOB.iv)}, key, b64dec(BLOB.ct));
+  }
+  function hasStored(){ try { return !!localStorage.getItem(LSKEY); } catch(e){ return false; } }
+  function refresh(){
+    var st = hasStored();
+    openbtn.hidden = !st; forget.hidden = !st;
+  }
+  openbtn.addEventListener('click', function(){
+    err.textContent = '';
+    var raw = b64dec(localStorage.getItem(LSKEY));
+    crypto.subtle.importKey('raw', raw, {name:'AES-GCM'}, false, ['decrypt']).then(function(key){
+      return tryDecrypt(key);
+    }).then(render).catch(function(){
+      try { localStorage.removeItem(LSKEY); } catch(e){}
+      refresh();
+      err.textContent = '本机密钥已失效，请输入密码';
+      pwzone.hidden = false;
+    });
+  });
+  pwbtn.addEventListener('click', function(){
+    pwzone.hidden = false;
+    document.getElementById('pw').focus();
+  });
+  document.getElementById('pwform').addEventListener('submit', function(ev){
+    ev.preventDefault();
+    err.textContent = '';
+    var pw = document.getElementById('pw').value;
+    if (!pw) { err.textContent = '先输入密码'; return; }
+    var enc = new TextEncoder();
+    crypto.subtle.importKey('raw', enc.encode(pw), 'PBKDF2', false, ['deriveKey']).then(function(base){
+      return crypto.subtle.deriveKey(
+        {name:'PBKDF2', salt: b64dec(BLOB.salt), iterations: BLOB.iter, hash:'SHA-256'},
+        base, {name:'AES-GCM', length:256}, true, ['decrypt']);
+    }).then(function(key){
+      return tryDecrypt(key).then(function(buf){
+        return crypto.subtle.exportKey('raw', key).then(function(raw){
+          try { localStorage.setItem(LSKEY, b64enc(new Uint8Array(raw))); } catch(e){}
+          render(buf);
+        });
+      });
+    }).catch(function(){
+      err.textContent = '密码不对，再试一次';
+    });
+  });
+  forget.addEventListener('click', function(ev){
+    ev.preventDefault();
+    try { localStorage.removeItem(LSKEY); } catch(e){}
+    refresh();
+    err.textContent = '已忘记本机密钥';
+  });
+  refresh();
+})();
+</script>
+</body>
+</html>

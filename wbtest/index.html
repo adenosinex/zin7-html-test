@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>网页工作台</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif; background: #f5f6f8; color: #1c2333; padding: 16px 14px 44px; }
+.wrap { max-width: 960px; margin: 0 auto; }
+h1 { font-size: 20px; font-weight: 700; }
+.sub { color: #68707f; font-size: 13px; margin-top: 6px; line-height: 1.6; }
+.card { background: #fff; border-radius: 12px; padding: 16px; margin-top: 14px; box-shadow: 0 1px 3px rgba(16,24,40,.06); }
+.card h2 { font-size: 14px; font-weight: 600; margin-bottom: 10px; }
+label.f { display: block; font-size: 12px; color: #68707f; margin: 10px 0 5px; }
+input[type=text], select, textarea { width: 100%; font-size: 14px; padding: 9px 10px; border: 1px solid #d4d9e1; border-radius: 9px; background: #fff; color: inherit; }
+textarea.code { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 12.5px; line-height: 1.55; min-height: 240px; resize: vertical; }
+.row { display: flex; gap: 10px; flex-wrap: wrap; }
+.row > div { flex: 1 1 200px; }
+button { font-size: 14px; padding: 9px 14px; border: 0; border-radius: 9px; background: #1c2333; color: #fff; cursor: pointer; }
+button.ghost { background: #eef1f6; color: #1c2333; }
+button.on { background: #2f6fd0; }
+button:disabled { opacity: .55; cursor: not-allowed; }
+.chk { display: flex; gap: 8px; align-items: flex-start; margin-top: 12px; font-size: 13.5px; line-height: 1.5; }
+.chk input { margin-top: 3px; }
+.hint { font-size: 12px; color: #98a0ae; line-height: 1.6; margin-top: 6px; }
+.msg { font-size: 13.5px; line-height: 1.6; margin-top: 10px; white-space: pre-wrap; }
+.err { color: #c0392b; }
+.ok { color: #1e7d4f; }
+#pvwrap { border: 1px solid #e3e7ee; border-radius: 10px; overflow: hidden; margin-top: 10px; background: #fff; }
+#pv { display: block; border: 0; height: 520px; margin: 0 auto; background: #fff; }
+details.nest { margin-top: 10px; border-top: 1px dashed #e3e7ee; padding-top: 10px; }
+details.nest summary { font-size: 13px; color: #68707f; cursor: pointer; }
+footer { max-width: 960px; margin: 24px auto 0; color: #98a0ae; font-size: 12px; line-height: 1.7; }
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>网页工作台</h1>
+<p class="sub">写一页新的 html、选好分类、实时预览，保存后它就是平台里的一个普通页面：随既有同步自动出现在 GitHub 与 Cloudflare 两处静态镜像，不需要任何令牌，也不用再逐次派工。</p>
+<div class="card"><h2>新页面</h2>
+<div class="row"><div><label class="f">页名（标题）</label><input type="text" id="pname" placeholder="如：露营清单"></div><div><label class="f">路径名（slug，发布后页面的地址段）</label><input type="text" id="slug" placeholder="如 camping-list"><div class="hint" id="slugwarn"></div></div></div>
+<label class="f">备注（显示在导航卡片上的一句话，可空）</label><input type="text" id="remark" placeholder="可空">
+<label class="f">分类</label><select id="cat"><option>实用工具</option><option>AI 与模型</option><option>健身与体能</option><option>健康与身体</option><option>户外与出行</option><option>设备与车辆</option><option>认知与社会</option><option>选购依据</option></select>
+<label class="f">HTML 源码（粘贴整页，或从本地文件载入）</label><textarea class="code" id="code" placeholder="&lt;!doctype html&gt;…"></textarea>
+<div class="row" style="margin-top:8px"><div><input type="file" id="file" accept=".html,.htm,text/html"></div></div>
+<label class="chk"><input type="checkbox" id="enc"><span>这是敏感页：加密发布（整页加密、它自己的随机密钥、点按钮输密码解密；分类自动归入“需验证”）</span></label>
+<div style="margin-top:14px"><button id="savebtn" disabled>保存到平台</button></div>
+<p class="hint" id="savestate">正在探测平台写入通道…</p>
+<div class="msg" id="msg"></div>
+</div>
+<div class="card"><h2>预览</h2><div class="row" style="flex-wrap:nowrap;gap:8px"><button id="pv-pc" class="on" type="button">电脑宽度</button><button id="pv-mob" class="ghost" type="button">手机宽度</button></div>
+<div id="pvwrap"><iframe id="pv" sandbox="allow-scripts" style="width:100%"></iframe></div></div>
+<div class="card" id="nestzone" hidden><h2>嵌套示例（加密页在本页内解密）</h2><div id="nestroot"></div></div>
+<div class="card"><h2>说明</h2><p class="hint" style="font-size:12.5px;color:#68707f">本页是平台 html 项目里的一页普通页面，没有自己的服务器与令牌：保存走平台既有入库通道（与微书签发布同一入口），发布走既有静态镜像同步（约 15 分钟一轮，或手动一条命令立即跑）。分类决定新页在导航里归入哪个分区；勾选加密的页会被整页加密、归入“需验证”分区，托管上只有密文。嵌套：若平台侧把某个加密页登记为本页的嵌套页，它会在上方以解密后渲染的方式出现，不需要整页跳转。本页代码零外部引用、零统计。</p></div>
+</div>
+<footer>网页工作台 · 平台 html 项目 · 保存与发布均复用平台既有通道</footer>
+<script>
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var LINKS_BASE = "https://debi.su7.dpdns.org/web/links/";
+  var GH_BASE = "https://ghhtml.zin7.de/";
+  var CF_BASE = "https://html.zin7.de/";
+  var EMBED_LSKEY = "zin7_gate_key_v1__";
+  var state = { api: null, embed: null, saving: false };
+
+  function esc(s) { return String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
+  function setMsg(html, cls) { var m = $("msg"); m.className = "msg " + (cls || ""); m.innerHTML = html; }
+  function b64dec(s) { var bin = atob(s); var u = new Uint8Array(bin.length); for (var i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i); return u; }
+
+  function refreshPreview() {
+    var src = $("code").value;
+    var f = $("pv");
+    if (src.trim()) { f.srcdoc = src; }
+    else { f.srcdoc = "<!doctype html><html><body style='font-family:sans-serif;color:#98a0ae;padding:20px'>在左侧粘贴 HTML 后这里实时预览</body></html>"; }
+  }
+  var pvTimer = null;
+  $("code").addEventListener("input", function () { clearTimeout(pvTimer); pvTimer = setTimeout(refreshPreview, 250); });
+  $("pv-pc").addEventListener("click", function () { $("pv").style.width = "100%"; $("pv-pc").className = "on"; $("pv-mob").className = "ghost"; });
+  $("pv-mob").addEventListener("click", function () { $("pv").style.width = "390px"; $("pv-mob").className = "on"; $("pv-pc").className = "ghost"; });
+
+  $("file").addEventListener("change", function () {
+    var file = this.files && this.files[0];
+    if (!file) return;
+    var rd = new FileReader();
+    rd.onload = function () {
+      var text = String(rd.result || "");
+      try { text = new TextDecoder("utf-8", { fatal: true }).decode(new Uint8Array(rd.result instanceof ArrayBuffer ? rd.result : new ArrayBuffer(0))); } catch (e) { /* fall back to string read */ }
+      $("code").value = text;
+      var m = text.match(/<title>([^<]*)<\/title>/i);
+      if (m && !$("pname").value.trim()) $("pname").value = m[1].trim();
+      refreshPreview();
+    };
+    rd.readAsText(file, "utf-8");
+  });
+  $("slug").addEventListener("input", function () {
+    var s = $("slug").value.trim();
+    var warn = $("slugwarn");
+    if (s && !/^[a-zA-Z0-9][a-zA-Z0-9_-]{0,62}$/.test(s)) { warn.textContent = "标识只能是 1–63 位字母、数字、连字符或下划线。"; }
+    else { warn.textContent = ""; }
+  });
+
+  // ---- embedded (nested) pages: client-side decrypt + render ----
+  function renderEmbedShell(rootId) {
+    var root = $(rootId);
+    root.innerHTML = "";
+    var p = document.createElement("p");
+    p.className = "hint";
+    p.textContent = "嵌套页已加密：托管上只有密文，在本机输入它自己的密码解密并在本页内渲染。";
+    var btnRow = document.createElement("div"); btnRow.className = "row"; btnRow.style.marginTop = "8px";
+    var openBtn = document.createElement("button"); openBtn.type = "button"; openBtn.textContent = "点击加载嵌套页";
+    var pwBtn = document.createElement("button"); pwBtn.type = "button"; pwBtn.className = "ghost"; pwBtn.textContent = "输入密码解锁";
+    btnRow.appendChild(openBtn); btnRow.appendChild(pwBtn);
+    var pwZone = document.createElement("div"); pwZone.hidden = true; pwZone.style.marginTop = "8px";
+    var pwInput = document.createElement("input"); pwInput.type = "password"; pwInput.placeholder = "嵌套页的密码"; pwInput.autocomplete = "off";
+    var decBtn = document.createElement("button"); decBtn.type = "button"; decBtn.textContent = "解密"; decBtn.style.marginTop = "8px";
+    pwZone.appendChild(pwInput); pwZone.appendChild(decBtn);
+    var err = document.createElement("div"); err.className = "msg err";
+    var frame = document.createElement("iframe");
+    frame.setAttribute("sandbox", "allow-scripts");
+    frame.style.cssText = "width:100%;height:420px;border:1px solid #e3e7ee;border-radius:10px;margin-top:10px;background:#fff";
+    frame.hidden = true;
+    root.appendChild(p); root.appendChild(btnRow); root.appendChild(pwZone); root.appendChild(err); root.appendChild(frame);
+
+    var blob = null;
+    function getBlob() {
+      if (blob) return Promise.resolve(blob);
+      return state.embed.fetchShell().then(function (html) {
+        var m = html.match(/<script id="zgblob" type="application\/json">([\s\S]*?)<\/script>/);
+        if (!m) throw new Error("嵌套页里没有找到密文");
+        blob = JSON.parse(m[1]);
+        return blob;
+      });
+    }
+    function doRender(buf) {
+      frame.srcdoc = new TextDecoder("utf-8").decode(buf);
+      frame.hidden = false;
+      err.textContent = "";
+    }
+    function tryStored() {
+      var slug = state.embed.slug;
+      var raw = null;
+      try { raw = localStorage.getItem(EMBED_LSKEY + slug); } catch (e) { }
+      if (!raw) { pwZone.hidden = false; pwInput.focus(); return; }
+      getBlob().then(function (b) {
+        return crypto.subtle.importKey("raw", b64dec(raw), { name: "AES-GCM" }, false, ["decrypt"]);
+      }).then(function (key) {
+        return getBlob().then(function (b) {
+          return crypto.subtle.decrypt({ name: "AES-GCM", iv: b64dec(b.iv) }, key, b64dec(b.ct));
+        });
+      }).then(doRender).catch(function () {
+        try { localStorage.removeItem(EMBED_LSKEY + slug); } catch (e) { }
+        err.textContent = "本机记住的密钥已失效，请输入密码。";
+        pwZone.hidden = false;
+      });
+    }
+    openBtn.addEventListener("click", tryStored);
+    pwBtn.addEventListener("click", function () { pwZone.hidden = false; pwInput.focus(); });
+    decBtn.addEventListener("click", function () {
+      var pw = pwInput.value;
+      if (!pw) { err.textContent = "先输入密码"; return; }
+      err.textContent = "";
+      getBlob().then(function (b) {
+        var enc = new TextEncoder();
+        return crypto.subtle.importKey("raw", enc.encode(pw), "PBKDF2", false, ["deriveKey"]).then(function (base) {
+          return crypto.subtle.deriveKey({ name: "PBKDF2", salt: b64dec(b.salt), iterations: b.iter, hash: "SHA-256" }, base, { name: "AES-GCM", length: 256 }, true, ["decrypt"]);
+        }).then(function (key) {
+          return crypto.subtle.decrypt({ name: "AES-GCM", iv: b64dec(b.iv) }, key, b64dec(b.ct)).then(function (buf) {
+            return crypto.subtle.exportKey("raw", key).then(function (rawKey) {
+              var s = ""; var u = new Uint8Array(rawKey);
+              for (var i = 0; i < u.length; i++) s += String.fromCharCode(u[i]);
+              try { localStorage.setItem(EMBED_LSKEY + state.embed.slug, btoa(s)); } catch (e) { }
+              doRender(buf);
+            });
+          });
+        });
+      }).catch(function () { err.textContent = "密码不对，或嵌套页取不到。"; });
+    });
+  }
+
+  // ---- probe platform origin for the injected API / embed channels ----
+  function probe() {
+    var f = document.createElement("iframe");
+    f.style.display = "none";
+    f.src = LINKS_BASE;
+    var done = false;
+    function onMsg(ev) {
+      if (ev.origin !== "https://debi.su7.dpdns.org") return;
+      var d = ev.data || {};
+      if (d.type !== "wb-hello" || done) return;
+      done = true;
+      window.removeEventListener("message", onMsg);
+      f.remove();
+      onHello(d);
+    }
+    window.addEventListener("message", onMsg);
+    document.body.appendChild(f);
+    setTimeout(function () {
+      if (!done) { done = true; window.removeEventListener("message", onMsg); f.remove(); onHello(null); }
+    }, 6000);
+  }
+  function onHello(d) {
+    if (d && d.api === "wbapi1") {
+      state.api = {
+        origin: "https://debi.su7.dpdns.org",
+        post: function (path, body) {
+          return new Promise(function (resolve, reject) {
+            var id = "r" + Math.random().toString(36).slice(2);
+            var f = $("bridge");
+            function h(ev) {
+              if (ev.origin !== "https://debi.su7.dpdns.org") return;
+              var dd = ev.data || {};
+              if (dd.type !== "wb-resp" || dd.id !== id) return;
+              window.removeEventListener("message", h);
+              resolve(dd);
+            }
+            window.addEventListener("message", h);
+            f.contentWindow.postMessage({ type: "wb-req", id: id, path: path, body: body }, "https://debi.su7.dpdns.org");
+            setTimeout(function () { window.removeEventListener("message", h); reject(new Error("平台通道超时")); }, 30000);
+          });
+        }
+      };
+      // persistent bridge frame
+      var bf = document.createElement("iframe");
+      bf.id = "bridge"; bf.style.display = "none"; bf.src = LINKS_BASE;
+      document.body.appendChild(bf);
+      $("savebtn").disabled = false;
+      $("savestate").textContent = "平台通道已连接（经 debi 平台页保存，新页会进入平台并随既有同步出现在两处镜像）。";
+    } else {
+      $("savestate").textContent = "当前环境未连接平台写入通道（你多半在看静态镜像版）：本页可看说明与预览；要真正保存新页，请从平台打开本页（debi /site 版），保存按钮会自动点亮。";
+    }
+    if (d && d.embed) {
+      state.embed = {
+        slug: d.embed,
+        fetchShell: function () {
+          return fetch(GH_BASE + d.embed + "/").then(function (r) { return r.text(); });
+        }
+      };
+      $("nestzone").hidden = false;
+      renderEmbedShell("nestroot");
+    }
+  }
+
+  $("savebtn").addEventListener("click", function () {
+    if (!state.api || state.saving) return;
+    var slug = $("slug").value.trim();
+    var name = $("pname").value.trim();
+    var desc = $("remark").value.trim();
+    var code = $("code").value;
+    var enc = $("enc").checked;
+    if (!/^[a-zA-Z0-9][a-zA-Z0-9_-]{0,62}$/.test(slug)) { setMsg("标识（slug）需为 1–63 位字母、数字、连字符或下划线。", "err"); return; }
+    if (!name) { setMsg("先填页名。", "err"); return; }
+    if (!code.trim()) { setMsg("先粘贴 HTML 源码。", "err"); return; }
+    state.saving = true; $("savebtn").disabled = true;
+    setMsg("正在保存到平台…", "");
+    state.api.post("save", { slug: slug, name: name, description: desc, code: code }).then(function (resp) {
+      if (!resp.ok) throw new Error(resp.message || "平台保存失败");
+      if (!enc) {
+        setMsg("已保存进平台。第 15 分钟一轮的自动同步会把它带到两处镜像：\nGitHub：" + GH_BASE + slug + "/\nCloudflare：" + CF_BASE + slug + "/\n（也可让主线手动跑一条同步命令立即生效）", "ok");
+        return null;
+      }
+      return state.api.post("mark-encrypted", { slug: slug }).then(function (r2) {
+        if (!r2.ok) throw new Error(r2.message || "已保存，但加密标记失败");
+        setMsg("已保存并已标记加密：自动同步时会整页加密发布，镜像上只有密文、点按钮输密码解密；该页的专属密码由平台凭据保管（向主线索取一次即可，本机输一次后记住）。\nGitHub：" + GH_BASE + slug + "/\nCloudflare：" + CF_BASE + slug + "/", "ok");
+      });
+    }).catch(function (e) {
+      setMsg("保存失败：" + e.message, "err");
+    }).then(function () {
+      state.saving = false; $("savebtn").disabled = false;
+    });
+  });
+
+  refreshPreview();
+  probe();
+})();
+</script>
+</body>
+</html>
