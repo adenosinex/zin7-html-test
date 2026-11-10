@@ -1,0 +1,809 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>⚙️ 智齿拔除术后护理指南</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700;900&family=Noto+Sans+SC:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f5f1eb;
+    --bg-warm: #ece6dd;
+    --surface: #ffffff;
+    --surface-alt: #faf8f5;
+    --accent: #3d6b56;
+    --accent-light: #e8f0eb;
+    --accent-dark: #2a4d3d;
+    --danger: #b5453a;
+    --danger-light: #fdf0ee;
+    --danger-bg: #f9e4e0;
+    --warning: #c4882d;
+    --warning-light: #fdf6ec;
+    --info: #4a6fa5;
+    --info-light: #eef3f9;
+    --text: #2c2a27;
+    --text-secondary: #5c5751;
+    --text-muted: #9a938b;
+    --border: #e2ddd6;
+    --border-light: #ece8e2;
+    --radius: 14px;
+    --radius-sm: 8px;
+    --shadow-sm: 0 1px 3px rgba(44,42,39,0.06), 0 1px 2px rgba(44,42,39,0.04);
+    --shadow-md: 0 4px 16px rgba(44,42,39,0.08), 0 1px 3px rgba(44,42,39,0.04);
+    --shadow-lg: 0 12px 40px rgba(44,42,39,0.1), 0 4px 12px rgba(44,42,39,0.05);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Noto Sans SC', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.8;
+    font-weight: 400;
+    min-height: 100vh;
+  }
+
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .page-wrapper {
+    position: relative;
+    z-index: 1;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 40px 24px 80px;
+  }
+
+  /* ── Hero ── */
+  .hero {
+    text-align: center;
+    padding: 60px 20px 50px;
+    margin-bottom: 48px;
+    position: relative;
+    opacity: 0;
+    animation: fadeUp 0.8s ease forwards;
+  }
+
+  .hero::after {
+    content: '';
+    display: block;
+    width: 60px;
+    height: 3px;
+    background: var(--accent);
+    margin: 32px auto 0;
+    border-radius: 2px;
+  }
+
+  .hero-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 72px; height: 72px;
+    background: var(--accent-light);
+    border-radius: 50%;
+    margin-bottom: 24px;
+    font-size: 32px;
+  }
+
+  .hero h1 {
+    font-family: 'Noto Serif SC', serif;
+    font-size: clamp(28px, 5vw, 40px);
+    font-weight: 900;
+    letter-spacing: 0.02em;
+    color: var(--text);
+    margin-bottom: 12px;
+    line-height: 1.3;
+  }
+
+  .hero p {
+    font-size: 15px;
+    color: var(--text-muted);
+    max-width: 480px;
+    margin: 0 auto;
+    line-height: 1.9;
+  }
+
+  /* ── Section Titles ── */
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 24px;
+    opacity: 0;
+    animation: fadeUp 0.6s ease forwards;
+    animation-delay: 0.15s;
+  }
+
+  .section-header .icon-badge {
+    flex-shrink: 0;
+    width: 44px; height: 44px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    box-shadow: var(--shadow-sm);
+  }
+
+  .icon-badge.green { background: var(--accent-light); }
+  .icon-badge.red { background: var(--danger-light); }
+  .icon-badge.amber { background: var(--warning-light); }
+  .icon-badge.blue { background: var(--info-light); }
+
+  .section-header h2 {
+    font-family: 'Noto Serif SC', serif;
+    font-size: clamp(20px, 3.5vw, 26px);
+    font-weight: 700;
+    letter-spacing: 0.01em;
+    line-height: 1.3;
+  }
+
+  .section-subtitle {
+    font-size: 14px;
+    color: var(--text-muted);
+    margin-top: 2px;
+    font-weight: 400;
+  }
+
+  /* ── Cards ── */
+  .card {
+    background: var(--surface);
+    border-radius: var(--radius);
+    padding: 28px 28px;
+    margin-bottom: 16px;
+    border: 1px solid var(--border-light);
+    box-shadow: var(--shadow-sm);
+    opacity: 0;
+    animation: fadeUp 0.6s ease forwards;
+    transition: box-shadow 0.3s ease, transform 0.3s ease;
+  }
+
+  .card:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-1px);
+  }
+
+  .card h3 {
+    font-family: 'Noto Serif SC', serif;
+    font-size: 17px;
+    font-weight: 700;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    line-height: 1.5;
+  }
+
+  .card p, .card li {
+    font-size: 14.5px;
+    color: var(--text-secondary);
+    line-height: 1.9;
+  }
+
+  .card ul {
+    list-style: none;
+    padding: 0;
+  }
+
+  .card ul li {
+    position: relative;
+    padding-left: 20px;
+    margin-bottom: 6px;
+  }
+
+  .card ul li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 12px;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+
+  .danger-card { border-left: 3px solid var(--danger); }
+  .danger-card ul li::before { background: var(--danger); }
+
+  .warning-card { border-left: 3px solid var(--warning); }
+  .warning-card ul li::before { background: var(--warning); }
+
+  .info-card { border-left: 3px solid var(--info); }
+  .info-card ul li::before { background: var(--info); }
+
+  /* ── Protect Grid ── */
+  .protect-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 14px;
+    margin-bottom: 40px;
+  }
+
+  .protect-item {
+    background: var(--surface);
+    border-radius: var(--radius);
+    padding: 22px 20px;
+    border: 1px solid var(--border-light);
+    box-shadow: var(--shadow-sm);
+    text-align: center;
+    opacity: 0;
+    animation: fadeUp 0.6s ease forwards;
+    transition: box-shadow 0.3s ease, transform 0.3s ease;
+  }
+
+  .protect-item:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+  }
+
+  .protect-item .emoji {
+    font-size: 32px;
+    display: block;
+    margin-bottom: 10px;
+  }
+
+  .protect-item h4 {
+    font-family: 'Noto Serif SC', serif;
+    font-size: 15px;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+
+  .protect-item p {
+    font-size: 13px;
+    color: var(--text-muted);
+    line-height: 1.7;
+  }
+
+  /* ── Timeline ── */
+  .timeline-section {
+    margin: 48px 0 40px;
+  }
+
+  .timeline {
+    position: relative;
+    padding-left: 40px;
+  }
+
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 15px;
+    top: 8px;
+    bottom: 8px;
+    width: 2px;
+    background: linear-gradient(to bottom, var(--accent), var(--info));
+    border-radius: 1px;
+  }
+
+  .timeline-item {
+    position: relative;
+    margin-bottom: 24px;
+    opacity: 0;
+    animation: fadeUp 0.6s ease forwards;
+  }
+
+  .timeline-item:last-child { margin-bottom: 0; }
+
+  .timeline-dot {
+    position: absolute;
+    left: -33px;
+    top: 22px;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    border: 3px solid var(--accent);
+    background: var(--bg);
+    z-index: 2;
+    transition: transform 0.3s ease;
+  }
+
+  .timeline-item:hover .timeline-dot {
+    transform: scale(1.3);
+    background: var(--accent);
+  }
+
+  .timeline-card {
+    background: var(--surface);
+    border-radius: var(--radius);
+    padding: 22px 24px;
+    border: 1px solid var(--border-light);
+    box-shadow: var(--shadow-sm);
+    transition: box-shadow 0.3s ease;
+  }
+
+  .timeline-item:hover .timeline-card {
+    box-shadow: var(--shadow-md);
+  }
+
+  .timeline-label {
+    display: inline-block;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--accent);
+    background: var(--accent-light);
+    padding: 3px 12px;
+    border-radius: 20px;
+    margin-bottom: 10px;
+    letter-spacing: 0.03em;
+  }
+
+  .timeline-card h3 {
+    font-family: 'Noto Serif SC', serif;
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    line-height: 1.5;
+  }
+
+  .timeline-card p {
+    font-size: 14px;
+    color: var(--text-secondary);
+    line-height: 1.85;
+  }
+
+  .timeline-card ul {
+    list-style: none;
+    padding: 0;
+    margin-top: 6px;
+  }
+
+  .timeline-card li {
+    font-size: 13.5px;
+    color: var(--text-secondary);
+    padding-left: 18px;
+    position: relative;
+    margin-bottom: 4px;
+    line-height: 1.8;
+  }
+
+  .timeline-card li::before {
+    content: '→';
+    position: absolute;
+    left: 0;
+    color: var(--accent);
+    font-weight: 600;
+  }
+
+  /* ── Callout Boxes ── */
+  .callout {
+    border-radius: var(--radius);
+    padding: 20px 24px;
+    margin: 20px 0;
+    font-size: 14px;
+    line-height: 1.85;
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+  }
+
+  .callout.danger {
+    background: var(--danger-bg);
+    border: 1px solid #e6c4bf;
+    color: #7a2e25;
+  }
+
+  .callout.warning {
+    background: var(--warning-light);
+    border: 1px solid #e6d5a8;
+    color: #7a5a15;
+  }
+
+  .callout.info {
+    background: var(--info-light);
+    border: 1px solid #b8cde2;
+    color: #2e4a6b;
+  }
+
+  .callout-icon {
+    font-size: 20px;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  .callout strong {
+    font-weight: 600;
+  }
+
+  /* ── Section Spacing ── */
+  .content-section {
+    margin-bottom: 48px;
+  }
+
+  /* ── Footer ── */
+  .footer-note {
+    text-align: center;
+    padding: 40px 20px;
+    border-top: 1px solid var(--border);
+    margin-top: 24px;
+    opacity: 0;
+    animation: fadeUp 0.6s ease forwards;
+    animation-delay: 0.3s;
+  }
+
+  .footer-note p {
+    font-size: 13px;
+    color: var(--text-muted);
+    line-height: 1.9;
+  }
+
+  .footer-note .emphasis {
+    font-family: 'Noto Serif SC', serif;
+    font-weight: 600;
+    color: var(--accent-dark);
+    font-size: 15px;
+  }
+
+  /* ── Animations ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(18px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .delay-1 { animation-delay: 0.1s !important; }
+  .delay-2 { animation-delay: 0.2s !important; }
+  .delay-3 { animation-delay: 0.3s !important; }
+  .delay-4 { animation-delay: 0.4s !important; }
+  .delay-5 { animation-delay: 0.5s !important; }
+  .delay-6 { animation-delay: 0.6s !important; }
+  .delay-7 { animation-delay: 0.7s !important; }
+  .delay-8 { animation-delay: 0.8s !important; }
+
+  /* ── Responsive ── */
+  @media (max-width: 600px) {
+    .page-wrapper { padding: 24px 16px 60px; }
+    .hero { padding: 40px 12px 36px; margin-bottom: 36px; }
+    .card { padding: 20px 18px; }
+    .protect-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+    .protect-item { padding: 16px 14px; }
+    .timeline { padding-left: 32px; }
+    .timeline-dot { left: -25px; width: 14px; height: 14px; }
+    .timeline-card { padding: 18px 16px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="page-wrapper">
+
+  <!-- ─── Hero ─── -->
+  <header class="hero">
+    <div class="hero-icon">🦷</div>
+    <h1>智齿拔除术后护理指南</h1>
+    <p>科学护理，助你顺利度过恢复期。以下内容涵盖术后需要保护的关键组织、具体护理措施、必须避免的行为，以及不同阶段的恢复界限。</p>
+  </header>
+
+  <!-- ─── Section 1: 需要保护的东西 ─── -->
+  <section class="content-section">
+    <div class="section-header">
+      <div class="icon-badge green">🛡️</div>
+      <div>
+        <h2>术后需要保护的关键组织</h2>
+        <div class="section-subtitle">了解你在保护什么，才能更好地保护它们</div>
+      </div>
+    </div>
+
+    <div class="protect-grid">
+      <div class="protect-item delay-1">
+        <span class="emoji">🩸</span>
+        <h4>血凝块</h4>
+        <p>拔牙窝中最关键的"天然创可贴"，保护骨头和神经。一旦脱落，将引发干槽症。</p>
+      </div>
+      <div class="protect-item delay-2">
+        <span class="emoji">🦴</span>
+        <h4>拔牙窝骨壁</h4>
+        <p>手术暴露的骨组织非常脆弱，需要在血凝块的保护下缓慢愈合，防止感染和骨髓炎。</p>
+      </div>
+      <div class="protect-item delay-3">
+        <span class="emoji">🧵</span>
+        <h4>手术缝线与创口</h4>
+        <p>缝合线维持伤口闭合，过早拉扯会导致伤口裂开、出血和延迟愈合。</p>
+      </div>
+      <div class="protect-item delay-4">
+        <span class="emoji">⚡</span>
+        <h4>周围神经</h4>
+        <p>下牙槽神经和舌神经紧邻拔牙区，术后可能出现暂时性麻木，需避免压迫和感染。</p>
+      </div>
+      <div class="protect-item delay-5">
+        <span class="emoji">🦷</span>
+        <h4>邻牙与对颌牙</h4>
+        <p>邻牙可能因手术操作暂时松动，对颌牙因失去咬合对手可能伸长，需关注牙齿对位。</p>
+      </div>
+      <div class="protect-item delay-6">
+        <span class="emoji">🫁</span>
+        <h4>呼吸道与吞咽功能</h4>
+        <p>术后肿胀可能影响气道，出血可能导致吞咽不适，需确保呼吸道通畅。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── Section 2: 具体护理措施 ─── -->
+  <section class="content-section">
+    <div class="section-header delay-2">
+      <div class="icon-badge blue">📋</div>
+      <div>
+        <h2>具体护理措施</h2>
+        <div class="section-subtitle">术后每一阶段该做什么，做到位</div>
+      </div>
+    </div>
+
+    <div class="card delay-2">
+      <h3>🩸 止血与血凝块保护</h3>
+      <ul>
+        <li><strong>咬纱布 30-45 分钟</strong>：轻轻咬住纱布，不要频繁吐出查看，确保血凝块稳固形成</li>
+        <li>纱布取出后仍有少量渗血属正常，可用<strong>湿茶包</strong>（含单宁酸）替代纱布轻咬止血</li>
+        <li>唾液中带血丝属正常现象（术后 24-48 小时），<strong>不要反复吐口水</strong>，应轻轻咽下</li>
+        <li>若出现鲜红色大量出血且无法止住，应立即就诊</li>
+      </ul>
+    </div>
+
+    <div class="card delay-3">
+      <h3>🧊 冷敷与热敷</h3>
+      <ul>
+        <li><strong>术后 48 小时内</strong>：冷敷患侧面部，每次 15-20 分钟，间隔 15 分钟。减轻肿胀和疼痛</li>
+        <li>冰袋外裹毛巾，<strong>不可直接接触皮肤</strong>，防止冻伤</li>
+        <li><strong>48 小时后</strong>：改用温热毛巾热敷，促进肿胀消散和淤血吸收</li>
+        <li>肿胀通常在术后第 3 天达到高峰，属正常反应</li>
+      </ul>
+    </div>
+
+    <div class="card delay-4">
+      <h3>🍽️ 饮食管理</h3>
+      <ul>
+        <li><strong>术后 2-4 小时</strong>：麻药消退前禁止进食，防止咬伤自己</li>
+        <li><strong>术后 1-7 天</strong>：以温凉、软烂食物为主 —— 粥、酸奶、土豆泥、蛋羹、面条、豆腐</li>
+        <li>食物温度<strong>不宜超过 40°C</strong>，过热会促进血管扩张导致出血</li>
+        <li>避免用拔牙侧咀嚼，尽量使用<strong>对侧牙齿</strong></li>
+        <li>多喝水，但 <strong>不要用吸管</strong>（吸吮动作会导致负压，破坏血凝块）</li>
+        <li>术后补充维生素 C 和蛋白质，促进伤口愈合</li>
+      </ul>
+    </div>
+
+    <div class="card delay-5">
+      <h3>💊 用药与口腔清洁</h3>
+      <ul>
+        <li>严格按医嘱服用<strong>抗生素</strong>，即使感觉好转也不要自行停药</li>
+        <li>止痛药在疼痛加重前服用，遵医嘱使用，不要空腹服用布洛芬</li>
+        <li><strong>术后 24 小时内</strong>不要刷牙、不要漱口，保护血凝块</li>
+        <li><strong>24 小时后</strong>：用温盐水（半茶匙盐 + 一杯温水）轻柔漱口，每日 3-4 次</li>
+        <li>刷牙时<strong>避开手术区域</strong>，使用软毛牙刷，动作轻柔</li>
+        <li>医生可能开具<strong>氯己定含漱液</strong>，按指示使用</li>
+      </ul>
+    </div>
+
+    <div class="card delay-6">
+      <h3>😴 休息与体位</h3>
+      <ul>
+        <li>术后 24-48 小时<strong>充分休息</strong>，避免弯腰、低头等增加头部血压的动作</li>
+        <li>睡觉时<strong>垫高枕头</strong>（15-30°），减轻面部肿胀</li>
+        <li>避免剧烈运动、重体力劳动至少 1 周</li>
+        <li>保持室内空气流通，避免过热环境</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ─── Section 3: 严重负面行为 ─── -->
+  <section class="content-section">
+    <div class="section-header delay-2">
+      <div class="icon-badge red">⛔</div>
+      <div>
+        <h2>必须避免的行为</h2>
+        <div class="section-subtitle">这些行为可能导致严重后果，包括干槽症、大出血或感染</div>
+      </div>
+    </div>
+
+    <div class="callout danger delay-3">
+      <span class="callout-icon">⚠️</span>
+      <div>
+        <strong>干槽症警示：</strong>血凝块脱落或未形成时，骨壁暴露于口腔环境中，引发剧烈疼痛（通常术后 3-5 天出现），疼痛可放射至耳部和颞部。干槽症需要立即就医处理，以下行为是导致干槽症的高危因素。
+      </div>
+    </div>
+
+    <div class="card danger-card delay-3">
+      <h3>🚬 吸烟与电子烟</h3>
+      <p>尼古丁收缩血管、抑制愈合；吸烟产生的负压直接破坏血凝块。<strong>至少术后 72 小时内绝对禁止</strong>，理想情况下应戒烟 1-2 周。电子烟同样有害。</p>
+    </div>
+
+    <div class="card danger-card delay-4">
+      <h3>🥤 使用吸管</h3>
+      <p>吸吮动作在口腔内产生负压，极易将血凝块"吸出"。<strong>术后至少 1 周内不使用吸管</strong>，直接小口饮用。</p>
+    </div>
+
+    <div class="card danger-card delay-5">
+      <h3>🫧 用力漱口与反复吐口水</h3>
+      <p>漱口和吐口水的力度会冲刷拔牙窝，破坏血凝块。<strong>术后 24 小时内严禁漱口</strong>，之后也只能轻柔含漱，不要用力鼓漱。</p>
+    </div>
+
+    <div class="card danger-card delay-6">
+      <h3>🌶️ 刺激性食物与饮品</h3>
+      <ul>
+        <li>辛辣、酸性、过咸的食物 —— 直接刺激创口</li>
+        <li>酒精 —— 扩张血管导致出血，且与药物可能产生不良反应</li>
+        <li>过烫的食物和饮品 —— 促进出血、溶解血凝块</li>
+        <li>坚硬、脆碎的食物（坚果、薯片）—— 碎屑嵌入伤口引发感染</li>
+      </ul>
+    </div>
+
+    <div class="card danger-card delay-7">
+      <h3>👆 触碰与舔舐伤口</h3>
+      <p>用手指、舌头反复触碰或舔舐拔牙窝，会带入细菌并干扰血凝块。<strong>管住舌头</strong>，即使有异物感也不要频繁探查。</p>
+    </div>
+
+    <div class="card warning-card delay-8">
+      <h3>🏋️ 剧烈运动与重体力劳动</h3>
+      <p>运动升高血压，增加出血风险；出汗和体位变化可能影响伤口。<strong>术后至少 1 周内避免</strong>高强度活动。</p>
+    </div>
+
+    <div class="card warning-card delay-8">
+      <h3>✈️ 飞行与潜水</h3>
+      <p>气压变化可能影响拔牙窝愈合。<strong>术后至少 2 周内避免乘飞机</strong>（尤其是复杂阻生齿拔除后），潜水则需更长时间。</p>
+    </div>
+  </section>
+
+  <!-- ─── Section 4: 时间线 ─── -->
+  <section class="content-section timeline-section">
+    <div class="section-header delay-2">
+      <div class="icon-badge amber">🕐</div>
+      <div>
+        <h2>不同期限的恢复界限</h2>
+        <div class="section-subtitle">随时间推移，逐步恢复正常生活</div>
+      </div>
+    </div>
+
+    <div class="timeline">
+
+      <div class="timeline-item delay-2">
+        <div class="timeline-dot"></div>
+        <div class="timeline-card">
+          <span class="timeline-label">术后 0-6 小时</span>
+          <h3>止血期 · 最严格阶段</h3>
+          <ul>
+            <li>持续咬纱布 30-45 分钟，不要吐出查看</li>
+            <li>禁止进食（麻药未退）</li>
+            <li>禁止漱口、吐口水、使用吸管</li>
+            <li>禁止刷牙</li>
+            <li>禁止热敷</li>
+            <li>禁止平躺，保持半坐位或头部抬高</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="timeline-item delay-3">
+        <div class="timeline-dot"></div>
+        <div class="timeline-card">
+          <span class="timeline-label">术后 6-24 小时</span>
+          <h3>凝固期 · 高度保护</h3>
+          <ul>
+            <li>可以开始进食温凉流质（酸奶、凉粥）</li>
+            <li>继续冷敷</li>
+            <li>仍禁止漱口和刷牙</li>
+            <li>开始服用抗生素和止痛药</li>
+            <li>禁止吸烟和饮酒</li>
+            <li>充分休息，禁止工作或运动</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="timeline-item delay-4">
+        <div class="timeline-dot"></div>
+        <div class="timeline-card">
+          <span class="timeline-label">术后 24-48 小时</span>
+          <h3>初始恢复期 · 开始轻柔清洁</h3>
+          <ul>
+            <li>可以开始<strong>轻柔</strong>温盐水漱口（不要鼓漱）</li>
+            <li>可以避开手术区轻柔刷牙</li>
+            <li>可以过渡到软食（面条、蛋羹、土豆泥）</li>
+            <li>继续冷敷（最后阶段）</li>
+            <li>仍禁止吸烟、吸管、酒精、运动</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="timeline-item delay-5">
+        <div class="timeline-dot"></div>
+        <div class="timeline-card">
+          <span class="timeline-label">术后 48-72 小时</span>
+          <h3>肿胀高峰期 · 冷热切换</h3>
+          <ul>
+            <li>肿胀达到最大值属正常反应，不必惊慌</li>
+            <li><strong>改冷敷为温热敷</strong>，促进消肿</li>
+            <li>疼痛可能加重，按需使用止痛药</li>
+            <li>若疼痛剧烈且持续加重，警惕干槽症，及时就诊</li>
+            <li>仍禁止吸烟（最低 72 小时禁烟期限）</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="timeline-item delay-6">
+        <div class="timeline-dot"></div>
+        <div class="timeline-card">
+          <span class="timeline-label">术后 3-7 天</span>
+          <h3>软组织愈合期 · 逐步放松</h3>
+          <ul>
+            <li>肿胀逐渐消退</li>
+            <li>可以过渡到半固体食物（软米饭、鱼肉、豆腐）</li>
+            <li>正常刷牙，但仍需避开伤口区域</li>
+            <li>可以恢复轻度日常活动</li>
+            <li>仍禁止使用吸管、吸烟、饮酒</li>
+            <li>仍避免硬食、辛辣刺激</li>
+            <li><strong>术后 7 天左右复查拆线</strong>（如为可吸收线则无需拆线）</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="timeline-item delay-7">
+        <div class="timeline-dot"></div>
+        <div class="timeline-card">
+          <span class="timeline-label">术后 1-2 周</span>
+          <h3>中期恢复 · 大部分限制解除</h3>
+          <ul>
+            <li>可以开始<strong>温和运动</strong>（散步、瑜伽）</li>
+            <li>可以逐步恢复正常饮食（但仍避免极硬食物）</li>
+            <li>可以少量饮酒（若未服药）</li>
+            <li>伤口基本闭合，但深层组织仍在愈合</li>
+            <li>可以使用吸管（轻柔使用）</li>
+            <li>仍建议戒烟</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="timeline-item delay-8">
+        <div class="timeline-dot"></div>
+        <div class="timeline-card">
+          <span class="timeline-label">术后 2-4 周</span>
+          <h3>基本恢复期 · 接近正常</h3>
+          <ul>
+            <li>软组织基本愈合完成</li>
+            <li>可以恢复<strong>中高强度运动</strong>（跑步、游泳、健身）</li>
+            <li>可以恢复完全正常饮食</li>
+            <li>可以乘飞机</li>
+            <li>伤口处可能仍有轻微凹陷，属正常</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="timeline-item delay-8">
+        <div class="timeline-dot"></div>
+        <div class="timeline-card">
+          <span class="timeline-label">术后 1-3 个月</span>
+          <h3>完全恢复期 · 骨组织重塑</h3>
+          <ul>
+            <li>骨组织在 3-6 个月内逐渐填充拔牙窝</li>
+            <li>所有活动和饮食完全恢复正常</li>
+            <li>若需种植牙修复，通常在 3-6 个月后评估</li>
+            <li>若仍有持续麻木或异常感觉，及时复诊</li>
+          </ul>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ─── Callout: 需要立即就诊的情况 ─── -->
+  <section class="content-section">
+    <div class="callout danger delay-2">
+      <span class="callout-icon">🚨</span>
+      <div>
+        <strong>以下情况请立即就医：</strong><br>
+        持续大量出血超过 12 小时无法止住 · 术后 3-5 天出现剧烈放射性疼痛（疑似干槽症）· 体温超过 38.5°C · 面部肿胀持续加重而非消退 · 吞咽困难或呼吸困难 · 拔牙区出现异味脓液 · 下唇或舌头持续麻木超过 2 周
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── Footer ─── -->
+  <footer class="footer-note">
+    <p class="emphasis">每个人的愈合速度不同，请以主治医生的医嘱为准</p>
+    <p style="margin-top:8px;">本指南为通用术后护理建议，不替代专业医疗诊断。<br>如有任何疑问或异常，请及时联系你的口腔外科医生。</p>
+  </footer>
+
+</div>
+
+</body>
+</html>

@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="color-scheme" content="light" />
+  <title>📌 智齿拔牙后护理指南（亮面版）</title>
+  <style>
+    :root {
+      --bg1: #f7fbff;
+      --bg2: #eef4fb;
+      --card: #ffffff;
+      --ink: #1f2937;
+      --muted: #64748b;
+      --line: #e3edf7;
+      --blue: #2563eb;
+      --teal: #0f766e;
+      --amber: #b45309;
+      --red: #b91c1c;
+      --green: #15803d;
+      --shadow: 0 12px 34px rgba(15, 23, 42, 0.08);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+        "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(1100px 380px at 8% -8%, rgba(37, 99, 235, 0.13), transparent 56%),
+        radial-gradient(900px 340px at 92% 0%, rgba(16, 185, 129, 0.12), transparent 52%),
+        linear-gradient(180deg, var(--bg1), var(--bg2));
+      min-height: 100vh;
+    }
+
+    .wrap {
+      width: min(1120px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 30px 0 54px;
+    }
+
+    .hero {
+      background: linear-gradient(135deg, rgba(255,255,255,0.96), rgba(255,255,255,0.82));
+      border: 1px solid rgba(255,255,255,0.9);
+      border-radius: 30px;
+      box-shadow: var(--shadow);
+      padding: 30px;
+      backdrop-filter: blur(8px);
+    }
+
+    .badge {
+      display: inline-block;
+      margin-bottom: 14px;
+      padding: 8px 13px;
+      border-radius: 999px;
+      background: #eaf2ff;
+      color: var(--blue);
+      font-weight: 800;
+      font-size: 13px;
+      letter-spacing: 0.2px;
+    }
+
+    h1 {
+      margin: 0 0 12px;
+      font-size: clamp(30px, 4vw, 44px);
+      line-height: 1.15;
+    }
+
+    .sub {
+      margin: 0;
+      max-width: 920px;
+      color: var(--muted);
+      line-height: 1.8;
+      font-size: 15px;
+    }
+
+    .tip-line {
+      margin-top: 14px;
+      display: inline-block;
+      padding: 10px 14px;
+      border-radius: 16px;
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      color: var(--green);
+      font-weight: 800;
+      line-height: 1.7;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 16px;
+      margin-top: 18px;
+    }
+
+    .card {
+      grid-column: span 6;
+      background: linear-gradient(180deg, #ffffff, #fbfdff);
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      box-shadow: var(--shadow);
+      padding: 20px;
+    }
+
+    .card.full {
+      grid-column: 1 / -1;
+    }
+
+    .card h2 {
+      margin: 0 0 13px;
+      font-size: 20px;
+      line-height: 1.3;
+    }
+
+    .card ul {
+      margin: 0;
+      padding-left: 20px;
+      line-height: 1.85;
+    }
+
+    .card li {
+      margin: 9px 0;
+    }
+
+    .danger-list {
+      background: linear-gradient(180deg, #fffdfd, #fff5f5);
+      border-color: #fecaca;
+    }
+
+    .warn-list {
+      background: linear-gradient(180deg, #fffef8, #fff9eb);
+      border-color: #fde68a;
+    }
+
+    .section-title {
+      margin: 32px 0 14px;
+      font-size: 27px;
+    }
+
+    .table-card {
+      padding: 0;
+      overflow: auto;
+    }
+
+    table {
+      width: 100%;
+      min-width: 760px;
+      border-collapse: collapse;
+      background: #fff;
+    }
+
+    th,
+    td {
+      padding: 13px 15px;
+      border-bottom: 1px solid #eaf2f8;
+      text-align: left;
+      vertical-align: top;
+      line-height: 1.72;
+      font-size: 14.5px;
+    }
+
+    th {
+      background: #f8fbff;
+      color: #334155;
+      font-size: 14px;
+      white-space: nowrap;
+    }
+
+    tbody tr:nth-child(even) {
+      background: #fbfdff;
+    }
+
+    tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    .note {
+      margin-top: 18px;
+      padding: 15px 17px;
+      border-radius: 18px;
+      background: #f8fbff;
+      border: 1px dashed #bfdbfe;
+      color: #1e3a8a;
+      line-height: 1.85;
+    }
+
+    .footer {
+      margin-top: 18px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.8;
+    }
+
+    @media (max-width: 880px) {
+      .card {
+        grid-column: span 12;
+      }
+
+      .hero {
+        padding: 22px;
+        border-radius: 24px;
+      }
+
+      .section-title {
+        font-size: 22px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="hero">
+      <span class="badge">亮面 HTML · 智齿拔牙后护理</span>
+      <h1>🦷 智齿拔牙后注意事项</h1>
+      <p class="sub">
+        核心目标：保护血凝块、减少出血与肿胀、预防感染和干槽症。以下内容为通用参考，
+        如果口腔科医生给了单独医嘱，请优先遵循医生安排。
+      </p>
+      <div class="tip-line">
+        一句话记住：不吸、不吐、不烫、不硬、不抠、不烟、不酒，轻柔清洁，按期限逐步放松。
+      </div>
+    </header>
+
+    <section class="grid">
+      <article class="card">
+        <h2>🛡️ 需要重点保护的东西</h2>
+        <ul>
+          <li><strong>血凝块</strong>：拔牙窝内的“天然敷料”，是愈合基础；脱落或溶解容易引发干槽症。</li>
+          <li><strong>拔牙窝与牙龈创口</strong>：避免食物残渣、细菌、舌头、手指、牙签刺激。</li>
+          <li><strong>邻牙、补牙与牙冠</strong>：避免用患侧咬硬物，减少二次损伤。</li>
+          <li><strong>缝线与深部组织</strong>：阻生齿、切开缝合、骨修整者需要更久稳定期。</li>
+          <li><strong>麻木未消退区域</strong>：麻药未退时避免咬唇、咬颊、咬舌，防止误伤。</li>
+        </ul>
+      </article>
+
+      <article class="card">
+        <h2>✅ 具体措施</h2>
+        <ul>
+          <li><strong>咬纱布止血</strong>：术后咬住纱布 30–60 分钟；仍渗血可换干净纱布再咬 30 分钟，不要反复频繁查看伤口。</li>
+          <li><strong>口水处理</strong>：不要用力吐口水，可让口水自然流出或轻轻拭去，也可轻轻咽下。</li>
+          <li><strong>冷敷与温敷</strong>：术后 24–48 小时内可冷敷患侧面部，每次 15–20 分钟、间隔 15–20 分钟；48 小时后如有淤青可改温敷。</li>
+          <li><strong>饮食</strong>：等麻药消退后进食；先选凉/温软食，如粥、面条、鸡蛋、酸奶、土豆泥，小口吃，尽量用另一侧咀嚼。</li>
+          <li><strong>口腔清洁</strong>：24 小时内不漱口；24 小时后可饭后轻柔含漱淡温盐水或医嘱漱口水，让水自然流出，不要用力咕噜。</li>
+          <li><strong>刷牙</strong>：当天可轻柔刷其他牙齿，但避开拔牙窝；之后逐渐恢复清洁，仍不要直接刷创口。</li>
+          <li><strong>休息</strong>：当天少弯腰、少提重物、少长时间说话；睡觉枕头稍高。</li>
+          <li><strong>用药</strong>：按医嘱使用止痛药或抗生素；不要自行加量、停药或混用不明药物。</li>
+          <li><strong>缝线</strong>：不要拉扯缝线；可吸收线可能自行脱落，不可吸收线按医嘱拆线。</li>
+        </ul>
+      </article>
+
+      <article class="card danger-list">
+        <h2>🚫 严重负面行为</h2>
+        <ul>
+          <li><strong>用吸管、用力吸吮</strong>：产生负压，可能冲掉血凝块。</li>
+          <li><strong>用力漱口、吐口水</strong>：容易破坏血凝块，增加干槽症风险。</li>
+          <li><strong>吸烟、电子烟</strong>：显著增加干槽症、感染和愈合延迟风险。</li>
+          <li><strong>饮酒</strong>：可能影响凝血，并与止痛药、抗生素发生相互作用。</li>
+          <li><strong>剧烈运动、熬夜、桑拿、热水泡脚、长时间热水澡</strong>：可能加重出血、肿胀和搏动性疼痛。</li>
+          <li><strong>吃过烫、辛辣、坚硬、带籽、坚果、薯片等食物</strong>：可能刺激创口、划伤牙龈或嵌入拔牙窝。</li>
+          <li><strong>用手、舌头、牙签抠伤口</strong>：可能破坏血凝块并引入细菌。</li>
+          <li><strong>拉扯缝线、试图清理拔牙窝深处</strong>：可能导致伤口裂开或感染。</li>
+          <li><strong>忽略异常症状</strong>：持续出血、剧痛加重、发热、化脓、肿胀明显加重等应及时联系医生。</li>
+        </ul>
+      </article>
+
+      <article class="card warn-list">
+        <h2>⚠️ 需要联系医生 / 复诊的情况</h2>
+        <ul>
+          <li>咬纱布后仍持续明显出血，或反复出现大量鲜血、血块。</li>
+          <li>术后 2–4 天疼痛反而加重，并放射到耳朵、头部，伴口臭或异味，警惕干槽症。</li>
+          <li>发热、化脓、肿胀持续加重、张口困难明显。</li>
+          <li>麻木持续超过麻醉预期，或出现吞咽、呼吸不适。</li>
+          <li>缝线提前脱落、伤口裂开，或医生要求复诊拆线。</li>
+          <li>上颌智齿拔除后，如出现液体从鼻腔流出、伤口漏气或医生提示上颌窦相关，应避免擤鼻并及时联系医生。</li>
+        </ul>
+      </article>
+    </section>
+
+    <h2 class="section-title">⏱️ 不同期限的放松界限</h2>
+    <section class="card full table-card">
+      <table>
+        <thead>
+          <tr>
+            <th>时间</th>
+            <th>主要目标</th>
+            <th>可以逐渐做</th>
+            <th>仍应避免</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>0–2 小时</strong></td>
+            <td>稳定止血，形成血凝块</td>
+            <td>无明显出血后可小口喝水；麻药消退后吃凉软食</td>
+            <td>漱口、吐口水、过热饮食、频繁查看伤口、用患侧咀嚼</td>
+          </tr>
+          <tr>
+            <td><strong>0–24 小时</strong></td>
+            <td>减少出血与肿胀</td>
+            <td>轻柔刷其他牙齿；冷敷；休息；软食</td>
+            <td>吸管、用力漱口、吸烟、饮酒、运动、热饮、辛辣食物</td>
+          </tr>
+          <tr>
+            <td><strong>24–72 小时</strong></td>
+            <td>保护血凝块，开始轻柔清洁</td>
+            <td>淡温盐水或医嘱漱口水轻柔含漱；轻度日常活动；较软正常饮食；48 小时后可温敷</td>
+            <td>用力漱口、剧烈运动、吸烟饮酒、辛辣硬物、带籽食物</td>
+          </tr>
+          <tr>
+            <td><strong>3–7 天</strong></td>
+            <td>软组织初步愈合</td>
+            <td>疼痛明显减轻后逐步恢复普通饮食和轻度运动；食物残渣可轻柔漱出</td>
+            <td>患侧咬硬物、抠伤口、熬夜、拉扯缝线、吃坚果壳/硬骨</td>
+          </tr>
+          <tr>
+            <td><strong>1–2 周</strong></td>
+            <td>软组织继续愈合，必要时拆线</td>
+            <td>简单拔牙多数接近恢复；可逐步恢复常规运动</td>
+            <td>仍肿痛、张口受限时强行高强度运动或硬食</td>
+          </tr>
+          <tr>
+            <td><strong>2 周以后</strong></td>
+            <td>深层组织继续修复</td>
+            <td>多数饮食可逐渐恢复；复杂阻生齿按医嘱延后</td>
+            <td>未完全愈合时啃硬骨、坚果壳、冰块等</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <h2 class="section-title">🚨 高风险行为速查</h2>
+    <section class="card full table-card">
+      <table>
+        <thead>
+          <tr>
+            <th>负面行为</th>
+            <th>主要风险</th>
+            <th>建议至少避免</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>吸管、用力漱口、吐口水</td>
+            <td>负压导致血凝块脱落、干槽症</td>
+            <td>至少 72 小时；复杂拔牙建议 5–7 天</td>
+          </tr>
+          <tr>
+            <td>吸烟、电子烟</td>
+            <td>干槽症、感染、愈合延迟</td>
+            <td>至少 72 小时，最好 7–10 天</td>
+          </tr>
+          <tr>
+            <td>饮酒</td>
+            <td>出血、药物相互作用、愈合延迟</td>
+            <td>至少 24–72 小时；服药期间避免</td>
+          </tr>
+          <tr>
+            <td>剧烈运动、熬夜、桑拿、热水久泡</td>
+            <td>出血、肿胀、疼痛加重</td>
+            <td>至少 48–72 小时；复杂拔牙建议 1 周</td>
+          </tr>
+          <tr>
+            <td>烫、辣、硬、带籽食物</td>
+            <td>刺激、嵌塞、划伤创口</td>
+            <td>24–72 小时起逐步尝试；硬物建议 1–2 周</td>
+          </tr>
+          <tr>
+            <td>抠、舔、牙签清理拔牙窝</td>
+            <td>感染、血凝块脱落、出血</td>
+            <td>完全愈合前都避免</td>
+          </tr>
+          <tr>
+            <td>不遵医嘱停药、乱加药</td>
+            <td>感染控制失败、出血或副作用</td>
+            <td>全程避免；有疑问先问医生或药师</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <div class="note">
+      <strong>备注：</strong>“放松界限”为通用参考。若为阻生智齿、切开缝合、骨修整、感染拔牙、上颌窦相关拔牙，
+      或医生要求复诊拆线，应延长限制时间并优先遵循医嘱。正在服用阿司匹林、华法林等抗凝药，或有糖尿病、
+      免疫相关疾病者，也应按医生个体化建议处理。
+    </div>
+
+    <footer class="footer">
+      本页面为一般健康科普，不替代口腔科医生面诊。若出现持续出血、剧烈疼痛、发热、肿胀加重、化脓、
+      吞咽或呼吸困难等情况，请及时就医。
+    </footer>
+  </div>
+</body>
+</html>

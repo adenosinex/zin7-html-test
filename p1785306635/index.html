@@ -1,0 +1,1796 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>磁力链接收集器</title>
+
+    <!-- PWA 元标签 -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="磁力收集器">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='100' fill='%236c5ce7'/%3E%3Cpath d='M160 128c0-35.3 28.7-64 64-64h64c35.3 0 64 28.7 64 64v192c0 70.7-57.3 128-128 128s-128-57.3-128-128V128z' fill='none' stroke='white' stroke-width='32' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M160 192h192' stroke='white' stroke-width='32' stroke-linecap='round'/%3E%3Cpath d='M256 384v96' stroke='white' stroke-width='32' stroke-linecap='round'/%3E%3Cpath d='M208 448h96' stroke='white' stroke-width='32' stroke-linecap='round'/%3E%3C/svg%3E">
+    <link rel="manifest" id="manifest-link">
+    <meta name="theme-color" content="#6c5ce7">
+
+    <style>
+        :root {
+            --bg: #f4f6fb;
+            --card-bg: #ffffff;
+            --input-bg: #f0f2f7;
+            --border: #d5d9e2;
+            --accent: #6c5ce7;
+            --accent-hover: #7f6ff0;
+            --accent-glow: rgba(108, 92, 231, 0.2);
+            --text: #1e1f2a;
+            --text-secondary: #5a5c6e;
+            --danger: #e74c5e;
+            --danger-hover: #f05a6c;
+            --danger-bg: rgba(231, 76, 94, 0.08);
+            --success: #2ecc71;
+            --success-glow: rgba(46, 204, 113, 0.3);
+            --tag-bg: #eef0f5;
+            --tag-border: #d0d4df;
+            --tag-hover-bg: #e3e6f0;
+            --scrollbar-thumb: #bcc0cd;
+            --scrollbar-track: #f0f2f7;
+            --radius: 14px;
+            --radius-sm: 10px;
+            --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            --orange: #f0a040;
+            --orange-bg: rgba(240, 160, 64, 0.08);
+            --orange-border: rgba(240, 160, 64, 0.35);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', 'Noto Sans SC', system-ui, -apple-system, sans-serif;
+            background: var(--bg);
+            background-image:
+                radial-gradient(ellipse at 20% 20%, rgba(108, 92, 231, 0.04) 0%, transparent 60%),
+                radial-gradient(ellipse at 80% 80%, rgba(46, 204, 113, 0.03) 0%, transparent 60%),
+                radial-gradient(ellipse at 50% 50%, rgba(108, 92, 231, 0.02) 0%, transparent 80%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            color: var(--text);
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 720px;
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 32px 28px 24px;
+            box-shadow:
+                0 18px 45px rgba(0, 0, 0, 0.06),
+                0 0 0 1px var(--border),
+                0 0 60px rgba(108, 92, 231, 0.05);
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 80px;
+        }
+
+        .container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(108, 92, 231, 0.3), rgba(108, 92, 231, 0.15), transparent);
+            border-radius: 1px;
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .header .icon-wrap {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, rgba(108, 92, 231, 0.12), rgba(108, 92, 231, 0.04));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            box-shadow: 0 0 20px rgba(108, 92, 231, 0.1);
+        }
+        .header .icon-wrap svg {
+            width: 22px;
+            height: 22px;
+            color: #6c5ce7;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2;
+        }
+        .header .title-group h1 {
+            font-size: 1.35rem;
+            font-weight: 700;
+            letter-spacing: -0.01em;
+            color: #1a1b2e;
+            line-height: 1.2;
+        }
+        .header .title-group .sub {
+            font-size: 0.78rem;
+            color: var(--text-secondary);
+            font-weight: 400;
+            letter-spacing: 0.01em;
+        }
+
+        .count-badge {
+            margin-left: auto;
+            background: var(--tag-bg);
+            border: 1px solid var(--tag-border);
+            border-radius: 20px;
+            padding: 6px 14px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            white-space: nowrap;
+            letter-spacing: 0.02em;
+            transition: var(--transition);
+        }
+        .count-badge.has-items {
+            color: #5b4ae0;
+            border-color: rgba(108, 92, 231, 0.45);
+            background: rgba(108, 92, 231, 0.08);
+            box-shadow: 0 0 10px rgba(108, 92, 231, 0.08);
+        }
+        .count-badge .num {
+            font-size: 1.1rem;
+            font-weight: 700;
+        }
+
+        .input-row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        .input-wrap {
+            flex: 1;
+            position: relative;
+        }
+        .input-wrap input {
+            width: 100%;
+            padding: 13px 16px;
+            padding-right: 44px;
+            border-radius: var(--radius-sm);
+            border: 1.5px solid var(--border);
+            background: var(--input-bg);
+            color: var(--text);
+            font-size: 0.95rem;
+            font-family: inherit;
+            letter-spacing: 0.01em;
+            transition: var(--transition);
+            outline: none;
+        }
+        .input-wrap input::placeholder {
+            color: #8b8d9e;
+            font-size: 0.9rem;
+        }
+        .input-wrap input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 4px rgba(108, 92, 231, 0.06), 0 0 15px rgba(108, 92, 231, 0.06);
+        }
+        .input-wrap .clear-input-btn {
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 6px;
+            border-radius: 50%;
+            color: #7d7f91;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+        }
+        .input-wrap .clear-input-btn.visible {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .input-wrap .clear-input-btn:hover {
+            color: #2a2b3c;
+            background: rgba(0, 0, 0, 0.04);
+        }
+        .input-wrap .clear-input-btn svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        .btn {
+            padding: 13px 20px;
+            border-radius: var(--radius-sm);
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.9rem;
+            font-family: inherit;
+            letter-spacing: 0.02em;
+            transition: var(--transition);
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            outline: none;
+            position: relative;
+            overflow: hidden;
+        }
+        .btn:active {
+            transform: scale(0.96);
+        }
+        .btn-primary {
+            background: var(--accent);
+            color: #fff;
+            box-shadow: 0 6px 18px rgba(108, 92, 231, 0.28);
+        }
+        .btn-primary:hover {
+            background: var(--accent-hover);
+            box-shadow: 0 8px 24px rgba(108, 92, 231, 0.35);
+            transform: translateY(-1px);
+        }
+        .btn-primary:active {
+            transform: scale(0.95) translateY(0);
+        }
+        .btn-outline {
+            background: transparent;
+            border: 1.5px solid var(--border);
+            color: var(--text);
+        }
+        .btn-outline:hover {
+            border-color: #a8acbd;
+            background: rgba(0, 0, 0, 0.02);
+        }
+        .btn-sm {
+            padding: 7px 14px;
+            font-size: 0.78rem;
+            border-radius: 8px;
+            gap: 5px;
+        }
+        .btn-xs {
+            padding: 5px 10px;
+            font-size: 0.7rem;
+            border-radius: 6px;
+            gap: 3px;
+        }
+        .btn-success {
+            background: #2ecc71;
+            color: #fff;
+            box-shadow: 0 4px 14px rgba(46, 204, 113, 0.25);
+        }
+        .btn-success:hover {
+            background: #35d87a;
+            box-shadow: 0 6px 20px rgba(46, 204, 113, 0.35);
+            transform: translateY(-1px);
+        }
+        .btn-danger-text {
+            background: transparent;
+            border: 1px solid transparent;
+            color: var(--danger);
+            padding: 7px 12px;
+        }
+        .btn-danger-text:hover {
+            background: var(--danger-bg);
+            border-color: rgba(231, 76, 94, 0.3);
+        }
+        .btn-ghost {
+            background: transparent;
+            border: 1px solid transparent;
+            color: var(--text-secondary);
+            padding: 7px 12px;
+        }
+        .btn-ghost:hover {
+            background: rgba(0, 0, 0, 0.02);
+            border-color: var(--border);
+            color: var(--text);
+        }
+        .btn-accent-outline {
+            background: transparent;
+            border: 1.5px solid rgba(108, 92, 231, 0.4);
+            color: #5b4ae0;
+        }
+        .btn-accent-outline:hover {
+            background: rgba(108, 92, 231, 0.06);
+            border-color: rgba(108, 92, 231, 0.65);
+            color: #3d2cc4;
+        }
+        .btn-orange {
+            background: #f0a040;
+            color: #fff;
+            box-shadow: 0 4px 14px rgba(240, 160, 64, 0.25);
+        }
+        .btn-orange:hover {
+            background: #f5b055;
+            box-shadow: 0 6px 20px rgba(240, 160, 64, 0.35);
+            transform: translateY(-1px);
+        }
+
+        .btn svg {
+            width: 17px;
+            height: 17px;
+            flex-shrink: 0;
+        }
+        .btn-sm svg {
+            width: 14px;
+            height: 14px;
+        }
+
+        .divider {
+            height: 1px;
+            background: var(--border);
+            border-radius: 1px;
+            margin: 2px 0;
+        }
+        .divider-dashed {
+            height: 1px;
+            border-top: 1.5px dashed var(--border);
+            margin: 4px 0;
+            border-radius: 1px;
+        }
+
+        .toolbar {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        .toolbar .spacer {
+            flex: 1;
+        }
+
+        .list-container {
+            background: var(--input-bg);
+            border-radius: var(--radius);
+            border: 1.5px solid var(--border);
+            min-height: 140px;
+            max-height: 420px;
+            overflow-y: auto;
+            padding: 6px;
+            transition: var(--transition);
+            position: relative;
+        }
+        .list-container:focus-within {
+            border-color: rgba(108, 92, 231, 0.5);
+            box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.04);
+        }
+        .list-container::-webkit-scrollbar {
+            width: 6px;
+        }
+        .list-container::-webkit-scrollbar-track {
+            background: transparent;
+            border-radius: 3px;
+        }
+        .list-container::-webkit-scrollbar-thumb {
+            background: var(--scrollbar-thumb);
+            border-radius: 3px;
+        }
+        .list-container::-webkit-scrollbar-thumb:hover {
+            background: #9a9fb2;
+        }
+
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 120px;
+            gap: 10px;
+            color: #8b8d9e;
+            pointer-events: none;
+            text-align: center;
+            padding: 20px;
+        }
+        .empty-state svg {
+            width: 44px;
+            height: 44px;
+            opacity: 0.5;
+            stroke: #8b8d9e;
+        }
+        .empty-state p {
+            font-size: 0.85rem;
+            letter-spacing: 0.02em;
+            line-height: 1.5;
+        }
+        .empty-state .highlight-key {
+            display: inline-block;
+            background: rgba(0, 0, 0, 0.03);
+            border: 1px solid #d0d3db;
+            border-radius: 4px;
+            padding: 2px 8px;
+            font-size: 0.75rem;
+            margin: 0 2px;
+            letter-spacing: 0.04em;
+            color: #585a6e;
+        }
+
+        .link-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .link-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 12px;
+            border-radius: 8px;
+            background: transparent;
+            cursor: pointer;
+            transition: var(--transition);
+            border: 1px solid transparent;
+            position: relative;
+            word-break: break-all;
+        }
+        .link-item:hover {
+            background: var(--tag-hover-bg);
+            border-color: var(--tag-border);
+        }
+        .link-item.selected {
+            background: rgba(108, 92, 231, 0.08);
+            border-color: rgba(108, 92, 231, 0.35);
+            box-shadow: inset 0 0 0 1px rgba(108, 92, 231, 0.15);
+        }
+        .link-item .index-num {
+            flex-shrink: 0;
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            background: var(--tag-bg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: var(--text-secondary);
+            letter-spacing: 0.03em;
+            border: 1px solid var(--tag-border);
+            transition: var(--transition);
+        }
+        .link-item.selected .index-num {
+            background: rgba(108, 92, 231, 0.18);
+            border-color: rgba(108, 92, 231, 0.45);
+            color: #4a3cd6;
+        }
+        .link-item .link-text {
+            flex: 1;
+            font-size: 0.85rem;
+            color: #2d2e3f;
+            letter-spacing: 0.01em;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            font-family: 'SF Mono', 'Cascadia Code', 'Consolas', 'Monaco', 'PingFang SC', 'Microsoft YaHei', monospace;
+            transition: var(--transition);
+        }
+        .link-item.selected .link-text {
+            color: #1a1b2e;
+        }
+        .link-item .remove-btn {
+            flex-shrink: 0;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            color: #8b8d9e;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+        }
+        .link-item:hover .remove-btn {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .link-item .remove-btn:hover {
+            background: var(--danger-bg);
+            color: var(--danger);
+        }
+        .link-item .remove-btn svg {
+            width: 14px;
+            height: 14px;
+        }
+
+        /* ==================== 批量分次复制区域样式 ==================== */
+        .batch-section {
+            background: var(--input-bg);
+            border-radius: var(--radius);
+            border: 1.5px solid var(--border);
+            padding: 16px 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            transition: var(--transition);
+            position: relative;
+        }
+        .batch-section:focus-within {
+            border-color: rgba(240, 160, 64, 0.5);
+            box-shadow: 0 0 0 3px rgba(240, 160, 64, 0.05);
+        }
+        .batch-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .batch-header .batch-title {
+            font-weight: 700;
+            font-size: 0.95rem;
+            color: #1a1b2e;
+            letter-spacing: 0.01em;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .batch-header .batch-title .batch-icon {
+            width: 20px;
+            height: 20px;
+            flex-shrink: 0;
+        }
+        .batch-header .batch-count-badge {
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 4px 10px;
+            border-radius: 14px;
+            background: var(--tag-bg);
+            border: 1px solid var(--tag-border);
+            color: var(--text-secondary);
+            letter-spacing: 0.02em;
+            transition: var(--transition);
+        }
+        .batch-header .batch-count-badge.has-data {
+            color: #c07820;
+            border-color: var(--orange-border);
+            background: var(--orange-bg);
+        }
+        .batch-header .spacer {
+            flex: 1;
+        }
+        .batch-textarea {
+            width: 100%;
+            min-height: 100px;
+            max-height: 200px;
+            padding: 12px 14px;
+            border-radius: var(--radius-sm);
+            border: 1.5px solid var(--border);
+            background: #ffffff;
+            color: var(--text);
+            font-size: 0.85rem;
+            font-family: 'SF Mono', 'Cascadia Code', 'Consolas', 'Monaco', 'PingFang SC', 'Microsoft YaHei', monospace;
+            letter-spacing: 0.01em;
+            resize: vertical;
+            outline: none;
+            transition: var(--transition);
+            line-height: 1.6;
+        }
+        .batch-textarea::placeholder {
+            color: #8b8d9e;
+            font-size: 0.82rem;
+            font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif;
+        }
+        .batch-textarea:focus {
+            border-color: #f0a040;
+            box-shadow: 0 0 0 4px rgba(240, 160, 64, 0.06), 0 0 15px rgba(240, 160, 64, 0.05);
+        }
+        .batch-controls {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .batch-size-label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            letter-spacing: 0.02em;
+            white-space: nowrap;
+        }
+        .batch-size-input {
+            width: 70px;
+            padding: 7px 10px;
+            border-radius: 8px;
+            border: 1.5px solid var(--border);
+            background: #ffffff;
+            color: var(--text);
+            font-size: 0.85rem;
+            font-weight: 600;
+            font-family: inherit;
+            text-align: center;
+            outline: none;
+            transition: var(--transition);
+        }
+        .batch-size-input:focus {
+            border-color: #f0a040;
+            box-shadow: 0 0 0 3px rgba(240, 160, 64, 0.08);
+        }
+        .batch-progress {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #c07820;
+            letter-spacing: 0.02em;
+            padding: 5px 12px;
+            border-radius: 14px;
+            background: var(--orange-bg);
+            border: 1px solid var(--orange-border);
+            white-space: nowrap;
+            transition: var(--transition);
+        }
+        .batch-progress.empty {
+            color: var(--text-secondary);
+            background: var(--tag-bg);
+            border-color: var(--tag-border);
+        }
+        .batch-preview {
+            background: #ffffff;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            padding: 10px 14px;
+            font-size: 0.78rem;
+            color: #5a5c6e;
+            letter-spacing: 0.01em;
+            font-family: 'SF Mono', 'Cascadia Code', 'Consolas', 'Monaco', 'PingFang SC', 'Microsoft YaHei', monospace;
+            max-height: 80px;
+            overflow-y: auto;
+            line-height: 1.5;
+            transition: var(--transition);
+            word-break: break-all;
+        }
+        .batch-preview .preview-line {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: block;
+            padding: 1px 0;
+        }
+        .batch-preview .preview-more {
+            color: #8b8d9e;
+            font-style: italic;
+            margin-top: 2px;
+        }
+        .batch-preview.empty-preview {
+            color: #a8acbd;
+            font-style: italic;
+            text-align: center;
+            padding: 8px;
+            font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif;
+        }
+        .batch-actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        .batch-actions .spacer {
+            flex: 1;
+        }
+
+        .toast {
+            position: fixed;
+            top: 24px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-120px);
+            background: #ffffff;
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 10px 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: #1e1f2a;
+            letter-spacing: 0.02em;
+            box-shadow: 0 10px 35px rgba(0, 0, 0, 0.08);
+            z-index: 999;
+            pointer-events: none;
+            transition: transform 0.35s cubic-bezier(0.22, 0.61, 0.36, 1);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+        }
+        .toast.success {
+            border-color: rgba(46, 204, 113, 0.4);
+            box-shadow: 0 10px 35px rgba(0, 0, 0, 0.08), 0 0 18px rgba(46, 204, 113, 0.12);
+        }
+        .toast .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+        .toast.success .dot {
+            background: #2ecc71;
+            box-shadow: 0 0 8px rgba(46, 204, 113, 0.5);
+        }
+        .toast.info .dot {
+            background: #6c5ce7;
+            box-shadow: 0 0 8px rgba(108, 92, 231, 0.5);
+        }
+
+        /* 安装横幅 */
+        .install-banner {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: calc(100% - 40px);
+            max-width: 600px;
+            background: #ffffff;
+            border: 1.5px solid var(--accent);
+            border-radius: 16px;
+            padding: 16px 20px;
+            display: none;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            box-shadow: 0 8px 30px rgba(108, 92, 231, 0.15);
+            z-index: 1000;
+            animation: slideUp 0.3s ease;
+        }
+        @keyframes slideUp {
+            from {
+                transform: translateX(-50%) translateY(20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(-50%) translateY(0);
+                opacity: 1;
+            }
+        }
+        .install-banner .banner-text {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: #1e1f2a;
+        }
+        .install-banner .btn-install {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: var(--transition);
+        }
+        .install-banner .btn-install:hover {
+            background: var(--accent-hover);
+        }
+        .install-banner .btn-close-banner {
+            background: none;
+            border: none;
+            color: #8b8d9e;
+            cursor: pointer;
+            font-size: 1.2rem;
+            padding: 4px;
+            line-height: 1;
+        }
+
+        @media (max-width: 500px) {
+            .container {
+                padding: 20px 14px 16px;
+                border-radius: 16px;
+                gap: 14px;
+            }
+            .header .icon-wrap {
+                width: 36px;
+                height: 36px;
+                border-radius: 10px;
+            }
+            .header .title-group h1 {
+                font-size: 1.15rem;
+            }
+            .btn {
+                padding: 11px 14px;
+                font-size: 0.8rem;
+                gap: 4px;
+            }
+            .btn svg {
+                width: 15px;
+                height: 15px;
+            }
+            .input-row {
+                gap: 6px;
+            }
+            .input-wrap input {
+                padding: 11px 12px;
+                padding-right: 38px;
+                font-size: 0.85rem;
+            }
+            .toolbar {
+                gap: 4px;
+            }
+            .link-item .link-text {
+                font-size: 0.78rem;
+            }
+            .list-container {
+                max-height: 300px;
+            }
+            .install-banner {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+            .batch-section {
+                padding: 12px 10px;
+                gap: 10px;
+            }
+            .batch-textarea {
+                font-size: 0.78rem;
+                min-height: 80px;
+                max-height: 150px;
+            }
+            .batch-actions {
+                gap: 4px;
+            }
+            .batch-actions .btn-sm {
+                padding: 6px 10px;
+                font-size: 0.72rem;
+                gap: 3px;
+            }
+            .batch-size-input {
+                width: 56px;
+                padding: 6px 8px;
+                font-size: 0.78rem;
+            }
+            .batch-preview {
+                font-size: 0.7rem;
+                max-height: 60px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="toast" id="toast">
+        <span class="dot"></span>
+        <span class="msg" id="toastMsg"></span>
+    </div>
+
+    <!-- 安装横幅 -->
+    <div class="install-banner" id="installBanner">
+        <span class="banner-text">📌 将磁力收集器安装到桌面，使用更方便</span>
+        <div style="display: flex; gap: 8px; align-items: center;">
+            <button class="btn-install" id="installBtn">立即安装</button>
+            <button class="btn-close-banner" id="closeBannerBtn">✕</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="header">
+            <div class="icon-wrap">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M6 3C6 1.89543 6.89543 1 8 1H16C17.1046 1 18 1.89543 18 3V11C18 14.3137 15.3137 17 12 17C8.68629 17 6 14.3137 6 11V3Z" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M6 7H18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    <path d="M12 17V23" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    <path d="M9 20H15" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+            </div>
+            <div class="title-group">
+                <h1>磁力链接收集器</h1>
+                <span class="sub">批量收集 · 一键复制</span>
+            </div>
+            <div class="count-badge" id="countBadge">
+                已收集 <span class="num" id="countNum">0</span> 条
+            </div>
+        </div>
+
+        <div class="input-row">
+            <div class="input-wrap">
+                <input type="text" id="linkInput" placeholder="粘贴磁力链接到此处，然后点击添加..." autocomplete="off" />
+                <button class="clear-input-btn" id="clearInputBtn" title="清空输入">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+            <button class="btn btn-primary" id="addBtn" title="添加输入框中的链接">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+                添加
+            </button>
+            <button class="btn btn-outline" id="pasteBtn" title="从剪贴板读取并添加">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
+                    <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
+                </svg>
+                粘贴
+            </button>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="toolbar">
+            <button class="btn btn-sm btn-outline" id="selectAllBtn" title="全选/取消全选">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="9 11 12 14 22 4"></polyline>
+                    <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+                </svg>
+                全选
+            </button>
+            <button class="btn btn-sm btn-outline" id="invertSelectBtn" title="反选">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="17 1 21 5 17 9"></polyline>
+                    <path d="M3 11V9a4 4 0 0 1 4-4h14"></path>
+                </svg>
+                反选
+            </button>
+            <span class="spacer"></span>
+            <button class="btn btn-sm btn-danger-text" id="clearAllBtn" title="清空全部链接">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                    <polyline points="3 6 5 6 21 6"></polyline>
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                </svg>
+                清空
+            </button>
+        </div>
+
+        <div class="list-container" id="listContainer" tabindex="0">
+            <div class="empty-state" id="emptyState">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                    <polyline points="14 2 14 8 20 8"></polyline>
+                    <line x1="12" y1="18" x2="12" y2="12"></line>
+                    <line x1="9" y1="15" x2="15" y2="15"></line>
+                </svg>
+                <p>
+                    暂无磁力链接<br>
+                    使用 <span class="highlight-key">Ctrl+V</span> 粘贴到输入框后点击添加<br>
+                    或直接点击 <span class="highlight-key">粘贴</span> 按钮一键读取剪贴板
+                </p>
+            </div>
+            <ul class="link-list" id="linkList" style="display:none;"></ul>
+        </div>
+
+        <div style="display:flex; gap:10px;">
+            <button class="btn btn-success" id="copyAllBtn" style="flex:1;" title="复制全部链接（换行分隔）">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                </svg>
+                一键复制全部
+            </button>
+            <button class="btn btn-outline" id="copySelectedBtn" title="仅复制选中的链接">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+                复制选中
+            </button>
+        </div>
+
+        <!-- ==================== 批量分次复制栏目（新增） ==================== -->
+        <div class="divider-dashed"></div>
+        <div class="batch-section" id="batchSection">
+            <div class="batch-header">
+                <span class="batch-title">
+                    <svg class="batch-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="3" width="7" height="7" rx="1"></rect>
+                        <rect x="14" y="3" width="7" height="7" rx="1"></rect>
+                        <rect x="3" y="14" width="7" height="7" rx="1"></rect>
+                        <rect x="14" y="14" width="7" height="7" rx="1"></rect>
+                    </svg>
+                    批量分次复制
+                </span>
+                <span class="batch-count-badge" id="batchCountBadge">未加载</span>
+                <span class="spacer"></span>
+                <button class="btn btn-xs btn-ghost" id="clearBatchBtn" title="清空批量区域" disabled>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="width:13px;height:13px;">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                    清空
+                </button>
+            </div>
+            <textarea id="batchTextarea" class="batch-textarea" placeholder="在此粘贴大量磁力链接，每行一条，换行分割...&#10;例如：&#10;magnet:?xt=urn:btih:xxx...&#10;magnet:?xt=urn:btih:yyy...&#10;magnet:?xt=urn:btih:zzz..." rows="5"></textarea>
+            <div class="batch-controls">
+                <label class="batch-size-label">
+                    每批 <input type="number" id="batchSizeInput" class="batch-size-input" value="100" min="1" max="10000" step="1"> 条
+                </label>
+                <span class="batch-progress empty" id="batchProgress">暂无数据</span>
+            </div>
+            <div class="batch-preview empty-preview" id="batchPreview">在文本框中粘贴链接后自动解析</div>
+            <div class="batch-actions">
+                <button class="btn btn-sm btn-outline" id="batchPrevBtn" disabled title="切换到上一批">
+                    ◀ 上一批
+                </button>
+                <button class="btn btn-sm btn-orange" id="batchCopyBtn" disabled title="复制当前批次并自动切换到下一批">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px;">
+                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                    </svg>
+                    复制本批并前进
+                </button>
+                <button class="btn btn-sm btn-outline" id="batchNextBtn" disabled title="切换到下一批">
+                    下一批 ▶
+                </button>
+                <span class="spacer"></span>
+                <button class="btn btn-sm btn-accent-outline" id="importFromListBtn" title="从上方收集列表导入链接到批量区域" disabled>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="17 8 12 3 7 8"></polyline>
+                        <line x1="12" y1="3" x2="12" y2="15"></line>
+                    </svg>
+                    从收集列表导入
+                </button>
+            </div>
+        </div>
+        <!-- ==================== 批量分次复制栏目结束 ==================== -->
+    </div>
+
+    <script>
+        (function() {
+            // ==================== PWA 安装逻辑 ====================
+            let deferredPrompt;
+            const installBanner = document.getElementById('installBanner');
+            const installBtn = document.getElementById('installBtn');
+            const closeBannerBtn = document.getElementById('closeBannerBtn');
+
+            if (window.matchMedia('(display-mode: standalone)').matches) {
+                if (installBanner) installBanner.style.display = 'none';
+            } else {
+                window.addEventListener('beforeinstallprompt', (e) => {
+                    e.preventDefault();
+                    deferredPrompt = e;
+                    if (installBanner) installBanner.style.display = 'flex';
+                });
+
+                if (installBtn) {
+                    installBtn.addEventListener('click', async () => {
+                        if (!deferredPrompt) {
+                            alert('安装功能暂不可用，请确保使用 Chrome/Edge 等现代浏览器，并通过 HTTPS 访问。');
+                            return;
+                        }
+                        deferredPrompt.prompt();
+                        const { outcome } = await deferredPrompt.userChoice;
+                        console.log(`安装结果: ${outcome}`);
+                        deferredPrompt = null;
+                        if (installBanner) installBanner.style.display = 'none';
+                    });
+                }
+
+                if (closeBannerBtn) {
+                    closeBannerBtn.addEventListener('click', () => {
+                        if (installBanner) installBanner.style.display = 'none';
+                    });
+                }
+
+                window.addEventListener('appinstalled', () => {
+                    console.log('应用已成功安装');
+                    if (installBanner) installBanner.style.display = 'none';
+                    deferredPrompt = null;
+                });
+            }
+
+            // ==================== 动态 manifest 与 Service Worker ====================
+            function setupPWA() {
+                const manifest = {
+                    name: '磁力链接收集器',
+                    short_name: '磁力收集',
+                    description: '高效汇总磁力链接，批量复制',
+                    start_url: '.',
+                    display: 'standalone',
+                    background_color: '#f4f6fb',
+                    theme_color: '#6c5ce7',
+                    icons: [{
+                        src: 'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 512 512\'%3E%3Crect width=\'512\' height=\'512\' rx=\'100\' fill=\'%236c5ce7\'/%3E%3Cpath d=\'M160 128c0-35.3 28.7-64 64-64h64c35.3 0 64 28.7 64 64v192c0 70.7-57.3 128-128 128s-128-57.3-128-128V128z\' fill=\'none\' stroke=\'white\' stroke-width=\'32\' stroke-linecap=\'round\' stroke-linejoin=\'round\'/%3E%3Cpath d=\'M160 192h192\' stroke=\'white\' stroke-width=\'32\' stroke-linecap=\'round\'/%3E%3Cpath d=\'M256 384v96\' stroke=\'white\' stroke-width=\'32\' stroke-linecap=\'round\'/%3E%3Cpath d=\'M208 448h96\' stroke=\'white\' stroke-width=\'32\' stroke-linecap=\'round\'/%3E%3C/svg%3E',
+                        sizes: '512x512',
+                        type: 'image/svg+xml',
+                        purpose: 'any maskable'
+                    }]
+                };
+
+                const blob = new Blob([JSON.stringify(manifest)], { type: 'application/json' });
+                const manifestURL = URL.createObjectURL(blob);
+                document.getElementById('manifest-link').href = manifestURL;
+
+                if ('serviceWorker' in navigator) {
+                    window.addEventListener('load', () => {
+                        navigator.serviceWorker.register('sw.js')
+                            .then(reg => console.log('✅ Service Worker 已注册', reg.scope))
+                            .catch(err => console.log('ℹ️ 离线缓存未启用（可忽略，不影响安装）'));
+                    });
+                }
+            }
+
+            setupPWA();
+
+            // ==================== 原有功能 ====================
+            const linkInput = document.getElementById('linkInput');
+            const clearInputBtn = document.getElementById('clearInputBtn');
+            const addBtn = document.getElementById('addBtn');
+            const pasteBtn = document.getElementById('pasteBtn');
+            const listContainer = document.getElementById('listContainer');
+            const linkList = document.getElementById('linkList');
+            const emptyState = document.getElementById('emptyState');
+            const countBadge = document.getElementById('countBadge');
+            const countNum = document.getElementById('countNum');
+            const selectAllBtn = document.getElementById('selectAllBtn');
+            const invertSelectBtn = document.getElementById('invertSelectBtn');
+            const clearAllBtn = document.getElementById('clearAllBtn');
+            const copyAllBtn = document.getElementById('copyAllBtn');
+            const copySelectedBtn = document.getElementById('copySelectedBtn');
+            const toast = document.getElementById('toast');
+            const toastMsg = document.getElementById('toastMsg');
+
+            let links = [];
+            let selectedIndices = new Set();
+            let isAllSelected = false;
+            let toastTimer = null;
+
+            function showToast(message, type = 'info') {
+                if (toastTimer) clearTimeout(toastTimer);
+                toast.className = 'toast ' + type;
+                toastMsg.textContent = message;
+                void toast.offsetWidth;
+                toast.classList.add('show');
+                toastTimer = setTimeout(() => {
+                    toast.classList.remove('show');
+                }, 1800);
+            }
+
+            function updateUI() {
+                const count = links.length;
+                countNum.textContent = count;
+                if (count > 0) {
+                    countBadge.classList.add('has-items');
+                } else {
+                    countBadge.classList.remove('has-items');
+                }
+                if (count === 0) {
+                    emptyState.style.display = 'flex';
+                    linkList.style.display = 'none';
+                    selectedIndices.clear();
+                    isAllSelected = false;
+                    updateSelectAllButtonText();
+                } else {
+                    emptyState.style.display = 'none';
+                    linkList.style.display = 'flex';
+                }
+                renderList();
+                updateSelectAllButtonText();
+                copySelectedBtn.disabled = selectedIndices.size === 0;
+                copySelectedBtn.style.opacity = selectedIndices.size === 0 ? '0.45' : '1';
+                copySelectedBtn.style.pointerEvents = selectedIndices.size === 0 ? 'none' : 'auto';
+                clearAllBtn.disabled = count === 0;
+                clearAllBtn.style.opacity = count === 0 ? '0.4' : '1';
+                clearAllBtn.style.pointerEvents = count === 0 ? 'none' : 'auto';
+                selectAllBtn.disabled = count === 0;
+                selectAllBtn.style.opacity = count === 0 ? '0.4' : '1';
+                selectAllBtn.style.pointerEvents = count === 0 ? 'none' : 'auto';
+                invertSelectBtn.disabled = count === 0;
+                invertSelectBtn.style.opacity = count === 0 ? '0.4' : '1';
+                invertSelectBtn.style.pointerEvents = count === 0 ? 'none' : 'auto';
+                copyAllBtn.disabled = count === 0;
+                copyAllBtn.style.opacity = count === 0 ? '0.45' : '1';
+                copyAllBtn.style.pointerEvents = count === 0 ? 'none' : 'auto';
+                // 更新导入按钮状态
+                updateImportButtonState();
+            }
+
+            function updateSelectAllButtonText() {
+                if (links.length === 0) {
+                    isAllSelected = false;
+                    selectAllBtn.innerHTML =
+                        `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;"><polyline points="9 11 12 14 22 4"></polyline><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>全选`;
+                    return;
+                }
+                if (isAllSelected && selectedIndices.size === links.length) {
+                    selectAllBtn.innerHTML =
+                        `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="width:14px;height:14px;"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>取消全选`;
+                } else {
+                    selectAllBtn.innerHTML =
+                        `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;"><polyline points="9 11 12 14 22 4"></polyline><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>全选`;
+                }
+            }
+
+            function renderList() {
+                linkList.innerHTML = '';
+                links.forEach((link, index) => {
+                    const li = document.createElement('li');
+                    li.className = 'link-item';
+                    if (selectedIndices.has(index)) li.classList.add('selected');
+                    li.setAttribute('data-index', index);
+                    li.innerHTML =
+                        `<span class="index-num">${index + 1}</span><span class="link-text" title="${escapeHtml(link)}">${escapeHtml(link)}</span><button class="remove-btn" data-index="${index}" title="删除此链接"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>`;
+                    li.addEventListener('click', function(e) {
+                        if (e.target.closest('.remove-btn')) return;
+                        toggleSelect(index);
+                    });
+                    li.querySelector('.remove-btn').addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        removeLink(index);
+                    });
+                    linkList.appendChild(li);
+                });
+                updateSelectAllButtonText();
+                copySelectedBtn.disabled = selectedIndices.size === 0;
+                copySelectedBtn.style.opacity = selectedIndices.size === 0 ? '0.45' : '1';
+                copySelectedBtn.style.pointerEvents = selectedIndices.size === 0 ? 'none' : 'auto';
+            }
+
+            function escapeHtml(str) {
+                const div = document.createElement('div');
+                div.textContent = str;
+                return div.innerHTML;
+            }
+
+            function toggleSelect(index) {
+                if (selectedIndices.has(index)) selectedIndices.delete(index);
+                else selectedIndices.add(index);
+                isAllSelected = (selectedIndices.size === links.length && links.length > 0);
+                renderList();
+            }
+
+            function selectAll() {
+                if (isAllSelected && selectedIndices.size === links.length) {
+                    selectedIndices.clear();
+                    isAllSelected = false;
+                } else {
+                    selectedIndices.clear();
+                    links.forEach((_, i) => selectedIndices.add(i));
+                    isAllSelected = true;
+                }
+                renderList();
+            }
+
+            function invertSelect() {
+                const newSelected = new Set();
+                links.forEach((_, i) => { if (!selectedIndices.has(i)) newSelected.add(i); });
+                selectedIndices = newSelected;
+                isAllSelected = (selectedIndices.size === links.length && links.length > 0);
+                renderList();
+                if (links.length > 0 && selectedIndices.size > 0) showToast(`已反选，选中 ${selectedIndices.size} 条`,
+                    'info');
+                else if (links.length > 0 && selectedIndices.size === 0) showToast('已取消全部选中', 'info');
+            }
+
+            function addLink(linkText) {
+                const trimmed = linkText.trim();
+                if (!trimmed) { showToast('请输入或粘贴磁力链接', 'info'); return false; }
+                links.push(trimmed);
+                linkInput.value = '';
+                updateClearInputBtnVisibility();
+                linkInput.focus();
+                updateUI();
+                setTimeout(() => { listContainer.scrollTop = listContainer.scrollHeight; }, 50);
+                showToast(`已添加第 ${links.length} 条链接`, 'success');
+                return true;
+            }
+
+            function removeLink(index) {
+                if (index < 0 || index >= links.length) return;
+                links.splice(index, 1);
+                const newSelected = new Set();
+                selectedIndices.forEach(i => {
+                    if (i < index) newSelected.add(i);
+                    else if (i > index) newSelected.add(i - 1);
+                });
+                selectedIndices = newSelected;
+                if (selectedIndices.size === 0) isAllSelected = false;
+                if (selectedIndices.size === links.length && links.length > 0) isAllSelected = true;
+                updateUI();
+                showToast('已删除一条链接', 'info');
+            }
+
+            function clearAll() {
+                if (links.length === 0) return;
+                if (confirm(`确定要清空全部 ${links.length} 条磁力链接吗？此操作不可撤销。`)) {
+                    links = [];
+                    selectedIndices.clear();
+                    isAllSelected = false;
+                    updateUI();
+                    showToast('已清空全部链接', 'info');
+                }
+            }
+
+            function addFromClipboard() {
+                if (!navigator.clipboard || !navigator.clipboard.readText) {
+                    linkInput.focus();
+                    linkInput.select();
+                    showToast('请手动粘贴 (Ctrl+V) 后点击添加', 'info');
+                    return;
+                }
+                navigator.clipboard.readText().then(text => {
+                    if (!text || !text.trim()) { showToast('剪贴板为空，请先复制磁力链接', 'info'); return; }
+                    const lines = text.split(/[\r\n]+/).filter(line => line.trim());
+                    if (lines.length === 0) { showToast('剪贴板中没有有效内容', 'info'); return; }
+                    if (lines.length === 1) {
+                        linkInput.value = lines[0].trim();
+                        updateClearInputBtnVisibility();
+                        const added = addLink(lines[0].trim());
+                        if (!added) showToast('已填入输入框，请确认后添加', 'info');
+                    } else {
+                        let addedCount = 0;
+                        lines.forEach(line => { const t = line.trim(); if (t) { links.push(t);
+                                addedCount++; } });
+                        if (addedCount > 0) {
+                            updateUI();
+                            setTimeout(() => { listContainer.scrollTop = listContainer.scrollHeight; }, 50);
+                            showToast(`已从剪贴板批量添加 ${addedCount} 条链接`, 'success');
+                        } else showToast('剪贴板中没有有效链接', 'info');
+                    }
+                }).catch(() => {
+                    linkInput.focus();
+                    linkInput.select();
+                    showToast('无法读取剪贴板，请手动粘贴', 'info');
+                });
+            }
+
+            function copyAllLinks() {
+                if (links.length === 0) { showToast('没有可复制的链接', 'info'); return; }
+                copyToClipboard(links.join('\n'), `已复制全部 ${links.length} 条链接`);
+            }
+
+            function copySelectedLinks() {
+                if (selectedIndices.size === 0) { showToast('请先选中要复制的链接（点击列表项即可选中）', 'info'); return; }
+                const selectedLinks = [];
+                selectedIndices.forEach(i => { if (i < links.length) selectedLinks.push(links[i]); });
+                copyToClipboard(selectedLinks.join('\n'), `已复制选中的 ${selectedLinks.length} 条链接`);
+            }
+
+            function copyToClipboard(text, successMsg) {
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    navigator.clipboard.writeText(text).then(() => showToast(successMsg, 'success')).catch(() =>
+                        fallbackCopy(text, successMsg));
+                } else fallbackCopy(text, successMsg);
+            }
+
+            function fallbackCopy(text, successMsg) {
+                const textarea = document.createElement('textarea');
+                textarea.value = text;
+                textarea.style.position = 'fixed';
+                textarea.style.left = '-9999px';
+                textarea.style.top = '-9999px';
+                textarea.style.opacity = '0';
+                document.body.appendChild(textarea);
+                textarea.focus();
+                textarea.select();
+                try {
+                    const success = document.execCommand('copy');
+                    showToast(success ? successMsg : '复制失败，请手动全选复制', success ? 'success' : 'info');
+                } catch (e) { showToast('复制失败，请手动全选复制', 'info'); }
+                document.body.removeChild(textarea);
+            }
+
+            function updateClearInputBtnVisibility() {
+                if (linkInput.value.trim()) clearInputBtn.classList.add('visible');
+                else clearInputBtn.classList.remove('visible');
+            }
+
+            function setupKeyboardShortcuts() {
+                listContainer.addEventListener('keydown', function(e) {
+                    if (e.ctrlKey && e.key === 'a') {
+                        e.preventDefault();
+                        if (links.length > 0) {
+                            selectedIndices.clear();
+                            links.forEach((_, i) => selectedIndices.add(i));
+                            isAllSelected = true;
+                            renderList();
+                            showToast(`已选中全部 ${links.length} 条链接`, 'info');
+                        }
+                    }
+                    if (e.ctrlKey && e.key === 'c') {
+                        if (selectedIndices.size > 0 && document.activeElement === listContainer) {
+                            e.preventDefault();
+                            copySelectedLinks();
+                        }
+                    }
+                });
+                document.addEventListener('keydown', function(e) {
+                    if (e.ctrlKey && e.shiftKey && e.key === 'V') {
+                        e.preventDefault();
+                        addFromClipboard();
+                    }
+                    if (e.key === 'Enter' && document.activeElement === linkInput) {
+                        e.preventDefault();
+                        const val = linkInput.value.trim();
+                        if (val) addLink(val);
+                        else addFromClipboard();
+                    }
+                    if (e.key === 'Escape' && document.activeElement === linkInput) {
+                        linkInput.value = '';
+                        updateClearInputBtnVisibility();
+                        linkInput.blur();
+                    }
+                });
+            }
+
+            addBtn.addEventListener('click', () => {
+                const val = linkInput.value.trim();
+                if (val) addLink(val);
+                else addFromClipboard();
+            });
+            pasteBtn.addEventListener('click', addFromClipboard);
+            clearInputBtn.addEventListener('click', () => {
+                linkInput.value = '';
+                updateClearInputBtnVisibility();
+                linkInput.focus();
+            });
+            linkInput.addEventListener('input', updateClearInputBtnVisibility);
+            linkInput.addEventListener('focus', updateClearInputBtnVisibility);
+            linkInput.addEventListener('blur', () => setTimeout(updateClearInputBtnVisibility, 150));
+            linkInput.addEventListener('paste', () => setTimeout(updateClearInputBtnVisibility, 50));
+            selectAllBtn.addEventListener('click', selectAll);
+            invertSelectBtn.addEventListener('click', invertSelect);
+            clearAllBtn.addEventListener('click', clearAll);
+            copyAllBtn.addEventListener('click', copyAllLinks);
+            copySelectedBtn.addEventListener('click', copySelectedLinks);
+
+            // ==================== 批量分次复制功能（新增） ====================
+            const batchTextarea = document.getElementById('batchTextarea');
+            const batchSizeInput = document.getElementById('batchSizeInput');
+            const batchProgress = document.getElementById('batchProgress');
+            const batchPreview = document.getElementById('batchPreview');
+            const batchCountBadge = document.getElementById('batchCountBadge');
+            const batchPrevBtn = document.getElementById('batchPrevBtn');
+            const batchCopyBtn = document.getElementById('batchCopyBtn');
+            const batchNextBtn = document.getElementById('batchNextBtn');
+            const clearBatchBtn = document.getElementById('clearBatchBtn');
+            const importFromListBtn = document.getElementById('importFromListBtn');
+
+            let batchLinks = []; // 从textarea解析出的所有链接
+            let batchSize = 100; // 每批数量
+            let currentBatchIndex = 0; // 当前批次索引（从0开始）
+            let batchParseTimer = null; // debounce定时器
+
+            // 解析textarea中的链接
+            function parseBatchLinks() {
+                const text = batchTextarea.value || '';
+                const lines = text.split(/[\r\n]+/).filter(line => line.trim());
+                batchLinks = lines.map(line => line.trim());
+                // 重置批次索引
+                currentBatchIndex = 0;
+                // 读取每批数量设置
+                const sizeVal = parseInt(batchSizeInput.value, 10);
+                batchSize = (isNaN(sizeVal) || sizeVal < 1) ? 1 : Math.min(sizeVal, 10000);
+                updateBatchUI();
+            }
+
+            // 获取总批次数
+            function getTotalBatches() {
+                if (batchLinks.length === 0) return 0;
+                return Math.ceil(batchLinks.length / batchSize);
+            }
+
+            // 获取当前批次链接范围
+            function getCurrentBatchRange() {
+                if (batchLinks.length === 0) return { start: 0, end: 0, links: [] };
+                const totalBatches = getTotalBatches();
+                // 确保当前批次索引在有效范围内
+                if (currentBatchIndex >= totalBatches) currentBatchIndex = totalBatches - 1;
+                if (currentBatchIndex < 0) currentBatchIndex = 0;
+                const start = currentBatchIndex * batchSize;
+                const end = Math.min(start + batchSize, batchLinks.length);
+                const links = batchLinks.slice(start, end);
+                return { start, end, links };
+            }
+
+            // 更新批量区域UI
+            function updateBatchUI() {
+                const totalBatches = getTotalBatches();
+                const range = getCurrentBatchRange();
+
+                // 更新计数徽章
+                if (batchLinks.length > 0) {
+                    batchCountBadge.textContent = `共 ${batchLinks.length} 条 · ${totalBatches} 批`;
+                    batchCountBadge.classList.add('has-data');
+                } else {
+                    batchCountBadge.textContent = '未加载';
+                    batchCountBadge.classList.remove('has-data');
+                }
+
+                // 更新进度显示
+                if (batchLinks.length > 0 && totalBatches > 0) {
+                    const displayIndex = currentBatchIndex + 1;
+                    batchProgress.textContent =
+                        `第 ${displayIndex}/${totalBatches} 批：第 ${range.start + 1}-${range.end} 条`;
+                    batchProgress.classList.remove('empty');
+                } else {
+                    batchProgress.textContent = '暂无数据';
+                    batchProgress.classList.add('empty');
+                }
+
+                // 更新预览区域
+                if (range.links.length > 0) {
+                    batchPreview.classList.remove('empty-preview');
+                    const previewCount = Math.min(3, range.links.length);
+                    let previewHTML = '';
+                    for (let i = 0; i < previewCount; i++) {
+                        const truncated = range.links[i].length > 80 ? range.links[i].substring(0, 80) + '...' : range
+                            .links[i];
+                        previewHTML +=
+                            `<span class="preview-line">${(range.start + i + 1)}. ${escapeHtml(truncated)}</span>`;
+                    }
+                    if (range.links.length > previewCount) {
+                        previewHTML +=
+                            `<span class="preview-more">... 还有 ${range.links.length - previewCount} 条链接</span>`;
+                    }
+                    batchPreview.innerHTML = previewHTML;
+                } else {
+                    batchPreview.classList.add('empty-preview');
+                    batchPreview.textContent = '在文本框中粘贴链接后自动解析';
+                }
+
+                // 更新按钮状态
+                const hasData = batchLinks.length > 0 && totalBatches > 0;
+                clearBatchBtn.disabled = !hasData && batchTextarea.value.trim() === '';
+                clearBatchBtn.style.opacity = (!hasData && batchTextarea.value.trim() === '') ? '0.4' : '1';
+                clearBatchBtn.style.pointerEvents = (!hasData && batchTextarea.value.trim() === '') ? 'none' : 'auto';
+
+                batchPrevBtn.disabled = !hasData || currentBatchIndex <= 0;
+                batchPrevBtn.style.opacity = (!hasData || currentBatchIndex <= 0) ? '0.4' : '1';
+                batchPrevBtn.style.pointerEvents = (!hasData || currentBatchIndex <= 0) ? 'none' : 'auto';
+
+                batchCopyBtn.disabled = !hasData;
+                batchCopyBtn.style.opacity = !hasData ? '0.45' : '1';
+                batchCopyBtn.style.pointerEvents = !hasData ? 'none' : 'auto';
+
+                batchNextBtn.disabled = !hasData || currentBatchIndex >= totalBatches - 1;
+                batchNextBtn.style.opacity = (!hasData || currentBatchIndex >= totalBatches - 1) ? '0.4' : '1';
+                batchNextBtn.style.pointerEvents = (!hasData || currentBatchIndex >= totalBatches -
+                    1) ? 'none' : 'auto';
+
+                // 更新导入按钮状态
+                updateImportButtonState();
+            }
+
+            function updateImportButtonState() {
+                const hasLinks = links.length > 0;
+                importFromListBtn.disabled = !hasLinks;
+                importFromListBtn.style.opacity = !hasLinks ? '0.4' : '1';
+                importFromListBtn.style.pointerEvents = !hasLinks ? 'none' : 'auto';
+                if (hasLinks) {
+                    importFromListBtn.title = `将收集列表中的 ${links.length} 条链接导入到批量区域`;
+                } else {
+                    importFromListBtn.title = '收集列表为空，无法导入';
+                }
+            }
+
+            // 复制当前批次并前进到下一批
+            function copyCurrentBatchAndAdvance() {
+                const range = getCurrentBatchRange();
+                if (range.links.length === 0) {
+                    showToast('当前批次没有可复制的链接', 'info');
+                    return;
+                }
+                const text = range.links.join('\n');
+                const totalBatches = getTotalBatches();
+                const isLastBatch = (currentBatchIndex >= totalBatches - 1);
+
+                copyToClipboard(text, '').then || (() => {});
+
+                // 使用自定义复制逻辑以支持后续操作
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    navigator.clipboard.writeText(text).then(() => {
+                        if (isLastBatch) {
+                            showToast(
+                                `已复制最后一批（第 ${range.start + 1}-${range.end} 条，共 ${batchLinks.length} 条）`,
+                                'success');
+                        } else {
+                            showToast(
+                                `已复制第 ${range.start + 1}-${range.end} 条，已切换到下一批`,
+                                'success');
+                            // 前进到下一批
+                            currentBatchIndex++;
+                            updateBatchUI();
+                            // 滚动预览区域到顶部
+                            batchPreview.scrollTop = 0;
+                        }
+                    }).catch(() => {
+                        fallbackCopyAndAdvance(text, range, isLastBatch);
+                    });
+                } else {
+                    fallbackCopyAndAdvance(text, range, isLastBatch);
+                }
+            }
+
+            function fallbackCopyAndAdvance(text, range, isLastBatch) {
+                const textarea = document.createElement('textarea');
+                textarea.value = text;
+                textarea.style.position = 'fixed';
+                textarea.style.left = '-9999px';
+                textarea.style.top = '-9999px';
+                textarea.style.opacity = '0';
+                document.body.appendChild(textarea);
+                textarea.focus();
+                textarea.select();
+                try {
+                    const success = document.execCommand('copy');
+                    if (success) {
+                        if (isLastBatch) {
+                            showToast(
+                                `已复制最后一批（第 ${range.start + 1}-${range.end} 条，共 ${batchLinks.length} 条）`,
+                                'success');
+                        } else {
+                            showToast(
+                                `已复制第 ${range.start + 1}-${range.end} 条，已切换到下一批`,
+                                'success');
+                            currentBatchIndex++;
+                            updateBatchUI();
+                            batchPreview.scrollTop = 0;
+                        }
+                    } else {
+                        showToast('复制失败，请手动全选复制', 'info');
+                    }
+                } catch (e) {
+                    showToast('复制失败，请手动全选复制', 'info');
+                }
+                document.body.removeChild(textarea);
+            }
+
+            // 确保copyToClipboard返回可链式调用的对象
+            const originalCopyToClipboard = copyToClipboard;
+            copyToClipboard = function(text, successMsg) {
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    return navigator.clipboard.writeText(text).then(() => {
+                        if (successMsg) showToast(successMsg, 'success');
+                    }).catch(() => {
+                        fallbackCopy(text, successMsg);
+                    });
+                } else {
+                    fallbackCopy(text, successMsg);
+                    return Promise.resolve();
+                }
+            };
+
+            // 切换到上一批
+            function goToPrevBatch() {
+                if (currentBatchIndex > 0) {
+                    currentBatchIndex--;
+                    updateBatchUI();
+                    batchPreview.scrollTop = 0;
+                }
+            }
+
+            // 切换到下一批
+            function goToNextBatch() {
+                const totalBatches = getTotalBatches();
+                if (currentBatchIndex < totalBatches - 1) {
+                    currentBatchIndex++;
+                    updateBatchUI();
+                    batchPreview.scrollTop = 0;
+                }
+            }
+
+            // 清空批量区域
+            function clearBatchArea() {
+                if (batchLinks.length > 0 || batchTextarea.value.trim()) {
+                    batchTextarea.value = '';
+                    batchLinks = [];
+                    currentBatchIndex = 0;
+                    batchSize = parseInt(batchSizeInput.value, 10) || 100;
+                    if (batchSize < 1) batchSize = 1;
+                    updateBatchUI();
+                    batchTextarea.focus();
+                    showToast('已清空批量区域', 'info');
+                }
+            }
+
+            // 从收集列表导入
+            function importFromList() {
+                if (links.length === 0) {
+                    showToast('收集列表为空，无法导入', 'info');
+                    return;
+                }
+                const existingText = batchTextarea.value.trim();
+                const newContent = links.join('\n');
+                if (existingText) {
+                    batchTextarea.value = existingText + '\n' + newContent;
+                } else {
+                    batchTextarea.value = newContent;
+                }
+                // 触发解析
+                parseBatchLinks();
+                showToast(`已从收集列表导入 ${links.length} 条链接到批量区域`, 'success');
+                // 滚动textarea到底部
+                batchTextarea.scrollTop = batchTextarea.scrollHeight;
+            }
+
+            // 监听textarea输入（debounce自动解析）
+            batchTextarea.addEventListener('input', function() {
+                if (batchParseTimer) clearTimeout(batchParseTimer);
+                batchParseTimer = setTimeout(() => {
+                    parseBatchLinks();
+                }, 400);
+            });
+
+            // 监听粘贴事件，立即触发解析（缩短debounce）
+            batchTextarea.addEventListener('paste', function() {
+                if (batchParseTimer) clearTimeout(batchParseTimer);
+                batchParseTimer = setTimeout(() => {
+                    parseBatchLinks();
+                }, 150);
+            });
+
+            // 监听每批数量变化
+            batchSizeInput.addEventListener('input', function() {
+                const val = parseInt(batchSizeInput.value, 10);
+                if (!isNaN(val) && val >= 1 && val <= 10000) {
+                    batchSize = val;
+                } else if (val > 10000) {
+                    batchSize = 10000;
+                    batchSizeInput.value = 10000;
+                }
+                if (batchLinks.length > 0) {
+                    currentBatchIndex = 0; // 修改每批数量时重置到第1批
+                    updateBatchUI();
+                }
+            });
+            batchSizeInput.addEventListener('change', function() {
+                const val = parseInt(batchSizeInput.value, 10);
+                if (isNaN(val) || val < 1) {
+                    batchSize = 1;
+                    batchSizeInput.value = 1;
+                } else if (val > 10000) {
+                    batchSize = 10000;
+                    batchSizeInput.value = 10000;
+                } else {
+                    batchSize = val;
+                }
+                if (batchLinks.length > 0) {
+                    currentBatchIndex = 0;
+                    updateBatchUI();
+                }
+            });
+
+            // 按钮事件
+            batchPrevBtn.addEventListener('click', goToPrevBatch);
+            batchNextBtn.addEventListener('click', goToNextBatch);
+            batchCopyBtn.addEventListener('click', copyCurrentBatchAndAdvance);
+            clearBatchBtn.addEventListener('click', clearBatchArea);
+            importFromListBtn.addEventListener('click', importFromList);
+
+            // 键盘快捷键：在batchTextarea中Ctrl+Enter触发复制并前进
+            batchTextarea.addEventListener('keydown', function(e) {
+                if (e.ctrlKey && e.key === 'Enter') {
+                    e.preventDefault();
+                    if (batchLinks.length > 0) {
+                        copyCurrentBatchAndAdvance();
+                    }
+                }
+            });
+
+            function init() {
+                updateUI();
+                updateClearInputBtnVisibility();
+                updateBatchUI();
+                updateImportButtonState();
+                setupKeyboardShortcuts();
+                setTimeout(() => linkInput.focus(), 300);
+            }
+            init();
+        })();
+    </script>
+</body>
+</html>

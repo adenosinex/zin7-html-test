@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>磁力链接收集器</title>
+
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="磁力收集器">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='100' fill='%236c5ce7'/%3E%3Cpath d='M160 128c0-35.3 28.7-64 64-64h64c35.3 0 64 28.7 64 64v192c0 70.7-57.3 128-128 128s-128-57.3-128-128V128z' fill='none' stroke='white' stroke-width='32' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M160 192h192' stroke='white' stroke-width='32' stroke-linecap='round'/%3E%3Cpath d='M256 384v96' stroke='white' stroke-width='32' stroke-linecap='round'/%3E%3Cpath d='M208 448h96' stroke='white' stroke-width='32' stroke-linecap='round'/%3E%3C/svg%3E">
+    
+    <meta name="theme-color" content="#6c5ce7">
+
+    <style>
+        :root {
+            --bg: #f4f6fb;
+            --card-bg: #ffffff;
+            --input-bg: #f0f2f7;
+            --border: #d5d9e2;
+            --accent: #6c5ce7;
+            --accent-hover: #7f6ff0;
+            --accent-glow: rgba(108, 92, 231, 0.2);
+            --text: #1e1f2a;
+            --text-secondary: #5a5c6e;
+            --danger: #e74c5e;
+            --danger-hover: #f05a6c;
+            --danger-bg: rgba(231, 76, 94, 0.08);
+            --success: #2ecc71;
+            --success-glow: rgba(46, 204, 113, 0.3);
+            --tag-bg: #eef0f5;
+            --tag-border: #d0d4df;
+            --tag-hover-bg: #e3e6f0;
+            --scrollbar-thumb: #bcc0cd;
+            --scrollbar-track: #f0f2f7;
+            --radius: 14px;
+            --radius-sm: 10px;
+            --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', 'Noto Sans SC', system-ui, -apple-system, sans-serif;
+            background: var(--bg);
+            background-image:
+                radial-gradient(ellipse at 20% 20%, rgba(108, 92, 231, 0.04) 0%, transparent 60%),
+                radial-gradient(ellipse at 80% 80%, rgba(46, 204, 113, 0.03) 0%, transparent 60%),
+                radial-gradient(ellipse at 50% 50%, rgba(108, 92, 231, 0.02) 0%, transparent 80%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            color: var(--text);
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        .container {
+            width: 100%;
+            max-width: 680px;
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 32px 28px 24px;
+            box-shadow: 0 18px 45px rgba(0,0,0,0.06), 0 0 0 1px var(--border), 0 0 60px rgba(108,92,231,0.05);
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 80px;
+        }
+        .container::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(108,92,231,0.3), rgba(108,92,231,0.15), transparent);
+        }
+        .header { display: flex; align-items: center; gap: 12px; }
+        .header .icon-wrap {
+            width: 44px; height: 44px; border-radius: 12px;
+            background: linear-gradient(135deg, rgba(108,92,231,0.12), rgba(108,92,231,0.04));
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+            box-shadow: 0 0 20px rgba(108,92,231,0.1);
+        }
+        .header .icon-wrap svg { width: 22px; height: 22px; color: #6c5ce7; fill: none; stroke: currentColor; stroke-width: 2; }
+        .header .title-group h1 { font-size: 1.35rem; font-weight: 700; letter-spacing: -0.01em; color: #1a1b2e; line-height: 1.2; }
+        .header .title-group .sub { font-size: 0.78rem; color: var(--text-secondary); font-weight: 400; }
+        .count-badge {
+            margin-left: auto;
+            background: var(--tag-bg);
+            border: 1px solid var(--tag-border);
+            border-radius: 20px;
+            padding: 6px 14px;
+            font-size: 0.8rem; font-weight: 600;
+            color: var(--text-secondary);
+            white-space: nowrap;
+            transition: var(--transition);
+        }
+        .count-badge.has-items {
+            color: #5b4ae0;
+            border-color: rgba(108,92,231,0.45);
+            background: rgba(108,92,231,0.08);
+        }
+        .count-badge .num { font-size: 1.1rem; font-weight: 700; }
+
+        .input-row { display: flex; gap: 10px; align-items: center; }
+        .input-wrap { flex: 1; position: relative; }
+        .input-wrap input {
+            width: 100%;
+            padding: 13px 16px; padding-right: 44px;
+            border-radius: var(--radius-sm);
+            border: 1.5px solid var(--border);
+            background: var(--input-bg);
+            color: var(--text);
+            font-size: 0.95rem;
+            font-family: inherit;
+            transition: var(--transition);
+            outline: none;
+            user-select: text;
+            -webkit-user-select: text;
+        }
+        .input-wrap input::placeholder { color: #8b8d9e; font-size: 0.9rem; }
+        .input-wrap input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 4px rgba(108,92,231,0.06);
+        }
+        .input-wrap .clear-input-btn {
+            position: absolute; right: 8px; top: 50%;
+            transform: translateY(-50%);
+            background: none; border: none; cursor: pointer;
+            padding: 6px; border-radius: 50%;
+            color: #7d7f91;
+            display: flex; align-items: center; justify-content: center;
+            opacity: 0; pointer-events: none;
+            transition: var(--transition);
+        }
+        .input-wrap .clear-input-btn.visible { opacity: 1; pointer-events: auto; }
+        .input-wrap .clear-input-btn:hover { color: #2a2b3c; background: rgba(0,0,0,0.04); }
+        .input-wrap .clear-input-btn svg { width: 16px; height: 16px; }
+
+        .btn {
+            padding: 13px 20px;
+            border-radius: var(--radius-sm);
+            border: none; cursor: pointer;
+            font-weight: 600; font-size: 0.9rem;
+            font-family: inherit;
+            transition: var(--transition);
+            white-space: nowrap;
+            display: flex; align-items: center; gap: 7px;
+            outline: none;
+            position: relative;
+        }
+        .btn:active { transform: scale(0.96); }
+        .btn-primary { background: var(--accent); color: #fff; box-shadow: 0 6px 18px rgba(108,92,231,0.28); }
+        .btn-primary:hover { background: var(--accent-hover); box-shadow: 0 8px 24px rgba(108,92,231,0.35); }
+        .btn-outline { background: transparent; border: 1.5px solid var(--border); color: var(--text); }
+        .btn-outline:hover { border-color: #a8acbd; background: rgba(0,0,0,0.02); }
+        .btn-sm { padding: 7px 14px; font-size: 0.78rem; border-radius: 8px; gap: 5px; }
+        .btn-success { background: #2ecc71; color: #fff; box-shadow: 0 4px 14px rgba(46,204,113,0.25); }
+        .btn-success:hover { background: #35d87a; }
+        .btn-danger-text { background: transparent; border: 1px solid transparent; color: var(--danger); padding: 7px 12px; }
+        .btn-danger-text:hover { background: var(--danger-bg); border-color: rgba(231,76,94,0.3); }
+        .btn svg { width: 17px; height: 17px; flex-shrink: 0; }
+        .btn-sm svg { width: 14px; height: 14px; }
+
+        .divider { height: 1px; background: var(--border); border-radius: 1px; }
+
+        .toolbar { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+        .toolbar .spacer { flex: 1; }
+
+        .list-container {
+            background: var(--input-bg);
+            border-radius: var(--radius);
+            border: 1.5px solid var(--border);
+            min-height: 140px;
+            max-height: 420px;
+            overflow-y: auto;
+            padding: 6px;
+            transition: var(--transition);
+        }
+        .list-container:focus-within {
+            border-color: rgba(108,92,231,0.5);
+            box-shadow: 0 0 0 3px rgba(108,92,231,0.04);
+        }
+        .list-container::-webkit-scrollbar { width: 6px; }
+        .list-container::-webkit-scrollbar-track { background: transparent; }
+        .list-container::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 3px; }
+
+        .empty-state {
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            min-height: 120px; gap: 10px;
+            color: #8b8d9e;
+            pointer-events: none; text-align: center;
+            padding: 20px;
+        }
+        .empty-state svg { width: 44px; height: 44px; opacity: 0.5; stroke: #8b8d9e; }
+        .empty-state p { font-size: 0.85rem; line-height: 1.5; }
+        .empty-state .highlight-key {
+            display: inline-block;
+            background: rgba(0,0,0,0.03);
+            border: 1px solid #d0d3db;
+            border-radius: 4px;
+            padding: 2px 8px;
+            font-size: 0.75rem;
+            margin: 0 2px;
+            color: #585a6e;
+        }
+
+        .link-list { list-style: none; display: flex; flex-direction: column; gap: 4px; }
+        .link-item {
+            display: flex; align-items: center; gap: 8px;
+            padding: 10px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: var(--transition);
+            border: 1px solid transparent;
+            word-break: break-all;
+        }
+        .link-item:hover { background: var(--tag-hover-bg); border-color: var(--tag-border); }
+        .link-item.selected {
+            background: rgba(108,92,231,0.08);
+            border-color: rgba(108,92,231,0.35);
+            box-shadow: inset 0 0 0 1px rgba(108,92,231,0.15);
+        }
+        .link-item .index-num {
+            flex-shrink: 0;
+            width: 26px; height: 26px; border-radius: 50%;
+            background: var(--tag-bg);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.7rem; font-weight: 700;
+            color: var(--text-secondary);
+            border: 1px solid var(--tag-border);
+        }
+        .link-item.selected .index-num {
+            background: rgba(108,92,231,0.18);
+            border-color: rgba(108,92,231,0.45);
+            color: #4a3cd6;
+        }
+        .link-item .link-text {
+            flex: 1;
+            font-size: 0.85rem;
+            color: #2d2e3f;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            font-family: 'SF Mono', 'Consolas', 'Monaco', monospace;
+        }
+        .link-item .remove-btn {
+            flex-shrink: 0;
+            width: 28px; height: 28px; border-radius: 50%;
+            border: none; background: transparent; cursor: pointer;
+            color: #8b8d9e;
+            display: flex; align-items: center; justify-content: center;
+            opacity: 0; pointer-events: none;
+            transition: var(--transition);
+        }
+        .link-item:hover .remove-btn { opacity: 1; pointer-events: auto; }
+        .link-item .remove-btn:hover { background: var(--danger-bg); color: var(--danger); }
+        .link-item .remove-btn svg { width: 14px; height: 14px; }
+
+        .toast {
+            position: fixed; top: 24px; left: 50%;
+            transform: translateX(-50%) translateY(-120px);
+            background: #fff;
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 10px 20px;
+            font-size: 0.85rem; font-weight: 500;
+            color: #1e1f2a;
+            box-shadow: 0 10px 35px rgba(0,0,0,0.08);
+            z-index: 999;
+            pointer-events: none;
+            transition: transform 0.35s cubic-bezier(0.22, 0.61, 0.36, 1);
+            display: flex; align-items: center; gap: 8px;
+        }
+        .toast.show { transform: translateX(-50%) translateY(0); }
+        .toast.success { border-color: rgba(46,204,113,0.4); }
+        .toast .dot { width: 8px; height: 8px; border-radius: 50%; }
+        .toast.success .dot { background: #2ecc71; }
+        .toast.info .dot { background: #6c5ce7; }
+
+        @media (max-width: 500px) {
+            .container { padding: 20px 14px 16px; border-radius: 16px; gap: 14px; }
+            .header .title-group h1 { font-size: 1.15rem; }
+            .btn { padding: 11px 14px; font-size: 0.8rem; }
+            .input-wrap input { padding: 11px 12px; padding-right: 38px; font-size: 0.85rem; }
+            .list-container { max-height: 300px; }
+        }
+    </style>
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="磁力链接收集器">
+<link rel="apple-touch-icon" href="./icon-192.png">
+
+</head>
+<body>
+
+    <div class="toast" id="toast">
+        <span class="dot"></span>
+        <span class="msg" id="toastMsg"></span>
+    </div>
+
+    <div class="container">
+        <div class="header">
+            <div class="icon-wrap">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M6 3C6 1.89543 6.89543 1 8 1H16C17.1046 1 18 1.89543 18 3V11C18 14.3137 15.3137 17 12 17C8.68629 17 6 14.3137 6 11V3Z" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M6 7H18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    <path d="M12 17V23" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    <path d="M9 20H15" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+            </div>
+            <div class="title-group">
+                <h1>磁力链接收集器</h1>
+                <span class="sub">批量收集 · 一键复制</span>
+            </div>
+            <div class="count-badge" id="countBadge">
+                已收集 <span class="num" id="countNum">0</span> 条
+            </div>
+        </div>
+
+        <div class="input-row">
+            <div class="input-wrap">
+                <input type="text" id="linkInput" placeholder="粘贴磁力链接到此处，然后点击添加..." autocomplete="off" />
+                <button class="clear-input-btn" id="clearInputBtn" title="清空输入">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+            <button class="btn btn-primary" id="addBtn" title="添加输入框中的链接">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+                添加
+            </button>
+            <button class="btn btn-outline" id="pasteBtn" title="从剪贴板读取并添加">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
+                    <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
+                </svg>
+                粘贴
+            </button>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="toolbar">
+            <button class="btn btn-sm btn-outline" id="selectAllBtn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="9 11 12 14 22 4"></polyline>
+                    <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+                </svg>
+                全选
+            </button>
+            <button class="btn btn-sm btn-outline" id="invertSelectBtn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="17 1 21 5 17 9"></polyline>
+                    <path d="M3 11V9a4 4 0 0 1 4-4h14"></path>
+                </svg>
+                反选
+            </button>
+            <span class="spacer"></span>
+            <button class="btn btn-sm btn-danger-text" id="clearAllBtn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                    <polyline points="3 6 5 6 21 6"></polyline>
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                </svg>
+                清空
+            </button>
+        </div>
+
+        <div class="list-container" id="listContainer" tabindex="0">
+            <div class="empty-state" id="emptyState">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                    <polyline points="14 2 14 8 20 8"></polyline>
+                    <line x1="12" y1="18" x2="12" y2="12"></line>
+                    <line x1="9" y1="15" x2="15" y2="15"></line>
+                </svg>
+                <p>
+                    暂无磁力链接<br>
+                    粘贴到输入框后点击添加，或点击 <span class="highlight-key">粘贴</span> 按钮
+                </p>
+            </div>
+            <ul class="link-list" id="linkList" style="display:none;"></ul>
+        </div>
+
+        <div style="display:flex; gap:10px;">
+            <button class="btn btn-success" id="copyAllBtn" style="flex:1;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                </svg>
+                一键复制全部
+            </button>
+            <button class="btn btn-outline" id="copySelectedBtn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+                复制选中
+            </button>
+        </div>
+    </div>
+
+    <script>
+        (function () {
+            'use strict';
+
+            // ============ DOM ============
+            var linkInput       = document.getElementById('linkInput');
+            var clearInputBtn   = document.getElementById('clearInputBtn');
+            var addBtn          = document.getElementById('addBtn');
+            var pasteBtn        = document.getElementById('pasteBtn');
+            var listContainer   = document.getElementById('listContainer');
+            var linkList        = document.getElementById('linkList');
+            var emptyState      = document.getElementById('emptyState');
+            var countBadge      = document.getElementById('countBadge');
+            var countNum        = document.getElementById('countNum');
+            var selectAllBtn    = document.getElementById('selectAllBtn');
+            var invertSelectBtn = document.getElementById('invertSelectBtn');
+            var clearAllBtn     = document.getElementById('clearAllBtn');
+            var copyAllBtn      = document.getElementById('copyAllBtn');
+            var copySelectedBtn = document.getElementById('copySelectedBtn');
+            var toast           = document.getElementById('toast');
+            var toastMsg        = document.getElementById('toastMsg');
+
+            // ============ State ============
+            var links = [];
+            var selectedIndices = new Set();
+            var isAllSelected = false;
+            var toastTimer = null;
+
+            // ============ Toast ============
+            function showToast(message, type) {
+                type = type || 'info';
+                if (toastTimer) clearTimeout(toastTimer);
+                toast.className = 'toast ' + type;
+                toastMsg.textContent = message;
+                void toast.offsetWidth;
+                toast.classList.add('show');
+                toastTimer = setTimeout(function () {
+                    toast.classList.remove('show');
+                }, 1800);
+            }
+
+            // ============ Helpers ============
+            function escapeHtml(str) {
+                var div = document.createElement('div');
+                div.textContent = str;
+                return div.innerHTML;
+            }
+
+            function updateClearInputBtnVisibility() {
+                if (linkInput.value.trim()) {
+                    clearInputBtn.classList.add('visible');
+                } else {
+                    clearInputBtn.classList.remove('visible');
+                }
+            }
+
+            // ============ Render ============
+            function renderList() {
+                linkList.innerHTML = '';
+                links.forEach(function (link, index) {
+                    var li = document.createElement('li');
+                    li.className = 'link-item' + (selectedIndices.has(index) ? ' selected' : '');
+                    li.setAttribute('data-index', String(index));
+
+                    li.innerHTML =
+                        '<span class="index-num">' + (index + 1) + '</span>' +
+                        '<span class="link-text" title="' + escapeHtml(link) + '">' + escapeHtml(link) + '</span>' +
+                        '<button class="remove-btn" title="删除此链接">' +
+                            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">' +
+                                '<line x1="18" y1="6" x2="6" y2="18"></line>' +
+                                '<line x1="6" y1="6" x2="18" y2="18"></line>' +
+                            '</svg>' +
+                        '</button>';
+
+                    li.addEventListener('click', function (e) {
+                        if (e.target.closest('.remove-btn')) return;
+                        toggleSelect(index);
+                    });
+                    li.querySelector('.remove-btn').addEventListener('click', function (e) {
+                        e.stopPropagation();
+                        removeLink(index);
+                    });
+
+                    linkList.appendChild(li);
+                });
+                updateSelectAllButtonText();
+                var none = selectedIndices.size === 0;
+                copySelectedBtn.disabled = none;
+                copySelectedBtn.style.opacity = none ? '0.45' : '1';
+                copySelectedBtn.style.pointerEvents = none ? 'none' : 'auto';
+            }
+
+            function updateSelectAllButtonText() {
+                if (links.length === 0) {
+                    isAllSelected = false;
+                    selectAllBtn.innerHTML =
+                        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;">' +
+                            '<polyline points="9 11 12 14 22 4"></polyline>' +
+                            '<path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>' +
+                        '</svg>全选';
+                    return;
+                }
+                if (isAllSelected && selectedIndices.size === links.length) {
+                    selectAllBtn.innerHTML =
+                        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="width:14px;height:14px;">' +
+                            '<line x1="18" y1="6" x2="6" y2="18"></line>' +
+                            '<line x1="6" y1="6" x2="18" y2="18"></line>' +
+                        '</svg>取消全选';
+                } else {
+                    selectAllBtn.innerHTML =
+                        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;">' +
+                            '<polyline points="9 11 12 14 22 4"></polyline>' +
+                            '<path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>' +
+                        '</svg>全选';
+                }
+            }
+
+            function updateUI() {
+                var count = links.length;
+                countNum.textContent = String(count);
+                if (count > 0) countBadge.classList.add('has-items');
+                else countBadge.classList.remove('has-items');
+
+                if (count === 0) {
+                    emptyState.style.display = 'flex';
+                    linkList.style.display = 'none';
+                    selectedIndices.clear();
+                    isAllSelected = false;
+                } else {
+                    emptyState.style.display = 'none';
+                    linkList.style.display = 'flex';
+                }
+                renderList();
+
+                var disabled = count === 0;
+                [clearAllBtn, selectAllBtn, invertSelectBtn].forEach(function (b) {
+                    b.disabled = disabled;
+                    b.style.opacity = disabled ? '0.4' : '1';
+                    b.style.pointerEvents = disabled ? 'none' : 'auto';
+                });
+                copyAllBtn.disabled = disabled;
+                copyAllBtn.style.opacity = disabled ? '0.45' : '1';
+                copyAllBtn.style.pointerEvents = disabled ? 'none' : 'auto';
+            }
+
+            // ============ Actions ============
+            function addLink(linkText) {
+                var trimmed = String(linkText || '').trim();
+                if (!trimmed) {
+                    showToast('请输入或粘贴磁力链接', 'info');
+                    return false;
+                }
+                links.push(trimmed);
+                linkInput.value = '';
+                updateClearInputBtnVisibility();
+                linkInput.focus();
+                updateUI();
+                setTimeout(function () {
+                    listContainer.scrollTop = listContainer.scrollHeight;
+                }, 50);
+                showToast('已添加第 ' + links.length + ' 条链接', 'success');
+                return true;
+            }
+
+            function toggleSelect(index) {
+                if (selectedIndices.has(index)) selectedIndices.delete(index);
+                else selectedIndices.add(index);
+                isAllSelected = (links.length > 0 && selectedIndices.size === links.length);
+                renderList();
+            }
+
+            function removeLink(index) {
+                if (index < 0 || index >= links.length) return;
+                links.splice(index, 1);
+                var next = new Set();
+                selectedIndices.forEach(function (i) {
+                    if (i < index) next.add(i);
+                    else if (i > index) next.add(i - 1);
+                });
+                selectedIndices = next;
+                isAllSelected = (links.length > 0 && selectedIndices.size === links.length);
+                updateUI();
+                showToast('已删除一条链接', 'info');
+            }
+
+            function selectAll() {
+                if (isAllSelected && selectedIndices.size === links.length) {
+                    selectedIndices.clear();
+                    isAllSelected = false;
+                } else {
+                    selectedIndices.clear();
+                    links.forEach(function (_, i) { selectedIndices.add(i); });
+                    isAllSelected = true;
+                }
+                renderList();
+            }
+
+            function invertSelect() {
+                var next = new Set();
+                links.forEach(function (_, i) {
+                    if (!selectedIndices.has(i)) next.add(i);
+                });
+                selectedIndices = next;
+                isAllSelected = (links.length > 0 && selectedIndices.size === links.length);
+                renderList();
+                if (links.length > 0) {
+                    showToast(
+                        selectedIndices.size > 0
+                            ? '已反选，选中 ' + selectedIndices.size + ' 条'
+                            : '已取消全部选中',
+                        'info'
+                    );
+                }
+            }
+
+            function clearAll() {
+                if (links.length === 0) return;
+                if (confirm('确定要清空全部 ' + links.length + ' 条磁力链接吗？此操作不可撤销。')) {
+                    links = [];
+                    selectedIndices.clear();
+                    isAllSelected = false;
+                    updateUI();
+                    showToast('已清空全部链接', 'info');
+                }
+            }
+
+            // ============ Clipboard ============
+            function addFromClipboard() {
+                if (!navigator.clipboard || !navigator.clipboard.readText) {
+                    linkInput.focus();
+                    linkInput.select();
+                    showToast('当前环境不支持读取剪贴板，请手动 Ctrl+V 粘贴', 'info');
+                    return;
+                }
+                navigator.clipboard.readText().then(function (text) {
+                    if (!text || !text.trim()) {
+                        showToast('剪贴板为空，请先复制磁力链接', 'info');
+                        return;
+                    }
+                    var lines = text.split(/[\r\n]+/).filter(function (l) { return l.trim(); });
+                    if (lines.length === 0) {
+                        showToast('剪贴板中没有有效内容', 'info');
+                        return;
+                    }
+                    if (lines.length === 1) {
+                        linkInput.value = lines[0].trim();
+                        updateClearInputBtnVisibility();
+                        addLink(lines[0].trim());
+                    } else {
+                        var addedCount = 0;
+                        lines.forEach(function (line) {
+                            var t = line.trim();
+                            if (t) { links.push(t); addedCount++; }
+                        });
+                        if (addedCount > 0) {
+                            updateUI();
+                            setTimeout(function () {
+                                listContainer.scrollTop = listContainer.scrollHeight;
+                            }, 50);
+                            showToast('已从剪贴板批量添加 ' + addedCount + ' 条链接', 'success');
+                        } else {
+                            showToast('剪贴板中没有有效链接', 'info');
+                        }
+                    }
+                }).catch(function () {
+                    linkInput.focus();
+                    linkInput.select();
+                    showToast('无法读取剪贴板，请手动粘贴', 'info');
+                });
+            }
+
+            function copyToClipboard(text, successMsg) {
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    navigator.clipboard.writeText(text).then(function () {
+                        showToast(successMsg, 'success');
+                    }).catch(function () {
+                        fallbackCopy(text, successMsg);
+                    });
+                } else {
+                    fallbackCopy(text, successMsg);
+                }
+            }
+
+            function fallbackCopy(text, successMsg) {
+                var ta = document.createElement('textarea');
+                ta.value = text;
+                ta.style.position = 'fixed';
+                ta.style.left = '-9999px';
+                ta.style.top = '-9999px';
+                ta.style.opacity = '0';
+                document.body.appendChild(ta);
+                ta.focus();
+                ta.select();
+                try {
+                    var ok = document.execCommand('copy');
+                    showToast(ok ? successMsg : '复制失败，请手动全选复制', ok ? 'success' : 'info');
+                } catch (e) {
+                    showToast('复制失败，请手动全选复制', 'info');
+                }
+                document.body.removeChild(ta);
+            }
+
+            function copyAllLinks() {
+                if (links.length === 0) {
+                    showToast('没有可复制的链接', 'info');
+                    return;
+                }
+                copyToClipboard(links.join('\n'), '已复制全部 ' + links.length + ' 条链接');
+            }
+
+            function copySelectedLinks() {
+                if (selectedIndices.size === 0) {
+                    showToast('请先选中要复制的链接（点击列表项即可选中）', 'info');
+                    return;
+                }
+                var arr = [];
+                selectedIndices.forEach(function (i) {
+                    if (i < links.length) arr.push(links[i]);
+                });
+                copyToClipboard(arr.join('\n'), '已复制选中的 ' + arr.length + ' 条链接');
+            }
+
+            // ============ Keyboard ============
+            function setupKeyboardShortcuts() {
+                listContainer.addEventListener('keydown', function (e) {
+                    if (e.ctrlKey && (e.key === 'a' || e.key === 'A')) {
+                        e.preventDefault();
+                        if (links.length > 0) {
+                            selectedIndices.clear();
+                            links.forEach(function (_, i) { selectedIndices.add(i); });
+                            isAllSelected = true;
+                            renderList();
+                            showToast('已选中全部 ' + links.length + ' 条链接', 'info');
+                        }
+                    }
+                    if (e.ctrlKey && (e.key === 'c' || e.key === 'C')) {
+                        if (selectedIndices.size > 0) {
+                            e.preventDefault();
+                            copySelectedLinks();
+                        }
+                    }
+                });
+
+                document.addEventListener('keydown', function (e) {
+                    if (e.ctrlKey && e.shiftKey && (e.key === 'V' || e.key === 'v')) {
+                        e.preventDefault();
+                        addFromClipboard();
+                    }
+                    if (e.key === 'Enter' && document.activeElement === linkInput) {
+                        e.preventDefault();
+                        var val = linkInput.value.trim();
+                        if (val) addLink(val);
+                        else addFromClipboard();
+                    }
+                    if (e.key === 'Escape' && document.activeElement === linkInput) {
+                        linkInput.value = '';
+                        updateClearInputBtnVisibility();
+                        linkInput.blur();
+                    }
+                });
+            }
+
+            // ============ Bind ============
+            addBtn.addEventListener('click', function () {
+                var val = linkInput.value.trim();
+                if (val) addLink(val);
+                else addFromClipboard();
+            });
+
+            pasteBtn.addEventListener('click', addFromClipboard);
+
+            clearInputBtn.addEventListener('click', function () {
+                linkInput.value = '';
+                updateClearInputBtnVisibility();
+                linkInput.focus();
+            });
+
+            linkInput.addEventListener('input', updateClearInputBtnVisibility);
+            linkInput.addEventListener('focus', updateClearInputBtnVisibility);
+            linkInput.addEventListener('blur', function () {
+                setTimeout(updateClearInputBtnVisibility, 150);
+            });
+            linkInput.addEventListener('paste', function () {
+                setTimeout(updateClearInputBtnVisibility, 50);
+            });
+
+            selectAllBtn.addEventListener('click', selectAll);
+            invertSelectBtn.addEventListener('click', invertSelect);
+            clearAllBtn.addEventListener('click', clearAll);
+            copyAllBtn.addEventListener('click', copyAllLinks);
+            copySelectedBtn.addEventListener('click', copySelectedLinks);
+
+            // ============ Init ============
+            updateUI();
+            updateClearInputBtnVisibility();
+            setupKeyboardShortcuts();
+            setTimeout(function () { linkInput.focus(); }, 300);
+
+        })();
+    </script>
+
+</body>
+</html>

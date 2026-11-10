@@ -1,0 +1,1157 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🏢 个人备用医疗清单 | 院前急救协议</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,600;1,8..60,300;1,8..60,400&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #070a10;
+            --surface: #0c1018;
+            --surface-raised: #121924;
+            --surface-hover: #182030;
+            --border: #1a2436;
+            --border-light: #243044;
+
+            --critical: #e63946;
+            --critical-dim: rgba(230, 57, 70, 0.08);
+            --high: #f77f00;
+            --high-dim: rgba(247, 127, 0, 0.07);
+            --medium: #2ec4b6;
+            --medium-dim: rgba(46, 196, 182, 0.07);
+            --special: #a78bfa;
+            --special-dim: rgba(167, 139, 250, 0.07);
+
+            --trigger: #fbbf24;
+            --execute: #34d399;
+            --gate: #60a5fa;
+            --gate-dim: rgba(96, 165, 250, 0.08);
+
+            --text-primary: #e8e4df;
+            --text-secondary: #8b95a6;
+            --text-muted: #465063;
+
+            --font-display: 'Syne', sans-serif;
+            --font-body: 'Source Serif 4', serif;
+            --font-mono: 'DM Mono', monospace;
+        }
+
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; background: var(--bg); }
+        body {
+            font-family: var(--font-body);
+            color: var(--text-primary);
+            background: var(--bg);
+            line-height: 1.75;
+            -webkit-font-smoothing: antialiased;
+        }
+        body::after {
+            content: '';
+            position: fixed; inset: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+            opacity: 0.025; pointer-events: none; z-index: 10000;
+        }
+        .container { max-width: 1140px; margin: 0 auto; padding: 0 24px; }
+
+        /* ===== HERO ===== */
+        .hero {
+            position: relative; padding: 100px 0 80px; overflow: hidden;
+            background:
+                radial-gradient(ellipse at 15% 40%, rgba(230, 57, 70, 0.06) 0%, transparent 55%),
+                radial-gradient(ellipse at 85% 20%, rgba(167, 139, 250, 0.04) 0%, transparent 45%),
+                radial-gradient(ellipse at 50% 90%, rgba(46, 196, 182, 0.03) 0%, transparent 50%),
+                var(--bg);
+        }
+        .hero::before {
+            content: ''; position: absolute; top: -1px; left: 0; right: 0;
+            height: 1px; background: linear-gradient(90deg, transparent, var(--critical) 30%, var(--special) 70%, transparent);
+            opacity: 0.5;
+        }
+        .hero-tag {
+            display: inline-block; font-family: var(--font-mono); font-size: 0.7rem;
+            font-weight: 500; letter-spacing: 0.2em; text-transform: uppercase;
+            color: var(--critical); border: 1px solid rgba(230, 57, 70, 0.3);
+            padding: 5px 14px; border-radius: 2px; margin-bottom: 28px;
+            opacity: 0; animation: fadeDown 0.6s ease forwards 0.1s;
+        }
+        .hero h1 {
+            font-family: var(--font-display); font-weight: 800;
+            font-size: clamp(2.2rem, 5vw, 3.4rem); line-height: 1.15;
+            color: var(--text-primary); letter-spacing: -0.02em; margin-bottom: 20px;
+            opacity: 0; animation: fadeDown 0.7s ease forwards 0.25s;
+        }
+        .hero h1 span {
+            display: block; background: linear-gradient(135deg, var(--critical), var(--special));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+        }
+        .hero-sub {
+            font-family: var(--font-mono); font-size: 0.9rem; font-weight: 400;
+            color: var(--text-secondary); max-width: 620px; line-height: 1.8; margin-bottom: 36px;
+            opacity: 0; animation: fadeDown 0.7s ease forwards 0.4s;
+        }
+        .hero-philosophy {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px; max-width: 700px;
+            opacity: 0; animation: fadeDown 0.7s ease forwards 0.55s;
+        }
+        .philosophy-item {
+            background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border);
+            border-radius: 4px; padding: 14px 18px;
+        }
+        .philosophy-item .pi-label {
+            font-family: var(--font-mono); font-size: 0.6rem; font-weight: 500;
+            letter-spacing: 0.15em; text-transform: uppercase; color: var(--text-muted);
+            display: block; margin-bottom: 4px;
+        }
+        .philosophy-item .pi-value {
+            font-family: var(--font-display); font-size: 0.95rem; font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        /* ===== TIMELINE ===== */
+        .timeline { padding: 0 0 60px; background: var(--bg); }
+        .timeline-bar {
+            display: flex; gap: 3px; border-radius: 4px; overflow: hidden; height: 48px;
+            opacity: 0; animation: fadeUp 0.8s ease forwards 0.6s;
+        }
+        .tl-seg {
+            flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px;
+            font-family: var(--font-mono); font-size: 0.7rem; font-weight: 500;
+            letter-spacing: 0.05em; color: var(--text-primary); text-decoration: none;
+            transition: filter 0.2s ease, flex 0.3s ease; cursor: pointer; position: relative;
+        }
+        .tl-seg:hover { flex: 1.3; filter: brightness(1.2); }
+        .tl-seg .tl-time { font-weight: 300; opacity: 0.7; }
+        .tl-seg.tl-critical { background: linear-gradient(135deg, var(--critical), #c1121f); }
+        .tl-seg.tl-high { background: linear-gradient(135deg, var(--high), #e36414); }
+        .tl-seg.tl-medium { background: linear-gradient(135deg, var(--medium), #1a9e8f); }
+        .tl-seg.tl-special { background: linear-gradient(135deg, var(--special), #7c3aed); }
+
+        /* ===== MODULES ===== */
+        .modules { padding: 20px 0 0; }
+        .module-section { margin-bottom: 64px; border-radius: 8px; overflow: hidden; }
+        .module-header { padding: 36px 0 28px; position: relative; }
+        .module-number {
+            font-family: var(--font-display); font-size: clamp(4rem, 8vw, 6.5rem);
+            font-weight: 800; line-height: 1; opacity: 0.04;
+            position: absolute; top: -10px; right: 0; user-select: none; pointer-events: none;
+        }
+        .module-label {
+            display: inline-flex; align-items: center; gap: 10px;
+            font-family: var(--font-mono); font-size: 0.65rem; font-weight: 500;
+            letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 12px;
+        }
+        .urgency-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+        .urgency-dot.dot-critical { background: var(--critical); box-shadow: 0 0 10px var(--critical); }
+        .urgency-dot.dot-high { background: var(--high); box-shadow: 0 0 10px var(--high); }
+        .urgency-dot.dot-medium { background: var(--medium); box-shadow: 0 0 10px var(--medium); }
+        .urgency-dot.dot-special { background: var(--special); box-shadow: 0 0 10px var(--special); }
+        .module-section.mod-critical .module-label { color: var(--critical); }
+        .module-section.mod-high .module-label { color: var(--high); }
+        .module-section.mod-medium .module-label { color: var(--medium); }
+        .module-section.mod-special .module-label { color: var(--special); }
+        .module-title {
+            font-family: var(--font-display); font-weight: 700;
+            font-size: clamp(1.4rem, 3vw, 1.85rem); line-height: 1.25;
+            color: var(--text-primary); margin-bottom: 10px;
+        }
+        .module-purpose { font-size: 0.95rem; color: var(--text-secondary); max-width: 720px; line-height: 1.8; }
+        .items-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 18px; margin-top: 8px;
+        }
+        .item-card {
+            background: var(--surface-raised); border: 1px solid var(--border);
+            border-radius: 6px; padding: 24px;
+            transition: border-color 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease;
+            opacity: 0; animation: fadeUp 0.6s ease forwards;
+        }
+        .item-card:hover {
+            border-color: var(--border-light); transform: translateY(-2px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+        .item-card:nth-child(1) { animation-delay: 0.7s; }
+        .item-card:nth-child(2) { animation-delay: 0.8s; }
+        .item-card:nth-child(3) { animation-delay: 0.9s; }
+        .mod-critical .item-card { border-left: 3px solid var(--critical); }
+        .mod-high .item-card { border-left: 3px solid var(--high); }
+        .mod-medium .item-card { border-left: 3px solid var(--medium); }
+        .mod-special .item-card { border-left: 3px solid var(--special); }
+        .item-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 8px; }
+        .item-name { font-family: var(--font-display); font-weight: 700; font-size: 1.05rem; line-height: 1.35; color: var(--text-primary); }
+        .price-tag {
+            font-family: var(--font-mono); font-size: 0.7rem; font-weight: 500;
+            color: var(--text-primary); background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border); padding: 3px 10px; border-radius: 3px;
+            white-space: nowrap; flex-shrink: 0;
+        }
+        .item-spec { font-family: var(--font-mono); font-size: 0.78rem; font-weight: 300; color: var(--text-muted); margin-bottom: 16px; line-height: 1.6; }
+        .item-divider { height: 1px; background: var(--border); margin-bottom: 16px; }
+        .block-trigger, .block-execute { border-left: 2px solid; padding-left: 14px; margin-bottom: 14px; }
+        .block-trigger { border-color: var(--trigger); }
+        .block-execute { border-color: var(--execute); margin-bottom: 0; }
+        .block-label {
+            font-family: var(--font-mono); font-size: 0.6rem; font-weight: 500;
+            letter-spacing: 0.15em; text-transform: uppercase; display: block; margin-bottom: 5px;
+        }
+        .block-trigger .block-label { color: var(--trigger); }
+        .block-execute .block-label { color: var(--execute); }
+        .block-text { font-size: 0.88rem; color: var(--text-secondary); line-height: 1.75; }
+        .block-text strong { color: var(--text-primary); font-weight: 600; }
+        .block-text .warn { color: var(--critical); font-weight: 600; }
+
+        /* ===== SECTION TRANSITION ===== */
+        .section-transition {
+            display: flex; align-items: center; gap: 16px;
+            padding: 48px 0; opacity: 0; animation: fadeUp 0.6s ease forwards 0.8s;
+        }
+        .transition-line { flex: 1; height: 1px; background: linear-gradient(90deg, transparent, var(--border-light) 30%, var(--border-light) 70%, transparent); }
+        .transition-label {
+            font-family: var(--font-mono); font-size: 0.65rem; font-weight: 500;
+            letter-spacing: 0.2em; text-transform: uppercase; color: var(--text-muted);
+            white-space: nowrap;
+        }
+
+        /* ===== SHARED SECTION HEADER ===== */
+        .section-header { margin-bottom: 36px; }
+        .section-tag {
+            display: inline-block; font-family: var(--font-mono); font-size: 0.62rem;
+            font-weight: 500; letter-spacing: 0.18em; text-transform: uppercase;
+            padding: 4px 12px; border-radius: 2px; margin-bottom: 14px;
+            opacity: 0; animation: fadeDown 0.5s ease forwards;
+        }
+        .section-tag.tag-gate { color: var(--gate); border: 1px solid rgba(96, 165, 250, 0.3); }
+        .section-tag.tag-high { color: var(--high); border: 1px solid rgba(247, 127, 0, 0.3); }
+        .section-header h2 {
+            font-family: var(--font-display); font-weight: 700;
+            font-size: clamp(1.4rem, 3vw, 1.85rem); line-height: 1.25;
+            color: var(--text-primary); margin-bottom: 10px;
+        }
+        .section-header .section-desc {
+            font-size: 0.92rem; color: var(--text-secondary); max-width: 700px; line-height: 1.8;
+        }
+
+        /* ===== SPEC TABLE SECTION ===== */
+        .spec-section { padding-bottom: 56px; opacity: 0; animation: fadeUp 0.7s ease forwards 0.9s; }
+        .spec-table-wrap {
+            overflow-x: auto; -webkit-overflow-scrolling: touch;
+            border: 1px solid var(--border); border-radius: 6px;
+            background: var(--surface-raised); position: relative;
+        }
+        .spec-table-wrap::-webkit-scrollbar { height: 5px; }
+        .spec-table-wrap::-webkit-scrollbar-track { background: var(--surface); }
+        .spec-table-wrap::-webkit-scrollbar-thumb { background: var(--border-light); border-radius: 3px; }
+        @media (max-width: 860px) {
+            .spec-table-wrap::after {
+                content: ''; position: absolute; top: 0; right: 0; bottom: 0; width: 48px;
+                background: linear-gradient(90deg, transparent, var(--surface-raised));
+                pointer-events: none; border-radius: 0 6px 6px 0;
+            }
+        }
+        .spec-table {
+            width: 100%; border-collapse: collapse; min-width: 780px;
+        }
+        .spec-table thead { background: rgba(255, 255, 255, 0.02); }
+        .spec-table th {
+            font-family: var(--font-mono); font-size: 0.62rem; font-weight: 500;
+            letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-muted);
+            text-align: left; padding: 14px 18px; border-bottom: 1px solid var(--border);
+            white-space: nowrap;
+        }
+        .spec-table td {
+            font-size: 0.85rem; padding: 16px 18px; border-bottom: 1px solid rgba(26, 36, 54, 0.5);
+            vertical-align: top; line-height: 1.6;
+        }
+        .spec-table tbody tr {
+            transition: background 0.2s ease;
+        }
+        .spec-table tbody tr:hover { background: rgba(255, 255, 255, 0.015); }
+        .spec-table tbody tr:last-child td { border-bottom: none; }
+
+        .spec-table .col-drug { min-width: 160px; }
+        .spec-table .col-spec { min-width: 130px; }
+        .drug-cell { display: flex; align-items: center; gap: 10px; }
+        .drug-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+        .drug-dot.dot-orange { background: var(--high); }
+        .drug-dot.dot-purple { background: var(--special); }
+        .drug-name-text { font-family: var(--font-display); font-weight: 600; font-size: 0.92rem; color: var(--text-primary); }
+        .spec-table .mono { font-family: var(--font-mono); font-weight: 400; color: var(--text-secondary); font-size: 0.82rem; }
+        .spec-table .warn-cell { color: var(--critical); font-weight: 600; }
+
+        .dose-badge {
+            display: inline-block; font-family: var(--font-mono); font-size: 0.6rem;
+            font-weight: 500; padding: 2px 8px; border-radius: 2px; margin-left: 6px;
+            letter-spacing: 0.05em; vertical-align: middle;
+        }
+        .dose-badge.badge-otc { color: var(--execute); border: 1px solid rgba(52, 211, 153, 0.3); }
+        .dose-badge.badge-rx { color: var(--critical); border: 1px solid rgba(230, 57, 70, 0.3); }
+
+        /* Spec notes grid */
+        .spec-notes {
+            margin-top: 24px; display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 12px;
+        }
+        .spec-note-card {
+            background: var(--surface-raised); border: 1px solid var(--border);
+            border-radius: 5px; padding: 16px 18px; display: flex; gap: 12px;
+            align-items: flex-start;
+        }
+        .spec-note-icon {
+            width: 28px; height: 28px; border-radius: 4px; flex-shrink: 0;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.75rem; font-family: var(--font-mono); font-weight: 700;
+        }
+        .spec-note-icon.icon-warn { background: var(--critical-dim); color: var(--critical); border: 1px solid rgba(230, 57, 70, 0.15); }
+        .spec-note-icon.icon-info { background: rgba(255, 255, 255, 0.03); color: var(--text-muted); border: 1px solid var(--border); }
+        .spec-note-body { flex: 1; }
+        .spec-note-title { font-family: var(--font-display); font-weight: 600; font-size: 0.82rem; color: var(--text-primary); margin-bottom: 3px; }
+        .spec-note-text { font-size: 0.8rem; color: var(--text-secondary); line-height: 1.65; }
+
+        /* ===== PROCUREMENT SECTION ===== */
+        .procure-section { padding-bottom: 56px; opacity: 0; animation: fadeUp 0.7s ease forwards 1.05s; }
+
+        /* Verify gate */
+        .verify-gate {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 16px; margin-bottom: 40px;
+        }
+        .gate-card {
+            background: var(--surface-raised); border: 1px solid var(--border);
+            border-radius: 6px; padding: 24px; position: relative; overflow: hidden;
+            transition: border-color 0.25s ease;
+        }
+        .gate-card:hover { border-color: var(--border-light); }
+        .gate-card::before {
+            content: ''; position: absolute; top: 0; left: 0; width: 3px; height: 100%;
+        }
+        .gate-card.gate-ok::before { background: var(--gate); }
+        .gate-card.gate-bad::before { background: var(--critical); }
+        .gate-tag {
+            font-family: var(--font-mono); font-size: 0.58rem; font-weight: 500;
+            letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 10px; display: block;
+        }
+        .gate-card.gate-ok .gate-tag { color: var(--gate); }
+        .gate-card.gate-bad .gate-tag { color: var(--critical); }
+        .gate-title { font-family: var(--font-display); font-weight: 700; font-size: 1.05rem; color: var(--text-primary); margin-bottom: 8px; }
+        .gate-text { font-size: 0.85rem; color: var(--text-secondary); line-height: 1.75; margin-bottom: 12px; }
+        .gate-pitfall {
+            background: rgba(230, 57, 70, 0.05); border: 1px solid rgba(230, 57, 70, 0.12);
+            border-radius: 4px; padding: 10px 14px; font-size: 0.78rem;
+            color: var(--text-secondary); line-height: 1.6;
+        }
+        .gate-pitfall strong { color: var(--critical); font-weight: 600; }
+
+        /* Procure tiers */
+        .procure-tiers { display: flex; flex-direction: column; gap: 24px; }
+        .procure-tier {
+            background: var(--surface-raised); border: 1px solid var(--border);
+            border-radius: 6px; overflow: hidden;
+        }
+        .tier-header {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 18px 24px; border-bottom: 1px solid var(--border); gap: 12px;
+            flex-wrap: wrap;
+        }
+        .tier-header-left { display: flex; align-items: center; gap: 14px; }
+        .tier-number {
+            font-family: var(--font-display); font-weight: 800; font-size: 1.3rem;
+            line-height: 1; opacity: 0.15;
+        }
+        .tier-title-group .tier-name {
+            font-family: var(--font-display); font-weight: 700; font-size: 1rem;
+            color: var(--text-primary);
+        }
+        .tier-title-group .tier-desc {
+            font-family: var(--font-mono); font-size: 0.68rem; color: var(--text-muted);
+            letter-spacing: 0.03em;
+        }
+        .tier-strategy {
+            font-family: var(--font-mono); font-size: 0.68rem; font-weight: 500;
+            padding: 4px 12px; border-radius: 3px; white-space: nowrap;
+        }
+        .procure-tier.tier-critical .tier-header { border-left: 3px solid var(--critical); }
+        .procure-tier.tier-critical .tier-number { color: var(--critical); }
+        .procure-tier.tier-critical .tier-strategy { color: var(--critical); background: var(--critical-dim); }
+        .procure-tier.tier-standard .tier-header { border-left: 3px solid var(--high); }
+        .procure-tier.tier-standard .tier-number { color: var(--high); }
+        .procure-tier.tier-standard .tier-strategy { color: var(--high); background: var(--high-dim); }
+        .procure-tier.tier-generic .tier-header { border-left: 3px solid var(--medium); }
+        .procure-tier.tier-generic .tier-number { color: var(--medium); }
+        .procure-tier.tier-generic .tier-strategy { color: var(--medium); background: var(--medium-dim); }
+
+        .tier-body { padding: 20px 24px; }
+        .tier-items-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px;
+        }
+        .tier-item {
+            background: rgba(255, 255, 255, 0.015); border: 1px solid var(--border);
+            border-radius: 5px; padding: 16px 18px;
+            transition: border-color 0.2s ease, background 0.2s ease;
+        }
+        .tier-item:hover { border-color: var(--border-light); background: rgba(255, 255, 255, 0.025); }
+        .tier-item-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; margin-bottom: 8px; }
+        .tier-item-name { font-family: var(--font-display); font-weight: 600; font-size: 0.9rem; color: var(--text-primary); }
+        .tier-item-price {
+            font-family: var(--font-mono); font-size: 0.68rem; font-weight: 500;
+            color: var(--text-muted); background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border); padding: 2px 8px; border-radius: 2px;
+            white-space: nowrap;
+        }
+        .tier-item-brands { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+        .brand-tag {
+            font-family: var(--font-mono); font-size: 0.62rem; font-weight: 500;
+            padding: 3px 10px; border-radius: 3px; letter-spacing: 0.03em;
+            background: rgba(255, 255, 255, 0.04); border: 1px solid var(--border);
+            color: var(--text-secondary); transition: border-color 0.2s ease;
+        }
+        .brand-tag.brand-recommended { border-color: rgba(52, 211, 153, 0.25); color: var(--execute); }
+        .brand-tag.brand-budget { border-color: rgba(96, 165, 250, 0.2); color: var(--gate); }
+        .tier-item-tip { font-size: 0.78rem; color: var(--text-muted); line-height: 1.6; }
+        .tier-item-tip .anti { color: var(--critical); font-weight: 600; }
+
+        /* Cost summary */
+        .cost-summary {
+            margin-top: 28px; background: var(--surface-raised); border: 1px solid var(--border);
+            border-radius: 6px; padding: 24px;
+            display: flex; align-items: center; justify-content: space-between;
+            flex-wrap: wrap; gap: 16px;
+        }
+        .cost-left { display: flex; align-items: baseline; gap: 12px; }
+        .cost-label {
+            font-family: var(--font-mono); font-size: 0.65rem; font-weight: 500;
+            letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-muted);
+        }
+        .cost-range {
+            font-family: var(--font-display); font-weight: 800; font-size: 1.5rem;
+            color: var(--text-primary);
+        }
+        .cost-range .cost-unit {
+            font-size: 0.85rem; font-weight: 400; color: var(--text-muted); margin-left: 2px;
+        }
+        .cost-note { font-family: var(--font-mono); font-size: 0.72rem; color: var(--text-muted); text-align: right; }
+
+        /* ===== AUXILIARY ===== */
+        .auxiliary { margin-bottom: 64px; }
+        .aux-title {
+            font-family: var(--font-display); font-weight: 700; font-size: 1.25rem;
+            color: var(--text-secondary); margin-bottom: 20px;
+            display: flex; align-items: center; gap: 10px;
+        }
+        .aux-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+        .aux-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px; }
+        .aux-item {
+            display: flex; align-items: flex-start; gap: 14px;
+            background: var(--surface-raised); border: 1px solid var(--border);
+            border-radius: 6px; padding: 18px 20px;
+            opacity: 0; animation: fadeUp 0.5s ease forwards;
+        }
+        .aux-item:nth-child(1) { animation-delay: 1.4s; }
+        .aux-item:nth-child(2) { animation-delay: 1.5s; }
+        .aux-item:nth-child(3) { animation-delay: 1.6s; }
+        .aux-icon {
+            width: 36px; height: 36px; border-radius: 4px;
+            background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border);
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0; font-size: 1rem;
+        }
+        .aux-content .aux-name { font-family: var(--font-display); font-weight: 600; font-size: 0.9rem; color: var(--text-primary); margin-bottom: 2px; }
+        .aux-content .aux-desc { font-size: 0.82rem; color: var(--text-muted); line-height: 1.6; }
+
+        /* ===== RED LINES ===== */
+        .redlines {
+            position: relative;
+            background: radial-gradient(ellipse at 50% 50%, rgba(230, 57, 70, 0.06) 0%, transparent 70%), var(--surface);
+            border: 1px solid rgba(230, 57, 70, 0.25); border-radius: 8px;
+            padding: 36px 40px; margin-bottom: 80px;
+            opacity: 0; animation: fadeUp 0.7s ease forwards 1.5s;
+        }
+        .redlines::before {
+            content: ''; position: absolute; inset: -1px; border-radius: 8px;
+            border: 1px solid rgba(230, 57, 70, 0.15);
+            animation: pulse-border 3s ease-in-out infinite; pointer-events: none;
+        }
+        .redlines-header { display: flex; align-items: center; gap: 12px; margin-bottom: 22px; }
+        .redlines-icon {
+            width: 40px; height: 40px; border-radius: 50%;
+            background: rgba(230, 57, 70, 0.12); border: 1px solid rgba(230, 57, 70, 0.3);
+            display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+        }
+        .redlines-icon svg { width: 20px; height: 20px; fill: var(--critical); }
+        .redlines-title { font-family: var(--font-display); font-weight: 800; font-size: 1.2rem; color: var(--critical); letter-spacing: 0.02em; }
+        .redlines-subtitle { font-family: var(--font-mono); font-size: 0.72rem; color: var(--text-muted); letter-spacing: 0.05em; }
+        .redlines-list { list-style: none; display: grid; gap: 10px; }
+        .redlines-list li { display: flex; align-items: flex-start; gap: 12px; font-size: 0.9rem; color: var(--text-secondary); line-height: 1.65; }
+        .redlines-list li::before {
+            content: ''; width: 6px; height: 6px; border-radius: 50%;
+            background: var(--critical); flex-shrink: 0; margin-top: 9px;
+        }
+        .redlines-list li strong { color: var(--text-primary); font-weight: 600; }
+        .redlines-action {
+            margin-top: 20px; padding-top: 16px;
+            border-top: 1px solid rgba(230, 57, 70, 0.15);
+            font-family: var(--font-mono); font-size: 0.78rem; font-weight: 500;
+            color: var(--critical); letter-spacing: 0.03em;
+        }
+
+        /* ===== FOOTER ===== */
+        footer { padding: 40px 0; border-top: 1px solid var(--border); margin-bottom: 40px; }
+        .footer-content { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; }
+        .footer-left, .footer-right { font-family: var(--font-mono); font-size: 0.72rem; color: var(--text-muted); line-height: 1.8; }
+        .footer-right { text-align: right; }
+
+        /* ===== ANIMATIONS ===== */
+        @keyframes fadeDown { from { opacity: 0; transform: translateY(-16px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes pulse-border { 0%, 100% { opacity: 0.4; } 50% { opacity: 1; } }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 768px) {
+            .hero { padding: 72px 0 56px; }
+            .hero-philosophy { grid-template-columns: 1fr; }
+            .timeline-bar { height: 42px; flex-wrap: wrap; }
+            .tl-seg { flex-basis: calc(50% - 2px); font-size: 0.6rem; }
+            .items-grid { grid-template-columns: 1fr; }
+            .module-number { font-size: 4rem; }
+            .redlines { padding: 28px 24px; }
+            .footer-content { flex-direction: column; text-align: center; }
+            .footer-right { text-align: center; }
+            .verify-gate { grid-template-columns: 1fr; }
+            .tier-items-grid { grid-template-columns: 1fr; }
+            .spec-notes { grid-template-columns: 1fr; }
+            .cost-summary { flex-direction: column; text-align: center; }
+            .cost-note { text-align: center; }
+            .tier-header { flex-direction: column; align-items: flex-start; }
+        }
+        @media (max-width: 420px) {
+            .container { padding: 0 16px; }
+            .item-card { padding: 18px; }
+            .item-top { flex-direction: column; gap: 6px; }
+            .tier-body { padding: 16px; }
+            .tier-header { padding: 14px 16px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ===== HERO ===== -->
+    <header class="hero">
+        <div class="container">
+            <div class="hero-tag">EMED PROTOCOL &mdash; 院前急救协议</div>
+            <h1>
+                个人备用医疗清单
+                <span>触发条件 → 执行方案</span>
+            </h1>
+            <p class="hero-sub">
+                剔除冗余情绪价值，仅保留<strong>「延迟 15 分钟处理会导致后果严重恶化」</strong>的物资模块。所有耗材与药品均提供具体规格与参考成本，确保在紧急状态下无需额外思考，直接调用。
+            </p>
+            <div class="hero-philosophy">
+                <div class="philosophy-item">
+                    <span class="pi-label">核心场景</span>
+                    <span class="pi-value">机车骑行 · 重训 · 长途徒步</span>
+                </div>
+                <div class="philosophy-item">
+                    <span class="pi-label">决策原则</span>
+                    <span class="pi-value">急症 · 夜发症 · 高频外伤</span>
+                </div>
+                <div class="philosophy-item">
+                    <span class="pi-label">排除项</span>
+                    <span class="pi-value">白天半小时可购的常规慢病药物</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- ===== TIMELINE ===== -->
+    <section class="timeline">
+        <div class="container">
+            <div class="timeline-bar">
+                <a href="#mod-1" class="tl-seg tl-critical">生命通路 <span class="tl-time">0–5 min</span></a>
+                <a href="#mod-2" class="tl-seg tl-high">急性硬损伤 <span class="tl-time">15–30 min</span></a>
+                <a href="#mod-3" class="tl-seg tl-medium">创面愈合 <span class="tl-time">中时效</span></a>
+                <a href="#mod-4" class="tl-seg tl-special">夜间急症 <span class="tl-time">低频高风险</span></a>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== MODULES ===== -->
+    <main class="modules">
+        <div class="container">
+
+            <!-- MODULE 1 -->
+            <article class="module-section mod-critical" id="mod-1">
+                <div class="module-header">
+                    <span class="module-number">01</span>
+                    <div class="module-label"><span class="urgency-dot dot-critical"></span>极高时效 · 0–5 分钟黄金期</div>
+                    <h2 class="module-title">生命通路与止血</h2>
+                    <p class="module-purpose">应对机车骑行意外、户外锐器造成的动脉喷射性出血或大静脉出血。目标是保命撑到救护车抵达，而非治愈。</p>
+                </div>
+                <div class="items-grid">
+                    <div class="item-card">
+                        <div class="item-top"><h3 class="item-name">CAT 旋压式止血带</h3><span class="price-tag">¥50–80</span></div>
+                        <p class="item-spec">战术单手操作型 · 国内可靠品牌或 TCCC 认证产品</p>
+                        <div class="item-divider"></div>
+                        <div class="block-trigger"><span class="block-label">触发条件</span><p class="block-text">四肢出现鲜红色、<strong>喷射状出血</strong>，或出血量大到普通按压无法减缓。</p></div>
+                        <div class="block-execute"><span class="block-label">执行指导</span><p class="block-text">置于伤口近心端 5–8 厘米处，收紧粘扣，旋转调节杆至出血停止，卡入固定槽并记录时间。<span class="warn">严禁随意松解</span>。必须提前拆包练习单手操作。</p></div>
+                    </div>
+                    <div class="item-card">
+                        <div class="item-top"><h3 class="item-name">压缩纱布</h3><span class="price-tag">¥15–25</span></div>
+                        <p class="item-spec">Z 字折叠 · 真空小体积包装</p>
+                        <div class="item-divider"></div>
+                        <div class="block-trigger"><span class="block-label">触发条件</span><p class="block-text">较深且出血量大的<strong>穿刺伤或割伤</strong>。</p></div>
+                        <div class="block-execute"><span class="block-label">执行指导</span><p class="block-text">直接暴力填塞进伤口内部，配合外部双手重压 3–5 分钟。普通纱布吸血即废，压缩纱布能在创腔内膨胀形成压迫。</p></div>
+                    </div>
+                </div>
+            </article>
+
+            <!-- MODULE 2 -->
+            <article class="module-section mod-high" id="mod-2">
+                <div class="module-header">
+                    <span class="module-number">02</span>
+                    <div class="module-label"><span class="urgency-dot dot-high"></span>高时效 · 15–30 分钟黄金期</div>
+                    <h2 class="module-title">急性硬损伤与肿痛压制</h2>
+                    <p class="module-purpose">针对大重量力量训练（如冲击 150kg 臀推或高强度街健动作）导致的肌肉撕裂，或户外徒步造成的严重崴脚。前 30 分钟的压制直接决定后续几个月的恢复期。</p>
+                </div>
+                <div class="items-grid">
+                    <div class="item-card">
+                        <div class="item-top"><h3 class="item-name">一次性速冷冰袋</h3><span class="price-tag">¥2–3/包</span></div>
+                        <p class="item-spec">100g–150g 独立装 · 化学反应型 · 无需冷藏</p>
+                        <div class="item-divider"></div>
+                        <div class="block-trigger"><span class="block-label">触发条件</span><p class="block-text">急性关节扭伤、重度肌肉拉伤、撞击肿胀。</p></div>
+                        <div class="block-execute"><span class="block-label">执行指导</span><p class="block-text">双手用力捏破内胆，摇晃数秒即可制冷。隔一层衣物或单层纱布敷于患处 <strong>15–20 分钟</strong>，大幅降低组织液渗出和内出血。</p></div>
+                    </div>
+                    <div class="item-card">
+                        <div class="item-top"><h3 class="item-name">布洛芬片 / 对乙酰氨基酚</h3><span class="price-tag">¥12–15</span></div>
+                        <p class="item-spec">布洛芬片 0.2g×24 片 · 对乙酰氨基酚片 0.5g×24 片</p>
+                        <div class="item-divider"></div>
+                        <div class="block-trigger"><span class="block-label">触发条件</span><p class="block-text">夜间突发 <strong>39°C 以上高热</strong>，或训练 / 创伤带来的难以忍受的急性剧痛。</p></div>
+                        <div class="block-execute"><span class="block-label">执行指导</span><p class="block-text">摒弃缓释胶囊（起效需 1–2 小时），速释片 <strong>30 分钟</strong>即可达到血药峰值。两者选其一服用，对乙酰氨基酚作为肠胃脆弱期的替代方案。</p></div>
+                    </div>
+                    <div class="item-card">
+                        <div class="item-top"><h3 class="item-name">高弹力绷带</h3><span class="price-tag">¥8/卷</span></div>
+                        <p class="item-spec">7.5cm 及 10cm 宽各一卷 · 含固定扣</p>
+                        <div class="item-divider"></div>
+                        <div class="block-trigger"><span class="block-label">触发条件</span><p class="block-text">关节急性扭伤后的物理固定，或静脉出血的加压包扎。</p></div>
+                        <div class="block-execute"><span class="block-label">执行指导</span><p class="block-text">由远心端向近心端缠绕，保持一定张力，限制受损关节活动空间。</p></div>
+                    </div>
+                </div>
+            </article>
+
+            <!-- MODULE 3 -->
+            <article class="module-section mod-medium" id="mod-3">
+                <div class="module-header">
+                    <span class="module-number">03</span>
+                    <div class="module-label"><span class="urgency-dot dot-medium"></span>中时效 · 降低维护成本</div>
+                    <h2 class="module-title">开放创面湿润愈合系统</h2>
+                    <p class="module-purpose">处理骑行大面积擦伤（犁地）或器械夹伤。放弃传统的"干燥结痂"思路，采用现代"湿润愈合"，极大降低换药时的撕裂剧痛，提高愈合质量。</p>
+                </div>
+                <div class="items-grid">
+                    <div class="item-card">
+                        <div class="item-top"><h3 class="item-name">0.9% 氯化钠注射液 + 滴眼液</h3><span class="price-tag">¥15</span></div>
+                        <p class="item-spec">10ml 塑瓶×20 支 · 另备 3 支独立滴眼液包装</p>
+                        <div class="item-divider"></div>
+                        <div class="block-trigger"><span class="block-label">触发条件</span><p class="block-text">创面沾染泥沙机油，或骑行时<strong>飞虫 / 砂石入眼</strong>。</p></div>
+                        <div class="block-execute"><span class="block-label">执行指导</span><p class="block-text">创面急救的第一步是<strong>无菌冲洗</strong>，而非直接消毒。眼部异物直接用滴眼液规格冲洗。</p></div>
+                    </div>
+                    <div class="item-card">
+                        <div class="item-top"><h3 class="item-name">凡士林纱布 + 不粘敷料</h3><span class="price-tag">¥2–10/片</span></div>
+                        <p class="item-spec">凡士林纱布单片独立装 · 不粘敷料 10×10cm（如美皮康 / Telfa）</p>
+                        <div class="item-divider"></div>
+                        <div class="block-trigger"><span class="block-label">触发条件</span><p class="block-text">大面积擦伤、渗液较多的浅表创面。</p></div>
+                        <div class="block-execute"><span class="block-label">执行指导</span><p class="block-text">生理盐水冲洗 → 碘伏棉签点涂消毒 → <strong>覆盖凡士林纱布（核心步骤）</strong> → 覆盖无菌纱布或不粘敷料 → 胶带固定。彻底阻断血痂与外敷料的粘连。</p></div>
+                    </div>
+                    <div class="item-card">
+                        <div class="item-top"><h3 class="item-name">Steri-Strip 伤口闭合贴</h3><span class="price-tag">¥30/包</span></div>
+                        <p class="item-spec">6mm×75mm 或 12mm×100mm 规格 · 免缝合创口拉合</p>
+                        <div class="item-divider"></div>
+                        <div class="block-trigger"><span class="block-label">触发条件</span><p class="block-text">边缘整齐、深度较浅的裂伤（1–3cm），如金属划伤。</p></div>
+                        <div class="block-execute"><span class="block-label">执行指导</span><p class="block-text">止血消毒后，直接横跨伤口粘贴，将两侧皮缘拉拢。高概率可避免深夜前往急诊排队缝针。</p></div>
+                    </div>
+                </div>
+            </article>
+
+            <!-- MODULE 4 -->
+            <article class="module-section mod-special" id="mod-4">
+                <div class="module-header">
+                    <span class="module-number">04</span>
+                    <div class="module-label"><span class="urgency-dot dot-special"></span>低频高风险 · 夜间 / 特定状态</div>
+                    <h2 class="module-title">夜间急症防御</h2>
+                    <p class="module-purpose">解决县城郊区夜间难以快速获取处方药的问题，并针对日常维持的 18 小时断食习惯，建立电解质和消化道的底层防线。</p>
+                </div>
+                <div class="items-grid">
+                    <div class="item-card">
+                        <div class="item-top"><h3 class="item-name">口服补液盐 III + 蒙脱石散</h3><span class="price-tag">≈¥40</span></div>
+                        <p class="item-spec">均为独立粉剂小包 · 各备一盒</p>
+                        <div class="item-divider"></div>
+                        <div class="block-trigger"><span class="block-label">触发条件</span><p class="block-text">急性水样腹泻。在长时间空腹状态下突发腹泻，电解质崩溃极快，易引发全身性神经肌肉控制力下降（类似抓握力衰竭时的系统性张力涣散）。</p></div>
+                        <div class="block-execute"><span class="block-label">执行指导</span><p class="block-text">蒙脱石散空腹服用，物理吸附肠道毒素；补液盐严格按说明书兑水（通常 250ml 冲一包），<strong>小口频饮</strong>防脱水。</p></div>
+                    </div>
+                    <div class="item-card">
+                        <div class="item-top"><h3 class="item-name">消旋山莨菪碱片 (654-2)</h3><span class="price-tag">≈¥10</span></div>
+                        <p class="item-spec">5mg/片 · 瓶装</p>
+                        <div class="item-divider"></div>
+                        <div class="block-trigger"><span class="block-label">触发条件</span><p class="block-text">突发的严重胃肠绞痛、痉挛性剧痛。</p></div>
+                        <div class="block-execute"><span class="block-label">执行指导</span><p class="block-text">直接解除平滑肌痉挛，缓解绞痛。<span class="warn">前列腺肥大或青光眼病史禁用。</span></p></div>
+                    </div>
+                    <div class="item-card">
+                        <div class="item-top"><h3 class="item-name">阿莫西林克拉维酸钾 + 莫匹罗星</h3><span class="price-tag">¥25 + ¥15</span></div>
+                        <p class="item-spec">前者为处方药（需提前开） · 莫匹罗星软膏 5g 装（百多邦）</p>
+                        <div class="item-divider"></div>
+                        <div class="block-trigger"><span class="block-label">触发条件</span><p class="block-text">前者针对急性重度感染（如剧烈牙髓炎伴发烧、扁桃体化脓）；后者针对皮肤局部红肿化脓的急性疖肿或感染性擦伤。</p></div>
+                        <div class="block-execute"><span class="block-label">执行指导</span><p class="block-text">提前确认<strong>无青霉素过敏史</strong>。抗生素仅作为确诊细菌感染后、前往医院前的桥接手段；莫匹罗星直接外涂于局部脓疱。<span class="warn">发热 &gt;38.5°C 持续 24h 未退或局部红肿扩散，必须就医。</span></p></div>
+                    </div>
+                </div>
+            </article>
+
+            <!-- ===== SECTION TRANSITION ===== -->
+            <div class="section-transition">
+                <div class="transition-line"></div>
+                <span class="transition-label">规格参考 · 采购协议</span>
+                <div class="transition-line"></div>
+            </div>
+
+            <!-- ===== DRUG SPECIFICATION TABLE ===== -->
+            <section class="spec-section">
+                <div class="section-header">
+                    <span class="section-tag tag-gate">Reference Card</span>
+                    <h2>药品规格速查表</h2>
+                    <p class="section-desc">所有药品均为应急储备，非长期治疗方案。严格遵循单次用量与日上限，症状缓解即停，持续恶化立即就医。</p>
+                </div>
+
+                <div class="spec-table-wrap">
+                    <table class="spec-table">
+                        <thead>
+                            <tr>
+                                <th class="col-drug">药品</th>
+                                <th class="col-spec">标准规格</th>
+                                <th>单次用量（成人）</th>
+                                <th>给药间隔</th>
+                                <th>日上限 / 疗程</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- 布洛芬 -->
+                            <tr>
+                                <td class="col-drug">
+                                    <div class="drug-cell">
+                                        <span class="drug-dot dot-orange"></span>
+                                        <div>
+                                            <div class="drug-name-text">布洛芬片 <span class="dose-badge badge-otc">OTC</span></div>
+                                            <div class="mono">退热 · 镇痛 · 抗炎</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="mono">0.2g × 24片/盒<br>铝箔板装</td>
+                                <td><strong>0.2–0.4g</strong><br><span class="mono">1–2 片</span></td>
+                                <td class="mono">每 4–6 小时</td>
+                                <td>日最大 1.2g<br><span class="mono">解热 ≤3天 · 镇痛 ≤5天</span></td>
+                            </tr>
+                            <!-- 对乙酰氨基酚 -->
+                            <tr>
+                                <td class="col-drug">
+                                    <div class="drug-cell">
+                                        <span class="drug-dot dot-orange"></span>
+                                        <div>
+                                            <div class="drug-name-text">对乙酰氨基酚片 <span class="dose-badge badge-otc">OTC</span></div>
+                                            <div class="mono">退热 · 镇痛（胃肠安全）</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="mono">0.5g × 24片/盒<br>铝箔板装</td>
+                                <td><strong>0.5g</strong><br><span class="mono">1 片</span></td>
+                                <td class="mono">每 4–6 小时</td>
+                                <td class="warn-cell">日最大 2g（保守）<br><span class="mono">自行使用 ≤3天</span></td>
+                            </tr>
+                            <!-- 阿莫西林克拉维酸钾 -->
+                            <tr>
+                                <td class="col-drug">
+                                    <div class="drug-cell">
+                                        <span class="drug-dot dot-purple"></span>
+                                        <div>
+                                            <div class="drug-name-text">阿莫西林克拉维酸钾 <span class="dose-badge badge-rx">Rx 处方</span></div>
+                                            <div class="mono">急性细菌感染</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="mono">0.375g × 12片/盒<br>（4:1 配比）</td>
+                                <td><strong>0.375–0.75g</strong><br><span class="mono">1–2 片</span></td>
+                                <td class="mono">每 8 小时</td>
+                                <td>疗程 5–7 天<br><span class="warn-cell">青霉素过敏禁用</span></td>
+                            </tr>
+                            <!-- 莫匹罗星 -->
+                            <tr>
+                                <td class="col-drug">
+                                    <div class="drug-cell">
+                                        <span class="drug-dot dot-purple"></span>
+                                        <div>
+                                            <div class="drug-name-text">莫匹罗星软膏 <span class="dose-badge badge-otc">OTC</span></div>
+                                            <div class="mono">局部皮肤感染</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="mono">2% · 5g/支<br>（百多邦 / 仿制）</td>
+                                <td><strong>薄涂患处</strong><br><span class="mono">超过红肿边缘 1cm</span></td>
+                                <td class="mono">每日 3 次</td>
+                                <td>5 天一疗程<br><span class="mono">仅限外用</span></td>
+                            </tr>
+                            <!-- 蒙脱石散 -->
+                            <tr>
+                                <td class="col-drug">
+                                    <div class="drug-cell">
+                                        <span class="drug-dot dot-purple"></span>
+                                        <div>
+                                            <div class="drug-name-text">蒙脱石散 <span class="dose-badge badge-otc">OTC</span></div>
+                                            <div class="mono">物理止泻</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="mono">3g × 10袋/盒<br>独立粉剂</td>
+                                <td><strong>3g</strong><br><span class="mono">1 袋 · 首剂可加倍</span></td>
+                                <td class="mono">每日 3 次</td>
+                                <td>腹泻停止即停<br><span class="warn-cell">与其他药间隔 ≥2h</span></td>
+                            </tr>
+                            <!-- 口服补液盐 III -->
+                            <tr>
+                                <td class="col-drug">
+                                    <div class="drug-cell">
+                                        <span class="drug-dot dot-purple"></span>
+                                        <div>
+                                            <div class="drug-name-text">口服补液盐 III <span class="dose-badge badge-otc">OTC</span></div>
+                                            <div class="mono">电解质补充</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="mono">5.125g × 20袋/盒<br>认准 III 代配方</td>
+                                <td><strong>1 袋兑 250ml 温水</strong><br><span class="mono">少量频饮</span></td>
+                                <td class="mono">不拘次数</td>
+                                <td>脱水纠正即停<br><span class="warn-cell">配好后 24h 内用完</span></td>
+                            </tr>
+                            <!-- 654-2 -->
+                            <tr>
+                                <td class="col-drug">
+                                    <div class="drug-cell">
+                                        <span class="drug-dot dot-purple"></span>
+                                        <div>
+                                            <div class="drug-name-text">消旋山莨菪碱片 <span class="dose-badge badge-otc">OTC</span></div>
+                                            <div class="mono">胃肠解痉</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="mono">5mg × 100片/瓶</td>
+                                <td><strong>5–10mg</strong><br><span class="mono">1–2 片</span></td>
+                                <td class="mono">每日 3 次</td>
+                                <td>症状缓解即停<br><span class="warn-cell">青光眼/前列腺肥大禁用</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Spec notes -->
+                <div class="spec-notes">
+                    <div class="spec-note-card">
+                        <div class="spec-note-icon icon-warn">!</div>
+                        <div class="spec-note-body">
+                            <div class="spec-note-title">布洛芬 vs 对乙酰氨基酚 — 怎么选</div>
+                            <p class="spec-note-text">训练后关节/肌肉炎症痛选<strong>布洛芬</strong>（兼有抗炎作用）；空腹状态或既往有胃部不适选<strong>对乙酰氨基酚</strong>（无胃肠刺激）。严禁两者同时叠加服用。</p>
+                        </div>
+                    </div>
+                    <div class="spec-note-card">
+                        <div class="spec-note-icon icon-warn">!</div>
+                        <div class="spec-note-body">
+                            <div class="spec-note-title">对乙酰氨基酚的肝毒性红线</div>
+                            <p class="spec-note-text">日剂量超过 4g 将显著提升急性肝损伤风险。若正在服用含对乙酰氨基酚的复方感冒药，<strong>必须扣除该部分剂量</strong>。保守上限设为 2g/日。</p>
+                        </div>
+                    </div>
+                    <div class="spec-note-card">
+                        <div class="spec-note-icon icon-info">i</div>
+                        <div class="spec-note-body">
+                            <div class="spec-note-title">蒙脱石散的吸附陷阱</div>
+                            <p class="spec-note-text">蒙脱石散是物理吸附剂，会同时吸附同服的其他药物（包括抗生素），使其失效。必须与其他口服药<strong>间隔至少 2 小时</strong>服用。</p>
+                        </div>
+                    </div>
+                    <div class="spec-note-card">
+                        <div class="spec-note-icon icon-info">i</div>
+                        <div class="spec-note-body">
+                            <div class="spec-note-title">口服补液盐必须认准 III 代</div>
+                            <p class="spec-note-text">III 代为低渗配方（渗透压 245 mOsm/L），吸收效率显著优于 I/II 代。购买时核对包装是否标注"III"或"低渗"，不建议用运动饮料替代。</p>
+                        </div>
+                    </div>
+                    <div class="spec-note-card">
+                        <div class="spec-note-icon icon-warn">!</div>
+                        <div class="spec-note-body">
+                            <div class="spec-note-title">阿莫西林克拉维酸钾的过敏筛查</div>
+                            <p class="spec-note-text">使用前必须确认<strong>既往无青霉素类过敏史</strong>。首次服用后观察 30 分钟，若出现皮疹、呼吸困难、面部肿胀，立即停药并就医。此为处方药，需提前找医生开具。</p>
+                        </div>
+                    </div>
+                    <div class="spec-note-card">
+                        <div class="spec-note-icon icon-info">i</div>
+                        <div class="spec-note-body">
+                            <div class="spec-note-title">654-2 的副作用预知</div>
+                            <p class="spec-note-text">常见副作用为<strong>口干、视物模糊、心率加快</strong>，属正常药理反应，停药后自行消退。驾驶或操作精密机械前慎用。</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ===== PROCUREMENT GUIDE ===== -->
+            <section class="procure-section">
+                <div class="section-header">
+                    <span class="section-tag tag-high">Procurement Protocol</span>
+                    <h2>采购防坑指南</h2>
+                    <p class="section-desc">医疗物资的采购逻辑与其他商品不同：<strong>在合规的医疗体系内，标准大于品牌</strong>。绝大多数基础耗材和非处方药完全可以购买"平价大厂基础款"，将预算倾斜给真正决定生死的关键装备。</p>
+                </div>
+
+                <!-- Verification Gate -->
+                <div class="verify-gate">
+                    <div class="gate-card gate-ok">
+                        <span class="gate-tag">买药 · 第一道关</span>
+                        <h3 class="gate-title">认准"国药准字"</h3>
+                        <p class="gate-text">包装上必须印有 <strong>国药准字 H（或 Z/S）+ 8 位数字</strong>。这是国家药监局的强制认证，是避坑的最底层逻辑。</p>
+                        <div class="gate-pitfall">
+                            <strong>坑点：</strong>电商平台搜"跌打损伤"或"皮肤感染"出来的爆款，包装印的是<strong>"消字号"（消毒产品）或"健字号"（保健品）</strong>。这些没有治疗作用，严禁作为急救储备。
+                        </div>
+                    </div>
+                    <div class="gate-card gate-ok">
+                        <span class="gate-tag">买耗材 · 第二道关</span>
+                        <h3 class="gate-title">认准"械字号"</h3>
+                        <p class="gate-text">纱布、绷带、冰袋等必须有 <strong>XX 药监械（准）字</strong>。经灭菌处理，达到医疗接触级别。</p>
+                        <div class="gate-pitfall">
+                            <strong>坑点：</strong>便宜得离谱的纱布或手套，包装写的是<strong>"执行标准：GB/T"或"日用品"</strong>。未经灭菌或只达生活清洁级，直接接触开放性伤口极易引发感染。
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Procurement Tiers -->
+                <div class="procure-tiers">
+                    <!-- Tier 1: Critical Equipment -->
+                    <div class="procure-tier tier-critical">
+                        <div class="tier-header">
+                            <div class="tier-header-left">
+                                <span class="tier-number">01</span>
+                                <div class="tier-title-group">
+                                    <div class="tier-name">核心重装 · 单买指定品牌</div>
+                                    <div class="tier-desc">极端情况下直接决定救治成败，必须购买特定品牌或严格认证产品</div>
+                                </div>
+                            </div>
+                            <span class="tier-strategy">绝不省钱</span>
+                        </div>
+                        <div class="tier-body">
+                            <div class="tier-items-grid">
+                                <div class="tier-item">
+                                    <div class="tier-item-top">
+                                        <div class="tier-item-name">CAT 旋压式止血带</div>
+                                        <span class="tier-item-price">¥50–80</span>
+                                    </div>
+                                    <div class="tier-item-brands">
+                                        <span class="brand-tag brand-recommended">Rhino Rescue 犀牛急救</span>
+                                        <span class="brand-tag brand-budget">NAR（原版 ¥200+）</span>
+                                    </div>
+                                    <p class="tier-item-tip"><span class="anti">防坑：</span>9.9 元"户外生存止血带"或"影视道具款"的塑料绞盘在承受大动脉止血压力时会直接崩断。犀牛急救性价比极高，绞盘经过抗拉力测试，作为个人备用完全达标。</p>
+                                </div>
+                                <div class="tier-item">
+                                    <div class="tier-item-top">
+                                        <div class="tier-item-name">免缝合伤口闭合贴</div>
+                                        <span class="tier-item-price">¥30–50</span>
+                                    </div>
+                                    <div class="tier-item-brands">
+                                        <span class="brand-tag brand-recommended">3M Steri-Strip 核心系列</span>
+                                    </div>
+                                    <p class="tier-item-tip"><span class="anti">防坑：</span>杂牌拉合贴粘性不足或抗张力差，贴上后稍活动即重新裂开。医用胶带和粘合剂领域 3M 是绝对标杆，不要在这个单品上找平替。</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tier 2: Standard Consumables -->
+                    <div class="procure-tier tier-standard">
+                        <div class="tier-header">
+                            <div class="tier-header-left">
+                                <span class="tier-number">02</span>
+                                <div class="tier-title-group">
+                                    <div class="tier-name">基础耗材 · 国内大厂一站购齐</div>
+                                    <div class="tier-desc">技术壁垒极低，核心在于"无菌控制"和"材质达标"，认准国内医疗耗材三巨头</div>
+                                </div>
+                            </div>
+                            <span class="tier-strategy">认准大厂旗舰店</span>
+                        </div>
+                        <div class="tier-body">
+                            <div class="tier-items-grid">
+                                <div class="tier-item">
+                                    <div class="tier-item-top">
+                                        <div class="tier-item-name">纱布 · 绷带 · 碘伏棉签 · 手套</div>
+                                    </div>
+                                    <div class="tier-item-brands">
+                                        <span class="brand-tag brand-recommended">稳健医疗 Winner</span>
+                                        <span class="brand-tag brand-recommended">振德医疗 Zhende</span>
+                                        <span class="brand-tag brand-recommended">海氏海诺</span>
+                                    </div>
+                                    <p class="tier-item-tip">品控完全对标三甲医院供应链，价格透明且极少有质量瑕疵。直接在电商平台官方旗舰店按需采购组合。</p>
+                                </div>
+                                <div class="tier-item">
+                                    <div class="tier-item-top">
+                                        <div class="tier-item-name">生理盐水</div>
+                                        <span class="tier-item-price">≈¥15/20支</span>
+                                    </div>
+                                    <div class="tier-item-brands">
+                                        <span class="brand-tag brand-recommended">科伦药业</span>
+                                        <span class="brand-tag brand-recommended">石四药</span>
+                                    </div>
+                                    <p class="tier-item-tip">买 10ml / 100ml 塑瓶装。<span class="anti">严禁用隐形眼镜护理液替代</span>，护理液含防腐剂和缓冲剂，冲洗伤口会破坏肉芽组织。</p>
+                                </div>
+                                <div class="tier-item">
+                                    <div class="tier-item-top">
+                                        <div class="tier-item-name">凡士林纱布</div>
+                                        <span class="tier-item-price">≈¥2/片</span>
+                                    </div>
+                                    <div class="tier-item-brands">
+                                        <span class="brand-tag brand-recommended">稳健 / 振德</span>
+                                    </div>
+                                    <p class="tier-item-tip">必须买<strong>单片铝箔独立包装</strong>。<span class="anti">不要买大罐装自己剪</span>，开罐后极易被细菌污染，等同于往伤口上抹菌。</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tier 3: Generic Drugs -->
+                    <div class="procure-tier tier-generic">
+                        <div class="tier-header">
+                            <div class="tier-header-left">
+                                <span class="tier-number">03</span>
+                                <div class="tier-title-group">
+                                    <div class="tier-name">药品拼单 · 看成分不看包装</div>
+                                    <div class="tier-desc">化学药品有效成分确定后，不同厂家疗效差异对于应急场景微乎其微</div>
+                                </div>
+                            </div>
+                            <span class="tier-strategy">认准国药准字 · 挑便宜买</span>
+                        </div>
+                        <div class="tier-body">
+                            <div class="tier-items-grid">
+                                <div class="tier-item">
+                                    <div class="tier-item-top">
+                                        <div class="tier-item-name">布洛芬 / 对乙酰氨基酚</div>
+                                        <span class="tier-item-price">¥10–15/盒</span>
+                                    </div>
+                                    <div class="tier-item-brands">
+                                        <span class="brand-tag brand-budget">新华制药</span>
+                                        <span class="brand-tag brand-budget">石药集团</span>
+                                        <span class="brand-tag">中美史克</span>
+                                        <span class="brand-tag">强生 泰诺林</span>
+                                    </div>
+                                    <p class="tier-item-tip">买铝箔板装基础款。<span class="anti">避开"女性痛经专研""无糖配方"等高溢价营销包装</span>，有效成分完全一样，价格翻倍。</p>
+                                </div>
+                                <div class="tier-item">
+                                    <div class="tier-item-top">
+                                        <div class="tier-item-name">莫匹罗星软膏</div>
+                                        <span class="tier-item-price">¥10–25/支</span>
+                                    </div>
+                                    <div class="tier-item-brands">
+                                        <span class="brand-tag brand-budget">马应龙</span>
+                                        <span class="brand-tag brand-budget">恒瑞医药</span>
+                                        <span class="brand-tag">中美史克 百多邦 ¥25</span>
+                                    </div>
+                                    <p class="tier-item-tip">国产仿制药有效成分和浓度与百多邦完全一致，价格在 10–15 元左右。应急场景下无差异。</p>
+                                </div>
+                                <div class="tier-item">
+                                    <div class="tier-item-top">
+                                        <div class="tier-item-name">蒙脱石散 / 补液盐 / 654-2</div>
+                                        <span class="tier-item-price">¥10–40/盒</span>
+                                    </div>
+                                    <div class="tier-item-brands">
+                                        <span class="brand-tag brand-budget">各大正规药厂</span>
+                                    </div>
+                                    <p class="tier-item-tip">成分单一，各厂家差异极小。在正规网上药店或线下连锁，<strong>按价格排序买最便宜的国药准字产品即可</strong>。补液盐认准 III 代配方。</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cost Summary -->
+                <div class="cost-summary">
+                    <div class="cost-left">
+                        <span class="cost-label">全套采购估算</span>
+                        <span class="cost-range">¥330–420<span class="cost-unit"> 元</span></span>
+                    </div>
+                    <div class="cost-note">
+                        含全部 4 个模块药品与耗材<br>
+                        不含电子体温计等辅助工具
+                    </div>
+                </div>
+            </section>
+
+            <!-- ===== AUXILIARY ===== -->
+            <section class="auxiliary">
+                <h3 class="aux-title">附属运维工具</h3>
+                <div class="aux-grid">
+                    <div class="aux-item">
+                        <div class="aux-icon">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="M8 12l3 3 5-5"/></svg>
+                        </div>
+                        <div class="aux-content">
+                            <div class="aux-name">丁腈检查手套（无粉）</div>
+                            <div class="aux-desc">2–3 副。处理伤口前佩戴，阻断泥污及双手细菌的双向污染。</div>
+                        </div>
+                    </div>
+                    <div class="aux-item">
+                        <div class="aux-icon">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                        </div>
+                        <div class="aux-content">
+                            <div class="aux-name">医用圆头剪刀</div>
+                            <div class="aux-desc">置于急救箱顶层。紧急状态下直接剪开骑行服或裤腿，避免骨折端的二次位移。</div>
+                        </div>
+                    </div>
+                    <div class="aux-item">
+                        <div class="aux-icon">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                        </div>
+                        <div class="aux-content">
+                            <div class="aux-name">红线底线标识</div>
+                            <div class="aux-desc">在药箱内侧贴标签，标注立即呼叫 120 的绝对红线条件（见下方）。</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ===== RED LINES ===== -->
+            <section class="redlines">
+                <div class="redlines-header">
+                    <div class="redlines-icon">
+                        <svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0zM12 9v4m0 4h.01"/></svg>
+                    </div>
+                    <div>
+                        <div class="redlines-title">绝对红线 · 立即呼叫 120</div>
+                        <div class="redlines-subtitle">出现以下任何情况 → 放弃自救 → 呼叫急救</div>
+                    </div>
+                </div>
+                <ul class="redlines-list">
+                    <li><strong>喷射状出血</strong> — 四肢鲜红色、脉冲式喷射，止血带为唯一手段且已使用时，仍需立即呼叫。</li>
+                    <li><strong>严重过敏伴喉头紧缩感</strong> — 嘴唇 / 舌头肿大、呼吸困难、声音嘶哑。口服抗组胺药起效太慢压不住，需肾上腺素级别的干预。</li>
+                    <li><strong>高处坠落或严重撞击后</strong> — 出现呕吐、意识模糊、瞳孔不等大。高度怀疑颅内损伤，任何延误都是不可逆的。</li>
+                </ul>
+                <div class="redlines-action">▸ 拨打 120 时清晰提供：位置、伤情描述、已执行的自救措施、联系方式。保持电话畅通。</div>
+            </section>
+
+        </div>
+    </main>
+
+    <!-- ===== FOOTER ===== -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-left">
+                    盘点周期：每半年一次（6 月 1 日 / 12 月 1 日）<br>
+                    已开封耗材标注开封日期，3 个月内替换
+                </div>
+                <div class="footer-right">
+                    本清单为个人院前急救参考<br>
+                    不替代专业医疗诊断与治疗
+                </div>
+            </div>
+        </div>
+    </footer>
+
+</body>
+</html>
