@@ -1,0 +1,144 @@
+/* hub-ui.css — App Hub 薄组件层（样板 D1）
+   底盘：Pico.css v2.1.1 classless（vendored）。本文件只补 Pico 不管的四件事：
+   深色顶栏身份、目录（侧栏/移动端）、长节折叠、正文可读列宽与长行处理。
+   目标体量：几百行内，可整体读完。 */
+
+:root {
+  --hub-ink: #101828;
+  --hub-accent: #f5b301;
+  --hub-border: #d9dee6;
+  --hub-muted: #667085;
+  --hub-aside-w: 17rem;
+  --hub-read-w: 46rem; /* 约 72 汉字宽的可读行宽上限 */
+}
+
+/* ---------- 深色顶栏（保留原站身份感：深底 + ★） ---------- */
+.hub-top {
+  background: var(--hub-ink);
+  color: #f2f4f7;
+  position: sticky;
+  top: 0;
+  z-index: 20;
+}
+.hub-top-in {
+  max-width: 76rem;
+  margin: 0 auto;
+  padding: 0.55rem 1rem;
+  display: flex;
+  align-items: baseline;
+  gap: 0.9rem;
+  flex-wrap: wrap;
+}
+.hub-brand { font-weight: 700; letter-spacing: 0.01em; }
+.hub-star { color: var(--hub-accent); }
+.hub-crumb { color: #cbd2dc; font-size: 0.9rem; }
+.hub-badge {
+  margin-left: auto;
+  font-size: 0.78rem;
+  color: var(--hub-ink);
+  background: var(--hub-accent);
+  border-radius: 999px;
+  padding: 0.1rem 0.6rem;
+  font-weight: 600;
+}
+
+/* ---------- 布局：大屏侧栏目录 + 窄正文；小屏单列 ---------- */
+.hub-layout {
+  max-width: 76rem;
+  margin: 0 auto;
+  padding: 1rem;
+  display: grid;
+  grid-template-columns: var(--hub-aside-w) minmax(0, 1fr);
+  gap: 2rem;
+  align-items: start;
+}
+.hub-main { max-width: var(--hub-read-w); min-width: 0; }
+@media (max-width: 1023px) {
+  .hub-layout { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* ---------- 目录 ---------- */
+.toc-side {
+  position: sticky;
+  top: 3.6rem;
+  max-height: calc(100vh - 4.5rem);
+  overflow: auto;
+  font-size: 0.92rem;
+}
+.toc ul { list-style: none; padding-left: 0; margin: 0; }
+.toc li { margin: 0.18rem 0; }
+.toc li.toc-sub { padding-left: 1rem; font-size: 0.88rem; }
+.toc a { text-decoration: none; color: inherit; display: block; padding: 0.14rem 0.4rem; border-radius: 0.375rem; }
+.toc a:hover { background: #eef1f5; }
+.toc-title { font-weight: 700; margin: 0 0 0.4rem; }
+.toc-foot { font-size: 0.85rem; color: var(--hub-muted); margin-top: 0.8rem; }
+.toc-mobile { display: none; }
+@media (max-width: 1023px) {
+  .toc-side { display: none; }
+  .toc-mobile {
+    display: block;
+    max-width: 76rem;
+    margin: 0.6rem auto 0;
+    padding: 0 1rem;
+  }
+  .toc-mobile > summary { font-weight: 700; cursor: pointer; padding: 0.4rem 0; }
+}
+
+/* ---------- 长节折叠：h2 在 summary 内常驻可见，锚点永远可达 ---------- */
+details.hub-sec {
+  border-top: 1px solid var(--hub-border);
+  padding: 0.4rem 0 0.8rem;
+  margin-top: 0.6rem;
+}
+details.hub-sec > summary {
+  cursor: pointer;
+  list-style: none;
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+details.hub-sec > summary::-webkit-details-marker { display: none; }
+details.hub-sec > summary::before {
+  content: "▸";
+  color: var(--hub-muted);
+  transition: transform 0.15s ease;
+  flex: none;
+}
+details.hub-sec[open] > summary::before { transform: rotate(90deg); }
+details.hub-sec > summary h2 { margin: 0.35rem 0; font-size: 1.45rem; }
+.hub-main h1, .hub-main h2, .hub-main h3, .hub-main h4 { scroll-margin-top: 4.2rem; }
+
+/* ---------- 长行 / 不可断字符串处理 ---------- */
+.hub-main p, .hub-main li { overflow-wrap: break-word; }
+.hub-main li { margin: 0.3rem 0; }
+.hub-main code { overflow-wrap: anywhere; font-size: 0.86em; }
+.hub-main pre { overflow-x: auto; }
+.hub-main pre code { overflow-wrap: normal; }
+
+/* ---------- 表格：横滚包裹，不撑破列宽 ---------- */
+.table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; margin: 0.8rem 0; }
+.table-scroll table { min-width: 34rem; margin: 0; }
+
+/* ---------- 回顶部 / 说明 ---------- */
+.to-top {
+  position: fixed;
+  right: 1rem;
+  bottom: 1rem;
+  width: 2.4rem;
+  height: 2.4rem;
+  border-radius: 50%;
+  background: var(--hub-ink);
+  color: #fff;
+  text-align: center;
+  line-height: 2.4rem;
+  text-decoration: none;
+  box-shadow: 0 2px 8px rgba(16, 24, 40, 0.35);
+  z-index: 30;
+}
+.hub-note {
+  color: var(--hub-muted);
+  font-size: 0.88rem;
+  border-top: 1px dashed var(--hub-border);
+  padding-top: 0.8rem;
+  margin-top: 2rem;
+}

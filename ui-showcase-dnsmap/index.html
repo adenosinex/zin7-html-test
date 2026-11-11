@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>dnsmap 样板 · Pico + hub-ui（预览，不接生产）</title>
+<link rel="stylesheet" href="vendor/pico.classless.min.css">
+<link rel="stylesheet" href="hub-ui.css"></head>
+<body><main>
+<header><h1>DNS 指向台账 <small>· dnsmap 样板</small></h1>
+<p>预览版：内嵌<strong>脱敏示例数据</strong>（域名 *.example.de、文档段 IP 203.0.113.0/24 与 2001:db8::/32），不接生产 API、不含任何令牌。</p>
+<section class="hub-stats">
+<article><b>18</b>托管账本记录</article><article><b>7</b>局域网主机</article>
+<article><b>19</b>审计行（尾部）</article><article><b>8 / 页</b>统一分页粒度</article></section></header>
+
+<nav class="hub-tabs" role="tablist" aria-label="三区">
+<button role="tab" id="tab-hosted" aria-selected="true" aria-controls="panel-hosted">托管账本</button>
+<button role="tab" id="tab-lan" aria-selected="false" aria-controls="panel-lan">局域网台账</button>
+<button role="tab" id="tab-audit" aria-selected="false" aria-controls="panel-audit">审计</button>
+<a href="#settings-note" style="align-self:center">设置区说明 ↓</a></nav>
+
+<section id="panel-hosted" role="tabpanel" aria-labelledby="tab-hosted">
+<h2 id="hosted">托管账本（示例 zone: example.de · provider: cloudflare）</h2>
+<div class="hub-table-wrap"><table style="min-width:720px">
+<thead><tr><th>域名</th><th>类型</th><th>值</th><th>来源</th><th>更新</th><th>状态</th></tr></thead>
+<tbody id="hostedTb"></tbody></table></div>
+<nav class="hub-pager" id="hostedPager" aria-label="托管账本分页"></nav>
+</section>
+
+<section id="panel-lan" role="tabpanel" aria-labelledby="tab-lan" hidden>
+<h2 id="lan">局域网台账（示例 · 本机记录，不推 DNS）</h2>
+<div class="hub-table-wrap"><table style="min-width:760px">
+<thead><tr><th>主机</th><th>IPv4（局域网）</th><th>IPv4 域名</th><th>IPv6 域名</th><th>IPv6（记录）</th><th>备注</th><th>状态</th></tr></thead>
+<tbody id="lanTb"></tbody></table></div>
+<nav class="hub-pager" id="lanPager" aria-label="局域网台账分页"></nav>
+</section>
+
+<section id="panel-audit" role="tabpanel" aria-labelledby="tab-audit" hidden>
+<h2 id="audit">审计（示例 · 结构同 dns_audit.jsonl 每行）</h2>
+<div class="hub-table-wrap"><table style="min-width:680px">
+<thead><tr><th>时间</th><th>动作</th><th>名称</th><th>类型</th><th>新值</th><th>结果</th></tr></thead>
+<tbody id="auditTb"></tbody></table></div>
+<nav class="hub-pager" id="auditPager" aria-label="审计分页"></nav>
+</section>
+
+<section id="settings-note"><h2>设置区（仅登记存在）</h2>
+<p>原页同页含 Cloudflare 令牌设置区与本机令牌文件状态显示（接口 <code>/dns/api/credentials</code> 等）。
+本样板<strong>不取、不展示任何令牌值</strong>，此处仅占位说明其存在；弱线相关行号指代亦不在样板复制。</p></section>
+
+<details><summary>结构断言（移动端 / 长列表）</summary><ul>
+<li>390px：三张表均在 <code>.hub-table-wrap{overflow-x:auto}</code> 内，表 min-width 680–760px → 横滚不破版，页面本身不横溢。</li>
+<li>断点：<code>@media (max-width:640px)</code> —— 选项卡横滚不换行、按钮/页钮 min-height:44px、单元格内边距收紧。</li>
+<li>分页：PAGE_SIZE=8 恒定；托管 18→3 页、审计 19→3 页、局域网 7→1 页（页钮禁用态）。DOM 中每表 tbody 任一时刻 ≤8 行。</li>
+<li>状态：ok=true→「一致」ok 徽章；false→「不一致」bad；null→「仅台账」neutral（CNAME/MX/TXT 与原逻辑一致，不做地址族校验）。</li>
+</ul></details>
+</main>
+<script>
+const PAGE_SIZE=8;
+const HOSTED=[{"name": "host01.example.de", "type": "A", "value": "203.0.113.10", "ttl": 1, "proxied": false, "managed_by": "dnsmap", "created_via": "panel", "updated_at": "2026-11-01T08:00:00Z", "resolved": ["203.0.113.10"], "ok": true}, {"name": "host02.example.de", "type": "AAAA", "value": "2001:db8::11", "ttl": 1, "proxied": false, "managed_by": "dnsmap", "created_via": "dm-api", "updated_at": "2026-11-02T08:00:00Z", "resolved": ["2001:db8::10"], "ok": true}, {"name": "host03.example.de", "type": "CNAME", "value": "target.example.net", "ttl": 1, "proxied": false, "managed_by": "dnsmap", "created_via": "dm-api", "updated_at": "2026-11-03T08:00:00Z", "resolved": [], "ok": null}, {"name": "host04.example.de", "type": "MX", "value": "mail.example.de", "ttl": 1, "proxied": false, "managed_by": "dnsmap", "created_via": "panel", "updated_at": "2026-11-04T08:00:00Z", "resolved": [], "ok": null}, {"name": "host05.example.de", "type": "TXT", "value": "v=spf1 -all", "ttl": 1, "proxied": false, "managed_by": "dnsmap", "created_via": "dm-api", "updated_at": "2026-11-05T08:00:00Z", "resolved": [], "ok": null}, {"name": "host06.example.de", "type": "A", "value": "203.0.113.10", "ttl": 1, "proxied": false, "managed_by": "dnsmap", "created_via": "dm-api", "updated_at": "2026-11-06T08:00:00Z", "resolved": ["203.0.113.10"], "ok": true}, {"name": "host07.example.de", "type": "AAAA", "value": "2001:db8::16", "ttl": 1, "proxied": false, "managed_by": "dnsmap", "created_via": "panel", "updated_at": "2026-11-07T08:00:00Z", "resolved": ["2001:db8::10"], "ok": true}, {"name": "host08.example.de", "type": "CNAME", "value": "target.example.net", "ttl": 1, "proxied": false, "managed_by": "dnsmap", "created_via": "dm-api", "updated_at": "2026-11-08T08:00:00Z", "resolved": [], "ok": null}, {"name": "host09.example.de", "type": "MX", "value": "mail.example.de", "ttl": 1, "proxied": false, "managed_by": "dnsmap", "created_via": "dm-api", "updated_at": "2026-11-09T08:00:00Z", "resolved": [], "ok": null}, {"name": "host10.example.de", "type": "TXT", "value": "v=spf1 -all", "ttl": 1, "proxied": false, "managed_by": "dnsmap", "created_via": "panel", "updated_at": "2026-11-01T08:00:00Z", "resolved": [], "ok": null}, {"name": "host11.example.de", "type": "A", "value": "203.0.113.10", "ttl": 1, "proxied": false, "managed_by": "dnsmap", "created_via": "dm-api", "updated_at": "2026-11-02T08:00:00Z", "resolved": ["203.0.113.10"], "ok": false}, {"name": "host12.example.de", "type": "AAAA", "value": "2001:db8::1b", "ttl": 1, "proxied": false, "managed_by": "dnsmap", "created_via": "dm-api", "updated_at": "2026-11-03T08:00:00Z", "resolved": ["2001:db8::10"], "ok": true}, {"name": "host13.example.de", "type": "CNAME", "value": "target.example.net", "ttl": 1, "proxied": false, "managed_by": "dnsmap", "created_via": "panel", "updated_at": "2026-11-04T08:00:00Z", "resolved": [], "ok": null}, {"name": "host14.example.de", "type": "MX", "value": "mail.example.de", "ttl": 1, "proxied": false, "managed_by": "dnsmap", "created_via": "dm-api", "updated_at": "2026-11-05T08:00:00Z", "resolved": [], "ok": null}, {"name": "host15.example.de", "type": "TXT", "value": "v=spf1 -all", "ttl": 1, "proxied": false, "managed_by": "dnsmap", "created_via": "dm-api", "updated_at": "2026-11-06T08:00:00Z", "resolved": [], "ok": null}, {"name": "host16.example.de", "type": "A", "value": "203.0.113.10", "ttl": 1, "proxied": false, "managed_by": "dnsmap", "created_via": "panel", "updated_at": "2026-11-07T08:00:00Z", "resolved": ["203.0.113.10"], "ok": true}, {"name": "host17.example.de", "type": "AAAA", "value": "2001:db8::20", "ttl": 1, "proxied": false, "managed_by": "dnsmap", "created_via": "dm-api", "updated_at": "2026-11-08T08:00:00Z", "resolved": ["2001:db8::10"], "ok": true}, {"name": "host18.example.de", "type": "CNAME", "value": "target.example.net", "ttl": 1, "proxied": false, "managed_by": "dnsmap", "created_via": "dm-api", "updated_at": "2026-11-09T08:00:00Z", "resolved": [], "ok": null}], LAN=[{"name": "nas", "lan_ipv4": "192.168.0.20", "ipv4dns": "nas4.example.lan", "ipv6dns": "nas.example.lan", "last_ipv6": "2001:db8:1::1", "last_seen": 1762400000, "note": "示例备注", "ipv4_ok": true, "ipv6_ok": true}, {"name": "mac-home", "lan_ipv4": "192.168.0.21", "ipv4dns": "mac-home4.example.lan", "ipv6dns": "mac-home.example.lan", "last_ipv6": null, "last_seen": 1762403600, "note": "示例备注", "ipv4_ok": true, "ipv6_ok": null}, {"name": "pc-desk", "lan_ipv4": "192.168.0.22", "ipv4dns": "pc-desk4.example.lan", "ipv6dns": "pc-desk.example.lan", "last_ipv6": "2001:db8:1::3", "last_seen": 1762407200, "note": "", "ipv4_ok": true, "ipv6_ok": true}, {"name": "router", "lan_ipv4": "192.168.0.23", "ipv4dns": "router4.example.lan", "ipv6dns": "router.example.lan", "last_ipv6": null, "last_seen": 1762410800, "note": "", "ipv4_ok": true, "ipv6_ok": null}, {"name": "printer", "lan_ipv4": "192.168.0.24", "ipv4dns": "printer4.example.lan", "ipv6dns": "printer.example.lan", "last_ipv6": "2001:db8:1::5", "last_seen": 1762414400, "note": "", "ipv4_ok": false, "ipv6_ok": true}, {"name": "pi-node", "lan_ipv4": "192.168.0.25", "ipv4dns": "pi-node4.example.lan", "ipv6dns": "pi-node.example.lan", "last_ipv6": null, "last_seen": 1762418000, "note": "", "ipv4_ok": true, "ipv6_ok": null}, {"name": "cam-hall", "lan_ipv4": "192.168.0.26", "ipv4dns": "cam-hall4.example.lan", "ipv6dns": "cam-hall.example.lan", "last_ipv6": "2001:db8:1::7", "last_seen": 1762421600, "note": "", "ipv4_ok": true, "ipv6_ok": true}], AUDIT=[{"ts": "2026-11-01T07:00:00Z", "action": "upsert-create", "zone": "example.de", "name": "host01.example.de", "type": "A", "old": null, "new": "203.0.113.10", "result": "ok"}, {"ts": "2026-11-02T07:01:00Z", "action": "cname-create", "zone": "example.de", "name": "host02.example.de", "type": "AAAA", "old": null, "new": "—", "result": "ok"}, {"ts": "2026-11-03T07:02:00Z", "action": "email-routing-enabled", "zone": "example.de", "name": "host03.example.de", "type": "CNAME", "old": null, "new": "—", "result": "ok"}, {"ts": "2026-11-04T07:03:00Z", "action": "upsert-update", "zone": "example.de", "name": "host04.example.de", "type": "MX", "old": null, "new": "—", "result": "ok"}, {"ts": "2026-11-05T07:04:00Z", "action": "email-routing-permission-recheck", "zone": "example.de", "name": "host05.example.de", "type": "A", "old": null, "new": "203.0.113.10", "result": "ok"}, {"ts": "2026-11-06T07:05:00Z", "action": "upsert-create", "zone": "example.de", "name": "host06.example.de", "type": "AAAA", "old": null, "new": "—", "result": "partial"}, {"ts": "2026-11-07T07:06:00Z", "action": "cname-create", "zone": "example.de", "name": "host07.example.de", "type": "CNAME", "old": null, "new": "—", "result": "ok"}, {"ts": "2026-11-08T07:07:00Z", "action": "email-routing-enabled", "zone": "example.de", "name": "host08.example.de", "type": "MX", "old": null, "new": "—", "result": "ok"}, {"ts": "2026-11-09T07:08:00Z", "action": "upsert-update", "zone": "example.de", "name": "host09.example.de", "type": "A", "old": null, "new": "203.0.113.10", "result": "ok"}, {"ts": "2026-11-10T07:09:00Z", "action": "email-routing-permission-recheck", "zone": "example.de", "name": "host10.example.de", "type": "AAAA", "old": null, "new": "—", "result": "ok"}, {"ts": "2026-11-01T07:10:00Z", "action": "upsert-create", "zone": "example.de", "name": "host11.example.de", "type": "CNAME", "old": null, "new": "—", "result": "ok"}, {"ts": "2026-11-02T07:11:00Z", "action": "cname-create", "zone": "example.de", "name": "host12.example.de", "type": "MX", "old": null, "new": "—", "result": "partial"}, {"ts": "2026-11-03T07:12:00Z", "action": "email-routing-enabled", "zone": "example.de", "name": "host13.example.de", "type": "A", "old": null, "new": "203.0.113.10", "result": "ok"}, {"ts": "2026-11-04T07:13:00Z", "action": "upsert-update", "zone": "example.de", "name": "host14.example.de", "type": "AAAA", "old": null, "new": "—", "result": "ok"}, {"ts": "2026-11-05T07:14:00Z", "action": "email-routing-permission-recheck", "zone": "example.de", "name": "host15.example.de", "type": "CNAME", "old": null, "new": "—", "result": "ok"}, {"ts": "2026-11-06T07:15:00Z", "action": "upsert-create", "zone": "example.de", "name": "host16.example.de", "type": "MX", "old": null, "new": "—", "result": "ok"}, {"ts": "2026-11-07T07:16:00Z", "action": "cname-create", "zone": "example.de", "name": "host17.example.de", "type": "A", "old": null, "new": "203.0.113.10", "result": "ok"}, {"ts": "2026-11-08T07:17:00Z", "action": "email-routing-enabled", "zone": "example.de", "name": "host18.example.de", "type": "AAAA", "old": null, "new": "—", "result": "partial"}, {"ts": "2026-11-09T07:18:00Z", "action": "upsert-update", "zone": "example.de", "name": "host01.example.de", "type": "CNAME", "old": null, "new": "—", "result": "ok"}];
+const esc=s=>String(s??"—").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const badge=b=>b===true?'<span class="hub-badge ok">一致</span>':b===false?'<span class="hub-badge bad">不一致</span>':'<span class="hub-badge neutral">仅台账</span>';
+function paginate(tbodyId,pagerId,rows,render){
+  let page=0; const pages=Math.max(1,Math.ceil(rows.length/PAGE_SIZE));
+  function draw(){
+    document.getElementById(tbodyId).innerHTML=rows.slice(page*PAGE_SIZE,(page+1)*PAGE_SIZE).map(render).join("");
+    document.getElementById(pagerId).innerHTML=
+      `<button data-a="prev" ${page===0?"disabled":""}>‹ 上一页</button>
+       <span>第 ${page+1} / ${pages} 页 · 共 ${rows.length} 条</span>
+       <button data-a="next" ${page>=pages-1?"disabled":""}>下一页 ›</button>`;
+    document.getElementById(pagerId).querySelectorAll("button").forEach(b=>b.onclick=()=>{page+=b.dataset.a==="next"?1:-1;draw();});
+  } draw();
+}
+paginate("hostedTb","hostedPager",HOSTED,r=>`<tr><td>${esc(r.name)}</td><td>${esc(r.type)}</td><td class="wrap">${esc(r.value)}</td><td>${esc(r.created_via)}</td><td>${esc(r.updated_at.slice(0,10))}</td><td>${badge(r.ok)}</td></tr>`);
+paginate("lanTb","lanPager",LAN,h=>`<tr><td>${esc(h.name)}</td><td>${esc(h.lan_ipv4)}</td><td>${esc(h.ipv4dns)}</td><td>${esc(h.ipv6dns)}</td><td class="wrap">${esc(h.last_ipv6)}</td><td>${esc(h.note)}</td><td>${badge(h.ipv4_ok)} ${badge(h.ipv6_ok)}</td></tr>`);
+paginate("auditTb","auditPager",AUDIT,a=>`<tr><td>${esc(a.ts)}</td><td>${esc(a.action)}</td><td>${esc(a.name)}</td><td>${esc(a.type)}</td><td class="wrap">${esc(a.new)}</td><td>${a.result==="ok"?'<span class="hub-badge ok">ok</span>':'<span class="hub-badge warn">'+esc(a.result)+'</span>'}</td></tr>`);
+document.querySelectorAll('[role=tab]').forEach(t=>t.onclick=()=>{
+  document.querySelectorAll('[role=tab]').forEach(x=>x.setAttribute("aria-selected",x===t?"true":"false"));
+  ["hosted","lan","audit"].forEach(k=>document.getElementById("panel-"+k).hidden=("tab-"+k)!==t.id);
+});
+</script></body></html>

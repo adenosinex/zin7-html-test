@@ -1,0 +1,36 @@
+/* hub-ui.css - thin shared layer over Pico classless v2.1.1 (vendored, frozen)
+   Same token names intended for the panel showcase: one accent, one radius,
+   badge + pager + tabs + table-wrap. No per-project one-off colours. */
+:root{
+  --hub-accent:#2f6fd0; --hub-accent-dark:#245aa8;
+  --hub-ok:#137333; --hub-ok-bg:#e6f4ea;
+  --hub-bad:#b3261e; --hub-bad-bg:#fdecea;
+  --hub-warn:#8a6d00; --hub-warn-bg:#fef7e0;
+  --hub-neutral:#5f6368; --hub-neutral-bg:#f1f3f4;
+  --hub-border:#dadce0; --hub-radius:10px; --hub-gap:16px;
+}
+main{max-width:1060px} /* platform mainstream width, not the original 1540px */
+.hub-tabs{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 var(--hub-gap)}
+.hub-tabs [role=tab]{min-height:44px;padding:8px 16px;border:1px solid var(--hub-border);
+  border-radius:var(--hub-radius);background:#fff;color:inherit;cursor:pointer}
+.hub-tabs [role=tab][aria-selected=true]{background:var(--hub-accent);border-color:var(--hub-accent);color:#fff}
+.hub-badge{display:inline-block;padding:1px 8px;border-radius:999px;font-size:.8rem;white-space:nowrap}
+.hub-badge.ok{background:var(--hub-ok-bg);color:var(--hub-ok)}
+.hub-badge.bad{background:var(--hub-bad-bg);color:var(--hub-bad)}
+.hub-badge.warn{background:var(--hub-warn-bg);color:var(--hub-warn)}
+.hub-badge.neutral{background:var(--hub-neutral-bg);color:var(--hub-neutral)}
+.hub-table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;border:1px solid var(--hub-border);border-radius:var(--hub-radius)}
+.hub-table-wrap table{margin:0;white-space:nowrap}
+.hub-table-wrap td.wrap{white-space:normal;overflow-wrap:anywhere;min-width:180px}
+.hub-pager{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:10px}
+.hub-pager button{min-height:44px;min-width:44px;padding:6px 14px}
+.hub-pager button[disabled]{opacity:.45}
+.hub-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:var(--hub-gap)}
+.hub-stats article{margin:0;padding:12px 16px}
+.hub-stats b{font-size:1.5rem;display:block}
+@media (max-width:640px){
+  .hub-tabs{flex-wrap:nowrap;overflow-x:auto}
+  .hub-tabs [role=tab]{flex:0 0 auto}
+  button,a[role=button]{min-height:44px} /* touch target */
+  td,th{padding:.45rem .6rem}
+}
