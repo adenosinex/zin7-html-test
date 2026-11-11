@@ -1,7 +1,11 @@
 /* hub-ui.css - thin shared layer over Pico classless v2.1.1 (vendored, frozen)
-   Same token names intended for the panel showcase: one accent, one radius,
-   badge + pager + tabs + table-wrap. No per-project one-off colours. */
+   v2 (2026-11-11, user feedback: button text too large; notes flat/verbose):
+   root size locked at 100% (Pico scales to 131% on wide viewports - the main
+   reason everything looked oversized), buttons/tabs/pager at 0.875rem with
+   tight padding, restrained heading steps, notes/footnotes demoted to small
+   muted text, the assertion block deleted from the page (moved to README). */
 :root{
+  --pico-font-size:100%;
   --hub-accent:#2f6fd0; --hub-accent-dark:#245aa8;
   --hub-ok:#137333; --hub-ok-bg:#e6f4ea;
   --hub-bad:#b3261e; --hub-bad-bg:#fdecea;
@@ -10,27 +14,38 @@
   --hub-border:#dadce0; --hub-radius:10px; --hub-gap:16px;
 }
 main{max-width:1060px} /* platform mainstream width, not the original 1540px */
-.hub-tabs{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 var(--hub-gap)}
-.hub-tabs [role=tab]{min-height:44px;padding:8px 16px;border:1px solid var(--hub-border);
-  border-radius:var(--hub-radius);background:#fff;color:inherit;cursor:pointer}
+h1{font-size:1.5rem;--pico-font-size:1.5rem}
+h2{font-size:1.2rem;--pico-font-size:1.2rem}
+h1 small{font-size:.65em;color:var(--hub-neutral);font-weight:400}
+.hub-lede{color:var(--hub-neutral);font-size:.8125rem;margin:.2rem 0 1rem}
+button,[type=submit],[type=button],[type=reset],[role=button]{
+  font-size:.875rem;line-height:1.35;padding:.375rem .75rem;
+  --pico-form-element-spacing-vertical:.375rem;
+  --pico-form-element-spacing-horizontal:.75rem}
+.hub-tabs{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 var(--hub-gap);align-items:center}
+.hub-tabs [role=tab]{min-height:36px;padding:.375rem .75rem;border:1px solid var(--hub-border);
+  border-radius:var(--hub-radius);background:#fff;color:inherit;cursor:pointer;font-size:.875rem}
 .hub-tabs [role=tab][aria-selected=true]{background:var(--hub-accent);border-color:var(--hub-accent);color:#fff}
-.hub-badge{display:inline-block;padding:1px 8px;border-radius:999px;font-size:.8rem;white-space:nowrap}
+.hub-tabs .hub-note-link{font-size:.8125rem;color:var(--hub-neutral)}
+.hub-badge{display:inline-block;padding:1px 8px;border-radius:999px;font-size:.75rem;white-space:nowrap}
 .hub-badge.ok{background:var(--hub-ok-bg);color:var(--hub-ok)}
 .hub-badge.bad{background:var(--hub-bad-bg);color:var(--hub-bad)}
 .hub-badge.warn{background:var(--hub-warn-bg);color:var(--hub-warn)}
 .hub-badge.neutral{background:var(--hub-neutral-bg);color:var(--hub-neutral)}
 .hub-table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;border:1px solid var(--hub-border);border-radius:var(--hub-radius)}
-.hub-table-wrap table{margin:0;white-space:nowrap}
+.hub-table-wrap table{margin:0;white-space:nowrap;font-size:.9375rem}
 .hub-table-wrap td.wrap{white-space:normal;overflow-wrap:anywhere;min-width:180px}
-.hub-pager{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:10px}
-.hub-pager button{min-height:44px;min-width:44px;padding:6px 14px}
+.hub-pager{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:10px;font-size:.875rem;color:var(--hub-neutral)}
+.hub-pager button{min-height:36px;min-width:44px;padding:.375rem .75rem}
 .hub-pager button[disabled]{opacity:.45}
 .hub-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:var(--hub-gap)}
-.hub-stats article{margin:0;padding:12px 16px}
-.hub-stats b{font-size:1.5rem;display:block}
+.hub-stats article{margin:0;padding:10px 14px;font-size:.875rem;color:var(--hub-neutral)}
+.hub-stats b{font-size:1.3rem;display:block;color:inherit}
+.hub-footnote{color:var(--hub-neutral);font-size:.8125rem}
+.hub-footnote p{margin:.3rem 0}
 @media (max-width:640px){
   .hub-tabs{flex-wrap:nowrap;overflow-x:auto}
-  .hub-tabs [role=tab]{flex:0 0 auto}
-  button,a[role=button]{min-height:44px} /* touch target */
+  .hub-tabs [role=tab]{flex:0 0 auto;min-height:44px}
+  .hub-pager button{min-height:44px} /* keep touch targets on small screens */
   td,th{padding:.45rem .6rem}
 }

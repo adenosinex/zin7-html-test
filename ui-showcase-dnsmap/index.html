@@ -6,7 +6,7 @@
 <link rel="stylesheet" href="hub-ui.css"></head>
 <body><main>
 <header><h1>DNS 指向台账 <small>· dnsmap 样板</small></h1>
-<p>预览版：内嵌<strong>脱敏示例数据</strong>（域名 *.example.de、文档段 IP 203.0.113.0/24 与 2001:db8::/32），不接生产 API、不含任何令牌。</p>
+<p class="hub-lede">预览版 · 脱敏示例数据（*.example.de 与文档段 IP），不接生产 API、不含任何令牌。</p>
 <section class="hub-stats">
 <article><b>18</b>托管账本记录</article><article><b>7</b>局域网主机</article>
 <article><b>19</b>审计行（尾部）</article><article><b>8 / 页</b>统一分页粒度</article></section></header>
@@ -15,7 +15,7 @@
 <button role="tab" id="tab-hosted" aria-selected="true" aria-controls="panel-hosted">托管账本</button>
 <button role="tab" id="tab-lan" aria-selected="false" aria-controls="panel-lan">局域网台账</button>
 <button role="tab" id="tab-audit" aria-selected="false" aria-controls="panel-audit">审计</button>
-<a href="#settings-note" style="align-self:center">设置区说明 ↓</a></nav>
+<a href="#settings-note" class="hub-note-link">设置区说明 ↓</a></nav>
 
 <section id="panel-hosted" role="tabpanel" aria-labelledby="tab-hosted">
 <h2 id="hosted">托管账本（示例 zone: example.de · provider: cloudflare）</h2>
@@ -41,16 +41,9 @@
 <nav class="hub-pager" id="auditPager" aria-label="审计分页"></nav>
 </section>
 
-<section id="settings-note"><h2>设置区（仅登记存在）</h2>
-<p>原页同页含 Cloudflare 令牌设置区与本机令牌文件状态显示（接口 <code>/dns/api/credentials</code> 等）。
-本样板<strong>不取、不展示任何令牌值</strong>，此处仅占位说明其存在；弱线相关行号指代亦不在样板复制。</p></section>
+<section id="settings-note" class="hub-footnote"><h2>设置区（仅登记存在）</h2>
+<p>原页同页含令牌设置区；本样板不取、不展示任何令牌值，此处仅登记其存在。</p></section>
 
-<details><summary>结构断言（移动端 / 长列表）</summary><ul>
-<li>390px：三张表均在 <code>.hub-table-wrap{overflow-x:auto}</code> 内，表 min-width 680–760px → 横滚不破版，页面本身不横溢。</li>
-<li>断点：<code>@media (max-width:640px)</code> —— 选项卡横滚不换行、按钮/页钮 min-height:44px、单元格内边距收紧。</li>
-<li>分页：PAGE_SIZE=8 恒定；托管 18→3 页、审计 19→3 页、局域网 7→1 页（页钮禁用态）。DOM 中每表 tbody 任一时刻 ≤8 行。</li>
-<li>状态：ok=true→「一致」ok 徽章；false→「不一致」bad；null→「仅台账」neutral（CNAME/MX/TXT 与原逻辑一致，不做地址族校验）。</li>
-</ul></details>
 </main>
 <script>
 const PAGE_SIZE=8;
