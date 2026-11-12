@@ -1,0 +1,550 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="light dark" />
+    <link rel="icon" href="data:," />
+    <title>三台 VPS 硬件实测对比</title>
+    <style>
+      button, [role="button"], select, summary, input:not([type="checkbox"], [type="radio"]) { min-height: 2rem; }
+    </style>
+    <style>
+      :root {
+        color-scheme: light dark;
+        --bg: #f7f5f1;
+        --paper: #fffdf9;
+        --ink: #211d18;
+        --ink-2: #57504a;
+        --ink-3: #8a8178;
+        --line: #e3ded4;
+        --line-soft: #ede9e0;
+        --track: #ece8df;
+        --hw: #b45309;
+        --shoc: #0e7490;
+        --debi: #5b7a3a;
+        --best-bg: #f3ecdd;
+        --chip: #efe9dd;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #14120f;
+          --paper: #1d1a16;
+          --ink: #ece5d8;
+          --ink-2: #b3a893;
+          --ink-3: #84796a;
+          --line: #38322a;
+          --line-soft: #2a261f;
+          --track: #2c2820;
+          --hw: #f0a04b;
+          --shoc: #4cc3dd;
+          --debi: #9dc36b;
+          --best-bg: #2e2619;
+          --chip: #2a251c;
+        }
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--ink);
+        font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans SC", system-ui, sans-serif;
+        font-size: 15px;
+        line-height: 1.65;
+        -webkit-font-smoothing: antialiased;
+      }
+      .mono, .num, td.n, .val, .pct {
+        font-family: ui-monospace, "SF Mono", "Cascadia Mono", Menlo, Consolas, monospace;
+        font-variant-numeric: tabular-nums;
+      }
+      .wrap { max-width: 920px; margin: 0 auto; padding: 28px 18px 56px; }
+
+      /* ---------- header ---------- */
+      header.doc { border-bottom: 2px solid var(--ink); padding-bottom: 18px; margin-bottom: 8px; }
+      .kicker { font-size: 12px; letter-spacing: .18em; color: var(--ink-3); margin: 0 0 8px; }
+      h1 { font-size: 27px; line-height: 1.3; margin: 0 0 10px; font-weight: 700; letter-spacing: .01em; }
+      .meta { color: var(--ink-2); font-size: 13px; margin: 0; }
+      .meta b { color: var(--ink); font-weight: 600; }
+      .rule-note {
+        margin-top: 14px; background: var(--chip); border: 1px solid var(--line);
+        padding: 10px 14px; font-size: 13px; color: var(--ink-2);
+      }
+      .rule-note b { color: var(--ink); }
+
+      /* ---------- sections ---------- */
+      section { margin-top: 34px; }
+      h2 {
+        font-size: 18px; margin: 0 0 4px; font-weight: 700;
+        display: flex; align-items: baseline; gap: 10px;
+      }
+      h2 .no { font-family: ui-monospace, Menlo, monospace; font-size: 13px; color: var(--ink-3); font-weight: 400; }
+      .sec-sub { color: var(--ink-2); font-size: 13px; margin: 0 0 14px; }
+      h3.group {
+        font-size: 13px; letter-spacing: .12em; color: var(--ink-2); font-weight: 600;
+        margin: 22px 0 6px; padding-bottom: 5px; border-bottom: 1px solid var(--line);
+      }
+      h3.group:first-of-type { margin-top: 6px; }
+      p.body { margin: 8px 0; color: var(--ink); }
+      p.body, li { font-size: 14.5px; }
+      ul.plain { margin: 8px 0; padding-left: 20px; }
+      ul.plain li { margin: 5px 0; }
+      .small { font-size: 12.5px; color: var(--ink-3); }
+
+      /* ---------- machine cards ---------- */
+      .cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+      .card {
+        background: var(--paper); border: 1px solid var(--line); border-top: 3px solid var(--mc, var(--line));
+        padding: 14px 15px 10px;
+      }
+      .card[data-m="hw"] { --mc: var(--hw); }
+      .card[data-m="shoc"] { --mc: var(--shoc); }
+      .card[data-m="debi"] { --mc: var(--debi); }
+      .card h3 { margin: 0; font-size: 16px; }
+      .card .sub { color: var(--ink-3); font-size: 12px; margin: 1px 0 10px; font-family: ui-monospace, Menlo, monospace; }
+      .card .price { font-size: 20px; font-weight: 700; margin: 0 0 8px; }
+      .card .price span { font-size: 12px; color: var(--ink-2); font-weight: 400; }
+      dl.spec { margin: 0; }
+      dl.spec div { display: flex; gap: 8px; padding: 4px 0; border-top: 1px solid var(--line-soft); font-size: 13px; }
+      dl.spec dt { color: var(--ink-3); flex: 0 0 62px; }
+      dl.spec dd { margin: 0; flex: 1; }
+      .warn { color: var(--hw); font-weight: 600; }
+
+      /* ---------- metric rows ---------- */
+      .metric { padding: 13px 0 11px; border-bottom: 1px solid var(--line-soft); }
+      .metric-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 12px; margin-bottom: 8px; }
+      .metric-head .name { font-weight: 600; font-size: 15px; }
+      .metric-head .dir { font-size: 11.5px; color: var(--ink-3); border: 1px solid var(--line); padding: 0 6px; line-height: 1.7; }
+      .metric-head .note { font-size: 12px; color: var(--ink-3); flex-basis: 100%; }
+      .entries { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px 18px; }
+      .entry { min-width: 0; }
+      .entry .top { display: flex; align-items: baseline; gap: 7px; margin-bottom: 3px; }
+      .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--mc); flex: 0 0 auto; position: relative; top: -1px; }
+      .entry[data-m="hw"] { --mc: var(--hw); }
+      .entry[data-m="shoc"] { --mc: var(--shoc); }
+      .entry[data-m="debi"] { --mc: var(--debi); }
+      .entry .mname { font-size: 12.5px; color: var(--ink-2); flex: 0 0 auto; }
+      .entry .val { font-size: 15px; font-weight: 600; white-space: nowrap; }
+      .entry .val .unit { font-size: 11px; color: var(--ink-3); font-weight: 400; margin-left: 3px; }
+      .entry .pct { margin-left: auto; font-size: 13px; color: var(--ink-2); white-space: nowrap; }
+      .entry.best .pct { color: var(--ink); font-weight: 700; }
+      .best-tag {
+        font-size: 10.5px; font-weight: 700; letter-spacing: .06em;
+        background: var(--mc); color: #fff; padding: 1px 5px; line-height: 1.5;
+      }
+      @media (prefers-color-scheme: dark) { .best-tag { color: #161310; } }
+      .bar { height: 7px; background: var(--track); position: relative; }
+      .bar i { position: absolute; inset: 0 auto 0 0; background: var(--mc); display: block; }
+      .entry:not(.best) .bar i { opacity: .55; }
+      .entry .range { font-size: 11.5px; color: var(--ink-3); margin-top: 3px; font-family: ui-monospace, Menlo, monospace; font-variant-numeric: tabular-nums; }
+
+      /* ---------- category summary ---------- */
+      .cat { padding: 11px 0; border-bottom: 1px solid var(--line-soft); }
+      .cat .cat-name { font-weight: 600; margin-bottom: 7px; font-size: 14.5px; }
+      .cat .cat-name span { color: var(--ink-3); font-weight: 400; font-size: 12px; margin-left: 8px; }
+
+      /* ---------- controls ---------- */
+      .controls { display: flex; flex-wrap: wrap; gap: 10px 22px; align-items: center; margin: 4px 0 2px; font-size: 13px; color: var(--ink-2); }
+      .seg { display: inline-flex; border: 1px solid var(--line); background: var(--paper); }
+      .seg button {
+        appearance: none; border: 0; background: transparent; color: var(--ink-2);
+        font: inherit; font-size: 13px; padding: 6px 14px; cursor: pointer; min-height: 36px;
+      }
+      .seg button[aria-pressed="true"] { background: var(--ink); color: var(--bg); font-weight: 600; }
+
+      /* ---------- tables (capacity / appendix) ---------- */
+      table { border-collapse: collapse; width: 100%; font-size: 13.5px; }
+      th, td { text-align: left; padding: 7px 10px 7px 0; vertical-align: top; }
+      thead th { border-bottom: 2px solid var(--ink); font-size: 12.5px; color: var(--ink-2); }
+      tbody td, tbody th { border-bottom: 1px solid var(--line-soft); }
+      tbody th { font-weight: 600; white-space: nowrap; }
+      th.m-hw, td.m-hw { } 
+      .mchip { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; }
+      .mchip.hw { background: var(--hw); } .mchip.shoc { background: var(--shoc); } .mchip.debi { background: var(--debi); }
+
+      .callout { border: 1px solid var(--line); background: var(--paper); padding: 12px 15px; margin: 12px 0; font-size: 14px; }
+      .callout b.t { display: block; margin-bottom: 4px; }
+      footer.doc { margin-top: 40px; border-top: 1px solid var(--line); padding-top: 12px; color: var(--ink-3); font-size: 12.5px; }
+
+      @media (max-width: 680px) {
+        .cards { grid-template-columns: 1fr; }
+        .entries { grid-template-columns: 1fr; gap: 10px; }
+        h1 { font-size: 23px; }
+        .wrap { padding: 20px 14px 44px; }
+        table.cap thead { display: none; }
+        table.cap, table.cap tbody, table.cap tr, table.cap td { display: block; width: 100%; }
+        table.cap tr { padding: 8px 0; border-bottom: 1px solid var(--line-soft); }
+        table.cap td { border: 0; padding: 2px 0; }
+        table.cap td::before { content: attr(data-k); color: var(--ink-3); font-size: 12px; margin-right: 8px; }
+        table.cap th.rowh { display: block; border: 0; padding: 2px 0; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+
+      <header class="doc">
+        <p class="kicker">硬件实测报告 · 三台同口径对照</p>
+        <h1>三台 VPS 硬件实测对比：华为云 vs shoc vs debi</h1>
+        <p class="meta">
+          实测日期：<b>debi / shoc 为 2026-11-10 08:13–08:41 CST</b>，<b>华为云为 2026-11-12 09:15 按同一套参数重测</b> ·
+          工具：fio 3.36、sysbench 1.0.20、Python 3.12.3 · 每项 3–5 轮，表中为中位数（附录附 min–max 原值） ·
+          三台均为在产机器、测试全程 nice 低优先级、未停任何业务
+        </p>
+        <div class="rule-note">
+          <b>比例口径：</b>每一项以三台中的最强者为 <b>100%</b>，其余按比例折算（耗时类指标越低越好，最快者为 100%）。
+          带宽统一以 <b>MiB/s</b> 计（可在下方切换 GiB/s），随机 IO 统一以 <b>k IOPS</b> 计，容量统一以 <b>MB / GB</b> 计。
+        </div>
+      </header>
+
+      <!-- ============ 主机速览 ============ -->
+      <section aria-labelledby="h-overview">
+        <h2 id="h-overview">主机速览</h2>
+        <p class="sec-sub">价格、名义配置与实测身份。debi 的名实出入见 ③ 节。</p>
+        <div class="cards">
+          <article class="card" data-m="hw">
+            <h3>华为云</h3>
+            <p class="sub">hcss-ecs-bb66 · KVM 通用型</p>
+            <p class="price">¥36<span> / 年（约 $5）</span></p>
+            <dl class="spec">
+              <div><dt>名义配置</dt><dd>2 vCPU / 2 GB / 40 GB</dd></div>
+              <div><dt>实测 CPU</dt><dd>AMD Zen 3 · 1 核 2 线程 @2.45 GHz</dd></div>
+              <div><dt>内存</dt><dd>1,775 MB 总 / 858 MB 可用 · 无 swap</dd></div>
+              <div><dt>磁盘</dt><dd>40 GB 总 / 31 GB 可用（21% 已用）</dd></div>
+              <div><dt>公网带宽</dt><dd>2 Mbps 标称（实测下行 1.56 / 上行 2.1 Mbps）</dd></div>
+              <div><dt>在机角色</dt><dd>Home Assistant、Portainer、DNS 探针、轻度出口</dd></div>
+            </dl>
+          </article>
+          <article class="card" data-m="shoc">
+            <h3>shoc</h3>
+            <p class="sub">shock3 · Shock Hosting · 洛杉矶 CoreSite LA2 · AS395092</p>
+            <p class="price">$20<span> / 年（续费同价）</span></p>
+            <dl class="spec">
+              <div><dt>名义配置</dt><dd>1 核 / 2 GB / 30 GB</dd></div>
+              <div><dt>实测 CPU</dt><dd>Xeon Silver 4215R @3.20 GHz · 1 核</dd></div>
+              <div><dt>内存</dt><dd>1,968 MB 总 / 1,538 MB 可用 · swap 512 MB 几乎未用</dd></div>
+              <div><dt>磁盘</dt><dd>30 GB 总 / 25.4 GB 可用（14% 已用）</dd></div>
+              <div><dt>公网带宽</dt><dd>1 Gbps 口（与 debi 机间 iperf3 实测 ≈930 Mbps）</dd></div>
+              <div><dt>在机角色</dt><dd>代理生产 + apirelay 副本（较轻）</dd></div>
+            </dl>
+          </article>
+          <article class="card" data-m="debi">
+            <h3>debi</h3>
+            <p class="sub">DediRock · 洛杉矶 ColoCrossing · AS36352</p>
+            <p class="price">$10.88<span> / 年</span></p>
+            <dl class="spec">
+              <div><dt>名义配置</dt><dd>2 vCPU / 2 GB / 40 GB</dd></div>
+              <div><dt>实测 CPU</dt><dd>Xeon E5-2670 v2 @2.50 GHz · <span class="warn">1 核</span></dd></div>
+              <div><dt>内存</dt><dd>1,967 MB 总 / 710 MB 可用 · swap 2 GB 已用 965 MB</dd></div>
+              <div><dt>磁盘</dt><dd><span class="warn">30 GB</span> 总 / 13.1 GB 可用（56% 已用）</dd></div>
+              <div><dt>公网带宽</dt><dd>1 Gbps 口（与 shoc 机间 iperf3 实测 ≈930 Mbps）</dd></div>
+              <div><dt>在机角色</dt><dd>App Hub 主机：平台 + 21 个 web 项目 + 代理 + AList / Navidrome 等</dd></div>
+            </dl>
+          </article>
+        </div>
+      </section>
+
+      <!-- ============ 核心成绩 ============ -->
+      <section aria-labelledby="h-core">
+        <h2 id="h-core">核心成绩对照</h2>
+        <p class="sec-sub">条长即比例：每项最强 = 100%。数值下小字为该项各轮 min–max（未测轮次范围者不标）。</p>
+        <div class="controls">
+          <span>带宽单位</span>
+          <span class="seg" role="group" aria-label="带宽单位切换">
+            <button type="button" id="u-mib" aria-pressed="true">MiB/s</button>
+            <button type="button" id="u-gib" aria-pressed="false">GiB/s</button>
+          </span>
+          <span class="small">切换只改带宽类数值的显示单位，比例不变。</span>
+        </div>
+        <div id="metrics"></div>
+      </section>
+
+      <!-- ============ 分类汇总 ============ -->
+      <section aria-labelledby="h-cat">
+        <h2 id="h-cat">分类汇总</h2>
+        <p class="sec-sub">每类取其下各指标百分比的平均，只看相对位置，不与单项成绩混用。</p>
+        <div id="cats"></div>
+        <div class="callout">
+          <b class="t">画像一句话</b>
+          华为云：计算与内存的冠军、磁盘的末位——CPU 与内存带宽四项全满，磁盘四项全部垫底且与前两名差一个数量级。
+          shoc：磁盘的冠军、其余第二——随机 IO 断层领先，CPU / 内存约为华为的四到六成。
+          debi：全面第三，仅 1M 顺序写一项反超居首；约束顺序是磁盘 &gt; 内存 &gt; CPU。
+        </div>
+      </section>
+
+      <!-- ============ 容量与 steal ============ -->
+      <section aria-labelledby="h-cap">
+        <h2 id="h-cap">容量与 steal</h2>
+        <p class="sec-sub">测量时点实读（free / df）。这类是存量状态，不做比例折算。</p>
+        <table class="cap">
+          <thead>
+            <tr>
+              <th scope="col">项目</th>
+              <th scope="col"><span class="mchip hw"></span>华为云</th>
+              <th scope="col"><span class="mchip shoc"></span>shoc</th>
+              <th scope="col"><span class="mchip debi"></span>debi</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th scope="row" class="rowh">内存总量 / 可用</th>
+              <td data-k="华为云" class="n">1,775 MB / 858 MB</td>
+              <td data-k="shoc" class="n">1,968 MB / 1,538 MB</td>
+              <td data-k="debi" class="n">1,967 MB / 710 MB</td>
+            </tr>
+            <tr>
+              <th scope="row" class="rowh">swap</th>
+              <td data-k="华为云">无 swap（内存爆掉即 OOM，无缓冲）</td>
+              <td data-k="shoc" class="n">512 MB，已用 ≈0</td>
+              <td data-k="debi" class="n">2 GB，已用 965 MB（长期生产负载存量）</td>
+            </tr>
+            <tr>
+              <th scope="row" class="rowh">磁盘总量 / 可用</th>
+              <td data-k="华为云" class="n">40 GB / 31 GB（21% 已用）</td>
+              <td data-k="shoc" class="n">30 GB / 25.4 GB（14% 已用）</td>
+              <td data-k="debi" class="n">30 GB / 13.1 GB（56% 已用，三台中最先告急）</td>
+            </tr>
+            <tr>
+              <th scope="row" class="rowh">CPU steal</th>
+              <td data-k="华为云" class="n">0%（仅读数，未做旁证复测）</td>
+              <td data-k="shoc" class="n">0%（旁证复测可信，见 ④）</td>
+              <td data-k="debi" class="n">0%（旁证复测可信，见 ④）</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- ============ ① 测量条件 ============ -->
+      <section aria-labelledby="h-cond">
+        <h2 id="h-cond"><span class="no">01</span>测量条件与负载背景</h2>
+        <p class="body"><b>华为云本轮为同口径重测。</b>它最初一轮（2026-11-12 08:45）用的参数与 debi / shoc 报告不一致——磁盘只测了 QD1、内存是双线程合并值、sysbench 只跑 10 秒 1 轮——直接混比会误导，故按原报告口径重跑：sysbench 单线程 15 s × 5 轮、Python sqrt 固定 3×10⁷ 次 × 3 轮、内存单线程分读写、fio 1 GB 文件 direct=1、25 s × 3 轮（4K 项 QD32、1M 项 QD8）、全程 nice -n 10。</p>
+        <ul class="plain">
+          <li><b>debi 是满载生产机：</b>测量时段 load 0.10–0.27（单核），在跑 App Hub 平台与 21 个 web 项目、代理全套、AList、Navidrome、Tailscale 等 30+ 服务。它的每个数字都含真实生产噪声，是「这台机日常能给出的性能」，不是实验室裸机值。</li>
+          <li><b>shoc 是轻载生产机：</b>load 0.02–0.27，在跑代理与 apirelay 副本，内存可用 1.5 GB、swap 几乎未动。数字更接近裸机上限。</li>
+          <li><b>华为云是轻载机：</b>在跑 Home Assistant、Portainer、DNS 探针等轻服务，测试时负载接近空闲。数字同样接近裸机上限——它与 shoc 的差距不是负载差异能解释的。</li>
+          <li><b>异常轮次的处理：</b>debi 内存拷贝首轮出现首次大额分配型离群（4.13 / 4.35 s vs 稳态 1.6–2.3 s），保留在附录原值中并在表中标注，未剔除；shoc 顺序读三轮逐轮爬升（宿主机缓存预热特征），中位数可用、极差大。其余各项轮间极差都小，稳定性本身就是结论的一部分。</li>
+          <li><b>不在本表：</b>国内段速度测的是「国内 → 该机」整条路径的质量（出口运营商、晚高峰、入境线路），不是机器属性，不拿本表参数去解释；华为云的 2 Mbps 是套餐带宽上限，同样不是硬件成绩。</li>
+        </ul>
+      </section>
+
+      <!-- ============ ② 结论 ============ -->
+      <section aria-labelledby="h-conc">
+        <h2 id="h-conc"><span class="no">02</span>结论：三台的硬件画像</h2>
+        <p class="body"><b>CPU 与内存，华为云断层第一。</b>sysbench 单核 1,439 events/s 是 shoc（408）的 3.5 倍、debi（273）的 5.3 倍；但要注意口径放大：sysbench 的素数测试以整数除法为主，对 Zen 3 特别有利，Python sqrt 口径下差距收窄为 1.8 倍 / 2.7 倍——日常通用算力的真实差距在两者之间，华为第一无疑。内存读带宽 43,803 MiB/s（≈42.8 GiB/s）是 shoc 的 2.1 倍、debi 的 3.2 倍，写带宽同理领先。这本质是代际差：Zen 3（2020）对 Xeon Silver 4215R（2019）再对 E5-2670 v2（2013）。</p>
+        <p class="body"><b>磁盘，华为云断层垫底。</b>4K 随机只有约 5.0k IOPS，shoc 的 127k 是它的约 25 倍，debi 的 13.4k 也是它的 2.7 倍；1M 顺序读写都只有 107 MiB/s，不到 shoc 顺序读的 2.2%。且华为的读写数值恰好完全对称（顺序 107 / 107、随机 19.7 / 19.7 MiB/s），形态像云盘 QoS 限速，不像盘本身跑不到——限速值就是它的实际可用值，按此规划即可。</p>
+        <p class="body"><b>shoc 是三台里最均衡的机器。</b>磁盘是像样 NVMe 阵列的形态（127k / 112k IOPS），CPU 与内存居中，容量余量最大；唯一被反超的是 1M 顺序写（920 vs debi 1,716 MiB/s）——两家后端不同：shoc 呈 NVMe + 限速 / 写缓存节流形态，debi 顺序写意外地高且稳。对备份打包、日志、顺序落盘类负载 debi 这一项是实打实的安慰，但日常应用的痛点在随机 IO，不在这。</p>
+        <p class="body"><b>用途落位：</b>华为云适合 CPU / 内存型轻服务（Home Assistant、面板、探针、加密运算——其 AES-256-GCM 达 3.8 GB/s，做轻度出口绰绰有余），别放重 IO 任务（大库重建、批量索引会先撞磁盘）；它的真正瓶颈仍是 2 Mbps 公网带宽而非硬件。shoc 能同时扛代理 + apirelay + 未来杂活。debi 继续做轻 IO 的应用宿主，容量（56% 已用）比性能更早告急。</p>
+        <p class="body"><b>性价比：</b>最便宜的华为云（¥36/年）拿走了 CPU 与内存两项冠军，最贵的 shoc（$20/年）拿走磁盘冠军，debi（$10.88/年）只赢顺序写一项——三台的价格与单项性能之间没有线性关系，按用途选机比按价格选机重要。</p>
+      </section>
+
+      <!-- ============ ③ 名实出入 ============ -->
+      <section aria-labelledby="h-diff">
+        <h2 id="h-diff"><span class="no">03</span>与名义配置的出入清单</h2>
+        <ul class="plain">
+          <li><b>出入 1（debi）：核心数。</b>名义 2 vCPU，实测 lscpu / nproc / /proc/cpuinfo 三口径一致 = 1 核。这是三台中最大的名实不符，直接决定这台机的全部上限。</li>
+          <li><b>出入 2（debi）：磁盘容量。</b>名义 40 GB，分区实测总量 30 GB（31,591,518,208 B），差的 10 GB 不在任何分区里。</li>
+          <li><b>shoc：</b>名义 1 核 / 2 GB / 30 GB 与实测全部一致（1,968 MB、30 GB、4215R 1 核）。</li>
+          <li><b>华为云：</b>名义 2 vCPU 即 1 核 2 线程，与实测一致；磁盘 40 GB 与实测一致；内存实测总量 1,775 MB，属虚拟化常规损耗，不算出入。它是三台中最便宜的一台，且名实基本相符。</li>
+          <li>三台的 CPU 型号两家 / 三家商家均未承诺，Zen 3、4215R、E5-2670 v2 均为实测所得、如实记录。除以上外，其余项目查无出入。</li>
+        </ul>
+      </section>
+
+      <!-- ============ ④ steal ============ -->
+      <section aria-labelledby="h-steal">
+        <h2 id="h-steal"><span class="no">04</span>steal 复测：读数 0 是否可信</h2>
+        <p class="body">steal 是宿主机通过 kvm_steal_time「自愿上报」的数据：宿主机若不开 steal 记账、或用 cgroup CPU quota 限流（被限流的线程已摘出运行队列，往往不计入 steal），steal 可以恒为 0 而限制真实存在。因此「steal = 0」本身不能自证清白。</p>
+        <ul class="plain">
+          <li><b>debi / shoc（2026-11-10 09:46–10:03 旁证复测，结论：可信）：</b>间隙检测查 cgroup throttle 指纹（周期性约 100 ms 出现几十 ms 停顿）——两台均未见：shoc ≥10 ms 间隙仅 2 次、无规律；debi 间隙多但 95% 以上在 2–5 ms 档（生产调度抖动），≥25 ms 为 0 次、无等间隔周期。跑分时段稳定性：sysbench 5 轮极差 debi ±1.5%、shoc ±0.9%。shoc 另做满载 5 分钟：每段耗时 4.69–5.20 s，前 10 段均值 4.92 s vs 后 10 段 4.82 s，无阶梯下跌，配额 / burst 积分耗尽形态不存在。debi 为在产主机未做长满载，以 8 天生产史 + 多时段跑分稳定 + 间隙检测代偿。</li>
+          <li><b>华为云（仅读数，未复测）：</b>本轮只有 vmstat / 采样读数 0%，没有做间隙检测与满载旁证，如实记为「读数 0、未旁证」。其 sysbench 5 轮极差极小（1,436–1,439，±0.1%）、绝对成绩与 Zen 3 公开量级相符，未见可疑压制形态，但按同一标准，这不等于已排除限流。</li>
+          <li><b>三台共同的证明力边界：</b>超线程兄弟核争抢、宿主机降频、缓存与内存带宽争用这类「一直在跑、只是变慢」既不产生间隙也不产生 steal，只能靠绝对跑分与同型号公开成绩的差距间接提示；且全部采样都在上午时段，晚高峰等其他时段的争抢未测。</li>
+        </ul>
+      </section>
+
+      <!-- ============ 附录 ============ -->
+      <section aria-labelledby="h-appx">
+        <h2 id="h-appx">附录：各轮原始值（中位数可复核）</h2>
+        <p class="sec-sub">工具与口径注：fio 3.36、sysbench 1.0.20；fio 统一参数 libaio + direct=1 + group_reporting + 1 GB 文件 + runtime 25 s + time_based，4K 项 iodepth=32、1M 项 iodepth=8、numjobs=1，全程 nice -n 10。华为云 fio 原始输出只给带宽，4K IOPS 由带宽换算（19.7 MiB/s ÷ 4 KiB ≈ 5.0k）。报告生成：2026-11-12；debi / shoc 原报告：2026-11-10（steal 复测补记 2026-11-10 09:46–10:03 CST）。</p>
+        <div id="appendix"></div>
+      </section>
+
+      <footer class="doc">
+        数据来源：三台机器上的实际运行输出（debi / shoc 2026-11-10，华为云 2026-11-12 同口径重测）。比例为本页按「最强 = 100%」折算，原始值见附录；未测的项目记为未测，不做推测填补。
+      </footer>
+
+    </div>
+
+    <script>
+      (function () {
+        "use strict";
+
+        var MACHINES = [
+          { id: "hw",   name: "华为云" },
+          { id: "shoc", name: "shoc" },
+          { id: "debi", name: "debi" }
+        ];
+
+        // kind: "bw" = bandwidth in MiB/s (unit-toggleable), "num" = fixed unit
+        var GROUPS = [
+          { title: "CPU", items: [
+            { name: "CPU 单核 · sysbench", short: "sysbench 单核", dir: "high", kind: "num", unit: "events/s", digits: 0,
+              note: "sysbench cpu · 单线程 15 s · max-prime 20000 · 5 轮",
+              v: { hw: 1439, shoc: 408, debi: 273 }, r: { hw: "1436–1439", shoc: "405–412", debi: "267–275" } },
+            { name: "CPU 单核 · Python sqrt 循环", short: "Python sqrt", dir: "low", kind: "num", unit: "秒", digits: 2,
+              note: "固定 3×10⁷ 次循环 · 3 轮 · 越低越好。此口径对架构中立，差距比 sysbench 小（见结论 ②）",
+              v: { hw: 3.18, shoc: 5.66, debi: 8.46 }, r: { hw: "3.15–3.25", shoc: "5.57–5.89", debi: "8.09–8.88" } }
+          ]},
+          { title: "内存", items: [
+            { name: "内存写带宽", short: "写带宽", dir: "high", kind: "bw", digits: 0,
+              note: "sysbench memory · 1M 块 × 4G · 单线程 · 3 轮",
+              v: { hw: 26298, shoc: 16581, debi: 11605 }, r: { shoc: "16,059–17,373", debi: "11,544–12,249" } },
+            { name: "内存读带宽", short: "读带宽", dir: "high", kind: "bw", digits: 0,
+              note: "sysbench memory · read 口径 · 其余参数同上",
+              v: { hw: 43803, shoc: 20699, debi: 13873 }, r: { shoc: "19,489–20,926", debi: "13,105–14,144" } },
+            { name: "内存拷贝参考 · 256 MB 切片 ×4", short: "内存拷贝", dir: "low", kind: "num", unit: "秒", digits: 2,
+              note: "Python bytearray 切片拷贝 · 稳态轮 · 越低越好。*debi 每口径首轮含首次大额分配开销，已标注未剔除",
+              v: { hw: 0.87, shoc: 1.18, debi: 2.30 }, r: { shoc: "1.15–1.27", debi: "2.26–4.35 *" } }
+          ]},
+          { title: "磁盘 · 随机 IO（4K，QD32）", items: [
+            { name: "4K 随机读", short: "随机读", dir: "high", kind: "num", unit: "k IOPS", digits: 1,
+              note: "fio libaio direct=1 · 1 GB 文件 · 25 s/轮 · 3 轮。华为的 IOPS 由其带宽 19.7 MiB/s 换算（见附录注）",
+              v: { hw: 5.0, shoc: 127, debi: 13.4 }, r: { hw: "≈5.0（换算）", shoc: "127–127", debi: "13.4–13.5" }, approx: { hw: true } },
+            { name: "4K 随机写", short: "随机写", dir: "high", kind: "num", unit: "k IOPS", digits: 1,
+              note: "fio · 参数同上。华为同为带宽换算值（19.7 MiB/s）",
+              v: { hw: 5.0, shoc: 112, debi: 12.1 }, r: { hw: "≈5.0（换算）", shoc: "112–113", debi: "12.0–12.2" }, approx: { hw: true } }
+          ]},
+          { title: "磁盘 · 顺序 IO（1M，QD8）", items: [
+            { name: "1M 顺序读", short: "顺序读", dir: "high", kind: "bw", digits: 0,
+              note: "fio · iodepth 8 · 其余同上。†shoc 三轮逐轮爬升（宿主机缓存预热特征），中位数可用、极差大",
+              v: { hw: 107, shoc: 4835, debi: 2017 }, r: { shoc: "4,008–6,589 †", debi: "1,873–2,092" } },
+            { name: "1M 顺序写", short: "顺序写", dir: "high", kind: "bw", digits: 0,
+              note: "fio · 参数同上。本项 debi 反超居首（后端形态差异，见结论 ②）",
+              v: { hw: 107, shoc: 920, debi: 1716 }, r: { shoc: "795–1,130", debi: "1,604–1,863" } }
+          ]}
+        ];
+
+        var bwUnit = "MiB/s"; // or "GiB/s"
+
+        function pctOf(item, id) {
+          var vals = MACHINES.map(function (m) { return item.v[m.id]; });
+          var best = item.dir === "high" ? Math.max.apply(null, vals) : Math.min.apply(null, vals);
+          return item.dir === "high" ? (item.v[id] / best) * 100 : (best / item.v[id]) * 100;
+        }
+        function fmtPct(p) {
+          if (p >= 99.95) return "100%";
+          if (p < 10) return p.toFixed(1) + "%";
+          return Math.round(p) + "%";
+        }
+        function fmtInt(n) { return String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, ","); }
+        function fmtVal(item, id) {
+          var x = item.v[id];
+          var approx = item.approx && item.approx[id] ? "≈" : "";
+          if (item.kind === "bw") {
+            if (bwUnit === "GiB/s") return { t: approx + (x / 1024).toFixed(2), u: "GiB/s" };
+            return { t: approx + fmtInt(x), u: "MiB/s" };
+          }
+          var t = item.digits === 0 ? fmtInt(x)
+            : (item.digits === 1 && x >= 100 ? fmtInt(x) : x.toFixed(item.digits));
+          return { t: approx + t, u: item.unit };
+        }
+        function bestId(item) {
+          var best = null, bv = null;
+          MACHINES.forEach(function (m) {
+            var x = item.v[m.id];
+            if (bv === null || (item.dir === "high" ? x > bv : x < bv)) { bv = x; best = m.id; }
+          });
+          return best;
+        }
+        function esc(s) { return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;"); }
+
+        function entryHTML(item, m) {
+          var p = pctOf(item, m.id);
+          var fv = fmtVal(item, m.id);
+          var isBest = bestId(item) === m.id;
+          var range = item.r && item.r[m.id] ? '<div class="range">' + esc(item.r[m.id]) + "</div>" : "";
+          return '<div class="entry' + (isBest ? " best" : "") + '" data-m="' + m.id + '">' +
+            '<div class="top"><span class="dot"></span><span class="mname">' + m.name + '</span>' +
+            (isBest ? '<span class="best-tag">最强</span>' : "") +
+            '<span class="val">' + fv.t + '<span class="unit">' + fv.u + '</span></span>' +
+            '<span class="pct">' + fmtPct(p) + "</span></div>" +
+            '<div class="bar"><i style="width:' + Math.max(p, 0.8).toFixed(1) + '%"></i></div>' +
+            range + "</div>";
+        }
+
+        function renderMetrics() {
+          var html = "";
+          GROUPS.forEach(function (g) {
+            html += '<h3 class="group">' + esc(g.title) + "</h3>";
+            g.items.forEach(function (item) {
+              html += '<div class="metric"><div class="metric-head">' +
+                '<span class="name">' + esc(item.name) + "</span>" +
+                '<span class="dir">' + (item.dir === "high" ? "越高越好" : "越低越好") + "</span>" +
+                '<span class="note">' + esc(item.note) + "</span></div>" +
+                '<div class="entries">' +
+                MACHINES.map(function (m) { return entryHTML(item, m); }).join("") +
+                "</div></div>";
+            });
+          });
+          document.getElementById("metrics").innerHTML = html;
+        }
+
+        function renderCats() {
+          var html = "";
+          GROUPS.forEach(function (g) {
+            var sums = { hw: 0, shoc: 0, debi: 0 };
+            g.items.forEach(function (item) {
+              MACHINES.forEach(function (m) { sums[m.id] += pctOf(item, m.id); });
+            });
+            var fake = { dir: "high", v: {}, r: null, kind: "num", unit: "%", digits: 0 };
+            MACHINES.forEach(function (m) { fake.v[m.id] = sums[m.id] / g.items.length; });
+            var names = g.items.map(function (i) { return i.short || i.name; }).join(" / ");
+            html += '<div class="cat"><div class="cat-name">' + esc(g.title) + "<span>" + esc(names) + ' 的百分比平均</span></div>' +
+              '<div class="entries">' +
+              MACHINES.map(function (m) {
+                var p = fake.v[m.id];
+                var isBest = p >= 99.95;
+                return '<div class="entry' + (isBest ? " best" : "") + '" data-m="' + m.id + '">' +
+                  '<div class="top"><span class="dot"></span><span class="mname">' + m.name + '</span>' +
+                  (isBest ? '<span class="best-tag">最强</span>' : "") +
+                  '<span class="pct" style="margin-left:auto;font-size:15px;font-weight:600;color:var(--ink)">' + fmtPct(p) + "</span></div>" +
+                  '<div class="bar"><i style="width:' + Math.max(p, 0.8).toFixed(1) + '%"></i></div></div>';
+              }).join("") +
+              "</div></div>";
+          });
+          document.getElementById("cats").innerHTML = html;
+        }
+
+        function renderAppendix() {
+          var html = "";
+          GROUPS.forEach(function (g) {
+            g.items.forEach(function (item) {
+              html += '<div class="metric"><div class="metric-head"><span class="name" style="font-size:14px">' +
+                esc(item.name) + '</span><span class="note">' + esc(item.note) + "</span></div>" +
+                '<div class="entries">' + MACHINES.map(function (m) {
+                  var fv = fmtVal(item, m.id);
+                  var range = item.r && item.r[m.id] ? item.r[m.id] : "单值（无轮次范围记录）";
+                  return '<div class="entry" data-m="' + m.id + '"><div class="top">' +
+                    '<span class="dot"></span><span class="mname">' + m.name + "</span>" +
+                    '<span class="val" style="font-size:14px">' + fv.t + '<span class="unit">' + fv.u + "</span></span></div>" +
+                    '<div class="range">各轮 ' + esc(range) + "</div></div>";
+                }).join("") + "</div></div>";
+            });
+          });
+          document.getElementById("appendix").innerHTML = html;
+        }
+
+        function renderAll() { renderMetrics(); renderCats(); renderAppendix(); }
+        renderAll();
+
+        var bMib = document.getElementById("u-mib");
+        var bGib = document.getElementById("u-gib");
+        function setUnit(u) {
+          bwUnit = u;
+          bMib.setAttribute("aria-pressed", u === "MiB/s" ? "true" : "false");
+          bGib.setAttribute("aria-pressed", u === "GiB/s" ? "true" : "false");
+          renderAll();
+        }
+        bMib.addEventListener("click", function () { setUnit("MiB/s"); });
+        bGib.addEventListener("click", function () { setUnit("GiB/s"); });
+      })();
+    </script>
+  </body>
+</html>
