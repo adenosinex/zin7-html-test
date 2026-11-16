@@ -255,7 +255,7 @@ textarea::placeholder{color:var(--muted);opacity:.5}
               <td><code>用户名</code></td>
               <td class="req">必填</td>
               <td>用户名 / 网名 / username / name / 昵称 / 账号 / 博主</td>
-              <td>为空的行会被自动跳过；同时用于生成头像；<b>点击卡片上的用户名</b>会新窗口打开 <code>http://192.168.31.124/?search=用户名</code></td>
+              <td>为空的行会被自动跳过；同时用于生成头像；用户名搜索跳转未配置，点击用户名不跳转</td>
             </tr>
             <tr>
               <td><code>文案数量</code></td>
@@ -380,10 +380,11 @@ const $$ = s => Array.from(document.querySelectorAll(s));
 /* ========================================================= *
  * ★ 跳转配置
  * ========================================================= */
-const SEARCH_BASE = 'http://192.168.31.124/';
+const SEARCH_BASE = ''; // 搜索服务地址：留空则用户名不跳转；填入自有搜索服务地址可恢复跳转
 const SEARCH_KEY  = 'search';
 
 function buildSearchUrl(username) {
+  if (!SEARCH_BASE) return '';
   const sep = SEARCH_BASE.includes('?') ? '&' : '?';
   return `${SEARCH_BASE}${sep}${SEARCH_KEY}=${encodeURIComponent(username)}&v=1`;
 }
@@ -752,7 +753,11 @@ function cardHTML(item) {
   const likesNum = parseFloat(String(item.likes).replace(/[,\s]/g, '')) || 0;
 
   const nameEsc = escapeHtml(item.username);
-  const urlEsc  = escapeHtml(buildSearchUrl(item.username));
+  const searchUrl = buildSearchUrl(item.username);
+  const urlEsc  = escapeHtml(searchUrl);
+  const nameHtml = searchUrl
+    ? `<a class="card-name" href="${urlEsc}" target="_blank" rel="noopener noreferrer" title="打开搜索：${nameEsc}"><span class="txt">${nameEsc}</span><span class="go">↗</span></a>`
+    : `<span class="card-name"><span class="txt">${nameEsc}</span></span>`;
 
   const bodyText = item.desc || item.content || '';
   const bodyHtml = bodyText
@@ -774,10 +779,7 @@ function cardHTML(item) {
         <img data-user="${nameEsc}" alt="" decoding="async">
       </div>
       <div class="card-info">
-        <a class="card-name" href="${urlEsc}" target="_blank" rel="noopener noreferrer"
-           title="打开搜索：${nameEsc}">
-          <span class="txt">${nameEsc}</span><span class="go">↗</span>
-        </a>
+        ${nameHtml}
         <div class="card-meta">
           <span class="card-count">📝 ${countNum} 篇文案</span>
           ${likesHtml}
@@ -986,12 +988,13 @@ $('#pgOpenAll').addEventListener('click', () => {
   const start = (state.page - 1) * state.pageSize;
   const list  = state.items.slice(start, start + state.pageSize);
   if (!list.length) return;
+  if (!SEARCH_BASE) { alert('未配置搜索地址，无法打开搜索链接。'); return; }
 
   if (!confirm(
     `将在新标签页中打开本页 ${list.length} 个用户的搜索链接。\n\n` +
     `浏览器可能会拦截多标签页弹出：\n` +
     `若被拦截，请点击地址栏右侧的「弹出式窗口被拦截」图标，\n` +
-    `选择「始终允许 192.168.31.124 显示弹出式窗口」，然后重试。\n\n确定继续？`
+    `选择「始终允许本站显示弹出式窗口」，然后重试。\n\n确定继续？`
   )) return;
 
   let opened = 0;
