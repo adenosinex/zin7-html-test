@@ -126,22 +126,30 @@
 </div>
 <div v-show="view === 'maint'">
     <div class="mb-4 p-4 bg-gray-50 rounded-lg text-sm text-gray-700">
-        车辆：豪爵 UHR150（HJ150T-28）· 149cc · 10.6kW · 油箱 8.0L · 双通道 ABS<br>当前里程 <b>${totalMileage} km</b>（截至 ${latestFuelDate}）· 上次保养取备注提取与手动登记中里程最大者
+        豪爵 UHR150（HJ150T-28）· 当前里程 <b>${totalMileage} km</b>（截至 ${latestFuelDate}）
     </div>
-    <div v-for="card in maintCards" :key="card.key" class="mb-4 p-4 border rounded-lg">
-        <div class="flex items-center gap-2 mb-1">
+    <div v-for="card in maintCards" :key="card.key" class="mb-3 p-3 border rounded-lg">
+        <div class="flex items-center gap-2">
             <span class="font-semibold text-gray-800">${card.name}</span>
             <span class="px-2 py-0.5 rounded text-xs" :style="card.badgeStyle">${card.statusLabel}</span>
-            <span class="ml-auto text-xs text-gray-500">${card.intervalLabel}</span>
+            <span v-if="card.mainNumber" class="text-sm font-semibold text-gray-800">${card.mainNumber}</span>
+            <span class="ml-auto px-2 py-0.5 rounded text-xs bg-gray-100 text-gray-700">${card.impactLabel} · ${card.sev}</span>
         </div>
-        <div class="text-xs text-gray-400 mb-2">${card.spec}</div>
-        <div v-if="card.pct !== null" class="h-2 bg-gray-200 rounded mb-1">
+        <div v-if="card.pct !== null" class="h-2 bg-gray-200 rounded my-2">
             <div class="h-2 rounded" :style="{width: Math.min(card.pct, 1) * 100 + '%', background: card.barColor}"></div>
         </div>
-        <div v-if="card.pct !== null" class="text-sm text-gray-600 mb-2">${card.progressLabel}</div>
-        <div class="text-sm text-gray-600 mb-2">${card.lastLabel}</div>
-        <div v-if="card.assumeLabel" class="text-sm text-amber-700 mb-2">${card.assumeLabel}</div>
-        <div class="text-sm text-gray-700"><span class="font-semibold">${card.impactLabel}：</span>${card.consequence} ${card.cost}</div>
+        <div class="flex items-center gap-2 mt-1">
+            <span class="text-xs text-gray-500">${card.cycleLabel}</span>
+            <button @click="toggleCard(card.key)" class="ml-auto text-sm text-blue-600">${expanded[card.key] ? '收起' : '详情'}</button>
+        </div>
+        <div v-if="expanded[card.key]" class="mt-2 text-sm text-gray-600 space-y-1">
+            <div class="text-xs text-gray-400">${card.spec}</div>
+            <div v-if="card.detailProgress">${card.detailProgress}</div>
+            <div>${card.lastLabel}</div>
+            <div v-if="card.assumeLabel" class="text-amber-700">${card.assumeLabel}</div>
+            <div class="text-gray-700">${card.consequence}</div>
+            <div>${card.cost}</div>
+        </div>
     </div>
     <div class="mt-6 p-4 bg-blue-50 rounded-lg">
         <h3 class="font-semibold text-gray-700 mb-3">登记保养</h3>
@@ -202,8 +210,13 @@
             <span class="text-xs text-gray-500 ml-2">留空或填 0 恢复默认；保存后立即生效</span>
         </div>
     </div>
-    <p class="mt-6 text-xs text-gray-400">备注提取规则：从加油记录备注中按关键词识别（机油、齿轮油、空滤、火花塞、气门、皮带、刹车、刹车油、轮胎、冷却液、蓄电池、节气门）；与手动登记合并，取里程最大的一次。</p>
-    <p class="mt-2 text-xs text-gray-400">长周期与易忽略（说明书）：机油滤网清洁 12000km/18 个月；燃油泵过滤器 50000km；燃油管、制动液软管、曲轴箱通气管 4 年更换；停车架润滑 12000km；积油管定期排废液；转向机构、CVT 每 6000km 检查。周期与规格按官方说明书（HJ150T-28）与笔记整理。</p>
+    <div class="mt-6">
+        <button @click="showNotes = !showNotes" class="text-sm text-blue-600">${showNotes ? '收起说明' : '说明'}</button>
+        <div v-if="showNotes">
+            <p class="mt-2 text-xs text-gray-400">备注提取规则：从加油记录备注中按关键词识别（机油、齿轮油、空滤、火花塞、气门、皮带、刹车、刹车油、轮胎、冷却液、蓄电池、节气门）；与手动登记合并，取里程最大的一次。</p>
+            <p class="mt-2 text-xs text-gray-400">长周期与易忽略（说明书）：机油滤网清洁 12000km/18 个月；燃油泵过滤器 50000km；燃油管、制动液软管、曲轴箱通气管 4 年更换；停车架润滑 12000km；积油管定期排废液；转向机构、CVT 每 6000km 检查。周期与规格按官方说明书（HJ150T-28）与笔记整理；经验值来自笔记优化表与师傅说法。</p>
+        </div>
+    </div>
 </div>
 </div>
 
@@ -267,21 +280,23 @@ const MAINT_CFG_URL = '/web/lightapi/maintcfg/blob';
 
 // Intervals and specs from the official manual as analyzed in the
 // user's docsnew notes (HJ150T-28, manual p.38-40 / p.61-62). Dual
-// bounds mean whichever comes first. Costs from the user's own notes
-// where stated.
+// bounds mean whichever comes first. exp = the real-world cycle from
+// the user's optimized notes and the mechanic's verdicts (display
+// only; progress is driven by the manual cycle unless overridden).
+// sev = severity if ignored: 大 / 中 / 小.
 const MAINT_ITEMS = [
-  { key: 'oil', name: '机油', action: '更换', intervalKm: 3000, intervalMonths: 6, spec: 'API SL · JASO MB · SAE 10W-40 · 800ml', impactLabel: '实际损伤', consequence: '机油衰减、油泥增多，润滑下降磨损气缸与活塞环，长期拖延可能拉缸；前期表现是噪音变大、动力下降、油耗上升。出保后全合成可放宽至 3500–4000km，不宜超 5000km。', cost: '全合成 70–120 元；拉缸大修上千元。' },
-  { key: 'gear', name: '齿轮油', action: '更换', intervalKm: 12000, intervalMonths: 12, spec: '豪爵专用或 API GL-5 · SAE 80W-90 · 120ml', impactLabel: '实际损伤', consequence: '齿轮油衰减后齿轮磨损加剧，出现异响与传动阻力，长期会啃齿。', cost: '换油几十元；齿轮箱维修几百元。' },
-  { key: 'air', name: '空滤', action: '更换', intervalKm: 6000, intervalMonths: null, spec: '含油纸滤芯，禁止清洗；多尘环境提前更换', impactLabel: '体验为主，长期有损伤', consequence: '堵塞后动力下降、油耗升高；滤芯破损则灰尘入缸造成磨损。优化表按 10000km 更换。', cost: '滤芯 40–70 元，更换简单。' },
-  { key: 'spark', name: '火花塞', action: '更换', intervalKm: 10000, intervalMonths: null, spec: 'NGK CPR7EA · 间隙 0.8–0.9mm · 每 6000km 检查', impactLabel: '体验为主', consequence: '点火变弱，启动困难、怠速抖动、加速无力、油耗上升；检查时颜色淡棕色为正常。优化表认为 20000km 前基本无需更换。', cost: '塞子本身便宜，损失有限。' },
-  { key: 'valve', name: '气门间隙', action: '检查', intervalKm: 6000, intervalMonths: null, spec: '冷态检查 · 进气 0.10–0.14mm · 排气 0.20–0.24mm · 需专业人员', impactLabel: '实际损伤', consequence: '间隙失准导致噪音与动力下降；间隙过小长期会烧气门（关闭不严过热）。通常检查后不需要调整。', cost: '检查调整以工时费为主；烧气门需拆缸头，费用高。' },
-  { key: 'belt', name: '驱动皮带', action: '更换', intervalKm: 24000, intervalMonths: null, spec: '硬性更换指标 · 每 6000km 检查 · 建议专业更换', impactLabel: '实际损伤', consequence: '皮带是橡胶件，会老化磨损；断裂则车辆完全失去动力，只能推车或拖车。', cost: '皮带 150–200 元 + 工时约 50 元。' },
-  { key: 'brakePad', name: '制动片 / 盘', action: '检查', intervalKm: 6000, intervalMonths: null, spec: '片磨到限度刻痕更换 · 盘厚度小于 3.5mm 更换 · 新片需 300km 磨合', impactLabel: '安全件', consequence: '磨没后制动距离变长并啃伤刹车盘，极端会失灵；先兆是异响与刹车变软。', cost: '刹车片 60–100 元；刹车盘几百元。' },
-  { key: 'brakeOil', name: '制动液', action: '更换', intervalKm: null, intervalMonths: 24, spec: 'DOT4 · 每 6 个月检查液面，不低于 LOWER 线', impactLabel: '安全件', consequence: '制动液吸水后沸点下降，极端时沸腾导致制动失灵。平时无感，出问题就是大事。', cost: '换油几十元。' },
-  { key: 'tire', name: '轮胎', action: '检查', intervalKm: null, intervalMonths: null, spec: '前 110/80-14 · 后 130/70-14 · 真空胎 · 换胎后必须做动平衡', impactLabel: '安全件', consequence: '手册每 3000km 检查胎压与磨损。胎压（冷胎）：单人前 200 / 后 225 kPa，双人前 200 / 后 250 kPa。磨损条触地必须更换，侧面损坏或破损大于 6mm 不能修复。', cost: '一条一两百元。' },
-  { key: 'coolant', name: '冷却液', action: '更换', intervalKm: 8000, intervalMonths: 24, spec: '乙二醇基（铝散热器适用）· 50:50 配比 · 更换 600ml', impactLabel: '实际损伤', consequence: '防冻液的防腐蚀和防锈能力随时间衰减，长期不换会腐蚀水道、影响散热。', cost: '更换费用不高。' },
-  { key: 'battery', name: '蓄电池', action: '检查', intervalKm: null, intervalMonths: 6, spec: '12V 6Ah 全密封 · 电压低于 12.4V 需充电 · 长期不用每月补电', impactLabel: '体验为主', consequence: '亏电导致起动无力、灯光暗淡，长期亏电损伤电池寿命。', cost: '检查电压免费，充电便宜；换电池一两百元。' },
-  { key: 'throttle', name: '节气门体', action: '清洗', intervalKm: 12000, intervalMonths: null, spec: '需专业人员 · 禁止调整限位螺钉', impactLabel: '体验为主', consequence: '积碳导致怠速不稳、油耗上升。优化表认为无异常可延至 15000–20000km。', cost: '清洗以工时费为主。' }
+  { key: 'oil', name: '机油', action: '更换', intervalKm: 3000, intervalMonths: 6, exp: '经验 3500–4000 km', sev: '大', spec: 'API SL · JASO MB · SAE 10W-40 · 800ml', impactLabel: '实际损伤', consequence: '机油衰减、油泥增多，润滑下降磨损气缸与活塞环，长期拖延可能拉缸；前期表现是噪音变大、动力下降、油耗上升。出保后全合成可放宽至 3500–4000km，不宜超 5000km。', cost: '全合成 70–120 元；拉缸大修上千元。' },
+  { key: 'gear', name: '齿轮油', action: '更换', intervalKm: 12000, intervalMonths: 12, exp: null, sev: '中', spec: '豪爵专用或 API GL-5 · SAE 80W-90 · 120ml', impactLabel: '实际损伤', consequence: '齿轮油衰减后齿轮磨损加剧，出现异响与传动阻力，长期会啃齿。', cost: '换油几十元；齿轮箱维修几百元。' },
+  { key: 'air', name: '空滤', action: '更换', intervalKm: 6000, intervalMonths: null, exp: '经验 10000 km', sev: '中', spec: '含油纸滤芯，禁止清洗；多尘环境提前更换', impactLabel: '体验为主', consequence: '堵塞后动力下降、油耗升高；滤芯破损则灰尘入缸造成磨损。优化表按 10000km 更换。', cost: '滤芯 40–70 元，更换简单。' },
+  { key: 'spark', name: '火花塞', action: '更换', intervalKm: 10000, intervalMonths: null, exp: '经验 20000 km', sev: '小', spec: 'NGK CPR7EA · 间隙 0.8–0.9mm · 每 6000km 检查', impactLabel: '体验为主', consequence: '点火变弱，启动困难、怠速抖动、加速无力、油耗上升；检查时颜色淡棕色为正常。优化表认为 20000km 前基本无需更换。', cost: '塞子本身便宜，损失有限。' },
+  { key: 'valve', name: '气门间隙', action: '检查', intervalKm: 6000, intervalMonths: null, exp: null, sev: '大', spec: '冷态检查 · 进气 0.10–0.14mm · 排气 0.20–0.24mm · 需专业人员', impactLabel: '实际损伤', consequence: '间隙失准导致噪音与动力下降；间隙过小长期会烧气门（关闭不严过热）。通常检查后不需要调整。', cost: '检查调整以工时费为主；烧气门需拆缸头，费用高。' },
+  { key: 'belt', name: '驱动皮带', action: '更换', intervalKm: 24000, intervalMonths: null, exp: null, sev: '中', spec: '硬性更换指标 · 每 6000km 检查 · 建议专业更换', impactLabel: '实际损伤', consequence: '皮带是橡胶件，会老化磨损；断裂则车辆完全失去动力，只能推车或拖车。', cost: '皮带 150–200 元 + 工时约 50 元。' },
+  { key: 'brakePad', name: '制动片 / 盘', action: '检查', intervalKm: 6000, intervalMonths: null, exp: null, sev: '大', spec: '片磨到限度刻痕更换 · 盘厚度小于 3.5mm 更换 · 新片需 300km 磨合', impactLabel: '安全件', consequence: '磨没后制动距离变长并啃伤刹车盘，极端会失灵；先兆是异响与刹车变软。', cost: '刹车片 60–100 元；刹车盘几百元。' },
+  { key: 'brakeOil', name: '制动液', action: '更换', intervalKm: null, intervalMonths: 24, exp: null, sev: '大', spec: 'DOT4 · 每 6 个月检查液面，不低于 LOWER 线', impactLabel: '安全件', consequence: '制动液吸水后沸点下降，极端时沸腾导致制动失灵。平时无感，出问题就是大事。', cost: '换油几十元。' },
+  { key: 'tire', name: '轮胎', action: '检查', intervalKm: null, intervalMonths: null, exp: null, sev: '大', spec: '前 110/80-14 · 后 130/70-14 · 真空胎 · 换胎后必须做动平衡', impactLabel: '安全件', consequence: '手册每 3000km 检查胎压与磨损。胎压（冷胎）：单人前 200 / 后 225 kPa，双人前 200 / 后 250 kPa。磨损条触地必须更换，侧面损坏或破损大于 6mm 不能修复。', cost: '一条一两百元。' },
+  { key: 'coolant', name: '冷却液', action: '更换', intervalKm: 8000, intervalMonths: 24, exp: null, sev: '中', spec: '乙二醇基（铝散热器适用）· 50:50 配比 · 更换 600ml', impactLabel: '实际损伤', consequence: '防冻液的防腐蚀和防锈能力随时间衰减，长期不换会腐蚀水道、影响散热。', cost: '更换费用不高。' },
+  { key: 'battery', name: '蓄电池', action: '检查', intervalKm: null, intervalMonths: 6, exp: null, sev: '小', spec: '12V 6Ah 全密封 · 电压低于 12.4V 需充电 · 长期不用每月补电', impactLabel: '体验为主', consequence: '亏电导致起动无力、灯光暗淡，长期亏电损伤电池寿命。', cost: '检查电压免费，充电便宜；换电池一两百元。' },
+  { key: 'throttle', name: '节气门体', action: '清洗', intervalKm: 12000, intervalMonths: null, exp: '经验 15000–20000 km', sev: '小', spec: '需专业人员 · 禁止调整限位螺钉', impactLabel: '体验为主', consequence: '积碳导致怠速不稳、油耗上升。优化表认为无异常可延至 15000–20000km。', cost: '清洗以工时费为主。' }
 ];
 
 function maintMatch(key, remark) {
@@ -366,23 +381,36 @@ function defaultEditBounds() {
   return out;
 }
 
-function computeMaintCards(items, events, currentMileage, today, overrides) {
+function lastLabelFor(ev) {
+  if (ev.source === 'never') return '新车至今未做';
+  let src = '（备注提取）';
+  if (ev.source === 'manual') {
+    src = ev.note ? '（手动登记：' + ev.note + '）' : '（手动登记）';
+  }
+  return '上次保养：' + ev.mileage + ' km · ' + ev.date + src;
+}
+
+function computeMaintCards(items, events, currentMileage, today, overrides, neverDone) {
+  const neverSet = {};
+  for (const k of (neverDone || [])) neverSet[k] = true;
   const cards = items.map((it) => {
     const b = effBounds(it, overrides);
-    const ev = events[it.key];
-    const card = { key: it.key, name: it.name, action: it.action, spec: it.spec, impactLabel: it.impactLabel, consequence: it.consequence, cost: it.cost, pct: null, statusLabel: '', badgeStyle: '', barColor: '', progressLabel: '', lastLabel: '', assumeLabel: '', intervalLabel: '', score: 0 };
+    let ev = events[it.key];
+    const never = !ev && !!neverSet[it.key];
+    if (never) ev = { mileage: 0, date: '', source: 'never' };
+    const card = { key: it.key, name: it.name, action: it.action, spec: it.spec, impactLabel: it.impactLabel, sev: it.sev, consequence: it.consequence, cost: it.cost, pct: null, statusLabel: '', badgeStyle: '', barColor: '', mainNumber: '', detailProgress: '', lastLabel: '', assumeLabel: '', cycleLabel: '', score: 0 };
     const parts = [];
-    if (b.km) parts.push(b.km + ' km');
-    if (b.months) parts.push(b.months + ' 个月');
+    if (b.km) parts.push(b.km + 'km');
+    if (b.months) parts.push(b.months + '月');
     if (parts.length === 0) {
-      card.intervalLabel = it.action + ' · 按状态';
+      card.cycleLabel = it.action + ' · 按状态';
       card.statusLabel = '检查';
       card.badgeStyle = 'background:#f3f4f6;color:#4b5563';
       card.score = 0;
-      card.lastLabel = ev ? ('上次保养：' + ev.mileage + ' km · ' + ev.date + (ev.source === 'manual' ? '（手动登记）' : '（备注提取）')) : '备注和登记里都没有记录';
+      card.lastLabel = ev ? lastLabelFor(ev) : '备注和登记里都没有记录';
       return card;
     }
-    card.intervalLabel = it.action + ' · ' + parts.join(' / ') + (parts.length > 1 ? '（先到为准）' : '');
+    card.cycleLabel = it.action + ' · ' + parts.join('/') + (it.exp ? ' · ' + it.exp : '');
     if (!ev) {
       card.statusLabel = '未记录';
       card.badgeStyle = 'background:#f3f4f6;color:#4b5563';
@@ -402,7 +430,7 @@ function computeMaintCards(items, events, currentMileage, today, overrides) {
       elapsedKm = Math.max(0, currentMileage - ev.mileage);
       pctKm = elapsedKm / b.km;
     }
-    if (b.months) {
+    if (b.months && ev.date) {
       const m = monthsBetween(ev.date, today);
       if (m !== null && !isNaN(m)) {
         elapsedMo = Math.max(0, m);
@@ -410,15 +438,15 @@ function computeMaintCards(items, events, currentMileage, today, overrides) {
       }
     }
     if (pctKm === null && pctMo === null) {
-      card.statusLabel = '未记录';
+      card.statusLabel = never ? '未做过' : '未记录';
       card.badgeStyle = 'background:#f3f4f6;color:#4b5563';
       card.score = 1.5;
-      card.lastLabel = '上次日期无法解析：' + ev.date;
+      card.lastLabel = never ? '新车至今未做' : '上次日期无法解析：' + ev.date;
       return card;
     }
     const pct = Math.max(pctKm === null ? -1 : pctKm, pctMo === null ? -1 : pctMo);
     card.pct = pct;
-    card.lastLabel = '上次保养：' + ev.mileage + ' km · ' + ev.date + (ev.source === 'manual' ? '（手动登记）' : '（备注提取）');
+    card.lastLabel = lastLabelFor(ev);
     if (pct < 0.8) {
       card.statusLabel = '正常';
       card.badgeStyle = 'background:#dcfce7;color:#166534';
@@ -436,14 +464,20 @@ function computeMaintCards(items, events, currentMileage, today, overrides) {
       card.score = 3;
     }
     card.score += pct * 0.01;
-    const segs = [];
+    const nums = [];
+    const details = [];
     if (pctKm !== null) {
-      segs.push('已行驶 ' + Math.round(elapsedKm) + ' km' + (pctKm < 1 ? '，还剩约 ' + Math.round(b.km - elapsedKm) + ' km' : '，已超约 ' + Math.round(elapsedKm - b.km) + ' km'));
+      if (pctKm < 1) nums.push('剩 ' + Math.round(b.km - elapsedKm) + 'km');
+      else nums.push('超 ' + Math.round(elapsedKm - b.km) + 'km');
+      details.push('已行驶 ' + Math.round(elapsedKm) + ' km' + (pctKm < 1 ? '，还剩约 ' + Math.round(b.km - elapsedKm) + ' km' : '，已超约 ' + Math.round(elapsedKm - b.km) + ' km'));
     }
     if (pctMo !== null) {
-      segs.push('已过 ' + elapsedMo.toFixed(1) + ' 个月' + (pctMo < 1 ? '，还剩约 ' + (b.months - elapsedMo).toFixed(1) + ' 个月' : '，已超约 ' + (elapsedMo - b.months).toFixed(1) + ' 个月'));
+      if (pctMo < 1) nums.push('剩 ' + (b.months - elapsedMo).toFixed(1) + '月');
+      else nums.push('超 ' + (elapsedMo - b.months).toFixed(1) + '月');
+      details.push('已过 ' + elapsedMo.toFixed(1) + ' 个月' + (pctMo < 1 ? '，还剩约 ' + (b.months - elapsedMo).toFixed(1) + ' 个月' : '，已超约 ' + (elapsedMo - b.months).toFixed(1) + ' 个月'));
     }
-    card.progressLabel = segs.join('；');
+    card.mainNumber = nums.join(' · ');
+    card.detailProgress = details.join('；');
     return card;
   });
   cards.sort((a, b) => b.score - a.score);
@@ -467,7 +501,9 @@ createApp({
             regDate: '',
             regNote: '',
             editBounds: defaultEditBounds(),
-            showCfg: false
+            showCfg: false,
+            expanded: {},
+            showNotes: false
         }
     },
     computed: {
@@ -582,8 +618,8 @@ createApp({
             return mergeMaintEvents(extractMaintEvents(this.rawStats), this.maintRecs);
         },
         maintCards() {
-            const ov = (this.maintCfg && this.maintCfg.intervals) || {};
-            return computeMaintCards(this.maintItems, this.maintEvents, this.totalMileage, new Date(), ov);
+            const cfg = this.maintCfg || {};
+            return computeMaintCards(this.maintItems, this.maintEvents, this.totalMileage, new Date(), cfg.intervals || {}, cfg.neverDone || []);
         },
         intervalItems() {
             return this.maintItems.filter((it) => it.intervalKm || it.intervalMonths);
@@ -608,6 +644,9 @@ createApp({
             const now = new Date().getTime();
             // 3天的毫秒数: 3 * 24 * 60 * 60 * 1000 = 259200000
             return (now - recordTime) <= 259200000;
+        },
+        toggleCard(key) {
+            this.expanded[key] = !this.expanded[key];
         },
         itemName(key) {
             const it = this.maintItems.find((x) => x.key === key);
@@ -684,7 +723,8 @@ createApp({
                 if (entry.km || entry.months) intervals[it.key] = entry;
             }
             try {
-                await axios.post(MAINT_CFG_URL, { payload: { intervals: intervals } });
+                const payload = Object.assign({}, this.maintCfg, { intervals: intervals });
+                await axios.post(MAINT_CFG_URL, { payload: payload });
                 await this.fetchMaint();
                 alert('周期已保存');
             } catch (e) {
