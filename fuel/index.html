@@ -382,7 +382,7 @@ function defaultEditBounds() {
 }
 
 function lastLabelFor(ev) {
-  if (ev.source === 'never') return '新车至今未做';
+  if (ev.source === 'never') return ev.date ? '新车至今未做（' + (ev.approx ? '约 ' : '') + ev.date + ' 起算）' : '新车至今未做';
   let src = '（备注提取）';
   if (ev.source === 'manual') {
     src = ev.note ? '（手动登记：' + ev.note + '）' : '（手动登记）';
@@ -390,14 +390,14 @@ function lastLabelFor(ev) {
   return '上次保养：' + ev.mileage + ' km · ' + ev.date + src;
 }
 
-function computeMaintCards(items, events, currentMileage, today, overrides, neverDone) {
+function computeMaintCards(items, events, currentMileage, today, overrides, neverDone, purchaseDate, purchaseDateApprox) {
   const neverSet = {};
   for (const k of (neverDone || [])) neverSet[k] = true;
   const cards = items.map((it) => {
     const b = effBounds(it, overrides);
     let ev = events[it.key];
     const never = !ev && !!neverSet[it.key];
-    if (never) ev = { mileage: 0, date: '', source: 'never' };
+    if (never) ev = { mileage: 0, date: purchaseDate || '', source: 'never', approx: !!purchaseDateApprox };
     const card = { key: it.key, name: it.name, action: it.action, spec: it.spec, impactLabel: it.impactLabel, sev: it.sev, consequence: it.consequence, cost: it.cost, pct: null, statusLabel: '', badgeStyle: '', barColor: '', mainNumber: '', detailProgress: '', lastLabel: '', assumeLabel: '', cycleLabel: '', score: 0 };
     const parts = [];
     if (b.km) parts.push(b.km + 'km');
@@ -619,7 +619,7 @@ createApp({
         },
         maintCards() {
             const cfg = this.maintCfg || {};
-            return computeMaintCards(this.maintItems, this.maintEvents, this.totalMileage, new Date(), cfg.intervals || {}, cfg.neverDone || []);
+            return computeMaintCards(this.maintItems, this.maintEvents, this.totalMileage, new Date(), cfg.intervals || {}, cfg.neverDone || [], cfg.purchaseDate || '', !!cfg.purchaseDateApprox);
         },
         intervalItems() {
             return this.maintItems.filter((it) => it.intervalKm || it.intervalMonths);
