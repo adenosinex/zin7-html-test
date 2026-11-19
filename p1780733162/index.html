@@ -315,6 +315,22 @@
         .sync-status.offline {
             color: var(--danger);
         }
+        .sync-status.login {
+            color: var(--danger);
+        }
+        .auth-banner {
+            display: none;
+            margin: 12px 0;
+            padding: 10px 12px;
+            border: 1px solid var(--danger);
+            border-radius: 8px;
+            color: var(--danger);
+            font-size: 14px;
+        }
+        .auth-banner a {
+            color: inherit;
+            font-weight: 600;
+        }
 
         @keyframes pulse {
             0%,
@@ -861,6 +877,7 @@
             </span>
         </div>
 
+        <div id="authBanner" class="auth-banner">未登录，无法读取云端数据，<a id="authLoginLink" href="/login">去登录</a></div>
         <div class="prompt-grid" id="promptGrid"></div>
     </div>
 
@@ -947,6 +964,7 @@
             var _syncTimer = null;
             var _syncInProgress = false;
             var _pendingSync = false;
+            var _cloudAuthFailed = false;
             var _skipNextSync = false;
             var SYNC_DEBOUNCE_MS = 400;
 
@@ -964,9 +982,23 @@
                     case 'offline':
                         el.textContent = '⚠️ Offline';
                         break;
+                    case 'login':
+                        el.textContent = '🔒 未登录';
+                        break;
                     default:
                         el.textContent = '☁️ ' + status;
                 }
+            }
+
+            function markAuthFailed() {
+                _cloudAuthFailed = true;
+                var banner = document.getElementById('authBanner');
+                if (banner) {
+                    banner.style.display = 'block';
+                    var link = document.getElementById('authLoginLink');
+                    if (link) link.href = '/login?next=' + encodeURIComponent(location.pathname + location.search);
+                }
+                setSyncStatus('login');
             }
 
             // ---- 工具函数 ----
@@ -1109,6 +1141,7 @@
                         body: payload
                     })
                     .then(function(res) {
+                        if (res.redirected || (res.url && res.url.indexOf('/login') !== -1)) { var e = new Error('AUTH'); e.code = 'AUTH'; throw e; }
                         if (!res.ok) throw new Error('HTTP ' + res.status);
                         return res.json();
                     })
@@ -1120,6 +1153,11 @@
                         }
                     })
                     .catch(function(err) {
+                        if (err && err.code === 'AUTH') {
+                            markAuthFailed();
+                            _pendingSync = false;
+                            return;
+                        }
                         console.warn('Prompt Vault: 云端同步失败。', err);
                         setSyncStatus('offline');
                         _pendingSync = true;
@@ -1139,6 +1177,7 @@
                 setSyncStatus('syncing');
                 return fetch(CLOUD_URL)
                     .then(function(res) {
+                        if (res.redirected || (res.url && res.url.indexOf('/login') !== -1)) { var e = new Error('AUTH'); e.code = 'AUTH'; throw e; }
                         if (!res.ok) throw new Error('No cloud data (HTTP ' + res.status + ')');
                         return res.json();
                     })
@@ -1149,6 +1188,7 @@
                         throw new Error('Empty or invalid cloud data');
                     })
                     .catch(function(err) {
+                        if (err && err.code === 'AUTH') markAuthFailed();
                         console.warn('Prompt Vault: 云端加载失败，使用本地数据。', err.message);
                         return null;
                     });
@@ -1753,6 +1793,10 @@
                             setSyncStatus('synced');
                         }
                     } else {
+                        if (_cloudAuthFailed) {
+                            setSyncStatus('login');
+                            return;
+                        }
                         if (initialDataLen === 0) {
                             var now = Date.now();
                             data = [{
