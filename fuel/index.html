@@ -24,7 +24,6 @@
 </style>
 <header class="hub-topnav"><div class="hub-topnav-in"><h1>油耗统计</h1></div></header>
 <div id="app" class="max-w-[68rem] mx-auto mt-8 p-6 bg-white rounded-lg shadow">
-    <div v-if="authError" class="mb-4 p-3 rounded-lg border border-red-300 bg-red-50 text-red-700 text-sm">未登录，无法读取云端数据，<a id="authLoginLink" href="/login" class="underline font-semibold">去登录</a></div>
     <div class="flex gap-2 mb-4">
   <button @click="view = 'fuel'" class="px-4 py-1.5 rounded font-semibold text-sm" :class="view === 'fuel' ? 'bg-blue-500 text-white' : 'bg-gray-100 text-gray-600'">油耗统计</button>
   <button @click="view = 'maint'" class="px-4 py-1.5 rounded font-semibold text-sm" :class="view === 'maint' ? 'bg-blue-500 text-white' : 'bg-gray-100 text-gray-600'">保养周期</button>
@@ -493,7 +492,6 @@ createApp({
             fuelAmount: null,
             remark: "",
             rawStats: [], // 存储后端返回的原始数据
-            authError: false,
             view: 'fuel',
             maintItems: MAINT_ITEMS,
             maintRecs: [],
@@ -659,15 +657,9 @@ createApp({
                 const res = await axios.get(MAINT_BASE + '/records/maint_records', {
                     params: { perPage: 200 }
                 });
-                if ((res.request && res.request.responseURL && res.request.responseURL.indexOf('/login') !== -1) || typeof res.data === 'string') {
-                    const authErr = new Error('AUTH');
-                    authErr.code = 'AUTH';
-                    throw authErr;
-                }
-                this.authError = false;
                 this.maintRecs = res.data.items || [];
             } catch (e) {
-                if (e && e.code === 'AUTH') { this.authError = true; } else { console.error('maint fetch failed', e); }
+                console.error('maint fetch failed', e);
             }
             try {
                 const cfg = await axios.get(MAINT_CFG_URL);
@@ -747,12 +739,6 @@ createApp({
                     const res = await axios.get(API_BASE + '/records/fuel_records', {
                         params: { sort: 'record_time', perPage: 200, page: page }
                     });
-                    if ((res.request && res.request.responseURL && res.request.responseURL.indexOf('/login') !== -1) || typeof res.data === 'string') {
-                        const authErr = new Error('AUTH');
-                        authErr.code = 'AUTH';
-                        throw authErr;
-                    }
-                    this.authError = false;
                     totalPages = res.data.totalPages || 1;
                     all = all.concat(res.data.items || []);
                     page++;
@@ -762,12 +748,7 @@ createApp({
                     this.drawChart();
                 });
             } catch (error) {
-                if (error && error.code === 'AUTH') {
-                    this.authError = true;
-                    this.$nextTick(() => { const a = document.getElementById('authLoginLink'); if (a) a.href = '/login?next=' + encodeURIComponent(window.location.pathname + window.location.search); });
-                } else {
-                    console.error("获取数据失败:", error);
-                }
+                console.error("获取数据失败:", error);
             }
         },
         async addRecord() {
