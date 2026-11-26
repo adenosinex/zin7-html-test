@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>T03: 生长轴、甲状腺轴与应激轴</title>
+<style>
+  :root {
+    --bg-page: #f8fafc;
+    --bg-card: #ffffff;
+    --border: #e2e8f0;
+    --border-dark: #cbd5e1;
+    --text-primary: #0f172a;
+    --text-secondary: #475569;
+    --text-muted: #64748b;
+    --male-color: #0284c7;
+    --female-color: #e11d48;
+    --accent: #2563eb;
+    --accent-soft: #eff6ff;
+    --shadow: 0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background-color: var(--bg-page);
+    color: var(--text-primary);
+    line-height: 1.6;
+    padding-top: 130px;
+    padding-bottom: 40px;
+  }
+  .container {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 0 16px;
+  }
+  header {
+    margin-bottom: 24px;
+  }
+  h1 {
+    font-size: 1.75rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .badge-dim {
+    background: #0f172a;
+    color: #fff;
+    font-size: 0.85rem;
+    padding: 2px 8px;
+    border-radius: 4px;
+    letter-spacing: 0.5px;
+  }
+  .curve-note {
+    margin-top: 8px;
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    background: #fff;
+    padding: 12px 16px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+  }
+  /* 顶部固定控制台 */
+  .fixed-bar {
+    position: static;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: #ffffff;
+    border-bottom: 2px solid var(--border);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    z-index: 1000;
+    padding: 10px 16px;
+  }
+  .fixed-inner {
+    max-width: 1120px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .control-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .slider-group {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-grow: 1;
+    min-width: 260px;
+  }
+  .slider-group label {
+    font-weight: 700;
+    font-size: 0.9rem;
+    white-space: nowrap;
+  }
+  .slider-group input[type="range"] {
+    flex-grow: 1;
+    height: 6px;
+    background: #cbd5e1;
+    border-radius: 3px;
+    outline: none;
+    cursor: pointer;
+  }
+  .age-display {
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: var(--accent);
+    min-width: 54px;
+    text-align: right;
+  }
+  .btn-group {
+    display: flex;
+    gap: 4px;
+    background: #f1f5f9;
+    padding: 3px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+  }
+  .btn-group button {
+    border: none;
+    background: none;
+    padding: 4px 12px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    border-radius: 4px;
+    cursor: pointer;
+    color: var(--text-secondary);
+  }
+  .btn-group button.active {
+    background: #ffffff;
+    color: var(--text-primary);
+    box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+  }
+  .summary-strip {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    font-size: 0.8rem;
+    background: #f8fafc;
+    padding: 6px 12px;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+  }
+  .summary-strip div span {
+    font-weight: 700;
+    color: var(--text-muted);
+    margin-right: 4px;
+  }
+  .summary-strip div strong {
+    color: var(--text-primary);
+  }
+
+  /* 通用Section卡片 */
+  .section-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 24px;
+    box-shadow: var(--shadow);
+  }
+  .section-title {
+    font-size: 1.15rem;
+    font-weight: 700;
+    border-bottom: 2px solid var(--accent-soft);
+    padding-bottom: 8px;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .section-title::before {
+    content: "";
+    display: inline-block;
+    width: 4px;
+    height: 18px;
+    background: var(--accent);
+    border-radius: 2px;
+  }
+
+  /* 轨迹图 SVG */
+  .chart-wrapper {
+    position: relative;
+    width: 100%;
+    overflow-x: auto;
+  }
+  #chartSvg {
+    width: 100%;
+    height: 380px;
+    min-width: 600px;
+  }
+  .axis text {
+    font-size: 11px;
+    fill: var(--text-muted);
+  }
+  .axis line, .axis path {
+    stroke: var(--border-dark);
+  }
+  .grid-line {
+    stroke: #f1f5f9;
+    stroke-dasharray: 2, 2;
+  }
+  .cursor-line {
+    stroke: #ef4444;
+    stroke-width: 1.5;
+    stroke-dasharray: 4, 3;
+    pointer-events: none;
+  }
+  .trend-badge-group {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 12px;
+    font-size: 0.75rem;
+  }
+  .trend-badge {
+    background: #f1f5f9;
+    padding: 4px 8px;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+  }
+
+  /* 悬停提示 Tooltip */
+  #tooltip {
+    position: absolute;
+    display: none;
+    background: rgba(15, 23, 42, 0.92);
+    color: #fff;
+    padding: 6px 10px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    pointer-events: none;
+    z-index: 50;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+    line-height: 1.4;
+  }
+
+  /* 阶段时间轴卡片 */
+  .timeline-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .stage-card {
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--accent);
+    border-radius: 6px;
+    padding: 14px;
+    background: #fff;
+  }
+  .stage-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+  .stage-range {
+    font-weight: 800;
+    font-size: 1rem;
+    color: var(--accent);
+  }
+  .stage-reversibility {
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 4px;
+    background: #fef2f2;
+    color: #991b1b;
+    border: 1px solid #fecaca;
+  }
+  .stage-desc {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin-bottom: 10px;
+  }
+  .stage-gender-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    background: #f8fafc;
+    padding: 10px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+  }
+  .stage-male { border-left: 2px solid var(--male-color); padding-left: 8px; }
+  .stage-female { border-left: 2px solid var(--female-color); padding-left: 8px; }
+  .stage-gender-grid strong {
+    display: block;
+    margin-bottom: 2px;
+  }
+
+  /* 可折叠详情 (details) */
+  details.branch-item {
+    margin-bottom: 12px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    overflow: hidden;
+  }
+  details.branch-item summary {
+    background: #f8fafc;
+    padding: 12px 16px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    list-style: none;
+    border-bottom: 1px solid transparent;
+  }
+  details.branch-item summary::-webkit-details-marker { display: none; }
+  details.branch-item[open] summary {
+    border-bottom: 1px solid var(--border);
+    background: #f1f5f9;
+  }
+  .branch-tag {
+    background: #e0f2fe;
+    color: #0369a1;
+    font-size: 0.7rem;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-weight: 700;
+  }
+  .branch-content {
+    padding: 14px 16px;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    line-height: 1.7;
+    background: #ffffff;
+  }
+
+  /* 干预窗口三类 */
+  .window-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+  .window-card {
+    border-radius: 6px;
+    padding: 14px;
+    border: 1px solid var(--border);
+    background: #ffffff;
+    font-size: 0.85rem;
+  }
+  .window-card h3 {
+    font-size: 0.95rem;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .window-locked { border-top: 4px solid #ef4444; }
+  .window-locked h3 { color: #b91c1c; }
+  .window-high-return { border-top: 4px solid #10b981; }
+  .window-high-return h3 { color: #047857; }
+  .window-delay-only { border-top: 4px solid #f59e0b; }
+  .window-delay-only h3 { color: #b45309; }
+  .window-card p {
+    color: var(--text-secondary);
+    line-height: 1.6;
+  }
+
+  /* 跨维度联动与核实清单 */
+  .cross-links-text {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    line-height: 1.7;
+    margin-bottom: 16px;
+    background: #f8fafc;
+    padding: 12px;
+    border-radius: 6px;
+    border-left: 3px solid var(--accent);
+  }
+  .claims-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.75rem;
+    margin-top: 10px;
+  }
+  .claims-table th, .claims-table td {
+    border: 1px solid var(--border);
+    padding: 8px 10px;
+    text-align: left;
+    vertical-align: top;
+  }
+  .claims-table th {
+    background: #f1f5f9;
+    color: var(--text-primary);
+  }
+  .status-verified {
+    background: #dcfce7;
+    color: #15803d;
+    padding: 2px 4px;
+    border-radius: 3px;
+    font-weight: 700;
+    display: inline-block;
+  }
+
+  @media (max-width: 768px) {
+    body { padding-top: 170px; }
+    .summary-strip { grid-template-columns: 1fr; gap: 4px; }
+    .window-grid { grid-template-columns: 1fr; }
+    .stage-gender-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- 顶部固定控制台 -->
+<div class="fixed-bar">
+  <div class="fixed-inner">
+    <div class="control-row">
+      <div class="slider-group">
+        <label for="ageSlider">观察年龄:</label>
+        <input type="range" id="ageSlider" min="0" max="95" value="15" step="1">
+        <span class="age-display" id="ageValue">15 岁</span>
+      </div>
+      <div class="btn-group">
+        <button id="btnBoth" class="active" onclick="setGenderMode('both')">两性对比</button>
+        <button id="btnMale" onclick="setGenderMode('male')">仅男性</button>
+        <button id="btnFemale" onclick="setGenderMode('female')">仅女性</button>
+      </div>
+    </div>
+    <div class="summary-strip">
+      <div><span>当前生命阶段:</span><strong id="barStage">青春期 (10-19岁)</strong></div>
+      <div><span>下一生理拐点:</span><strong id="barInflection">骨骺完全闭合 (~16-18岁)</strong></div>
+      <div><span>核心关注点:</span><strong id="barFocus">生长突增峰值(PHV)与睡眠促GH释放</strong></div>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+  <header>
+    <h1><span class="badge-dim">T03</span> 生长轴、甲状腺轴与应激轴</h1>
+    <div class="curve-note" id="curveNote"></div>
+  </header>
+
+  <!-- 段落 A: 轨迹图 -->
+  <section class="section-card">
+    <div class="section-title">A. 全生命周期同化-异化内分泌平衡相对轨迹图 (0-100 指数)</div>
+    <div class="chart-wrapper">
+      <svg id="chartSvg" viewBox="0 0 900 360"></svg>
+      <div id="tooltip"></div>
+    </div>
+    <div class="trend-badge-group">
+      <div class="trend-badge"><strong>定性趋势:</strong> 婴儿期初生极高同化 → 儿童期平稳平台 → 青春期两性错峰突增达峰 → 成年后渐进性生长/肾上腺绝经与去同化</div>
+      <div class="trend-badge"><strong>关键数据源:</strong> WHO (2006) [PMID:16817758], Tanner et al. (1966, 1970, 1976), Corpas et al. (1993), Orentreich (1984)</div>
+    </div>
+  </section>
+
+  <!-- 段落 B: 阶段时间轴卡片 -->
+  <section class="section-card">
+    <div class="section-title">B. 生理阶段演变时间轴</div>
+    <div class="timeline-grid" id="timelineContainer"></div>
+  </section>
+
+  <!-- 段落 C: 可折叠专题支线 -->
+  <section class="section-card">
+    <div class="section-title">C. 分子机制深潜与前沿专题</div>
+    <div id="branchesContainer"></div>
+  </section>
+
+  <!-- 段落 D: 干预窗口三类 -->
+  <section class="section-card">
+    <div class="section-title">D. 干预窗口三类划分</div>
+    <div class="window-grid">
+      <div class="window-card window-locked">
+        <h3>不可逆锁定点 (Locked)</h3>
+        <p id="winLocked"></p>
+      </div>
+      <div class="window-card window-high-return">
+        <h3>黄金干预窗口 (High Return)</h3>
+        <p id="winHighReturn"></p>
+      </div>
+      <div class="window-card window-delay-only">
+        <h3>仅可延缓衰退 (Delay Only)</h3>
+        <p id="winDelayOnly"></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 段落 E: 跨维度联动与核实清单 -->
+  <section class="section-card">
+    <div class="section-title">E. 跨维度联动与证据核实清单</div>
+    <div class="cross-links-text" id="crossLinksText"></div>
+    <details class="branch-item">
+      <summary><span class="branch-tag">[核实清单]</span> 点击查看底层科学声明与循证来源核实表 (Claims Verification Table)</summary>
+      <div class="branch-content" style="padding:0;">
+        <table class="claims-table">
+          <thead>
+            <tr>
+              <th style="width: 70px;">ID</th>
+              <th style="width: 80px;">阶段</th>
+              <th>已核实核心陈述</th>
+              <th style="width: 170px;">定量基准 / 范围</th>
+              <th style="width: 60px;">状态</th>
+              <th style="width: 220px;">循证来源</th>
+            </tr>
+          </thead>
+          <tbody id="claimsTableBody"></tbody>
+        </table>
+      </div>
+    </details>
+  </section>
+</div>
+
+<script>
+const rawData = {"dim": "T03", "title": "生长轴、甲状腺轴与应激轴", "curve_note": "本曲线为0-100相对归一化指数（综合同化-异化内分泌平衡指数），整合生长激素脉冲与IGF-1同化轴、下丘脑-垂体-甲状腺（HPT）轴代谢定势、下丘脑-垂体-肾上腺（HPA）应激弹性与DHEA-S抗异化储备。婴儿期与青春期呈现双峰同化激增，成年后随生殖内分泌稳态维持，40岁后因生长停滞变动与皮质醇/DHEA-S比值失衡呈渐进性去同化衰退。", "ages": [0, 2, 5, 9, 12, 15, 19, 25, 35, 45, 55, 65, 75, 85, 95], "series": {"male": [96, 78, 68, 65, 74, 92, 75, 80, 68, 54, 42, 31, 22, 14, 8], "female": [97, 80, 69, 68, 88, 76, 70, 76, 65, 50, 38, 28, 20, 13, 7]}, "claims": [{"claim_id": "T03-C01", "statement": "出生后第1年（婴儿期）经历全生命周期最快生长速率，主受营养及甲状腺素驱动，生长激素（GH）受体表达逐步上调接管。", "value": "年身高增长约25-26 cm/年（生后第1年），第2年降至10-12 cm/年", "stage": "婴儿期0-2岁", "status": "[VERIFIED]", "source": "WHO Multicentre Growth Reference Study Group (2006), PMID: 16817758"}, {"claim_id": "T03-C02", "statement": "儿童中期生长速率进入相对恒定的平稳平台期，由生长激素（GH）脉冲分泌与IGF-1轴主导线性骨骼延伸。", "value": "5.0-6.5 cm/年的恒定线性增长速率", "stage": "儿童期3-9岁", "status": "[VERIFIED]", "source": "Kelly A et al. (2014), PMID: 25084719; Tanner JM et al. (1966)"}, {"claim_id": "T03-C03", "statement": "女性青春期身高突增（PHV）启动及达峰时间均系统性早于男性约2年。", "value": "女性PHV启动平均为9.5-10.5岁，达峰年龄11.5-12.5岁；男性启动11.5-12.5岁，达峰年龄13.5-14.5岁", "stage": "青春期10-19岁", "status": "[VERIFIED]", "source": "Marshall WA & Tanner JM (1969, 1970), PMID: 5386185, 4920632"}, {"claim_id": "T03-C04", "statement": "青春期生长突增峰值速度（PHV）男性高于女性，形成成年终身高两性差异的核心来源。", "value": "峰值速率：男性约9.5-10.5 cm/年，女性约8.0-9.0 cm/年", "stage": "青春期10-19岁", "status": "[VERIFIED]", "source": "Rogol AD et al. (2000), PMID: 10996843; Tanner JM et al. (1976)"}, {"claim_id": "T03-C05", "statement": "长骨骨骺闭合由局部芳香化生成的雌二醇（E2）浓度阈值触发软骨细胞耗竭并骨化，女性闭合早于男性。", "value": "骨骺完全融合年龄：女性平均14-16岁，男性平均16-18岁", "stage": "青春期10-19岁", "status": "[VERIFIED]", "source": "Smith EP et al. (1994), PMID: 8090165; Weise M et al. (2001), PMID: 11477174"}, {"claim_id": "T03-C06", "statement": "成年后生长激素（GH）自发生理脉冲频率与峰值逐年衰减，引发躯体构成改变与骨骼肌同化减少（生长激素绝经 Somatopause）。", "value": "30岁后血清总GH分泌量每10年下降约14-15%，24小时IGF-1总水平每10年衰减约9-10%", "stage": "青年峰值期20-35岁至老年期", "status": "[VERIFIED]", "source": "Corpas E, Harman SM, Blackman MR (1993), PMID: 8462498"}, {"claim_id": "T03-C07", "statement": "70-80岁健康老年个体血清循环IGF-1浓度较20-30岁青年峰值期出现极大幅度回落。", "value": "相较青年期峰值下降50%-60%，多数降至100 ng/mL以下", "stage": "老年期56-75岁", "status": "[VERIFIED]", "source": "Lamberts SW et al. (1997), PMID: 9334293; Vitale G et al. (2012), PMID: 22760635"}, {"claim_id": "T03-C08", "statement": "肾上腺网状带分泌的脱氢表雄酮硫酸酯（DHEA-S）随年龄增加呈特征性断崖式衰退（肾上腺绝经 Adrenopause）。", "value": "80岁老年人血清DHEA-S浓度仅为20-30岁青年峰值的10%-20%", "stage": "高龄期76-95+岁", "status": "[VERIFIED]", "source": "Orentreich N et al. (1984), PMID: 6469966; Maggio M et al. (2008), PMID: 18672097"}, {"claim_id": "T03-C09", "statement": "下丘脑-垂体-肾上腺（HPA）轴基础昼夜节律振幅衰减，表现为早晨皮质醇觉醒反应（CAR）平缓与夜间低谷谷值异常上移。", "value": "70岁以上老年人夜间最低皮质醇浓度较青年人高出20%-50%，昼夜振幅衰减约30%", "stage": "老年期56-75岁", "status": "[VERIFIED]", "source": "Van Cauter E et al. (1996), PMID: 8675683; Ferrari E et al. (2001), PMID: 11744094"}, {"claim_id": "T03-C10", "statement": "甲状腺轴中枢反馈设定点随增龄发生重置，无自身抗体的健康高龄群体促甲状腺激素（TSH）分布曲线上限右移。", "value": "80岁以上健康人群血清TSH 97.5百分位上限扩展至5.5-6.0 mIU/L（青年标准常为4.0-4.2 mIU/L）", "stage": "高龄期76-95+岁", "status": "[VERIFIED]", "source": "Surks MI & Hollowell JG (NHANES III, 2007), PMID: 18000090"}, {"claim_id": "T03-C11", "statement": "外周脱碘酶活性随增龄与虚弱状态下调，游离三碘甲状腺原氨酸（FT3）水平降低，游离甲状腺素（FT4）多维持稳定。", "value": "65岁后血清FT3水平每十年下降约0.2-0.4 pmol/L，FT3/FT4比值逐级降低", "stage": "老年期56-75岁", "status": "[VERIFIED]", "source": "Mariotti S et al. (1995); Corsonello A et al. (2010), PMID: 20603348"}, {"claim_id": "T03-C12", "statement": "同化/异化比值（DHEA-S与皮质醇摩尔比）随增龄不可逆性倒置，诱发系统性肌少症、内脏脂肪重分布与海马神经元萎缩脆弱性增加。", "value": "血清DHEA-S/皮质醇摩尔比自25岁峰值至85岁累计下降80%以上", "stage": "高龄期76-95+岁", "status": "[VERIFIED]", "source": "Phillips AC et al. (2010), PMID: 20452132; Ferrari E et al. (2001), PMID: 11744094"}], "stages": [{"range": "0-2岁", "mechanism": "生长主要依赖于高胰岛素、甲状腺素（T3/T4对中枢骨化中心成熟及神经髓鞘化至关重要）及营养充足性。GH受体在出生后逐步上调，下丘脑GHRH脉冲与IGF-1系统完成平稳接管。HPA轴处于应激低反应期（SHRP）以保护神经发育。生后1-6个月男婴经历微小青春期（mini-puberty），睾酮水平达到短暂峰值。", "male": "出生体长与生后早期生长略快于女性；微小青春期内睾丸间质细胞大量分泌睾酮（峰值可达青年低限水平），驱动外生殖器二次发育及早期线性骨矿沉积。", "female": "骨龄分化成熟度较男婴提前数周，微小青春期以FSH升高主导促使卵泡发育，甲状腺素促骨骼中枢成熟敏感性略高，对营养剥夺表现出更强的代谢抗压弹性。", "reversibility": "高度可逆；此阶段如遭遇甲状腺功能减退或营养不良，在早期确诊并纠正后可实现完全性追赶生长（Catch-up growth）。然而先天性甲减若未在生后2周内纠正，中枢神经认知发育损害将永久锁定。"}, {"range": "3-9岁", "mechanism": "GH-IGF-1同化轴完全接管纵向骨骼延伸，下丘脑GnRH脉冲发生器受中枢强力抑制处于静息期。肾上腺网状带在6-8岁启动功能初现（Adrenarche），CYP17A1的17,20-裂解酶活性选择性上调，DHEA及其硫酸盐分泌上升，协同维持生长速率恒定。", "male": "生长速率极度平稳（5.0-6.0 cm/年），肾上腺机能初现启动略晚于女童，骨骺软骨细胞耗竭速度慢，线性生长潜能蓄积时间长。", "female": "多数女童在6.5-7.5岁先出现肾上腺初现，DHEA-S水平微量先行上升，9岁时骨龄成熟度领先男童约1-1.5年。", "reversibility": "中度可逆；GH缺乏症或原发性甲减若在此窗口期诊断并施加外源重组人GH（rhGH）或L-T4替代，可挽回90%以上的终身高损失。"}, {"range": "10-19岁", "mechanism": "中枢Kisspeptin-GPR54信号解除GnRH抑制，性腺类固醇（睾酮/雌二醇）大幅脉冲释放，放大垂体GH脉冲分泌量达全生命周期顶峰（GH-IGF-1轴超生理激活）。局部骨骺板在芳香化酶CYP19A1转化的雌二醇浓度阈值调控下完成由增殖加速到终末软骨耗竭与骨化闭合的双相演程。", "male": "突增晚2年启动，峰值速率更高（约9.5-10.5 cm/年）。睾酮在外周软骨细胞局部芳香化为E2需要更长时间达到融合阈值，使骨骺闭合延后至16-18岁，累积更多线性生长时间。", "female": "突增早2年启动，峰值速率较低（约8.0-9.0 cm/年）。卵巢直接分泌高水平雌二醇迅速跨越骨骺融合阈值，月经初潮后平均仅剩4-7 cm生长空间，骨骺于14-16岁完全融合。", "reversibility": "时间绝对不可逆；骨骺软骨板一旦完全耗竭骨化，长骨纵向线性生长窗口彻底永久关闭，任何外源性激素均无法重启线性身高。"}, {"range": "20-35岁", "mechanism": "骨骼线性增长终结，GH脉冲重构为组织修复、蛋白质同化与底物动员模式。HPA轴昼夜节律最典型：清晨皮质醇觉醒反应强劲、夜间迅速归底。DHEA-S达到生命巅峰，强力拮抗糖皮质激素的分解代谢与海马神经毒性。", "male": "GH与睾酮协同主导高骨骼肌量与较低内脏脂肪；DHEA-S峰值绝对浓度高于女性，HPA轴交感应激反应以经典高去甲肾上腺素战斗或逃跑为主。", "female": "雌孕激素周期性调节甲状腺结合球蛋白（TBG）水平与HPA轴灵敏度；黄体期基础体温上升伴随基础代谢率与皮质醇微调变动。", "reversibility": "功能高度可塑；急性压力导致的HPA轴紊乱、睡眠剥夺引发的GH夜间脉冲缺失，在去除诱因与建立睡眠节律后可在数周内完全恢复。"}, {"range": "36-55岁", "mechanism": "生长激素绝经（Somatopause）与肾上腺绝经（Adrenopause）演进，夜间慢波睡眠缩短导致GH深睡期分泌脉冲显著缩减（每10年减14%）。HPA轴负反馈下调导致高皮质醇暴露面积（AUC）渐进增加；下丘脑-垂体-甲状腺轴对环境适应敏感度下降。", "male": "DHEA-S稳步以每年1-2%速度下降，皮质醇/DHEA-S比值缓慢攀升，表现为内脏脂肪易堆积、肩颈肌群微萎缩。", "female": "围绝经期卵巢功能衰竭诱发神经内分泌剧震，雌激素撤退导致下丘脑温控中枢紊乱（潮热），交感-HPA轴频繁异常激活，桥本甲状腺炎等自身免疫疾病高发。", "reversibility": "部分可逆；抗阻训练、深睡眠优化与生活方式干预可延缓GH/DHEA-S下行斜率并压制夜间高皮质醇，但内源性合成基底不可逆下移。"}, {"range": "56-75岁", "mechanism": "系统性去同化进程确立：血清IGF-1水平维持低平，软组织修复与线粒体发生迟滞。HPA轴皮质醇昼夜节律明显扁平化，晨峰变钝，夜间谷值明显抬高（升高20%-50%），长期异化作用侵蚀骨质与骨骼肌蛋白。肝脏DIO1脱碘酶活性下调，外周T4向T3转化效率衰退。", "male": "IGF-1与游离睾酮双重亏空加速肌少症（Sarcopenia）发展，内脏脂肪持续向肝脏与骨髓浸润。", "female": "绝经后丧失雌二醇保护，骨吸收严重超过骨形成；由于TBG稳定于较低水平，甲状腺轴代偿裕度收窄，亚临床甲减检出率陡增。", "reversibility": "低度可逆；生理性衰减不可逆转，外源性超生理激素盲目补充风险极高（诱发肿瘤与心血管事件），但适度抗阻训练与临床支持可减缓去同化速度。"}, {"range": "76-95+岁", "mechanism": "内分泌重塑稳态：DHEA-S降至青年峰值的10%-20%，皮质醇/DHEA-S比值呈特征性极高状态；垂体促甲状腺激素细胞敏感度重设，TSH正常上限生理性上移至5.5-6.0 mIU/L（降低基础代谢消耗的适应性机制）。低T3状态频繁呈现为非甲状腺性病态综合征（ESS）。", "male": "应激储备（HPA弹性）衰竭，急性感染或创伤易触发下丘脑-垂体功能衰竭或谵妄状态。", "female": "极高龄群体中高TSH（<10 mIU/L）常伴随更优的残余寿命；外周糖皮质激素受体敏感度下调，骨质极度脆弱。", "reversibility": "终末不可逆；系统调谐进入低能耗保护模式。欧洲甲状腺学会（ETA）与ATA指南共识强调：对80岁以上无临床甲减体征且TSH低于10 mIU/L的老年人不推荐左甲状腺素替代治疗，盲目强行压低TSH将显著提升心房颤动与心血管死亡风险。"}], "branches": [{"tag": "[分子机制深潜]", "title": "男女生长突增时序差与骨骺闭合的双相雌二醇阈值调控机制", "body": "长骨延伸与终止的生物学开关本质上由局部骨微环境中雌二醇（E2）的浓度阈值双向决定。在青春期早期，低皮摩尔浓度（1-5 pmol/L）的E2通过软骨细胞上的雌激素受体α（ERα）激活IGF-1受体传导通路，促进静止带与增殖带生长板软骨细胞增殖分裂，驱动生长突增（PHV）。女性卵巢成熟早，早于男性约2年产生足量E2，因而更早迎来PHV。男性突增主要依靠睾丸产生的雄激素经生长板局部细胞色素P450芳香化酶（CYP19A1）局部转化为低剂量E2以启动突增。随着青春期推进，高浓度E2（男性血清>40 pmol/L，女性更高）激活Fas/FasL介导的促凋亡通路，抑制软骨细胞自噬并阻断增殖带干细胞自我更新，加速软骨细胞终末肥大与成骨细胞血管长入，导致软骨基质彻底钙化闭合。男性由于全身循环E2达到抑制阈值的时间晚于女性约2-3年，获得了额外2年的基础线性生长时间，加之男性突增期峰值速率更高，最终塑造了平均约12-13 cm的成年男女身高差。"}, {"tag": "[分子机制深潜]", "title": "青春期生理性胰岛素抵抗与GH脉冲的代谢分配逻辑", "body": "青春发育期垂体前叶GH分泌脉冲振幅增加2.5-3倍，血清IGF-1升高至生命最高值，伴随出现暂态但显著的全身胰岛素敏感性下降约30-50%（生理性胰岛素抵抗）。分子机制上，大量GH通过其受体（GHR）磷酸化JAK2并激活STAT5b通路，上调IGF-1转录；同时，过量GH刺激脂肪细胞甘油三酯水解，使外周游离脂肪酸（FFA）浓度升高，FFA在骨骼肌细胞中竞争性抑制丙酮酸脱氢酶复合体，并经PKC-θ通路导致胰岛素受体底物-1（IRS-1）丝氨酸位点异常磷酸化，阻滞Akt激活与GLUT4易位。这种生理性抵抗的进化意义在于阻断外周骨骼肌对葡萄糖的过度摄取利用，形成底物分配偏倚：将充沛的葡萄糖优先输送至软骨细胞代谢与神经中枢，迫使肌肉利用脂肪供能，同时代偿性高胰岛素血症强力协同GH与IGF-1，抑制肝脏IGFBP-1转录，最大化游离生物活性IGF-1浓度，确保骨骼线性延伸与器官体积扩张所需的蛋白质高效合成。"}, {"tag": "[分子机制深潜]", "title": "慢性压力下HPA轴失调：从神经毒性到CAR钝化与夜间基线抬升", "body": "慢性持续性应激诱发室旁核（PVN）CRH与AVP神经元过度去极化，早期呈现高皮质醇血症。持久的高糖皮质激素暴露下调海马CA1/CA3区盐皮质激素受体（MR）和糖皮质激素受体（GR）表达密度，引起树突棘回缩与海马神经元凋亡，破坏海马对HPA轴的抑制性负反馈环路。长期结果是下丘脑-垂体系统出现代偿性GR受体下调及转录失敏（糖皮质激素抵抗）。在节律表型上，早晨觉醒后30-45分钟内由视交叉上核（SCN）激发的特征性皮质醇快速飙升（CAR反应）发生钝化；与此同时，夜间由于失去GR介导的高效负反馈切断机制，基线低谷出现异常上移（夜间皮质醇分泌最低点提升20-50%）。全天皮质醇昼夜曲线扁平化（AUC积分增加但日间振幅萎缩），导致夜间骨代谢抑制（骨吸收大于骨形成）、慢波睡眠破坏、脑源性神经营养因子（BDNF）下调，加速海马衰老与异化综合征。"}, {"tag": "[分子机制深潜]", "title": "中老年甲状腺轴TSH/FT4参考范围漂移与低T3综合征的适应性争议", "body": "健康高龄人群血清TSH参考范围上限自4.0 mIU/L自然漂移至5.5-6.0 mIU/L以上，同时伴有外周游离T3水平轻度下降与游离T4维持基本不变。分子水平上，该漂移源于垂体促甲状腺激素细胞膜上TSH受体敏感性随增龄微调、下丘脑TRH脉冲振幅下降后引起的生物活性较低异构体TSH代偿性增加，以及外周1型脱碘酶（DIO1）在骨骼肌与肝脏中的转录活性下降。临床争议焦点在于：该漂移是需要外源左甲状腺素纠正的‘亚临床甲状腺功能减退’，还是一种旨在降低细胞基础耗氧量、减轻线粒体活性氧（ROS）产生与减少骨骼肌蛋白质分解的保护性代谢适应（Hypometabolic adaptation）。多个百岁老人队列前瞻性数据显示，高龄期（85岁以上）轻度高TSH、中低度FT3群体拥有显著更低的死亡风险与更长残余寿命。强行施加外源激素干预将TSH压回青年参考值（<4.0 mIU/L），常引发心房颤动发生率骤增、左心室肥厚及绝经后骨密度急剧流失。"}], "windows": {"locked": "长骨骨骺板完全闭合后（女性14-16岁，男性16-18岁），纵向软骨增殖带彻底骨化终结，骨骼线性身高潜能永久锁定；先天性甲状腺功能减退症若未在生后2-3周内确诊并补充左甲状腺素，中枢神经元轴突髓鞘化与突触建构将遭受终身不可逆损伤（克汀病）。", "high_return": "婴儿期（0-2岁）甲状腺素新生儿足跟血快速筛查（生后48-72小时）与营养优化；青春期突增早期（女孩9-11岁，男孩11-13岁）生长轴异常筛查，此窗口期纠正生长激素缺乏或及时阻断特发性中枢性性早熟可挽回10-15 cm成年终身高损失；青年期（20-35岁）建立规整慢波睡眠与高阻力负荷，是最大化储备峰值骨量（PBM）、肌量与DHEA-S储量的绝对黄金期。", "delay_only": "40岁以后出现的生长激素绝经（Somatopause）与肾上腺绝经（Adrenopause）；老年期HPA轴节律扁平化与夜间皮质醇基线抬升；甲状腺外周脱碘转化效率下降与TSH设定点生理性右移。上述退行性变化受生物钟转录衰退与细胞衰老表观遗传修饰驱动，无法彻底逆转，仅能通过维持规律昼夜节律、适度抗阻负荷、压力管理和热量控制来延缓其恶化斜率。"}, "cross_links": "T03与生殖轴（T04）高度偶联，性类固醇直接裁决青春期生长突增速度与骨骺闭合时钟；与骨骼肌肉轴（T08）形成力学与物质代谢回路，IGF-1与皮质醇/DHEA-S比值直接调控骨基质与肌纤维合成-分解平衡；与糖脂代谢轴（T05）深度重叠，青春期GH高脉冲诱发生理性胰岛素抵抗以富集骨骼营养，老年期夜间高皮质醇则促发内脏肥胖与2型糖尿病；与神经退行轴（T01）互为因果，慢性压力诱发的长期皮质醇暴露损伤海马GR受体，加速认知衰退。"};
+
+document.getElementById('curveNote').textContent = rawData.curve_note;
+document.getElementById('winLocked').textContent = rawData.windows.locked;
+document.getElementById('winHighReturn').textContent = rawData.windows.high_return;
+document.getElementById('winDelayOnly').textContent = rawData.windows.delay_only;
+document.getElementById('crossLinksText').textContent = rawData.cross_links;
+
+// 阶段卡片渲染
+const timelineEl = document.getElementById('timelineContainer');
+rawData.stages.forEach(st => {
+  const card = document.createElement('div');
+  card.className = 'stage-card';
+  card.innerHTML = `
+    <div class="stage-header">
+      <span class="stage-range">${st.range}</span>
+      <span class="stage-reversibility">${st.reversibility.split('；')[0]}</span>
+    </div>
+    <div class="stage-desc"><strong>核心机制：</strong>${st.mechanism}</div>
+    <div class="stage-gender-grid">
+      <div class="stage-male"><strong>男性特征:</strong>${st.male}</div>
+      <div class="stage-female"><strong>女性特征:</strong>${st.female}</div>
+    </div>
+    <div style="font-size:0.75rem; color:#b91c1c; margin-top:8px;"><strong>干预/可逆性备注:</strong> ${st.reversibility}</div>
+  `;
+  timelineEl.appendChild(card);
+});
+
+// 折叠专题分支渲染
+const branchesEl = document.getElementById('branchesContainer');
+rawData.branches.forEach(b => {
+  const d = document.createElement('details');
+  d.className = 'branch-item';
+  d.innerHTML = `
+    <summary><span class="branch-tag">${b.tag}</span> ${b.title}</summary>
+    <div class="branch-content">${b.body}</div>
+  `;
+  branchesEl.appendChild(d);
+});
+
+// 核实清单表格
+const tableBody = document.getElementById('claimsTableBody');
+rawData.claims.forEach(c => {
+  const row = document.createElement('tr');
+  row.innerHTML = `
+    <td><strong>${c.claim_id}</strong></td>
+    <td>${c.stage}</td>
+    <td>${c.statement}</td>
+    <td><code>${c.value}</code></td>
+    <td><span class="status-verified">${c.status}</span></td>
+    <td style="color:#64748b;">${c.source}</td>
+  `;
+  tableBody.appendChild(row);
+});
+
+// 图表渲染
+let currentGender = 'both'; // 'both' | 'male' | 'female'
+const svg = document.getElementById('chartSvg');
+const tooltip = document.getElementById('tooltip');
+
+const margin = { top: 30, right: 40, bottom: 40, left: 50 };
+const width = 900;
+const height = 360;
+const plotW = width - margin.left - margin.right;
+const plotH = height - margin.top - margin.bottom;
+
+function getX(age) {
+  return margin.left + (age / 95) * plotW;
+}
+function getY(val) {
+  return margin.top + plotH - (val / 100) * plotH;
+}
+
+function renderChart() {
+  svg.innerHTML = '';
+
+  // 坐标轴及网格
+  let gridG = `<g class="grid">`;
+  for (let y = 0; y <= 100; y += 20) {
+    const yPos = getY(y);
+    gridG += `<line class="grid-line" x1="${margin.left}" y1="${yPos}" x2="${width - margin.right}" y2="${yPos}"/>`;
+    gridG += `<text x="${margin.left - 10}" y="${yPos + 4}" text-anchor="end" class="axis" font-size="11" fill="#64748b">${y}</text>`;
+  }
+  for (let x = 0; x <= 95; x += 10) {
+    const xPos = getX(x);
+    gridG += `<line class="grid-line" x1="${xPos}" y1="${margin.top}" x2="${xPos}" y2="${height - margin.bottom}"/>`;
+    gridG += `<text x="${xPos}" y="${height - margin.bottom + 18}" text-anchor="middle" class="axis" font-size="11" fill="#64748b">${x}岁</text>`;
+  }
+  gridG += `</g>`;
+
+  // 轴线
+  const axisX = `<line x1="${margin.left}" y1="${height - margin.bottom}" x2="${width - margin.right}" y2="${height - margin.bottom}" stroke="#94a3b8" stroke-width="1.5"/>`;
+  const axisY = `<line x1="${margin.left}" y1="${margin.top}" x2="${margin.left}" y2="${height - margin.bottom}" stroke="#94a3b8" stroke-width="1.5"/>`;
+  const labelX = `<text x="${width - margin.right}" y="${height - margin.bottom - 8}" text-anchor="end" font-size="11" fill="#64748b">年龄 (Years)</text>`;
+  const labelY = `<text x="${margin.left + 8}" y="${margin.top + 14}" text-anchor="start" font-size="11" fill="#64748b">同化-异化指数 (0-100)</text>`;
+
+  // 折线路径构建
+  const ages = rawData.ages;
+  const mSeries = rawData.series.male;
+  const fSeries = rawData.series.female;
+
+  let dMale = '';
+  let dFemale = '';
+  ages.forEach((a, i) => {
+    const x = getX(a);
+    const ym = getY(mSeries[i]);
+    const yf = getY(fSeries[i]);
+    dMale += (i === 0 ? `M ${x} ${ym}` : ` L ${x} ${ym}`);
+    dFemale += (i === 0 ? `M ${x} ${yf}` : ` L ${x} ${yf}`);
+  });
+
+  let paths = '';
+  if (currentGender === 'both' || currentGender === 'male') {
+    paths += `<path d="${dMale}" fill="none" stroke="var(--male-color)" stroke-width="2.5" stroke-linejoin="round"/>`;
+  }
+  if (currentGender === 'both' || currentGender === 'female') {
+    paths += `<path d="${dFemale}" fill="none" stroke="var(--female-color)" stroke-width="2.5" stroke-linejoin="round"/>`;
+  }
+
+  // 数据圆点及来源编号标注
+  let dots = `<g class="data-dots">`;
+  ages.forEach((a, i) => {
+    const x = getX(a);
+    if (currentGender === 'both' || currentGender === 'male') {
+      const ym = getY(mSeries[i]);
+      dots += `<circle cx="${x}" cy="${ym}" r="4" fill="#ffffff" stroke="var(--male-color)" stroke-width="2" class="chart-point" data-gender="男" data-age="${a}" data-val="${mSeries[i]}"/>`;
+    }
+    if (currentGender === 'both' || currentGender === 'female') {
+      const yf = getY(fSeries[i]);
+      dots += `<circle cx="${x}" cy="${yf}" r="4" fill="#ffffff" stroke="var(--female-color)" stroke-width="2" class="chart-point" data-gender="女" data-age="${a}" data-val="${fSeries[i]}"/>`;
+    }
+  });
+
+  // 关键节点定性来源标签标注
+  const tagPoints = [
+    { age: 2, note: "WHO基准 [C01]", ym: 78, yf: 80 },
+    { age: 12, note: "女性PHV峰 [C03]", yf: 88 },
+    { age: 15, note: "男性PHV峰 [C04]", ym: 92 },
+    { age: 65, note: "去同化与FT3↓ [C11]", ym: 31, yf: 28 },
+    { age: 85, note: "肾上腺绝经 [C08/C12]", ym: 14, yf: 13 }
+  ];
+  let annotations = `<g class="annotations" font-size="10" fill="#475569">`;
+  tagPoints.forEach(tp => {
+    const x = getX(tp.age);
+    if (tp.yf && (currentGender === 'both' || currentGender === 'female')) {
+      const y = getY(tp.yf);
+      annotations += `<text x="${x}" y="${y - 8}" text-anchor="middle" font-weight="600">${tp.note}</text>`;
+    } else if (tp.ym && currentGender === 'male') {
+      const y = getY(tp.ym);
+      annotations += `<text x="${x}" y="${y - 8}" text-anchor="middle" font-weight="600">${tp.note}</text>`;
+    }
+  });
+  annotations += `</g>`;
+
+  // 联动竖线 (初始隐藏或根据slider设定)
+  const cursorX = getX(currentAge);
+  const cursorLine = `<line id="chartCursor" class="cursor-line" x1="${cursorX}" y1="${margin.top}" x2="${cursorX}" y2="${height - margin.bottom}" />`;
+
+  svg.innerHTML = gridG + axisX + axisY + labelX + labelY + paths + dots + annotations + cursorLine;
+
+  bindPointEvents();
+}
+
+function bindPointEvents() {
+  const circles = svg.querySelectorAll('.chart-point');
+  circles.forEach(c => {
+    c.addEventListener('mouseenter', e => {
+      const gender = e.target.getAttribute('data-gender');
+      const age = e.target.getAttribute('data-age');
+      const val = e.target.getAttribute('data-val');
+      tooltip.style.display = 'block';
+      tooltip.innerHTML = `<strong>${age} 岁 (${gender})</strong><br/>同化-异化平衡指数: <strong>${val}</strong>`;
+      updateTooltipPos(e);
+    });
+    c.addEventListener('mousemove', updateTooltipPos);
+    c.addEventListener('mouseleave', () => {
+      tooltip.style.display = 'none';
+    });
+  });
+}
+
+function updateTooltipPos(e) {
+  const rect = svg.getBoundingClientRect();
+  const x = e.clientX - rect.left;
+  const y = e.clientY - rect.top;
+  tooltip.style.left = (x + 15) + 'px';
+  tooltip.style.top = (y - 15) + 'px';
+}
+
+// 控制台与联动状态
+let currentAge = 15;
+const ageSlider = document.getElementById('ageSlider');
+const ageValue = document.getElementById('ageValue');
+const barStage = document.getElementById('barStage');
+const barInflection = document.getElementById('barInflection');
+const barFocus = document.getElementById('barFocus');
+
+function updateAgeStatus(age) {
+  currentAge = age;
+  ageValue.textContent = age + " 岁";
+  
+  // 更新图表指示线
+  const cursor = document.getElementById('chartCursor');
+  if (cursor) {
+    const cx = getX(age);
+    cursor.setAttribute('x1', cx);
+    cursor.setAttribute('x2', cx);
+  }
+
+  // 状态摘要规则匹配
+  if (age <= 2) {
+    barStage.textContent = "婴儿期 (0-2岁)";
+    barInflection.textContent = "微小青春期退去 / GH轴全面接管 (2岁)";
+    barFocus.textContent = "先天性甲减足跟血筛查(48-72h)与不可逆神经发育窗口";
+  } else if (age <= 9) {
+    barStage.textContent = "儿童期 (3-9岁)";
+    barInflection.textContent = "肾上腺功能初现(Adrenarche 6-8岁)与青春突增启动";
+    barFocus.textContent = "5-6.5cm/年线性平稳生长，中枢性性早熟筛查";
+  } else if (age <= 19) {
+    barStage.textContent = "青春期 (10-19岁)";
+    barInflection.textContent = "骨骺闭合阈值 (女14-16岁 / 男16-18岁)";
+    barFocus.textContent = "突增峰值(PHV)、生理性胰岛素抵抗与慢波睡眠脉冲优化";
+  } else if (age <= 35) {
+    barStage.textContent = "青年峰值期 (20-35岁)";
+    barInflection.textContent = "生长激素绝经启动 (30岁后GH每十年降14%)";
+    barFocus.textContent = "峰值骨量(PBM)与DHEA-S储备最大化，CAR昼夜节律规整";
+  } else if (age <= 55) {
+    barStage.textContent = "中年变动期 (36-55岁)";
+    barInflection.textContent = "围绝经期内分泌剧震与皮质醇/DHEA-S失衡";
+    barFocus.textContent = "夜间慢波睡眠缩短、内脏脂肪重分布、桥本甲状腺炎高发排查";
+  } else if (age <= 75) {
+    barStage.textContent = "老年系统退行期 (56-75岁)";
+    barInflection.textContent = "外周脱碘酶活性下调与低T3表型确立 (~65岁)";
+    barFocus.textContent = "夜间皮质醇基线抬升20-50%，骨质疏松与肌少症去同化防范";
+  } else {
+    barStage.textContent = "高龄平衡重塑期 (76-95+岁)";
+    barInflection.textContent = "终末低代谢适应定势 (TSH上限生理性右移至5.5-6.0)";
+    barFocus.textContent = "避免过激干预引发房颤，严防应激轴弹性衰竭诱发谵妄";
+  }
+}
+
+ageSlider.addEventListener('input', (e) => {
+  updateAgeStatus(parseInt(e.target.value, 10));
+});
+
+function setGenderMode(mode) {
+  currentGender = mode;
+  document.getElementById('btnBoth').className = mode === 'both' ? 'active' : '';
+  document.getElementById('btnMale').className = mode === 'male' ? 'active' : '';
+  document.getElementById('btnFemale').className = mode === 'female' ? 'active' : '';
+  renderChart();
+}
+
+// 初始执行渲染
+renderChart();
+updateAgeStatus(15);
+
+window.addEventListener('resize', () => {
+  renderChart();
+});
+</script>
+</body>
+</html>

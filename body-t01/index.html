@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>T01 细胞与分子衰老基座</title>
+<style>
+:root {
+  --bg-primary: #f8fafc;
+  --bg-card: #ffffff;
+  --text-main: #0f172a;
+  --text-muted: #475569;
+  --border-color: #cbd5e1;
+  --male-color: #0369a1;
+  --female-color: #be185d;
+  --accent-color: #0284c7;
+  --highlight-bg: #f1f5f9;
+  --tag-bg: #e2e8f0;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  background-color: var(--bg-primary);
+  color: var(--text-main);
+  line-height: 1.6;
+  padding-top: 130px;
+  font-size: 15px;
+}
+.header-panel {
+  position: static;
+  top: 0;
+  left: 0;
+  right: 0;
+  background: rgba(255, 255, 255, 0.98);
+  border-bottom: 2px solid var(--border-color);
+  z-index: 1000;
+  padding: 12px 24px;
+  box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+}
+.header-row-1 {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.dim-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
+.controls {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+.slider-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.slider-group input[type="range"] {
+  width: 160px;
+  cursor: pointer;
+}
+.radio-group {
+  display: flex;
+  gap: 12px;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+.radio-group label {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.summary-bar {
+  margin-top: 8px;
+  padding: 6px 12px;
+  background: var(--highlight-bg);
+  border-radius: 4px;
+  font-size: 0.85rem;
+  display: flex;
+  justify-content: space-between;
+  border-left: 4px solid var(--accent-color);
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.summary-bar span {
+  font-weight: 500;
+}
+.container {
+  max-width: 1140px;
+  margin: 0 auto;
+  padding: 24px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+.section-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-bottom: 16px;
+  border-bottom: 2px solid var(--text-main);
+  padding-bottom: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 20px;
+}
+.chart-container {
+  position: relative;
+  width: 100%;
+}
+svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+.tooltip {
+  position: absolute;
+  background: rgba(15, 23, 42, 0.92);
+  color: #ffffff;
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.1s;
+  line-height: 1.4;
+  white-space: nowrap;
+  z-index: 10;
+}
+.axis text {
+  font-size: 12px;
+  fill: var(--text-muted);
+}
+.grid line {
+  stroke: #e2e8f0;
+  stroke-dasharray: 2,2;
+}
+.timeline-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px;
+}
+.timeline-card {
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 16px;
+  background: #ffffff;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.timeline-card.active-stage {
+  border: 2px solid var(--accent-color);
+  background: #f0f9ff;
+}
+.timeline-card h4 {
+  font-size: 1rem;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 4px;
+  color: var(--text-main);
+}
+.timeline-prop {
+  font-size: 0.85rem;
+}
+.timeline-prop strong {
+  color: var(--text-muted);
+}
+.tag {
+  display: inline-block;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  background: var(--tag-bg);
+}
+.tag-male { background: #e0f2fe; color: var(--male-color); }
+.tag-female { background: #fce7f3; color: var(--female-color); }
+.tag-reversibility { background: #fef3c7; color: #92400e; }
+details {
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  background: #ffffff;
+  margin-bottom: 12px;
+}
+summary {
+  padding: 14px 16px;
+  cursor: pointer;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  user-select: none;
+}
+summary:hover {
+  background: var(--highlight-bg);
+}
+.details-content {
+  padding: 16px;
+  border-top: 1px solid var(--border-color);
+  font-size: 0.9rem;
+  white-space: pre-line;
+  color: #334155;
+}
+.window-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+}
+.window-box {
+  padding: 16px;
+  border-radius: 6px;
+  border: 1px solid;
+}
+.window-locked {
+  background: #fef2f2;
+  border-color: #fca5a5;
+  color: #991b1b;
+}
+.window-return {
+  background: #f0fdf4;
+  border-color: #86efac;
+  color: #166534;
+}
+.window-delay {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+  color: #334155;
+}
+.window-box h4 {
+  margin-bottom: 8px;
+  font-size: 1rem;
+}
+.window-box p {
+  font-size: 0.85rem;
+  color: var(--text-main);
+}
+.claim-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+  text-align: left;
+}
+.claim-table th, .claim-table td {
+  padding: 10px 12px;
+  border: 1px solid var(--border-color);
+}
+.claim-table th {
+  background: #f1f5f9;
+  font-weight: 600;
+}
+.claim-status {
+  display: inline-block;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-weight: 700;
+  font-size: 0.75rem;
+}
+.status-VERIFIED { background: #dcfce7; color: #15803d; }
+.status-CORRECTED { background: #fee2e2; color: #b91c1c; }
+.status-NORMALIZED_TREND { background: #e0f2fe; color: #0369a1; }
+@media (max-width: 768px) {
+  body { padding-top: 170px; }
+  .header-row-1 { flex-direction: column; align-items: flex-start; gap: 8px; }
+  .controls { width: 100%; justify-content: space-between; }
+  .summary-bar { flex-direction: column; gap: 4px; }
+}
+</style>
+</head>
+<body>
+
+<header class="header-panel">
+  <div class="header-row-1">
+    <div class="dim-title" id="panel-title">T01 细胞与分子衰老基座</div>
+    <div class="controls">
+      <div class="slider-group">
+        <label for="age-slider">年龄刻度:</label>
+        <input type="range" id="age-slider" min="0" max="95" value="35" step="1">
+        <strong id="age-val">35</strong> 岁
+      </div>
+      <div class="radio-group">
+        <label><input type="radio" name="gender" value="both" checked> 双性对比</label>
+        <label style="color:var(--male-color)"><input type="radio" name="gender" value="male"> 仅男</label>
+        <label style="color:var(--female-color)"><input type="radio" name="gender" value="female"> 仅女</label>
+      </div>
+    </div>
+  </div>
+  <div class="summary-bar" id="summary-bar">
+    <div>当前阶段: <span id="sum-stage">青年峰值期 (20-35岁)</span></div>
+    <div>下一拐点: <span id="sum-inflection">44岁 (首个组学代谢/脂质跃迁峰)</span></div>
+    <div>分子关注点: <span id="sum-focus">自噬流效率、DNA氧化累积、生活方式表观时钟校准</span></div>
+  </div>
+</header>
+
+<main class="container">
+
+  <!-- A 轨迹图 -->
+  <section>
+    <div class="section-title">
+      <span>A. 全生命周期细胞分子衰老负荷轨迹 (0-100相对指数)</span>
+      <span style="font-size:0.75rem; font-weight:normal; color:var(--text-muted)">基准映射源: Shen et al., 2024; López-Otín et al., 2023</span>
+    </div>
+    <div class="card">
+      <div class="chart-container" id="chart-box">
+        <svg id="svg-chart" viewBox="0 0 900 360"></svg>
+        <div id="chart-tooltip" class="tooltip"></div>
+      </div>
+      <p style="font-size:0.8rem; color:var(--text-muted); margin-top:12px; border-top:1px dashed var(--border-color); padding-top:8px;">
+        <strong>趋势注释：</strong>本曲线定性表征全生命周期非线性加速累积趋势，综合表观遗传时钟加速漂移、白细胞端粒损耗度、SASP低度炎症分泌负荷及蛋白稳态失衡等多元组学标志物建立。两性在45-55岁区间因性激素与代谢重构速率产生分异。
+      </p>
+    </div>
+  </section>
+
+  <!-- B 阶段时间轴卡片 -->
+  <section>
+    <div class="section-title">B. 生命周期阶段演进与性别分异基座</div>
+    <div class="timeline-grid" id="timeline-container"></div>
+  </section>
+
+  <!-- C 可折叠专题支线 -->
+  <section>
+    <div class="section-title">C. 细胞与分子深度专题支线</div>
+    <div id="branches-container"></div>
+  </section>
+
+  <!-- D 干预窗口三类 -->
+  <section>
+    <div class="section-title">D. 全生命周期干预窗口效能划分</div>
+    <div class="window-grid">
+      <div class="window-box window-locked">
+        <h4>🔒 锁定/不可逆窗口</h4>
+        <p id="win-locked"></p>
+      </div>
+      <div class="window-box window-return">
+        <h4>⚡ 高回报/高塑性窗口</h4>
+        <p id="win-return"></p>
+      </div>
+      <div class="window-box window-delay">
+        <h4>⏳ 仅限延缓/减损窗口</h4>
+        <p id="win-delay"></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- E 跨维度联动 + 核实清单 -->
+  <section>
+    <div class="section-title">E. 系统级互联与严谨性核实清单</div>
+    <div class="card" style="margin-bottom:16px;">
+      <h4 style="margin-bottom:8px; font-size:0.95rem;">跨系统分子衰老网络动力学：</h4>
+      <p style="font-size:0.88rem; color:#334155;" id="cross-links-p"></p>
+    </div>
+
+    <details>
+      <summary>
+        <span>查看证据链与组学声明核实清单 (Claims Verification List)</span>
+        <span class="tag">共12项核心声明</span>
+      </summary>
+      <div class="details-content" style="padding:0; overflow-x:auto;">
+        <table class="claim-table">
+          <thead>
+            <tr>
+              <th style="width:70px;">编号</th>
+              <th style="width:110px;">状态</th>
+              <th style="width:120px;">适用阶段</th>
+              <th>科学陈述</th>
+              <th>定量/定性核验值</th>
+              <th style="width:200px;">文献来源与凭证</th>
+            </tr>
+          </thead>
+          <tbody id="claims-table-body"></tbody>
+        </table>
+      </div>
+    </details>
+  </section>
+
+</main>
+
+<script>
+const rawData = {"dim": "T01", "title": "细胞与分子衰老基座", "curve_note": "本曲线为细胞与分子综合衰老负荷指数（0-100相对归一化指数，0表示分子稳态与损伤清除能力处于基底理想状态，100表示细胞损耗与分子衰老级联终末耗竭）。该轨迹综合表观遗传时钟加速漂移、白细胞端粒损耗度、SASP低度炎症分泌负荷及蛋白稳态失衡等多元组学标志物建立，定性表征全生命周期非线性加速累积趋势。", "ages": [0, 2, 5, 9, 12, 15, 19, 25, 35, 45, 55, 65, 75, 85, 95], "series": {"male": [1.5, 4.2, 6.8, 9.5, 12.2, 15.4, 18.8, 22.5, 28.6, 41.2, 53.5, 68.7, 81.4, 91.8, 98.2], "female": [1.2, 3.8, 6.1, 8.7, 11.0, 13.8, 16.5, 19.8, 25.1, 37.0, 50.8, 66.2, 78.5, 88.6, 96.0]}, "claims": [{"claim_id": "T01-C01", "statement": "2023年更新版衰老十二大标志物构架确立，包含原发性损伤、拮抗性反应及整合性表型三大层级", "value": "12项完整清单：基因组不稳定性、端粒损耗、表观遗传改变、蛋白质稳态失衡、巨自噬失能、营养感应失调、线粒体功能障碍、细胞衰老、干细胞耗竭、细胞间通讯改变、慢性低度炎症、肠道微生态失调", "stage": "全生命周期基座", "status": "VERIFIED", "source": "López-Otín et al., 2023, Cell (PMID: 36599349)"}, {"claim_id": "T01-C02", "statement": "白细胞端粒长度（LTL）在生命极早期呈现断崖式快速衰减，随后进入成年期平缓损耗期", "value": "出生至1-2岁年均损耗约800-1200 bp/年；成人稳态期（20-60岁）年均生理磨损降至20-35 bp/年", "stage": "0-2岁婴儿期至青年期", "status": "CORRECTED", "source": "Daniali et al., 2013, Circulation (PMID: 23645838); Frenck et al., 1998, PNAS (PMID: 9789534)"}, {"claim_id": "T01-C03", "statement": "多组学分子谱在生命历程中呈现非线性非匀速跳跃，存在中年与老年两次特征性表达突变波峰", "value": "分子重塑波峰集中于44岁（脂质代谢/心血管通路相关）与60岁（免疫调节/碳水化合物代谢/肾功能通路相关）", "stage": "36-55岁中年期及56-75岁老年期", "status": "VERIFIED", "source": "Shen et al., 2024, Nature Aging (PMID: 39143340)"}, {"claim_id": "T01-C04", "statement": "多组学44/60岁突变波峰存在样本与队列局限性，需谨慎外推为全人群刚性绝对断裂点", "value": "原研队列仅追踪108名加州健康志愿者（年龄25-75岁，纵向随访中位时间1.7年），存在地理单一性与小样本回溯局限", "stage": "全生命周期基座", "status": "VERIFIED", "source": "Shen et al., 2024, Nature Aging (PMID: 39143340)"}, {"claim_id": "T01-C05", "statement": "胎儿宫内微环境直接决定胎盘与新生儿表观遗传时钟设定点及端粒初始池深度", "value": "不良宫内应激与胎盘功能障碍导致脐带血LTL显著缩短4-8%（约300-600 bp），Cord-blood表观遗传时钟加速度漂移+0.3-0.8岁", "stage": "胎儿关键期", "status": "CORRECTED", "source": "Baccarelli et al., 2016; Marioni et al., 2018"}, {"claim_id": "T01-C06", "statement": "胸腺退化导致初始T细胞输出急剧萎缩，驱动适应性免疫衰老核心进程", "value": "胸腺活性功能区体积自青春期以每年约3%速度萎缩，至50岁功能性胸腺皮质减少超过80%", "stage": "10-19岁青春期至36-55岁中年期", "status": "VERIFIED", "source": "Steinmann et al., 1985, Scand J Immunol (PMID: 3874385); Palmer, 2013, Semin Immunol (PMID: 23377774)"}, {"claim_id": "T01-C07", "statement": "表观遗传时钟GrimAge可作为全因死亡率与细胞分子损伤的独立量化风险预测器", "value": "GrimAge加速值（AgeAccelGrim）每增加1个标准差（约3.6岁），校正传统危险因素后5年内全因死亡风险增加35-50%", "stage": "36-55岁中年期", "status": "VERIFIED", "source": "Lu et al., 2019, Aging (PMID: 30669119)"}, {"claim_id": "T01-C08", "statement": "衰老相关分泌表型（SASP）在老年组织中扩散，引发旁分泌级联损伤", "value": "循环促炎细胞因子（IL-6与TNF-α）在65岁以上老年人群中呈现系统性升高，相对基准表达负荷达到青年稳态期的1.8-3.2倍", "stage": "56-75岁老年期", "status": "NORMALIZED_TREND", "source": "Franceschi & Campisi, 2014, J Gerontol A (PMID: 24737562)"}, {"claim_id": "T01-C09", "statement": "线粒体DNA（mtDNA）异质性突变负荷伴随增龄非线性扩增，跨越表型阈值引发呼吸链缺损", "value": "有丝分裂后神经元与骨骼肌细胞中单细胞mtDNA大片段缺失异质性突变负荷在跨越60-80%临界阈值时触发电子传递链COX复合体缺陷", "stage": "56-75岁老年期", "status": "CORRECTED", "source": "Sciacco et al., 1994, Hum Mol Genet (PMID: 8144574); Larsson, 2010, Annu Rev Biochem (PMID: 20235824)"}, {"claim_id": "T01-C10", "statement": "巨自噬与伴侣分子介导自噬流（CMA）通量随增龄出现系统性减退", "value": "老年期肝实质与心肌组织中自噬通量标志物LC3-II/I流速与溶酶体LAMP-2A转运受体表达负荷较青年稳态相对下降40-50%", "stage": "56-75岁老年期", "status": "NORMALIZED_TREND", "source": "Cuervo & Wong, 2014, Nat Rev Mol Cell Biol (PMID: 24898512); Kaushik & Cuervo, 2018"}, {"claim_id": "T01-C11", "statement": "造血干细胞（HSC）克隆性造血（CHIP）在中老年群体发生率跃升，标志造血稳态破损", "value": "DNMT3A/TET2等突变引起的CHIP突变负荷（VAF≥2%）在70岁以上人群中检出率达到10-15%，85岁以上接近18-20%", "stage": "56-75岁老年期", "status": "VERIFIED", "source": "Jaiswal et al., 2014, NEJM (PMID: 25426837); Genovese et al., 2014, NEJM (PMID: 25426838)"}, {"claim_id": "T01-C12", "statement": "极高龄期异质性分化：超级百岁老人展现异常坚韧的抗炎与免疫重塑稳态谱", "value": "95岁以上长寿个体维持相对高比例的CD4+细胞毒性T细胞及低促炎单核细胞亚群，生物学表观钟表现为系统性减速", "stage": "76-95+岁高龄期", "status": "VERIFIED", "source": "Hashimoto et al., 2019, PNAS (PMID: 31722846)"}], "stages": [{"range": "胎儿关键期", "mechanism": "基因组原始甲基化印记重置与重构；端粒酶高活性组装胚胎端粒储备池；母体代谢/应激因子经胎盘转录调控对胎儿线粒体数进行表观标定。", "male": "胎盘功能受雄激素调节相对敏感，受营养剥夺时表观时钟甲基化漂移略快于女性。", "female": "双X染色体剂量补偿与失活维持，对早期氧化还原波动缓冲能力更强，甲基化背景更稳固。", "reversibility": "完全锁定。受孕至宫内微环境设定的初始端粒长度与原生表观基因组烙印终身不可逆转。"}, {"range": "0-2岁婴儿期", "mechanism": "机体剧烈体细胞增殖导致白细胞端粒遭遇生理性磨损最陡峭期；肠道先锋微生物定植与黏膜免疫系统完成共生校准。", "male": "端粒损耗速率较女性高约5-8%，感染应答介导的早期自由基过氧化损伤基底略高。", "female": "端粒长度基底优于男性，肠道菌群多样性建立及Treg细胞分化网络稍显稳定。", "reversibility": "高度锁定。已损耗的1000+ bp初始端粒无法体内自发伸长；肠道微生态免疫印记一旦固化极难全局覆写。"}, {"range": "3-9岁儿童期", "mechanism": "端粒磨损由指数期过渡至平台斜率；DNA修复系统（NHEJ、HR）处于高效率运转期；自噬流旺盛清除自生蛋白聚集体。", "male": "生长激素-IGF-1轴稳步攀升，线粒体活性氧（ROS）生成与清除体系维持高水平动态平衡。", "female": "表观遗传时钟处于稳定均一线性进展期，细胞外基质（ECM）胶原合成质控极为完备。", "reversibility": "损伤耐受度高。偶发的DNA双链断裂具有极强同源重组修复能力，分子重构窗口宽。"}, {"range": "10-19岁青春期", "mechanism": "性激素爆发激活转录调控激增；胸腺退化正式启动（脂肪替代淋巴上皮）；表观遗传时钟斜率出现第二波动态调整。", "male": "睾酮抑制部分免疫应答，蛋白质合成通量增加，同时mTOR通路处于生理性高激活状态。", "female": "雌激素受体激活上调超氧化物歧化酶（SOD）及谷胱甘肽过氧化物酶表达，线粒体膜电位保护效应增强。", "reversibility": "胸腺退化阶段性不可逆；生活方式导致的表观遗传修饰轻度可塑。"}, {"range": "20-35岁青年峰值期", "mechanism": "分子稳态达到全生命周期顶峰；蛋白质泛素-蛋白酶体系统（UPS）与线粒体自噬维持最佳清除效率；体细胞突变开始线性潜伏累积。", "male": "代谢副产物清除率维持平台期，不良生活习惯（烟酒/熬夜）开始在血管内皮引发DNA氧化损伤（8-OHdG增加）。", "female": "雌激素抗炎屏障巩固，抗氧化酶谱维持峰值，GrimAge与PhenoAge时钟读数显著落后于历法年龄。", "reversibility": "高窗口期。清除不良环境暴露可完全逆转暂时性线粒体应激与局部DNA高甲基化修饰。"}, {"range": "36-55岁中年过渡期", "mechanism": "44岁组学非线性突变波峰引发脂质与外源物代谢网络重排；异染色质松弛导致逆转座子（如LINE-1）转录解除抑制；SASP开始零星聚集。", "male": "心血管内皮与脂质代谢组在40岁后加速恶化，NAD+池耗竭速度加快，Sirtuins脱乙酰化酶活性下降。", "female": "围绝经期雌激素断崖导致破骨与内皮线粒体防护骤减，50岁左右表观遗传时钟出现补跳性加速追赶男性。", "reversibility": "中度可逆/部分固化。生活方式与代谢干预可延缓分子突变级联，但已耗竭的造血及间充质干细胞池无法逆转再生。"}, {"range": "56-75岁老年期", "mechanism": "60岁第二组学波峰启动，免疫衰老全面爆发；NF-κB与cGAS-STING通路持续活化驱动全身性低度慢性炎症（Inflammaging）；巨自噬失能，脂褐素积聚。", "male": "外周血嵌合性Y染色体缺失（mLOY）检出率攀升，心肺组织纤维化分子标志物高表达。", "female": "绝经后缺失激素抗炎庇护，骨骼肌蛋白降解大于合成，细胞衰老p16INK4a阳性细胞比例直线上升。", "reversibility": "仅限延缓与部分代偿。已衰老细胞的SASP分泌可被抗炎或Senolytics药物靶向压制，但全局器官组织结构性硬化不可逆转。"}, {"range": "76-95+岁高龄期", "mechanism": "干细胞库几乎完全耗竭，分子熵增失控；克隆性造血扩展；端粒突破临界短缩阈值引发细胞凋亡或终末衰老；表观遗传景观出现低甲基化漂移与表观侵蚀。", "male": "幸存个体呈现选择性长寿特征，但免疫耗竭极端严重，易死于细胞因子风暴与蛋白质稳态崩溃。", "female": "长寿幸存者富集，但高共病状态下神经元与心肌细胞不可逆分子损伤广泛存在，维持在脆性极高分子平衡中。", "reversibility": "不可逆。分子修复机能全面耗竭，干预目标仅限于减缓SASP毒性累及生命中枢与姑息代偿。"}], "branches": [{"tag": "[12项衰老标志物分类深潜]", "title": "从原发到整合：衰老标志物三级层次化交互网络", "body": "2023年更新的Hallmarks of Aging将12项标志物划分为三大功能层级：\n1. 原发性标志物（损伤触发源，全生命周期不可避免的物理化学攻击累积）：DNA损伤与基因组不稳定性、端粒耗竭损耗、表观遗传异染色质松弛与修饰改变、蛋白质稳态（伴侣蛋白/蛋白酶体）丧失、巨自噬降解失能。这些是细胞老化的上游始动诱因。\n2. 拮抗性标志物（应对损伤的机体代偿防御机制，低剂量有益，过度且慢性激活则成为致病原凶）：营养感应网络失调（mTOR持续活化/AMPK与SIRT1钝化）、线粒体代谢呼吸链功能障碍伴ROS泄漏、细胞衰老（p53/p21CIP1与p16INK4a/Rb通路介导的不可逆生长停滞）。\n3. 整合性标志物（前两级破坏级联的终末宏观组织表现）：成体干细胞耗竭（组织再生潜力枯竭）、细胞间通讯紊乱（以慢性低度炎症Inflammaging为轴心）以及肠道微生态失调（屏障破坏与菌群代谢移位）。三者交织构成不可逆的全身稳态失代偿。"}, {"tag": "[免疫衰老与慢性低度炎症]", "title": "cGAS-STING通路与SASP驱动的无菌性慢性低度炎症级联", "body": "衰老的核心系统级放大器是Inflammaging，其机制由细胞内与细胞间两个层面共同强化：\n1. 细胞自主性层面：线粒体膜透化导致mtDNA释放入细胞质，以及异染色质去抑制使LINE-1等逆转座子产生内源性双链cDNA，均会异常激活胞质cGAS-STINGDNA感知受体，驱动TBK1-IRF3及IKK-NF-κB级联，强制启动I型干扰素与促炎因子转录。\n2. 细胞间旁分泌层面：不可逆停滞的衰老细胞分泌高度异质性的衰老相关分泌表型（SASP），富含IL-6、IL-8、TNF-α、MCP-1及基质金属蛋白酶（MMP-1/3/9）。SASP不仅破坏胞外基质微环境，还通过旁分泌效应将周围原本健康的邻近细胞诱导为次级衰老细胞（Bystander effect）。伴随胸腺萎缩带来的TCR多样性坍塌以及骨髓髓系偏倚，免疫系统清除衰老细胞能力锐减，形成无法熄灭的正反馈无菌性炎症循环。"}, {"tag": "[衰老非线性跃迁与局限]", "title": "44岁与60岁组学波峰的系统生物学阐释与队列外推局限性", "body": "Stanford多组学追踪研究揭示人体并非以匀速线性节奏老去，而是在历法年龄44岁和60岁展现剧烈分子跃迁：\n1. 44岁跃迁峰：主导特征为心血管与代谢组分突变。脂质代谢（尤其是花生四烯酸、不饱和脂肪酸通路）、酒精与咖啡因代谢酶谱发生显著下调，皮肤和肌肉的细胞外基质重塑蛋白发生失衡。该跃迁在两性中均独立存在，不仅限于女性围绝经期，提示中年期存在系统性代谢细胞自主重编程。\n2. 60岁跃迁峰：主导特征为适应性免疫功能下行与碳水化合物代谢紊乱。抗氧化酶系发生广泛损耗，肾功能相关滤过标记物以及微血管完整性相关转录组急剧恶化。\n3. 样本与外推局限性核查：该结论高度依赖单中心前瞻性队列（n=108，年龄跨度25-75岁），中位随访仅1.7年，受试者受加州生活方式、高教育水平及高加索/亚裔混合背景制约；质谱与测序批次效应在微小样本中易产生聚类偏倚；此外，缺少极端高龄（>80岁）深度纵向链条，因此44/60岁波峰应视为代谢-免疫重塑的统计学高频敏感窗，而非个体确定的机械钟表刻度。"}, {"tag": "[干预证据分级]", "title": "延缓细胞与分子衰老的循证分级梯队", "body": "根据国际临床转化证据链，干预手段被严格划分为三级金字塔：\n1. Tier 1（强临床证据，高获益低风险）：\n   - 耐力与抗阻复合运动：上调PGC-1α，激活线粒体自噬，显著降低血清IL-6与hs-CRP，减缓中年LTL缩短速率每年约5-10 bp。\n   - 限制性卡路里摄入（CR，12-14%能量受限）：CALERIE试验证明可显著降低DNAmGrimAge表观时钟步速约2-3%，降低全身能量消耗与氧化损伤。\n   - 睡眠与昼夜节律同步：维持脑部类淋巴系统（Glymphatic system）清除β-淀粉样蛋白并恢复BMAL1/CLOCK核心振荡器功能。\n2. Tier 2（早期人类临床/强流行病学，中等确定性）：\n   - 二甲双胍（TAME临床构架）：抑制线粒体复合体I，微弱活化AMPK，降低多种衰老相关疾病全因死亡率。\n   - 雷帕霉素及雷帕类似物（Rapalogs）：变构抑制mTORC1，改善老年人流感疫苗抗体应答并部分抑制SASP表达。\n   - SGLT2抑制剂：模拟低糖饥饿应激，系统性降低心肾纤维化表观印记。\n3. Tier 3（实验阶段/机制验证中，高风险/未定型）：\n   - Senolytics靶向清除衰老细胞（达沙替尼+槲皮素D+Q/非瑟酮）：动物模型延寿显著，但早期人类临床（肺纤维化/糖尿病肾病）样本量小且存在脱靶组织修复障碍风险。\n   - Yamanaka因子（OSKM）瞬时局部重编程：可重置表观遗传时钟年龄，但全身体内递送面临畸胎瘤形成与细胞身份丧失的严重致死毒性。"}], "windows": {"locked": "胚胎着床至围生期（胎儿期及0-2岁）。此窗口母体印记、原生端粒初始绝对长度储备（~12000-15000 bp基底池）以及前脑与中枢神经元有丝分裂后原始基因组构型完全固化，一旦遭受高强度宫内氧化损伤、极早产或重度缺氧，其分子底座缺损终身无法体内再生修复。", "high_return": "青年峰值至中年突变窗口（20-42岁，即44岁首个组学波峰来临之前）。此阶段机体自噬通量、线粒体更新与成体干细胞库尚未发生不可逆衰竭，实施生活方式重构（抗阻/有氧训练、热量控制、昼夜节律重置）可最大化保护端粒余量，维持低GrimAge加速度，将代谢突变波峰的振幅与损伤后效压制在亚临床阈值内。", "delay_only": "60岁跃迁峰之后（65岁及以上老年期）。该阶段胸腺完全脂肪化，造血干细胞克隆性漂移建立，组织结构性纤维化及微血管内皮衰老不可逆转。任何生活方式或药理学干预（如Senolytics、二甲双胍或抗炎单抗）均无法将老化的分子机器逆转回年轻基底状态，其干预收益主要局限于压制SASP毒性扩散、延缓级联失代偿、降低脆性骨折与心血管终末事件发生率。"}, "cross_links": "本维度为整套衰老模型的底层驱动极。向上游直接向【T02 代谢与心血管】注入内皮氧化衰老与线粒体损伤信号；驱动【T03 神经与认知衰老】中突触修剪失能与神经炎症；作为【T04 运动与骨骼肌肉系统】中肌少症（线粒体功能障碍与肌肉干细胞衰竭）的根源生化机制；并决定了【T07 免疫系统衰老】的初始胸腺退化与Inflammaging级联动力学。"};
+
+const state = {
+  age: 35,
+  gender: 'both'
+};
+
+const svg = document.getElementById('svg-chart');
+const tooltip = document.getElementById('chart-tooltip');
+const ageSlider = document.getElementById('age-slider');
+const ageValLabel = document.getElementById('age-val');
+const summaryBar = document.getElementById('summary-bar');
+
+const W = 900, H = 360;
+const margin = { top: 30, right: 30, bottom: 45, left: 55 };
+const plotW = W - margin.left - margin.right;
+const plotH = H - margin.top - margin.bottom;
+
+function xMap(age) {
+  return margin.left + (age / 95) * plotW;
+}
+
+function yMap(val) {
+  return margin.top + plotH - (val / 100) * plotH;
+}
+
+function interpolate(age, seriesKey) {
+  const ages = rawData.ages;
+  const vals = rawData.series[seriesKey];
+  if (age <= ages[0]) return vals[0];
+  if (age >= ages[ages.length - 1]) return vals[vals.length - 1];
+  for (let i = 0; i < ages.length - 1; i++) {
+    if (age >= ages[i] && age <= ages[i + 1]) {
+      const t = (age - ages[i]) / (ages[i + 1] - ages[i]);
+      return vals[i] + t * (vals[i + 1] - vals[i]);
+    }
+  }
+  return 0;
+}
+
+function renderChart() {
+  svg.innerHTML = '';
+
+  // Grid
+  let gridG = document.createElementNS("http://www.w3.org/2000/svg", "g");
+  gridG.setAttribute("class", "grid");
+  for (let v = 0; v <= 100; v += 20) {
+    let y = yMap(v);
+    let line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+    line.setAttribute("x1", margin.left);
+    line.setAttribute("y1", y);
+    line.setAttribute("x2", W - margin.right);
+    line.setAttribute("y2", y);
+    gridG.appendChild(line);
+  }
+  svg.appendChild(gridG);
+
+  // Axes
+  let axisG = document.createElementNS("http://www.w3.org/2000/svg", "g");
+  axisG.setAttribute("class", "axis");
+
+  // X axis
+  let xAxis = document.createElementNS("http://www.w3.org/2000/svg", "line");
+  xAxis.setAttribute("x1", margin.left);
+  xAxis.setAttribute("y1", margin.top + plotH);
+  xAxis.setAttribute("x2", W - margin.right);
+  xAxis.setAttribute("y2", margin.top + plotH);
+  xAxis.setAttribute("stroke", "#475569");
+  xAxis.setAttribute("stroke-width", "1.5");
+  axisG.appendChild(xAxis);
+
+  // Y axis
+  let yAxis = document.createElementNS("http://www.w3.org/2000/svg", "line");
+  yAxis.setAttribute("x1", margin.left);
+  yAxis.setAttribute("y1", margin.top);
+  yAxis.setAttribute("x2", margin.left);
+  yAxis.setAttribute("y2", margin.top + plotH);
+  yAxis.setAttribute("stroke", "#475569");
+  yAxis.setAttribute("stroke-width", "1.5");
+  axisG.appendChild(yAxis);
+
+  // X ticks
+  rawData.ages.forEach(age => {
+    let x = xMap(age);
+    let txt = document.createElementNS("http://www.w3.org/2000/svg", "text");
+    txt.setAttribute("x", x);
+    txt.setAttribute("y", margin.top + plotH + 18);
+    txt.setAttribute("text-anchor", "middle");
+    txt.textContent = age;
+    axisG.appendChild(txt);
+
+    let tick = document.createElementNS("http://www.w3.org/2000/svg", "line");
+    tick.setAttribute("x1", x);
+    tick.setAttribute("y1", margin.top + plotH);
+    tick.setAttribute("x2", x);
+    tick.setAttribute("y2", margin.top + plotH + 4);
+    tick.setAttribute("stroke", "#475569");
+    axisG.appendChild(tick);
+  });
+
+  // Y ticks
+  for (let v = 0; v <= 100; v += 20) {
+    let y = yMap(v);
+    let txt = document.createElementNS("http://www.w3.org/2000/svg", "text");
+    txt.setAttribute("x", margin.left - 8);
+    txt.setAttribute("y", y + 4);
+    txt.setAttribute("text-anchor", "end");
+    txt.textContent = v;
+    axisG.appendChild(txt);
+  }
+  svg.appendChild(axisG);
+
+  // 44 & 60 Inflection Marks
+  [44, 60].forEach(infAge => {
+    let x = xMap(infAge);
+    let line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+    line.setAttribute("x1", x);
+    line.setAttribute("y1", margin.top);
+    line.setAttribute("x2", x);
+    line.setAttribute("y2", margin.top + plotH);
+    line.setAttribute("stroke", "#e11d48");
+    line.setAttribute("stroke-dasharray", "4,4");
+    line.setAttribute("stroke-width", "1");
+    svg.appendChild(line);
+
+    let t = document.createElementNS("http://www.w3.org/2000/svg", "text");
+    t.setAttribute("x", x + 3);
+    t.setAttribute("y", margin.top + 14);
+    t.setAttribute("fill", "#e11d48");
+    t.setAttribute("font-size", "10px");
+    t.setAttribute("font-weight", "600");
+    t.textContent = infAge + '岁跃迁峰 (T01-C03)';
+    svg.appendChild(t);
+  });
+
+  // Lines
+  function drawSeries(key, color, label) {
+    let d = "";
+    rawData.ages.forEach((age, idx) => {
+      let x = xMap(age);
+      let y = yMap(rawData.series[key][idx]);
+      d += (idx === 0 ? "M" : "L") + `${x},${y} `;
+    });
+    let path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    path.setAttribute("d", d);
+    path.setAttribute("fill", "none");
+    path.setAttribute("stroke", color);
+    path.setAttribute("stroke-width", "2.5");
+    svg.appendChild(path);
+
+    // Dots
+    rawData.ages.forEach((age, idx) => {
+      let x = xMap(age);
+      let y = yMap(rawData.series[key][idx]);
+      let circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+      circle.setAttribute("cx", x);
+      circle.setAttribute("cy", y);
+      circle.setAttribute("r", "3.5");
+      circle.setAttribute("fill", color);
+      circle.setAttribute("stroke", "#ffffff");
+      circle.setAttribute("stroke-width", "1.5");
+      svg.appendChild(circle);
+    });
+  }
+
+  if (state.gender === 'both' || state.gender === 'male') {
+    drawSeries('male', '#0369a1', '男');
+  }
+  if (state.gender === 'both' || state.gender === 'female') {
+    drawSeries('female', '#be185d', '女');
+  }
+
+  // Current Age Vertical Line
+  let curX = xMap(state.age);
+  let curLine = document.createElementNS("http://www.w3.org/2000/svg", "line");
+  curLine.setAttribute("id", "indicator-line");
+  curLine.setAttribute("x1", curX);
+  curLine.setAttribute("y1", margin.top);
+  curLine.setAttribute("x2", curX);
+  curLine.setAttribute("y2", margin.top + plotH);
+  curLine.setAttribute("stroke", "#0f172a");
+  curLine.setAttribute("stroke-width", "2");
+  svg.appendChild(curLine);
+
+  // Overlay for hover
+  let overlay = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+  overlay.setAttribute("x", margin.left);
+  overlay.setAttribute("y", margin.top);
+  overlay.setAttribute("width", plotW);
+  overlay.setAttribute("height", plotH);
+  overlay.setAttribute("fill", "transparent");
+  overlay.style.cursor = "crosshair";
+
+  overlay.addEventListener('mousemove', (e) => {
+    let rect = svg.getBoundingClientRect();
+    let svgX = (e.clientX - rect.left) * (W / rect.width);
+    let clampedX = Math.max(margin.left, Math.min(W - margin.right, svgX));
+    let hoverAge = Math.round(((clampedX - margin.left) / plotW) * 95);
+    showTooltip(e.clientX, e.clientY, hoverAge);
+  });
+
+  overlay.addEventListener('mouseleave', () => {
+    tooltip.style.opacity = '0';
+  });
+
+  overlay.addEventListener('click', (e) => {
+    let rect = svg.getBoundingClientRect();
+    let svgX = (e.clientX - rect.left) * (W / rect.width);
+    let clampedX = Math.max(margin.left, Math.min(W - margin.right, svgX));
+    let hoverAge = Math.round(((clampedX - margin.left) / plotW) * 95);
+    state.age = hoverAge;
+    ageSlider.value = hoverAge;
+    updateState();
+  });
+
+  svg.appendChild(overlay);
+}
+
+function showTooltip(clientX, clientY, age) {
+  let mVal = interpolate(age, 'male').toFixed(1);
+  let fVal = interpolate(age, 'female').toFixed(1);
+
+  let html = `<strong>年龄: ${age} 岁</strong><br/>`;
+  if (state.gender === 'both' || state.gender === 'male') {
+    html += `<span style="color:#38bdf8">■ 男: ${mVal}</span><br/>`;
+  }
+  if (state.gender === 'both' || state.gender === 'female') {
+    html += `<span style="color:#f472b6">■ 女: ${fVal}</span><br/>`;
+  }
+  html += `<span style="color:#94a3b8; font-size:0.7rem">相对指数 (0-100)</span>`;
+
+  tooltip.innerHTML = html;
+  tooltip.style.opacity = '1';
+
+  let cardBox = document.getElementById('chart-box').getBoundingClientRect();
+  let left = clientX - cardBox.left + 15;
+  let top = clientY - cardBox.top - 20;
+
+  if (left + 120 > cardBox.width) left -= 140;
+  tooltip.style.left = left + 'px';
+  tooltip.style.top = top + 'px';
+}
+
+function updateState() {
+  ageValLabel.textContent = state.age;
+  let curX = xMap(state.age);
+  let line = document.getElementById('indicator-line');
+  if (line) {
+    line.setAttribute("x1", curX);
+    line.setAttribute("x2", curX);
+  }
+
+  // Update Summary Bar & Highlight timeline
+  let age = state.age;
+  let stageName = "";
+  let nextInflection = "";
+  let focus = "";
+  let stageIdx = -1;
+
+  if (age <= 2) {
+    stageIdx = (age === 0) ? 0 : 1;
+    stageName = (age === 0) ? "胎儿关键期" : "0-2岁婴儿期";
+    nextInflection = "3岁 (端粒断崖式磨损进入平缓平台期)";
+    focus = "原生端粒储备建立与肠道先锋微生物定植";
+  } else if (age <= 9) {
+    stageIdx = 2;
+    stageName = "3-9岁儿童期";
+    nextInflection = "10-14岁 (青春期启动，胸腺功能性退化首波)";
+    focus = "DNA高保真重组修复及自噬清除稳态维持";
+  } else if (age <= 19) {
+    stageIdx = 3;
+    stageName = "10-19岁青春期";
+    nextInflection = "20岁 (成年生理峰值期开启)";
+    focus = "性激素与mTOR调控激增、胸腺皮质退化启动";
+  } else if (age <= 35) {
+    stageIdx = 4;
+    stageName = "20-35岁青年峰值期";
+    nextInflection = "44岁 (首个组学代谢/脂质跃迁峰)";
+    focus = "自噬流效率、DNA氧化累积、生活方式表观时钟校准";
+  } else if (age <= 55) {
+    stageIdx = 5;
+    stageName = "36-55岁中年过渡期";
+    nextInflection = "60岁 (第二组学免疫/糖代谢跃迁峰)";
+    focus = "脂质代谢重构、44岁组学峰、LINE-1激活与雌激素骤降";
+  } else if (age <= 75) {
+    stageIdx = 6;
+    stageName = "56-75岁老年期";
+    nextInflection = "76岁 (克隆造血扩张与端粒耗竭临界)";
+    focus = "cGAS-STING慢性低度炎症、SASP旁分泌扩散、自噬流失能";
+  } else {
+    stageIdx = 7;
+    stageName = "76-95+岁高龄期";
+    nextInflection = "生命终末期 (分子熵增失控与代偿耗竭)";
+    focus = "干细胞库枯竭、造血克隆异常、超级百岁异质性保护";
+  }
+
+  document.getElementById('sum-stage').textContent = stageName;
+  document.getElementById('sum-inflection').textContent = nextInflection;
+  document.getElementById('sum-focus').textContent = focus;
+
+  // Highlight Cards
+  document.querySelectorAll('.timeline-card').forEach((card, idx) => {
+    if (idx === stageIdx) {
+      card.classList.add('active-stage');
+    } else {
+      card.classList.remove('active-stage');
+    }
+  });
+}
+
+function initDOM() {
+  // Title
+  document.getElementById('panel-title').textContent = rawData.dim + ' ' + rawData.title;
+
+  // Timeline
+  const tContainer = document.getElementById('timeline-container');
+  tContainer.innerHTML = '';
+  rawData.stages.forEach((stg, i) => {
+    let div = document.createElement('div');
+    div.className = 'timeline-card';
+    div.innerHTML = `
+      <h4>${stg.range}</h4>
+      <div class="timeline-prop"><strong>分子核心机制:</strong> ${stg.mechanism}</div>
+      <div class="timeline-prop"><span class="tag tag-male">男性分异</span> ${stg.male}</div>
+      <div class="timeline-prop"><span class="tag tag-female">女性分异</span> ${stg.female}</div>
+      <div class="timeline-prop"><span class="tag tag-reversibility">可逆性评级</span> ${stg.reversibility}</div>
+    `;
+    tContainer.appendChild(div);
+  });
+
+  // Branches
+  const bContainer = document.getElementById('branches-container');
+  bContainer.innerHTML = '';
+  rawData.branches.forEach(b => {
+    let d = document.createElement('details');
+    d.innerHTML = `
+      <summary>
+        <span>${b.title}</span>
+        <span class="tag">${b.tag}</span>
+      </summary>
+      <div class="details-content">${b.body}</div>
+    `;
+    bContainer.appendChild(d);
+  });
+
+  // Windows
+  document.getElementById('win-locked').textContent = rawData.windows.locked;
+  document.getElementById('win-return').textContent = rawData.windows.high_return;
+  document.getElementById('win-delay').textContent = rawData.windows.delay_only;
+
+  // Cross links
+  document.getElementById('cross-links-p').textContent = rawData.cross_links;
+
+  // Claims
+  const cTbody = document.getElementById('claims-table-body');
+  cTbody.innerHTML = '';
+  rawData.claims.forEach(c => {
+    let tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td><strong>${c.claim_id}</strong></td>
+      <td><span class="claim-status status-${c.status}">${c.status}</span></td>
+      <td>${c.stage}</td>
+      <td>${c.statement}</td>
+      <td style="color:#334155">${c.value}</td>
+      <td style="font-size:0.75rem; color:#64748b">${c.source}</td>
+    `;
+    cTbody.appendChild(tr);
+  });
+}
+
+// Event Listeners
+ageSlider.addEventListener('input', (e) => {
+  state.age = parseInt(e.target.value, 10);
+  updateState();
+});
+
+document.querySelectorAll('input[name="gender"]').forEach(radio => {
+  radio.addEventListener('change', (e) => {
+    state.gender = e.target.value;
+    renderChart();
+  });
+});
+
+window.addEventListener('resize', () => {
+  renderChart();
+});
+
+// Initialization
+initDOM();
+renderChart();
+updateState();
+</script>
+</body>
+</html>

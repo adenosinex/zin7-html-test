@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>T02 性发育与生殖周期</title>
+<style>
+:root {
+  --bg: #f8fafc;
+  --surface: #ffffff;
+  --border: #e2e8f0;
+  --text: #0f172a;
+  --text-muted: #64748b;
+  --male: #2563eb;
+  --female: #db2777;
+  --neutral: #475569;
+  --accent: #0284c7;
+  --warning: #ea580c;
+  --danger: #dc2626;
+  --success: #16a34a;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.5;
+  padding-bottom: 60px;
+}
+.container { max-width: 1100px; margin: 0 auto; padding: 0 16px; }
+
+/* Sticky Console */
+.console-wrapper {
+  position: static;
+  top: 0;
+  z-index: 100;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(8px);
+  border-bottom: 2px solid var(--border);
+  box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+  padding: 12px 0;
+}
+.console-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+}
+.controls {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex: 1 1 320px;
+}
+.slider-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+}
+.slider-group label {
+  font-weight: 700;
+  font-size: 0.9rem;
+  white-space: nowrap;
+}
+.slider-group input[type="range"] {
+  flex: 1;
+  cursor: pointer;
+}
+.age-badge {
+  background: var(--text);
+  color: #fff;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  min-width: 44px;
+  text-align: center;
+}
+.btn-group {
+  display: flex;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  overflow: hidden;
+}
+.btn-group button {
+  background: var(--surface);
+  border: none;
+  padding: 6px 12px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  color: var(--text-muted);
+}
+.btn-group button.active {
+  background: var(--text);
+  color: #fff;
+}
+.summary-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  width: 100%;
+  background: var(--bg);
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  border: 1px solid var(--border);
+}
+.summary-item {
+  display: flex;
+  gap: 6px;
+}
+.summary-item span.label {
+  color: var(--text-muted);
+  font-weight: 600;
+}
+.summary-item span.val {
+  font-weight: 700;
+}
+
+/* Section Common */
+.section {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 20px;
+  margin-top: 24px;
+}
+.section-title {
+  font-size: 1.15rem;
+  font-weight: 800;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-left: 4px solid var(--text);
+  padding-left: 8px;
+}
+
+/* A: Chart */
+.chart-container {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+}
+svg { display: block; width: 100%; height: auto; }
+.tooltip {
+  position: absolute;
+  pointer-events: none;
+  background: rgba(15, 23, 42, 0.9);
+  color: #fff;
+  padding: 6px 10px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  display: none;
+  transform: translate(-50%, -100%);
+  margin-top: -8px;
+  white-space: nowrap;
+  z-index: 10;
+}
+
+/* B: Stage Timeline */
+.timeline-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+  margin-top: 12px;
+}
+.stage-card {
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 12px;
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 0.85rem;
+}
+.stage-card.active {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent);
+  background: #f0f9ff;
+}
+.stage-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 4px;
+}
+.stage-range { font-weight: 800; font-size: 0.95rem; }
+.stage-reversibility {
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: #e2e8f0;
+}
+.stage-male { color: var(--male); font-weight: 600; }
+.stage-female { color: var(--female); font-weight: 600; }
+
+/* C: Branches */
+details.branch-item {
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  margin-bottom: 12px;
+  overflow: hidden;
+}
+details.branch-item summary {
+  padding: 10px 14px;
+  font-weight: 700;
+  font-size: 0.9rem;
+  cursor: pointer;
+  background: var(--bg);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+details.branch-item summary span.tag {
+  background: var(--text);
+  color: #fff;
+  font-size: 0.75rem;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+.branch-content {
+  padding: 14px;
+  font-size: 0.85rem;
+  line-height: 1.6;
+  border-top: 1px solid var(--border);
+}
+
+/* D: Windows */
+.window-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+}
+.window-card {
+  padding: 14px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  border-left: 4px solid;
+}
+.window-card.locked {
+  background: #fef2f2;
+  border-color: var(--danger);
+}
+.window-card.high-return {
+  background: #f0fdf4;
+  border-color: var(--success);
+}
+.window-card.delay-only {
+  background: #fffbeb;
+  border-color: var(--warning);
+}
+.window-title {
+  font-weight: 800;
+  margin-bottom: 6px;
+  font-size: 0.9rem;
+}
+
+/* E: Cross Links & Verification */
+.claims-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8rem;
+  margin-top: 10px;
+}
+.claims-table th, .claims-table td {
+  border: 1px solid var(--border);
+  padding: 8px;
+  text-align: left;
+}
+.claims-table th { background: var(--bg); font-weight: 700; }
+.badge-status {
+  padding: 2px 4px;
+  border-radius: 4px;
+  font-weight: 700;
+  font-size: 0.7rem;
+}
+.badge-verified { background: #dcfce7; color: var(--success); }
+.badge-corrected { background: #ffedd5; color: var(--warning); }
+
+.source-ref {
+  display: inline-block;
+  font-size: 0.75rem;
+  color: var(--accent);
+  margin-left: 4px;
+  cursor: pointer;
+}
+</style>
+</head>
+<body>
+
+<div class="console-wrapper">
+  <div class="container console-grid">
+    <div class="controls">
+      <div class="slider-group">
+        <label for="ageSlider">年龄标定</label>
+        <input type="range" id="ageSlider" min="0" max="95" value="25" step="1">
+        <div class="age-badge" id="ageVal">25岁</div>
+      </div>
+      <div class="btn-group" id="genderBtnGroup">
+        <button type="button" class="active" data-gender="both">对比</button>
+        <button type="button" data-gender="male">仅男</button>
+        <button type="button" data-gender="female">仅女</button>
+      </div>
+    </div>
+    <div class="summary-bar">
+      <div class="summary-item"><span class="label">当前阶段:</span><span class="val" id="sumStage">20-35岁 黄金储备稳态期</span></div>
+      <div class="summary-item"><span class="label">下一拐点:</span><span class="val" id="sumInflection">37.5岁 (女性卵泡闭锁斜率突增 / 男性Leydig细胞进行性凋亡)</span></div>
+      <div class="summary-item"><span class="label">核心关注:</span><span class="val" id="sumFocus">配子保真度极高、AMH充沛、雄二醇/睾酮稳态</span></div>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- A: Trajectory Chart -->
+  <section class="section">
+    <div class="section-title">A. HPG轴内分泌活性与生殖潜能归一化轨迹 (0-100分)</div>
+    <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 12px;">
+      注：本轨迹为相对潜能指数。男婴经历迷你青春期脉冲，儿童期中枢强阻遏，青春期解除刹车，中青年达峰，女性50岁绝经阶跃断崖，男性渐进性衰减。
+      <span class="source-ref" title="数据核实来源">[T02-C01, T02-C07, T02-C08, T02-C09]</span>
+    </p>
+    <div class="chart-container" id="chartWrapper">
+      <svg id="chartSvg" viewBox="0 0 900 360"></svg>
+      <div class="tooltip" id="tooltip"></div>
+    </div>
+  </section>
+
+  <!-- B: Stages Timeline Cards -->
+  <section class="section">
+    <div class="section-title">B. 生理阶段演变时间轴卡片</div>
+    <div class="timeline-grid" id="timelineGrid"></div>
+  </section>
+
+  <!-- C: Foldable Deep Dives -->
+  <section class="section">
+    <div class="section-title">C. 分子机制与发育时序专题支线</div>
+    <div id="branchesContainer"></div>
+  </section>
+
+  <!-- D: Intervention Windows -->
+  <section class="section">
+    <div class="section-title">D. 三类生物学干预窗口模型</div>
+    <div class="window-grid" id="windowsContainer"></div>
+  </section>
+
+  <!-- E: Cross-Links & Verification -->
+  <section class="section">
+    <div class="section-title">E. 跨维度刚性生理偶联</div>
+    <p style="font-size: 0.85rem; line-height: 1.6; margin-bottom: 16px;" id="crossLinksText"></p>
+    <details>
+      <summary style="font-size: 0.85rem; font-weight: 700; cursor: pointer; color: var(--accent); padding: 8px 0;">
+        展开已核实断言与文献来源清单 (Claims Verification)
+      </summary>
+      <table class="claims-table">
+        <thead>
+          <tr>
+            <th>编号</th>
+            <th>断言陈述</th>
+            <th>量化截断与指标</th>
+            <th>状态</th>
+            <th>原始出处</th>
+          </tr>
+        </thead>
+        <tbody id="claimsTbody"></tbody>
+      </table>
+    </details>
+  </section>
+
+</div>
+
+<script>
+const rawData = {"dim": "T02", "title": "性发育与生殖周期", "curve_note": "本曲线为下丘脑-垂体-性腺（HPG）轴内分泌活性、靶器官敏感性及生殖功能潜能的0-100归一化相对指数。0岁男婴在产后经历迷你青春期（0-6个月睾酮峰值达生殖潜能归一化26分），女婴经历0-2岁高促性腺激素波动；2-9岁转入HPG轴中枢阻遏的完全静默谷底（2-8分）；10-19岁青春期KNDy系统解除刹车呈现指数式上升；20-35岁达到两性配子质量与激素分泌功能巅峰（100分）；女性在45-55岁因卵泡储备池耗竭经历阶跃式断崖下跌并终止于绝经（55岁降至7分）；男性则自40岁起因Leydig细胞进行性凋亡与SHBG上升呈平缓衰减曲线，直至85岁以上残余微弱基线内分泌活性。", "ages": [0, 2, 5, 9, 12, 15, 19, 25, 35, 45, 55, 65, 75, 85, 95], "series": {"male": [26, 5, 2, 7, 32, 76, 95, 100, 89, 74, 58, 44, 30, 18, 9], "female": [18, 4, 2, 8, 46, 86, 98, 100, 78, 42, 7, 3, 2, 1, 0]}, "claims": [{"claim_id": "T02-C01", "statement": "新生儿脱离母体胎盘高浓度雌二醇负反馈后经历迷你青春期（Mini-puberty），男婴血清睾酮在1-3个月达峰值且于6个月前回落至静默期，女婴FSH与E2高水平脉冲波动持续至1-2岁", "value": "男婴总睾酮峰值达1-12 nmol/L（1-3月龄，6月龄前降至基线<0.5 nmol/L）；女婴FSH/E2高水平脉动持续12-24个月", "stage": "0-2岁婴儿期", "status": "[VERIFIED]", "source": "Kuiri-Hänninen et al., Endocr Rev, 2014; PMID: 28628972"}, {"claim_id": "T02-C02", "statement": "胎儿性分化依赖孕早期雄激素脉冲与抗苗勒管激素（AMH），SRY基因驱动睾丸支持细胞于孕7周分泌AMH，间质细胞于孕8-14周在hCG刺激下分泌睾酮", "value": "孕8-14周胎儿睾酮峰值达8-12 nmol/L，驱动中肾管分化及外生殖器男性化形成", "stage": "胎儿期", "status": "[VERIFIED]", "source": "Rey et al., Semin Reprod Med, 2012; Hughes et al., 2006"}, {"claim_id": "T02-C03", "statement": "肾上腺机能初现（Adrenarche）与性腺机能初现（Gonadarche）在发生机制上解耦独立，前者表现为肾上腺皮质网状带CYB5A/SULT2A1激活致DHEA-S激增", "value": "肾上腺初现发生于6-8岁（血清DHEA-S>1.0 μmol/L诱导阴毛/腋毛萌出与体味改变）；性腺初现发生于9-11岁（弓状核GnRH脉冲重新激活）", "stage": "3-9岁儿童期", "status": "[VERIFIED]", "source": "Auchus et al., 2004; PMID: 34250379"}, {"claim_id": "T02-C04", "statement": "青春期真性启动的生物学金标准：女童以Tanner B2（乳腺出芽）为临床起点，男童以Tanner G2（双侧Prader计睾丸容积≥4 mL）为客观形态学起点", "value": "女童B2启动中位年龄为9.8-10.2岁；男童G2睾丸容积≥4 mL启动中位年龄为10.5-11.5岁", "stage": "10-19岁青春期", "status": "[VERIFIED]", "source": "PMID: 41921546; PMID: 12388944; PMID: 34250379"}, {"claim_id": "T02-C05", "statement": "女性生长突增峰值（PHV）严格先于月经初潮，初潮通常发生在生长速度减速阶段及Tanner B4期，为雌激素对内膜突破性撤退机制", "value": "女性PHV中位年龄11.5-12.0岁（峰速8-9 cm/年），初潮中位年龄为12.5-12.8岁，初潮时间严格滞后PHV约0.8-1.5年", "stage": "10-19岁青春期", "status": "[VERIFIED]", "source": "Marshall & Tanner, Arch Dis Child, 1969; Biro et al., 2006"}, {"claim_id": "T02-C06", "statement": "男性遗精（Oligarche）多出现在生长突增峰值（PHV）重叠期及Tanner G3-G4期，标志睾丸生精小管成熟精子发生通路完成功能闭环", "value": "首次遗精中位年龄为13.5-14.5岁，对应睾丸容积达10-15 mL及PHV峰速阶段（10-12 cm/年）", "stage": "10-19岁青春期", "status": "[VERIFIED]", "source": "Nielsen et al., 1986; Kulin et al., 1989"}, {"claim_id": "T02-C07", "statement": "女性原始卵泡库不可逆加速递减，胎儿期20周达700万极值，出生时跌至100-200万，青春期初剩30-40万，37.5岁后闭锁动力学斜率突增", "value": "37.5岁卵泡临界数量约为25000个（闭锁速率加快约2倍），绝经时卵泡库耗竭跌破临界阈值<1000个", "stage": "20-55岁生殖期", "status": "[VERIFIED]", "source": "Faddy & Gosden, 1996; Wallace & Kelsey, PLoS ONE, 2010"}, {"claim_id": "T02-C08", "statement": "女性自然绝经中位年龄为51.4岁，依据STRAW+10分期体系，围绝经期向绝经后过渡标志着卵巢原始卵泡池不可逆耗竭与排卵永久性终止", "value": "绝经中位年龄51.4岁（95% CI: 45-55岁），血清FSH>25-40 IU/L伴AMH<0.01 ng/mL且闭经持续≥12个月为最终绝经（Stage 0）标志", "stage": "45-55岁中年过渡期", "status": "[VERIFIED]", "source": "STRAW+10 Collaborative Group, 2012; PMID: 41106025; PMID: 41156491"}, {"claim_id": "T02-C09", "statement": "男性睾酮在35-40岁后呈平缓进行性衰退，肝脏SHBG年均递增导致游离睾酮（FT）下降速率显著高于总睾酮（TT）", "value": "TT年均下降0.8%-1.6%，SHBG年均上升1.2%-1.4%，具有生物活性的游离睾酮（FT）年均下降1.6%-2.2%", "stage": "36-75岁中老年期", "status": "[CORRECTED]", "source": "MMAS longitudinal study, Feldman et al., 2002; PMID: 27178254; PMID: 36038500"}, {"claim_id": "T02-C10", "statement": "迟发性性腺功能减退（LOH）诊断必须同时结合典型临床症候群与清晨空腹静脉血清睾酮生化切点", "value": "血清总睾酮<8.0-12.1 nmol/L（或计算游离睾酮cFT<220-240 pmol/L）为生化确认阈值", "stage": "56-75岁老年期", "status": "[VERIFIED]", "source": "Endocrine Society Clinical Practice Guideline, Bhasin et al., 2018; PMID: 17171213"}, {"claim_id": "T02-C11", "statement": "中枢性性早熟（CPP）定义为下丘脑GnRH脉冲发生器过早解禁激活，造成第二性征提前暴露及骨龄严重提前闭合", "value": "女童在8.0岁前出现Tanner B2（乳芽萌出），或男童在9.0岁前出现双侧睾丸增大（容积≥4 mL）", "stage": "3-9岁儿童期", "status": "[VERIFIED]", "source": "Carel et al., Pediatrics, 2009; 中华医学会儿科学分会内分泌学组CPP指南"}, {"claim_id": "T02-C12", "statement": "体质性青春期发育延迟（CDGP）呈现生殖轴重激活延迟与骨龄落后，需依据年龄截断值进行排查以排除器质性低促性腺激素性性腺功能减退", "value": "女童满13岁无乳房发育或满15岁尚无初潮；男童满14岁双侧睾丸容积仍<4 mL（未达G2），伴骨龄落后2-3年", "stage": "10-19岁青春期", "status": "[VERIFIED]", "source": "Sedlmeyer & Palmert, Endocr Rev, 2002; Wei & Crowne, 2016"}, {"claim_id": "T02-C13", "statement": "妊娠早期合胞体滋养层分泌hCG以挽救妊娠黄体，哺乳期高催乳素（PRL）通过抑制KNDy神经元吻素释放产生生理性下丘脑闭经", "value": "hCG在孕8-10周达峰值（50000-100000 IU/L）；哺乳期血清PRL维持>50-100 ng/mL时下丘脑GnRH/LH脉冲被强力抑制阻断排卵", "stage": "20-35岁峰值期", "status": "[VERIFIED]", "source": "McNeilly, Hum Reprod Update, 2001; Knobil and Neill's Physiology of Reproduction, 2015"}], "stages": [{"range": "胎儿关键期", "mechanism": "SRY诱导未分化性腺支持细胞分化分泌AMH促苗勒管退化；Leydig细胞在母体hCG刺激下分泌睾酮，局部5α-还原酶转化DHT完成外生殖器男性化；女性无雄激素则中肾管退化，副中肾管发育为子宫输卵管", "male": "孕8-14周出现睾酮脉冲峰值（8-12 nmol/L），孕28-36周降钙素基因相关肽介导睾丸经腹股沟降入阴囊", "female": "缺乏AMH和T使苗勒管自发定型为内生殖器，孕20周原始卵泡库增殖至全生命周期峰值（约700万）后启动程序性凋亡", "reversibility": "不可逆解剖定型期"}, {"range": "0-2岁", "mechanism": "断绝母体高雌二醇胎盘负反馈，HPG轴一过性觉醒（迷你青春期），对靶器官进行早期功能印记与敏化后，受中枢强抑制转入儿童期完全静默", "male": "出生第4-12周睾酮出现微峰（1-12 nmol/L），刺激阴茎及睾丸早期微生长；6个月内睾酮回落至静止基线（<0.5 nmol/L）", "female": "出生后垂体FSH/LH脉动持续，刺激卵巢微小卵泡生长并分泌雌激素，该波动持续12-24个月后彻底归于静止", "reversibility": "生理自限性激活期"}, {"range": "3-9岁", "mechanism": "中枢GABA能与阿片肽能神经元对GnRH脉冲发生器强力抑制；6-8岁肾上腺皮质网状带激活（CYB5A/SULT2A1上调）驱动肾上腺初现（Adrenarche），与性腺轴解耦独立运行", "male": "睾丸容积处于1-2 mL儿童期静止态；6-8岁DHEA-S上升（>1.0 μmol/L）驱动早期阴毛萌出与顶泌汗腺发育", "female": "卵巢与子宫处于低代谢休眠态；网状带雄激素驱动体味改变与早期腋毛萌出，骨龄平稳进展", "reversibility": "中枢程序化静默期"}, {"range": "10-19岁", "mechanism": "下丘脑弓状核KISS1/Neurokinin B/Dynorphin（KNDy）系统解除中枢抑制，GnRH阵发性脉冲驱动垂体高频FSH/LH释放，激活类固醇生成并启动骨骺突增闭合轴", "male": "Tanner G2(≥4mL)启动→G3/PHV生长突增→G4遗精（Oligarche，13.5-14.5岁）与变声→G5成熟精子持续生成", "female": "Tanner B2（乳房萌芽，9.8-10.2岁）→B3/PHV突增（11.5-12.0岁）→B4/初潮（Menarche，12.5-12.8岁）→B5建立规则排卵周期", "reversibility": "不可逆形态定型期"}, {"range": "20-35岁", "mechanism": "HPG轴反馈与前反馈环路高度成熟稳态，配子染色体减数分裂保真度最高，子宫内膜胞饮突及蜕膜化容受性处于生命周期黄金窗口", "male": "曲细精管生精上皮每日产生数千万活动精子，血睾屏障完整，精子DNA碎片指数处于低谷（DFI<15%）", "female": "建立规则排卵黄体周期，卵母细胞非整倍体率极低（<10%-15%），AMH储备充足（2.0-5.0 ng/mL），黄体酮分泌完备", "reversibility": "高度稳态可调控期"}, {"range": "36-55岁", "mechanism": "两性分化拐点：女性因卵巢始基卵泡库耗竭跌破临界阈值（37.5岁后加速耗竭，绝经时<1000个），抑制素B消失诱发FSH爆发式代偿（STRAW分期阶跃衰退）；男性为Leydig细胞进行性凋亡伴SHBG年增1.2%-1.4%", "male": "间质细胞年凋亡约1%，精子DFI逐渐增高，总睾酮年均降0.8%-1.6%，游离睾酮年均降1.6%-2.2%，勃起内皮功能渐进性衰退", "female": "经历STRAW -2期（周期长度差异≥7天）至-1期（闭经≥60天），直至最终绝经（中位51.4岁，闭经≥12个月，FSH>25-40 IU/L），排卵永久终止", "reversibility": "女性靶器官耗竭不可逆；男性渐进退行期"}, {"range": "56-75岁", "mechanism": "女性绝经后内源性雌二醇恒定低迷，雌激素受体下调致心血管与骨骼保护丧失；男性游离睾酮持续低于临床阈值，诱发迟发性性腺功能减退（LOH）、骨量流失与胰岛素抵抗", "male": "睾丸间质纤维化，早晨总睾酮常态化<8.0-12.1 nmol/L，伴发肌少症、内脏脂肪蓄积、贫血及认知精力衰退", "female": "血清E2<10-20 pg/mL，FSH维持>40-100 IU/L平台，泌尿生殖道萎缩（GSM），破骨细胞脱抑制致骨小梁微结构破坏", "reversibility": "不可逆内分泌耗竭/退行期"}, {"range": "76-95+岁", "mechanism": "性腺组织重度纤维硬化伴微血管闭塞，下丘脑-垂体脉冲发生器退行性钝化，靶器官核受体表达降至极低水平，全轴系呈现静默或脱敏状态", "male": "Leydig细胞残存稀少，游离睾酮极度匮乏，双氢睾酮转化失衡，前列腺结节性间质增生加剧排尿动力障碍", "female": "卵巢完全纤维条索化，阴道黏膜薄壁化无糖原，HPG轴促性腺激素处于高位平台后终末钝化，生殖内分泌指数趋近于0", "reversibility": "终末萎缩衰亡期"}], "branches": [{"tag": "[分子机制深潜]", "title": "男性生殖轴发育、精子发生动力学与迟发性性腺功能减退（LOH）", "body": "胚胎期第7周，Y染色体短臂SRY基因活化SOX9，指导双潜能性腺分化为睾丸支持细胞（Sertoli），合成分泌AMH诱导副中肾管凋亡退化；间质细胞（Leydig）在胎盘hCG驱动下分泌睾酮，并在泌尿生殖窦局部经5α-还原酶催化为活性双氢睾酮（DHT），诱发外生殖器男性化。生后1-3个月经历迷你青春期（血清T达1-12 nmol/L）后静默。青春期启动依赖脉冲式LH结合间质细胞LHR，激活PKA通路及StAR蛋白介导胆固醇向孕烯醇酮转运合成睾酮；FSH则作用于Sertoli细胞分泌雄激素结合蛋白（ABP）与抑制素B，维持局部微环境高浓度T以维系64-72天的生精周期。35-40岁后，睾丸Leydig细胞总数以每年约1%的速度凋亡，微血管硬化导致血流灌注降低；同时肝脏合成性激素结合球蛋白（SHBG）以每年1.2%-1.4%的速度持续递增，致使游离睾酮（FT）呈现更陡峭的年均1.6%-2.2%下降。当晨起血清总睾酮低于8.0-12.1 nmol/L（或游离睾酮低于220-240 pmol/L）且合并勃起障碍、体能下落及内脏脂肪蓄积时，生化与临床共同确立LOH诊断。"}, {"tag": "[分子机制深潜]", "title": "女性卵泡储备衰竭动力学、Tanner分期演进与STRAW+10分期", "body": "女性胚胎第20周原始卵泡储备达生命周期极值（约700万），出生时闭锁损耗至100-200万，青春期前进一步衰退至30-40万。青春期启动的核心为下丘脑弓状核KNDy神经元解除中枢制动，高频释放GnRH驱动垂体分泌促性腺激素。Tanner分期依序展开：B2（乳腺出芽，9.8-10.2岁，依赖雌激素）→B3/PHV（生长激素协同）→B4（乳晕乳头二次突起）→初潮（Menarche，中位12.5-12.8岁，发生于PHV减速期，初期多为无排卵周期）→B5（成人乳房形态）。始基卵泡的耗竭遵循两相非线性衰减模型：37.5岁前，每个月经周期伴随数十至数百个始基卵泡非受控募集闭锁；当残余卵泡池降至约25000个（37.5岁临界点）时，闭锁斜率突增约2倍。依据STRAW+10分期：围绝经早期（-2期）相邻月经周期差值≥7天；围绝经晚期（-1期）出现持续≥60天的闭经间隔，伴随抑制素B断崖式下落、AMH跌入检测限以下及血清FSH代偿性上升（>25 IU/L）；当最终闭经≥12个月即确立最终月经绝经（0期，中位51.4岁），此时卵泡池已跌破临界耗竭阈值（<1000个），全轴系进入永久性低雌激素与高促性腺激素状态。"}, {"tag": "[分子机制深潜]", "title": "妊娠与哺乳期母体生殖神经内分泌-代谢重塑网络", "body": "受精卵着床后，合胞体滋养层细胞分泌hCG，特异性激动黄体LH受体，维持妊娠黄体分泌孕酮与雌激素至孕8-10周完成黄体-胎盘转移。胎盘随后转变为主要内分泌器官，大量合成分泌胎盘催乳素（hPL）、胎盘生长激素（PGH）、孕酮及雌三醇（E3），不仅深度阻断母体垂体GnRH脉冲释放，还诱导母体外周胰岛素抵抗，确保母胎营养优先分流。分娩胎盘剥离后，高浓度孕酮与雌激素骤降，解除下丘脑对垂体催乳素（PRL）的转录抑制；新生儿吸吮刺激乳头神经末梢经脊髓-下丘脑通路，下调弓状核多巴胺释放，促进垂体PRL大量分泌，同时室旁核/视上核脉冲式释放催产素（OT）引发肌上皮细胞收缩（喷乳反射）。更为关键的是，持续高浓度的PRL通过抑制弓状核KNDy神经元的Kisspeptin表达，深度下调GnRH脉冲发生器的脉冲振幅与频率，使垂体无法产生触发排卵的LH峰，从而在全母乳喂养期间维持生理性下丘脑闭经（哺乳期无排卵闭经，LAM避孕机制）。"}, {"tag": "[分子机制深潜]", "title": "性发育时序偏离：中枢性性早熟（CPP）与体质性青春期延迟（CDGP）机制阈值", "body": "性发育启动时序受遗传网络、代谢营养信号（如瘦素Leptin临界阈值）及中枢神经递质平衡精密标定。中枢性性早熟（CPP）病理核心为HPG轴提前解除中枢制动，弓状核Kisspeptin-GPR54信号异常活化诱发真性GnRH阵发分泌。生化确诊金标准为GnRH激发试验：LH峰值>5.0 IU/L且LH/FSH峰值比>0.6。CPP的核心病理危害在于性激素提前大量暴露催化骺板软骨迅速分化成熟，使骨龄超越生理年龄≥2岁，骨骺过早闭合严重损耗成年终身高。体质性青春期发育延迟（CDGP）则为中枢成熟时钟异时化延迟表型，多伴家族遗传史，表现为下丘脑GnRH脉冲发生器再激活延迟，骨龄与身高生长曲线同步滞后2-3岁，但垂体生长激素储备完备。临床设定严格排查红线（女满13岁无乳腺出芽/男满14岁睾丸容积<4 mL），需通过低剂量短程性激素启动诱导治疗或GnRH促发试验排查卡尔曼综合征等先天性低促性腺激素性性腺功能减退症（CHH）。"}], "windows": {"locked": "胎儿期生殖结节与管道解剖定型（孕8-14周依赖雄激素脉冲完成男性化分化，错过关键期则形成隐睾、尿道下裂或两性畸形，出生后药物无法逆转解剖缺陷）；骨骺软骨板闭合终点（女孩骨龄满14-15岁、男孩骨龄满16-17岁时，高浓度雌二醇诱导生长板彻底矿化骨化，线性生长轴永久锁死）；绝经后始基卵泡库完全耗竭（跌破<1000个阈值后，卵母细胞池无法自发再生，排卵功能永久锁死）。", "high_return": "迷你青春期干预窗（出生后0-6月龄为隐睾与小阴茎促性腺激素治疗的最佳敏感窗，隐睾手术复位金标准截断为6-12/18月龄内，超时将导致生精细胞不可逆凋亡）；CPP药物阻断窗口（女孩在骨龄<11.5岁、男孩骨龄<12.5岁前应用GnRHa抑制骨龄飞跃、挽救成年终身高的获益最高）；生育潜能黄金储备窗（女性22-32岁卵巢AMH>2.0 ng/mL且卵母细胞非整倍体率<10%；男性20-35岁精子DNA断裂指数DFI<15%）。", "delay_only": "围绝经期过渡阶段（45-50岁）：在绝经10年之内且年龄<60岁的时间窗（Window of Opportunity）开启更年期激素治疗（MHT/HRT），可显著延缓骨质疏松进程、减轻血管舒缩综合征及心血管代谢风险，但无法阻断原始卵泡库耗竭；男性迟发性性腺功能减退期（55-70岁）：睾酮替代疗法（TRT）可改善肌少症、内脏脂肪肥胖及勃起障碍，但无法逆转曲细精管基底膜玻璃样变与精子生成潜能的衰竭。"}, "cross_links": "本维度（T02）与骨骼骨量演化（T05）呈现刚性生理偶联：青春期E2激增驱动PHV突增并最终诱导骺板融合，绝经后E2跌破阈值引发破骨细胞RANKL信号脱抑制致骨量断崖式流失；与身体形态与体成分（T03）双向强相关：雄激素通过AR驱动骨骼肌蛋白质合成与骨量沉淀，雌激素驱动皮下脂肪向臀股区特异性沉着；与心血管系统（T06）交叉：雌激素通过激活血管内皮eNOS具有血管舒张及内皮保护效应，女性绝经后心血管疾病发病率在5-10年内迅速追平男性；与神经递质及认知（T11）关联：绝经期雌激素剧烈震荡直接诱发下丘脑体温调节中枢KNDy神经元失代偿（潮热发汗）及情感障碍。"};
+
+let currentGender = 'both';
+let currentAge = 25;
+
+// Chart layout constants
+const W = 900, H = 360;
+const PAD = { top: 30, right: 40, bottom: 40, left: 50 };
+const plotW = W - PAD.left - PAD.right;
+const plotH = H - PAD.top - PAD.bottom;
+
+function xToPx(age) {
+  return PAD.left + (age / 95) * plotW;
+}
+function yToPx(val) {
+  return PAD.top + plotH - (val / 100) * plotH;
+}
+
+// Linear interpolate series
+function getValAtAge(age, arr) {
+  const ages = rawData.ages;
+  if (age <= ages[0]) return arr[0];
+  if (age >= ages[ages.length - 1]) return arr[arr.length - 1];
+  for (let i = 0; i < ages.length - 1; i++) {
+    if (age >= ages[i] && age <= ages[i+1]) {
+      const t = (age - ages[i]) / (ages[i+1] - ages[i]);
+      return Math.round(arr[i] + t * (arr[i+1] - arr[i]));
+    }
+  }
+  return 0;
+}
+
+// Render SVG Chart
+function renderChart() {
+  const svg = document.getElementById('chartSvg');
+  const ages = rawData.ages;
+  const mSeries = rawData.series.male;
+  const fSeries = rawData.series.female;
+
+  let malePathD = '';
+  let femalePathD = '';
+
+  ages.forEach((a, i) => {
+    const x = xToPx(a);
+    const ym = yToPx(mSeries[i]);
+    const yf = yToPx(fSeries[i]);
+    malePathD += (i === 0 ? `M ${x} ${ym}` : ` L ${x} ${ym}`);
+    femalePathD += (i === 0 ? `M ${x} ${yf}` : ` L ${x} ${yf}`);
+  });
+
+  // Grid lines
+  let gridLines = '';
+  [0, 25, 50, 75, 100].forEach(v => {
+    const y = yToPx(v);
+    gridLines += `<line x1="${PAD.left}" y1="${y}" x2="${W - PAD.right}" y2="${y}" stroke="#e2e8f0" stroke-width="1" />`;
+    gridLines += `<text x="${PAD.left - 8}" y="${y + 4}" fill="#64748b" font-size="11" text-anchor="end">${v}</text>`;
+  });
+  [0, 10, 20, 35, 50, 65, 80, 95].forEach(a => {
+    const x = xToPx(a);
+    gridLines += `<line x1="${x}" y1="${PAD.top}" x2="${x}" y2="${H - PAD.bottom}" stroke="#e2e8f0" stroke-width="1" />`;
+    gridLines += `<text x="${x}" y="${H - PAD.bottom + 16}" fill="#64748b" font-size="11" text-anchor="middle">${a}岁</text>`;
+  });
+
+  const activeX = xToPx(currentAge);
+
+  svg.innerHTML = `
+    <!-- Grid -->
+    ${gridLines}
+    <!-- Threshold Zones -->
+    <rect x="${xToPx(45)}" y="${PAD.top}" width="${xToPx(55) - xToPx(45)}" height="${plotH}" fill="#db2777" fill-opacity="0.05" />
+    <text x="${xToPx(50)}" y="${PAD.top + 14}" fill="#db2777" font-size="10" font-weight="700" text-anchor="middle">绝经断崖带(45-55岁)</text>
+
+    <!-- Paths -->
+    <path id="maleLine" d="${malePathD}" fill="none" stroke="#2563eb" stroke-width="2.5" opacity="${currentGender === 'female' ? '0.1' : '1'}" />
+    <path id="femaleLine" d="${femalePathD}" fill="none" stroke="#db2777" stroke-width="2.5" stroke-dasharray="4 2" opacity="${currentGender === 'male' ? '0.1' : '1'}" />
+
+    <!-- Current Indicator Line -->
+    <line id="indicatorLine" x1="${activeX}" y1="${PAD.top}" x2="${activeX}" y2="${H - PAD.bottom}" stroke="#0f172a" stroke-width="2" stroke-dasharray="2 2" />
+
+    <!-- Overlay transparent rect for hover -->
+    <rect id="hitRect" x="${PAD.left}" y="${PAD.top}" width="${plotW}" height="${plotH}" fill="transparent" style="cursor: crosshair;" />
+  `;
+
+  // Hit test for chart hover
+  const hit = document.getElementById('hitRect');
+  const tt = document.getElementById('tooltip');
+  hit.addEventListener('mousemove', (e) => {
+    const rect = hit.getBoundingClientRect();
+    const mouseX = e.clientX - rect.left;
+    const clampedX = Math.max(0, Math.min(plotW, mouseX));
+    const age = Math.round((clampedX / plotW) * 95);
+    const mVal = getValAtAge(age, mSeries);
+    const fVal = getValAtAge(age, fSeries);
+
+    tt.style.display = 'block';
+    tt.style.left = `${e.clientX - rect.left + PAD.left}px`;
+    tt.style.top = `${e.clientY - rect.top + PAD.top}px`;
+    tt.innerHTML = `<strong>${age} 岁</strong><br/>男: ${mVal} 分 | 女: ${fVal} 分`;
+  });
+  hit.addEventListener('mouseleave', () => { tt.style.display = 'none'; });
+  hit.addEventListener('click', (e) => {
+    const rect = hit.getBoundingClientRect();
+    const mouseX = e.clientX - rect.left;
+    const clampedX = Math.max(0, Math.min(plotW, mouseX));
+    const age = Math.round((clampedX / plotW) * 95);
+    document.getElementById('ageSlider').value = age;
+    updateState(age, currentGender);
+  });
+}
+
+// Stage updater
+function getStageInfo(age) {
+  if (age === 0) return { stage: "0-2岁 婴儿期(迷你青春期)", inflection: "6-12月龄 (睾酮回落至中枢阻遏静默)", focus: "隐睾与小阴茎干预黄金窗" };
+  if (age <= 2) return { stage: "0-2岁 婴儿期", inflection: "2岁 (全轴系转入彻底静默谷底)", focus: "女婴高促性腺激素波动自限性消退" };
+  if (age <= 9) return { stage: "3-9岁 儿童期", inflection: "6-8岁 (肾上腺机能初现 DHEA-S上调)", focus: "与性腺轴解耦独立运行；严密排查CPP(女<8男<9)" };
+  if (age <= 19) return { stage: "10-19岁 青春期", inflection: "12-14岁 (PHV生长突增 / 初潮 / 遗精)", focus: "KNDy解除中枢刹车；骨龄闭合前身高终点" };
+  if (age <= 35) return { stage: "20-35岁 黄金峰值稳态期", inflection: "37.5岁 (女性卵泡闭锁速率加倍加速点)", focus: "配子染色体保真度巅峰、AMH储备充沛" };
+  if (age <= 55) return { stage: "36-55岁 中年分化与过渡期", inflection: "51.4岁 (女性自然绝经中位年龄 STRAW Stage 0)", focus: "女性阶跃式断崖耗竭；男性SHBG年增导致游离睾酮衰减" };
+  if (age <= 75) return { stage: "56-75岁 老年中期退行期", inflection: "65-70岁 (男性迟发性性腺减退LOH高发)", focus: "绝经后心血管与骨质脱保护；男性肌少症与内脏脂肪沉着" };
+  return { stage: "76-95+岁 终末萎缩衰亡期", inflection: "终末钝化", focus: "靶器官核受体脱敏、全轴系纤维硬化基线维持" };
+}
+
+function updateState(age, gender) {
+  currentAge = parseInt(age, 10);
+  currentGender = gender;
+
+  document.getElementById('ageVal').innerText = `${currentAge}岁`;
+  
+  // Update Summary
+  const info = getStageInfo(currentAge);
+  document.getElementById('sumStage').innerText = info.stage;
+  document.getElementById('sumInflection').innerText = info.inflection;
+  document.getElementById('sumFocus').innerText = info.focus;
+
+  // Update SVG indicator and lines
+  const ind = document.getElementById('indicatorLine');
+  if (ind) {
+    const x = xToPx(currentAge);
+    ind.setAttribute('x1', x);
+    ind.setAttribute('x2', x);
+  }
+  const mLine = document.getElementById('maleLine');
+  const fLine = document.getElementById('femaleLine');
+  if (mLine && fLine) {
+    mLine.setAttribute('opacity', currentGender === 'female' ? '0.1' : '1');
+    fLine.setAttribute('opacity', currentGender === 'male' ? '0.1' : '1');
+  }
+
+  // Highlight Timeline Card
+  document.querySelectorAll('.stage-card').forEach(card => {
+    const rangeStr = card.getAttribute('data-range');
+    let isMatch = false;
+    if (rangeStr === '胎儿关键期' && currentAge === 0) isMatch = false;
+    else if (rangeStr === '0-2岁' && currentAge >= 0 && currentAge <= 2) isMatch = true;
+    else if (rangeStr === '3-9岁' && currentAge >= 3 && currentAge <= 9) isMatch = true;
+    else if (rangeStr === '10-19岁' && currentAge >= 10 && currentAge <= 19) isMatch = true;
+    else if (rangeStr === '20-35岁' && currentAge >= 20 && currentAge <= 35) isMatch = true;
+    else if (rangeStr === '36-55岁' && currentAge >= 36 && currentAge <= 55) isMatch = true;
+    else if (rangeStr === '56-75岁' && currentAge >= 56 && currentAge <= 75) isMatch = true;
+    else if (rangeStr === '76-95+岁' && currentAge >= 76) isMatch = true;
+
+    if (isMatch) card.classList.add('active');
+    else card.classList.remove('active');
+  });
+}
+
+// Init Static Sections
+function initStaticDOM() {
+  // B: Stages
+  const tg = document.getElementById('timelineGrid');
+  rawData.stages.forEach(st => {
+    const card = document.createElement('div');
+    card.className = 'stage-card';
+    card.setAttribute('data-range', st.range);
+    card.innerHTML = `
+      <div class="stage-header">
+        <span class="stage-range">${st.range}</span>
+        <span class="stage-reversibility">${st.reversibility}</span>
+      </div>
+      <p style="font-size: 0.8rem; color: var(--text-muted);">${st.mechanism}</p>
+      <div class="stage-male">♂ 男: ${st.male}</div>
+      <div class="stage-female">♀ 女: ${st.female}</div>
+    `;
+    tg.appendChild(card);
+  });
+
+  // C: Branches
+  const bc = document.getElementById('branchesContainer');
+  rawData.branches.forEach(b => {
+    const d = document.createElement('details');
+    d.className = 'branch-item';
+    d.innerHTML = `
+      <summary><span class="tag">${b.tag}</span> ${b.title}</summary>
+      <div class="branch-content">${b.body}</div>
+    `;
+    bc.appendChild(d);
+  });
+
+  // D: Windows
+  const wc = document.getElementById('windowsContainer');
+  wc.innerHTML = `
+    <div class="window-card locked">
+      <div class="window-title" style="color: var(--danger);">锁死不可逆窗口 (Locked)</div>
+      <div>${rawData.windows.locked}</div>
+    </div>
+    <div class="window-card high-return">
+      <div class="window-title" style="color: var(--success);">高收益阻断/干预窗口 (High-Return)</div>
+      <div>${rawData.windows.high_return}</div>
+    </div>
+    <div class="window-card delay-only">
+      <div class="window-title" style="color: var(--warning);">仅延缓进展窗口 (Delay-Only)</div>
+      <div>${rawData.windows.delay_only}</div>
+    </div>
+  `;
+
+  // E: Cross-links & Verification
+  document.getElementById('crossLinksText').innerText = rawData.cross_links;
+  const tbody = document.getElementById('claimsTbody');
+  rawData.claims.forEach(c => {
+    const tr = document.createElement('tr');
+    const isVerified = c.status.includes('VERIFIED');
+    tr.innerHTML = `
+      <td style="font-weight:700;">${c.claim_id}</td>
+      <td>${c.statement}</td>
+      <td style="color: var(--accent); font-weight: 600;">${c.value}</td>
+      <td><span class="badge-status ${isVerified ? 'badge-verified' : 'badge-corrected'}">${c.status}</span></td>
+      <td style="color: var(--text-muted); font-size: 0.75rem;">${c.source}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+// Event Bindings
+document.getElementById('ageSlider').addEventListener('input', (e) => {
+  updateState(e.target.value, currentGender);
+});
+
+document.getElementById('genderBtnGroup').addEventListener('click', (e) => {
+  if (e.target.tagName === 'BUTTON') {
+    document.querySelectorAll('#genderBtnGroup button').forEach(b => b.classList.remove('active'));
+    e.target.classList.add('active');
+    updateState(currentAge, e.target.getAttribute('data-gender'));
+  }
+});
+
+// Bootstrap
+window.addEventListener('DOMContentLoaded', () => {
+  initStaticDOM();
+  renderChart();
+  updateState(25, 'both');
+});
+</script>
+</body>
+</html>
