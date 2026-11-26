@@ -1,376 +1,42 @@
-<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>大脑结构发育与重塑 - 生命周期轨迹</title>
-<style>
-  :root {
-    --bg: #f8fafc;
-    --surface: #ffffff;
-    --text: #0f172a;
-    --text-sub: #475569;
-    --border: #cbd5e1;
-    --male: #2563eb;
-    --female: #db2777;
-    --accent: #0284c7;
-    --highlight: #fef08a;
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; padding-bottom: 60px; }
-  .sticky-header { position: static; top: 0; z-index: 100; background: var(--surface); border-bottom: 2px solid var(--border); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); padding: 12px 20px; }
-  .control-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 8px; }
-  .slider-box { display: flex; align-items: center; gap: 10px; flex-grow: 1; max-width: 500px; }
-  .slider-box input[type="range"] { flex-grow: 1; accent-color: var(--accent); cursor: pointer; }
-  .age-val { font-weight: 700; font-size: 1.1rem; min-width: 60px; color: var(--text); }
-  .gender-btns { display: flex; gap: 4px; }
-  .gender-btns button { padding: 4px 10px; font-size: 0.85rem; border: 1px solid var(--border); background: var(--bg); cursor: pointer; border-radius: 4px; font-weight: 600; }
-  .gender-btns button.active { background: var(--text); color: #fff; border-color: var(--text); }
-  .summary-strip { display: flex; flex-wrap: wrap; gap: 8px 16px; font-size: 0.85rem; background: #f1f5f9; padding: 6px 12px; border-radius: 4px; border: 1px solid #e2e8f0; }
-  .summary-strip span { display: inline-flex; align-items: center; gap: 4px; }
-  .summary-strip strong { color: var(--text); }
-  .container { max-width: 1000px; margin: 0 auto; padding: 20px; }
-  h1 { font-size: 1.5rem; margin-bottom: 4px; }
-  .curve-note { font-size: 0.85rem; color: var(--text-sub); margin-bottom: 16px; line-height: 1.4; border-left: 3px solid var(--accent); padding-left: 8px; }
-  section { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 18px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.02); }
-  h2 { font-size: 1.15rem; margin-bottom: 12px; border-bottom: 1px solid var(--border); padding-bottom: 6px; display: flex; justify-content: space-between; align-items: center; }
-  /* SVG Chart */
-  .chart-box { position: relative; width: 100%; overflow-x: auto; }
-  svg { display: block; width: 100%; height: auto; font-family: inherit; }
-  .chart-tooltip { position: absolute; background: rgba(15, 23, 42, 0.9); color: #fff; padding: 6px 10px; border-radius: 4px; font-size: 0.75rem; pointer-events: none; opacity: 0; transition: opacity 0.2s; white-space: nowrap; z-index: 10; }
-  /* Timeline Cards */
-  .stage-card { border-left: 4px solid var(--accent); background: #f8fafc; padding: 10px 14px; margin-bottom: 10px; border-radius: 0 4px 4px 0; }
-  .stage-card.current { border-left-color: #f59e0b; background: #fffbeb; }
-  .stage-header { display: flex; justify-content: space-between; font-weight: 700; margin-bottom: 4px; font-size: 0.95rem; }
-  .stage-meta { font-size: 0.85rem; margin-top: 4px; }
-  .stage-meta p { margin-bottom: 2px; }
-  /* Details Collapsible */
-  details { margin-bottom: 8px; border: 1px solid var(--border); border-radius: 4px; background: #fff; }
-  summary { padding: 10px; cursor: pointer; font-weight: 600; font-size: 0.9rem; background: #f8fafc; list-style: none; display: flex; align-items: center; gap: 8px; }
-  summary::-webkit-details-marker { display: none; }
-  summary::after { content: '▾'; margin-left: auto; font-size: 0.8rem; }
-  details[open] summary::after { content: '▴'; }
-  .summary-tag { background: #e2e8f0; font-size: 0.75rem; padding: 2px 6px; border-radius: 3px; font-weight: bold; color: var(--text-sub); }
-  .details-body { padding: 12px; font-size: 0.85rem; color: #334155; line-height: 1.5; border-top: 1px solid var(--border); }
-  /* Windows */
-  .window-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; }
-  .window-item { padding: 12px; border-radius: 6px; border: 1px solid; font-size: 0.85rem; }
-  .window-item.locked { background: #fef2f2; border-color: #fca5a5; }
-  .window-item.high { background: #f0fdf4; border-color: #86efac; }
-  .window-item.delay { background: #fefce8; border-color: #fde047; }
-  .window-title { font-weight: 700; margin-bottom: 4px; font-size: 0.9rem; }
-  /* Verification Table */
-  table { width: 100%; border-collapse: collapse; font-size: 0.8rem; text-align: left; margin-top: 8px; }
-  th, td { padding: 6px 8px; border: 1px solid var(--border); vertical-align: top; }
-  th { background: #f1f5f9; }
-  .status-badge { display: inline-block; padding: 2px 4px; border-radius: 3px; font-size: 0.7rem; font-weight: 700; background: #dcfce7; color: #166534; }
-  @media(max-width: 600px) {
-    .control-row { flex-direction: column; align-items: stretch; }
-    .slider-box { max-width: 100%; }
-    .summary-strip { flex-direction: column; gap: 4px; }
-  }
-</style>
-</head>
-<body>
-
-<div class="sticky-header">
-  <div class="control-row">
-    <div class="slider-box">
-      <label for="ageRange" style="font-weight:600; font-size:0.9rem;">当前年龄：</label>
-      <input type="range" id="ageRange" min="0" max="95" value="25" step="1">
-      <span class="age-val" id="ageVal">25 岁</span>
-    </div>
-    <div class="gender-btns">
-      <button type="button" class="active" data-g="both">男女对比</button>
-      <button type="button" data-g="male">仅男性</button>
-      <button type="button" data-g="female">仅女性</button>
-    </div>
-  </div>
-  <div class="summary-strip">
-    <span>阶段：<strong id="summaryStage">-</strong></span>
-    <span>下一拐点：<strong id="summaryNext">-</strong></span>
-    <span>关注重点：<strong id="summaryFocus">-</strong></span>
-  </div>
-</div>
-
-<div class="container">
-  <h1>T04 大脑结构发育与重塑</h1>
-  <div class="curve-note" id="curveNote"></div>
-
-  <!-- A 轨迹图 -->
-  <section>
-    <h2>A. 生命周期脑发育与重塑轨迹 (0-95岁)</h2>
-    <div class="chart-box">
-      <svg id="chartSvg" viewBox="0 0 800 350">
-        <!-- SVG content rendered via JS -->
-      </svg>
-      <div id="chartTooltip" class="chart-tooltip"></div>
-    </div>
-  </section>
-
-  <!-- B 阶段时间轴 -->
-  <section>
-    <h2>B. 阶段时间轴与解剖演变</h2>
-    <div id="timelineContainer"></div>
-  </section>
-
-  <!-- C 专题支线 -->
-  <section>
-    <h2>C. 可折叠专题支线</h2>
-    <div id="branchesContainer"></div>
-  </section>
-
-  <!-- D 干预窗口 -->
-  <section>
-    <h2>D. 结构可塑性干预窗口</h2>
-    <div class="window-grid" id="windowsContainer"></div>
-  </section>
-
-  <!-- E 跨维度联动与核实清单 -->
-  <section>
-    <h2>E. 跨维度联动与核实清单</h2>
-    <div style="font-size:0.85rem; margin-bottom:14px; background:#f8fafc; padding:10px; border-radius:4px; border:1px solid var(--border);">
-      <strong>跨系统交互：</strong><span id="crossLinks"></span>
-    </div>
-    <details>
-      <summary><span class="summary-tag">证据审核</span> 已核实声明清单 (Claims Verification)</summary>
-      <div class="details-body" style="padding:0; overflow-x:auto;">
-        <table>
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>阶段</th>
-              <th>声明与生理量值</th>
-              <th>状态</th>
-              <th>原始文献 / PMID</th>
-            </tr>
-          </thead>
-          <tbody id="claimsTable"></tbody>
-        </table>
-      </div>
-    </details>
-  </section>
-</div>
-
-<script>
-const data = {"dim": "T04", "title": "大脑结构发育与重塑", "curve_note": "本曲线基于Bethlehem等(2022)大规模生命周期脑图谱(Nature)及白质扩散张量成像(DTI)数据构建，表示全脑结构成熟与网络微结构完整度综合指数（0-100相对归一化值）。曲线综合了灰质体积、皮层厚度、白质微结构FA值及脑室膨胀率反向指标，反映从生后爆发式连接构建、区域阶梯式达峰、全脑髓鞘成熟平台期至中老年退行性演变的全生命周期轨迹。", "ages": [0, 2, 5, 9, 12, 15, 19, 25, 35, 45, 55, 65, 75, 85, 95], "series": {"male": [18, 50, 69, 81, 88, 93, 97, 100, 96, 89, 81, 70, 56, 40, 25], "female": [19, 52, 72, 83, 90, 95, 98, 99, 95, 88, 80, 69, 54, 38, 24]}, "claims": [{"claim_id": "T04-C01", "statement": "皮层厚度达峰年龄极早，呈现倒U型变化轨迹，生后早期即完成最迅猛的皮层扩张与折叠。", "value": "1.7-2.1岁", "stage": "婴儿期至幼儿期", "status": "VERIFIED", "source": "Bethlehem et al., 2022, Nature, PMID: 35388223"}, {"claim_id": "T04-C02", "statement": "全脑皮质灰质总体积在儿童中期达到全生命周期峰值，随后因生理性突触修剪呈现不可逆单调下降。", "value": "5.9岁（中位数）", "stage": "儿童期", "status": "VERIFIED", "source": "Bethlehem et al., 2022, Nature, PMID: 35388223"}, {"claim_id": "T04-C03", "statement": "全脑白质总体积及深部投射传导束髓鞘成熟达峰年龄显著晚于灰质，支撑高级认知整合能力。", "value": "28.7岁（中位数）", "stage": "青年峰值期", "status": "VERIFIED", "source": "Bethlehem et al., 2022, Nature, PMID: 35388223"}, {"claim_id": "T04-C04", "statement": "侧脑室体积在童年早期达到相对容积最低点，60岁后呈指数级加速膨胀，成为脑实质萎缩的核心替代指标。", "value": "2.3岁达容积低谷；60岁后年复合增长率达1.8%-2.5%", "stage": "老年期", "status": "VERIFIED", "source": "Bethlehem et al., 2022, Nature, PMID: 35388223; Jack et al., 2005, Neurology, PMID: 16186523"}, {"claim_id": "T04-C05", "statement": "初级视觉与感觉皮层突触密度呈爆发性过量生成，生后数月达到成人的150%，其后迅速修剪稳定。", "value": "8-12个月突触密度达峰（约成人1.5倍），11岁前修剪至成人基线", "stage": "婴儿期至学龄期", "status": "VERIFIED", "source": "Huttenlocher & de Courten, 1987, Neuropsychologia, PMID: 3670652; Bourgeois & Rakic, 1993, J Neurosci, PMID: 8426229"}, {"claim_id": "T04-C06", "statement": "背外侧前额叶皮层（dlPFC）的突触过度生成达峰较晚，突触修剪过程横跨整个青春期直至青年初期。", "value": "突触过度生成达峰约3.5-5岁，消除修剪持续至22-25岁", "stage": "儿童期至青春期", "status": "VERIFIED", "source": "Petanjek et al., 2011, PNAS, PMID: 21788513; Huttenlocher, 1979, Brain Res, PMID: 447471"}, {"claim_id": "T04-C07", "statement": "前额叶联合皮层内轴突内侧微细髓鞘化及少突胶质细胞增殖可持续延长至成年后数十年。", "value": "组织学与MRI-T1w/T2w证实微细髓鞘化持续至35-42岁", "stage": "青年期至中年过渡期", "status": "VERIFIED", "source": "Bartzokis et al., 2010, Neurobiol Aging, PMID: 18455269; Grydeland et al., 2013, J Neurosci, PMID: 24068821"}, {"claim_id": "T04-C08", "statement": "健康老化个体在60岁后海马体体积出现生理性加速萎缩，主因齿状回颗粒细胞发生减少与树突萎缩。", "value": "60岁后年均体积萎缩0.8%-1.2%/年", "stage": "老年期", "status": "VERIFIED", "source": "Raz et al., 2005, Cereb Cortex, PMID: 15345549; Fraser et al., 2015, Neuroimage, PMID: 25680519"}, {"claim_id": "T04-C09", "statement": "轻度认知障碍（MCI）转化为临床阿尔茨海默病（AD）阶段，海马体积丢失率呈2至5倍病理性激增。", "value": "MCI阶段年萎缩2.5%-3.5%/年；确诊AD阶段达4.0%-6.5%/年", "stage": "老年期至高龄期", "status": "VERIFIED", "source": "Barnes et al., 2009, Neurobiol Aging, PMID: 18353503; Henneman et al., 2009, Brain, PMID: 19675323"}, {"claim_id": "T04-C10", "statement": "初孕女性在妊娠期间经历广泛对称的灰质体积缩减，该重塑特异性集中于心智化网络，具有高度神经适应性意义。", "value": "心智化与默认网络GMV减少4.5%-7.0%，变化至少维持至产后2-6年", "stage": "青年峰值期", "status": "VERIFIED", "source": "Hoekzema et al., 2017, Nat Neurosci, PMID: 27991897; Martínez-García et al., 2021, Sci Adv, PMID: 34936442"}, {"claim_id": "T04-C11", "statement": "新生儿脑体积约为成年终体积的25%，出生后第一年体积翻倍，神经纤维与胶质细胞呈指数暴增。", "value": "1岁达到成人脑体积的70-75%，2岁达到80-85%", "stage": "婴儿期", "status": "VERIFIED", "source": "Pfefferbaum et al., 1994, Arch Neurol, PMID: 8067923; Knickmeyer et al., 2008, J Neurosci, PMID: 18971476"}, {"claim_id": "T04-C12", "statement": "胼胝体与上纵束的各向异性分数（FA）达峰年龄晚于下层投射纤维，标志高级联合网络长程传导效率最后成熟。", "value": "胼胝体压部及额顶联合白质FA达峰区间为26-32岁", "stage": "青年峰值期", "status": "VERIFIED", "source": "Lebel et al., 2012, Neuroimage, PMID: 22305988; Westlye et al., 2010, Cereb Cortex, PMID: 20080998"}, {"claim_id": "T04-C13", "statement": "40岁以后全脑体积开始出现线性递减，伴随白质微结构FA下降与轴向扩散系数（MD）升高。", "value": "40-70岁全脑体积平均损失0.4%-0.5%/年；70岁后加速至>1.0%/年", "stage": "中年过渡期至高龄期", "status": "VERIFIED", "source": "Hedman et al., 2012, Hum Brain Mapp, PMID: 21391264; Fjell et al., 2009, J Neurosci, PMID: 19955386"}], "stages": [{"range": "0-2岁", "mechanism": "生后神经元迁移基本完成，星形胶质与小胶质细胞剧增，初级感觉运动皮层完成密集突触生成与起始髓鞘化，皮层厚度在1.7-2.1岁达到人类全生命周期绝对顶峰。", "male": "脑颅内总容积绝对值较女性大约8%-10%，突触生成暴增斜率陡峭，但皮层微结构组织分化速率时序较女性略显滞后0.2-0.5岁。", "female": "神经突触爆发及初级语言皮层微结构组织分化速率微幅领先男性，灰质厚度增长提前触顶。", "reversibility": "极高可塑性与高脆弱性并存。重度缺血缺氧损伤易留不可逆软化灶，但周边对侧未分化脑区具备终生最强的拓扑功能代偿转移潜力。"}, {"range": "3-9岁", "mechanism": "全脑皮质灰质体积在5.9岁达全生命周期峰值，随后广泛启动自后向前的突触修剪；初级感觉运动网络髓鞘化定型，局部网络开始向全脑长程分布式拓扑转移。", "male": "全脑灰质达峰时间偏晚（约6.2岁），颅内总容积及皮层表面积维持体积基准优势。", "female": "灰质体积达峰时间偏早（约5.5岁），语言及高级联合皮层提早开启冗余突触精炼优化。", "reversibility": "高；初级单模态感觉关键期（如弱视屈光不正）在7岁前彻底关闭，但多模态认知、语言及精细运动网络的结构可塑性仍极高。"}, {"range": "10-19岁", "mechanism": "皮层灰质快速变薄（突触修剪高峰），白质体积大幅线性上升（轴突粗化与髓鞘增厚）；腹侧纹状体与边缘系统成熟显著快于前额叶执行抑制网络。", "male": "睾酮骤增驱动杏仁核及皮层下核团容积扩张，长程白质传导束与胼胝体增厚速度快、成熟拐点晚于女性1.5-2年。", "female": "雌孕激素脉冲重塑海马及额叶神经网络，全脑灰质修剪与白质传导束成熟达峰较男性提前推进。", "reversibility": "中度；已被剪除的冗余突触与树突棘不可再生，回路拓扑固化；长期慢性应激或神经毒性物质（酒精/THC）可引发永久性连接畸变。"}, {"range": "20-35岁", "mechanism": "前额叶-纹状体执行抑制回路修剪完成，全脑白质体积在28.7岁达峰；高级联合皮层完成微细髓鞘化闭环，全脑网络拓扑全局传输效率登顶。", "male": "全脑白质体积在29-30岁达峰，长程联络纤维FA值维持在终生最高平台期。", "female": "白质体积在27-28岁达峰；初孕女性在性激素驱使下经历心智化与默认网络4.5%-7.0%的特异性生理灰质紧凑修剪。", "reversibility": "低至中度；宏观解剖轮廓与主干传导束定型，结构重塑严格受限于突触长时程增强（LTP）、树突棘微细翻转及局部髓鞘微调。"}, {"range": "36-55岁", "mechanism": "少突胶质前体细胞更新速率下降，深部细小髓鞘纤维断裂与微循环灌注减少；灰质体积以每年0.4%-0.5%开始平缓递减，侧脑室开启代偿性缓慢微扩。", "male": "额叶与颞叶皮层厚度退变速度略快于女性，代谢综合征诱发的微血管玻璃样变启动皮质下白质微损伤。", "female": "围绝经期雌激素神经保护性断崖下跌，脑葡萄糖代谢重编程，局部灰质体积与白质FA完整度出现过渡性扰动。", "reversibility": "极低结构逆转性；已损失的神经元与脱髓鞘轴突无法宏观逆转，有氧运动与认知储备仅能建立侧支突触冗余以延缓临床功能滑坡。"}, {"range": "56-75岁", "mechanism": "海马与额顶联合区灰质萎缩加速（0.8%-1.2%/年），少突胶质细胞代谢衰竭导致白质疏松，小血管硬化驱动白质高信号（WMH）非线性累积，侧脑室年膨胀1.8%-2.5%。", "male": "额叶萎缩与脑室膨胀更显著，皮质下动脉硬化性微出血检出率更高。", "female": "绝经后丧失雌激素神经保护，内嗅皮层及海马萎缩速率加快，Tau蛋白缠结与Aβ淀粉样变易感性非线性上升。", "reversibility": "结构完全不可逆；海马神经元凋亡、穿通纤维变性及微梗死灶永久固化，干预仅能改善残存微循环与神经突触传递效率。"}, {"range": "76-95+岁", "mechanism": "全脑弥漫性萎缩，侧脑室严重代偿性扩张；血脑屏障紧密连接降解渗透，小胶质细胞转为衰老促炎表型，树突棘大面积脱落，全脑年萎缩率>1.0%。", "male": "脑实质萎缩伴硬膜下代偿间隙扩大，外伤性硬膜下血肿易感性显著升高，伴随脑大血管硬化高负荷。", "female": "高龄群体中阿尔茨海默病病理浸润率达峰，双侧海马与颞叶内侧不可逆毁损加剧。", "reversibility": "不可逆终末退变；神经元网络处于不可逆耗竭状态，临床目标仅为遏制级联病变及维持基础生活自理反射。"}], "branches": [{"tag": "[空间时序规律]", "title": "皮层发育与退化的反向时空波浪：感觉运动→顶颞联合→前额叶", "body": "人类皮层成熟严格遵循后-前（Postero-anterior）空间轴：初级运动和感觉皮层（枕叶、中央前回/后回）最早完成皮层增厚与髓鞘化，随后推进至顶叶与颞叶的多模态感觉联合区，背外侧前额叶（dlPFC）、眶额皮质及额极最后达标，成熟过程持续至20-25岁。而在衰老进程中，全脑退变呈现逆向重演的'后退先衰（Last in, first out）'规律：最晚成熟、髓鞘最薄的前额叶高阶联合区对氧化应激与少突胶质细胞代谢衰竭最为敏感，在50岁后最先发生灰质变薄与FA下降；而初级感觉运动皮质结构完整度则在晚年保持相对坚挺。"}, {"tag": "[神经环路模型]", "title": "青春期双系统失衡模型（Dual-Systems Model）与前额叶抑制控制滞后", "body": "青春期大脑经历深度的结构解偶联发育：以腹侧纹状体（伏隔核）、杏仁核为核心的社会情绪与奖赏处理边缘系统在性激素驱使下提前经历突触重塑与高敏化（12-15岁左右成熟）；而负责冷认知、认知灵活性、长远规划及冲动抑制的外侧前额叶-顶叶执行控制网络则需依赖至20岁以后的轴突持续髓鞘化与突触精细剪裁。两套系统成熟时间的显著不对称（5-8年的结构发育时间差）形成了'强大引擎配简陋刹车'的解剖学基础，直接解释了青少年高风险行为、奖赏驱动行为增多及对同伴评价极端敏感的神经生物学根源。"}, {"tag": "[生理可塑特例]", "title": "妊娠期母体脑灰质程序性收缩与产后神经拓扑适应", "body": "纵向MRI追踪证实，初孕女性在妊娠晚期经历显著的生理性灰质体积（GMV）对称性收缩（减少4.5%-7.0%），其解剖分布高度聚集于理论心智化网络（ToM）与默认模式网络（DMN），包括内侧前额叶、后扣带回、楔前叶及颞顶联合区（TPJ）。这一收缩并非病理性神经变性，而是极高雌激素与孕激素脉冲诱导的高效突触修剪与微胶质重构（使神经回路更专一紧凑），其体积萎缩幅度直接正向预测产后母婴依恋质量及对新生儿面部信号的神经反应特异性。该改变在产后维持至少2年，部分区域甚至长达6年，成为成年期中枢神经系统最大规模的生理性前瞻适应重塑。"}, {"tag": "[退行病理鉴别]", "title": "生理老化海马萎缩 vs. MCI/阿尔茨海默病病理萎缩的分水岭", "body": "60岁后健康衰老个体的海马体积以每年约0.8%-1.2%的速率平缓缩减，神经元总数丢失极少，主因是穿通纤维变性、突触数量下降及CA1区树突萎缩，且左右侧海马基本对称。当演进至轻度认知障碍（MCI）时，内嗅皮层最先受Tau蛋白神经原纤维缠结侵袭并波及海马，体积萎缩率跃升至2.5%-3.5%/年；一旦确诊为阿尔茨海默病（AD），海马萎缩速率飙升至4.0%-6.5%/年，且CA1与下托神经元出现大量坏死与凋亡，呈现显著不对称进行性萎缩。MRI年萎缩率超过2.0%是临床鉴别良性脑老化与临床前期神经退行性病变的关键影像生物标记物。"}], "windows": {"locked": "初级视觉/听觉皮层关键期在生后数月至7岁间彻底关闭；皮质灰质总体积达峰（5.9岁）后突触修剪单向进行，宏观脑叶折叠回旋构型在2岁后不可逆固化；海马与皮层神经元因衰老或神经变性凋亡后不可再生。", "high_return": "0-3岁突触爆发期（环境富集与感觉输入投资回报终生最高）；10-18岁青春期认知控制网络优化期（复杂抽象思维与技能定型黄金期）；20-30岁白质髓鞘化冲刺期（有氧运动与深度认知训练加固传导束口径与完整度）。", "delay_only": "45岁后白质高信号（WMH）进展与海马生理性萎缩；控制收缩压<120mmHg、纠正睡眠呼吸暂停（保障类淋巴系统清除Aβ/Tau）、抗阻与有氧运动促进BDNF释放，仅能延缓萎缩斜率，无法逆转脑实质容积递减。"}, "cross_links": "T01神经内分泌轴（下丘脑-垂体-性腺轴触发青春期突触修剪突增与妊娠期结构重塑）| T08脑代谢与线粒体动力学（神经元葡萄糖利用率在4-8岁达峰为成人的2倍，晚年线粒体衰退限制髓鞘修补）| T12睡眠与类淋巴代谢（深睡眠慢波驱动脑间质隙扩大60%，加速Tau与Aβ清除以阻断萎缩）| T16神经免疫与小胶质细胞（补体C1q/C3级联介导生理突触修剪，老年期过度激活转化为慢性神经炎症促进变性）"};
-
-let currentGender = "both";
-const chartSvg = document.getElementById("chartSvg");
-const tooltip = document.getElementById("chartTooltip");
-const ageRange = document.getElementById("ageRange");
-const ageVal = document.getElementById("ageVal");
-
-// Initialize Text Notes & Static Blocks
-document.getElementById("curveNote").textContent = data.curve_note;
-document.getElementById("crossLinks").textContent = data.cross_links;
-
-// Render Windows
-document.getElementById("windowsContainer").innerHTML = `
-  <div class="window-item locked"><div class="window-title">不可逆 / 结构锁定窗口</div>${data.windows.locked}</div>
-  <div class="window-item high"><div class="window-title">高回报塑型窗口</div>${data.windows.high_return}</div>
-  <div class="window-item delay"><div class="window-title">仅可延缓窗口</div>${data.windows.delay_only}</div>
-`;
-
-// Render Branches
-document.getElementById("branchesContainer").innerHTML = data.branches.map(b => `
-  <details>
-    <summary><span class="summary-tag">${b.tag}</span> ${b.title}</summary>
-    <div class="details-body">${b.body}</div>
-  </details>
-`).join('');
-
-// Render Claims
-document.getElementById("claimsTable").innerHTML = data.claims.map(c => `
-  <tr>
-    <td><strong>${c.claim_id}</strong></td>
-    <td>${c.stage}</td>
-    <td>${c.statement}<br><span style="color:#0284c7; font-weight:600;">[参数: ${c.value}]</span></td>
-    <td><span class="status-badge">${c.status}</span></td>
-    <td style="color:#64748b;">${c.source}</td>
-  </tr>
-`).join('');
-
-// SVG Dimensions
-const width = 800, height = 350;
-const margin = { top: 30, right: 30, bottom: 40, left: 50 };
-const plotW = width - margin.left - margin.right;
-const plotH = height - margin.top - margin.bottom;
-
-function getX(age) { return margin.left + (age / 95) * plotW; }
-function getY(val) { return margin.top + (1 - val / 100) * plotH; }
-
-// Render Chart Base
-function renderChart() {
-  const ages = data.ages;
-  const mPts = ages.map((a, i) => `${getX(a)},${getY(data.series.male[i])}`).join(" ");
-  const fPts = ages.map((a, i) => `${getX(a)},${getY(data.series.female[i])}`).join(" ");
-
-  let svgHtml = `
-    <!-- Grid & Axes -->
-    <line x1="${margin.left}" y1="${margin.top + plotH}" x2="${width - margin.right}" y2="${margin.top + plotH}" stroke="#94a3b8" stroke-width="1.5" />
-    <line x1="${margin.left}" y1="${margin.top}" x2="${margin.left}" y2="${margin.top + plotH}" stroke="#94a3b8" stroke-width="1.5" />
-  `;
-
-  // X ticks
-  [0, 10, 20, 30, 40, 50, 60, 70, 80, 95].forEach(a => {
-    const x = getX(a);
-    svgHtml += `
-      <line x1="${x}" y1="${margin.top + plotH}" x2="${x}" y2="${margin.top + plotH + 5}" stroke="#94a3b8" />
-      <text x="${x}" y="${margin.top + plotH + 18}" font-size="11" text-anchor="middle" fill="#64748b">${a}岁</text>
-    `;
-  });
-
-  // Y ticks
-  [0, 20, 40, 60, 80, 100].forEach(v => {
-    const y = getY(v);
-    svgHtml += `
-      <line x1="${margin.left - 5}" y1="${y}" x2="${width - margin.right}" y2="${y}" stroke="#e2e8f0" stroke-dasharray="2,2" />
-      <text x="${margin.left - 8}" y="${y + 4}" font-size="11" text-anchor="end" fill="#64748b">${v}</text>
-    `;
-  });
-
-  // Annotation Points & Lines
-  // Male Line
-  svgHtml += `<polyline id="maleLine" fill="none" stroke="var(--male)" stroke-width="2.5" points="${mPts}" opacity="${currentGender === 'female' ? '0' : '1'}" />`;
-  // Female Line
-  svgHtml += `<polyline id="femaleLine" fill="none" stroke="var(--female)" stroke-width="2.5" stroke-dasharray="${currentGender === 'both' ? '4,3' : 'none'}" points="${fPts}" opacity="${currentGender === 'male' ? '0' : '1'}" />`;
-
-  // Interactive Target Indicator
-  svgHtml += `<line id="ageIndicator" x1="${getX(25)}" y1="${margin.top}" x2="${getX(25)}" y2="${margin.top + plotH}" stroke="#f59e0b" stroke-width="2" stroke-dasharray="3,3" />`;
-
-  // Anchor Circles
-  ages.forEach((a, i) => {
-    const xm = getX(a), ym = getY(data.series.male[i]), yf = getY(data.series.female[i]);
-    if (currentGender !== 'female') {
-      svgHtml += `<circle class="pt-male" cx="${xm}" cy="${ym}" r="4" fill="var(--male)" data-age="${a}" data-val="${data.series.male[i]}" data-sex="男" style="cursor:pointer;" />`;
-    }
-    if (currentGender !== 'male') {
-      svgHtml += `<circle class="pt-female" cx="${xm}" cy="${yf}" r="4" fill="var(--female)" data-age="${a}" data-val="${data.series.female[i]}" data-sex="女" style="cursor:pointer;" />`;
-    }
-  });
-
-  // Qualitative Milestone Labels
-  svgHtml += `
-    <text x="${getX(2)}" y="${getY(52) - 10}" font-size="10" fill="#0f172a" font-weight="600">皮层厚度峰值 [C01]</text>
-    <text x="${getX(6)}" y="${getY(72) - 10}" font-size="10" fill="#0f172a" font-weight="600">灰质容积峰值 [C02]</text>
-    <text x="${getX(28)}" y="${getY(100) - 10}" font-size="10" fill="#0f172a" font-weight="600">全脑白质峰值 [C03]</text>
-    <text x="${getX(65)}" y="${getY(70) - 10}" font-size="10" fill="#dc2626" font-weight="600">脑室加速膨胀 [C04/C08]</text>
-  `;
-
-  chartSvg.innerHTML = svgHtml;
-
-  // Add Hover Events
-  chartSvg.querySelectorAll('circle').forEach(c => {
-    c.addEventListener('mouseenter', e => {
-      const a = c.getAttribute('data-age');
-      const v = c.getAttribute('data-val');
-      const s = c.getAttribute('data-sex');
-      tooltip.style.opacity = '1';
-      tooltip.innerHTML = `年龄: ${a}岁<br>${s}性脑成熟度: <strong>${v}/100</strong>`;
-      const rect = chartSvg.getBoundingClientRect();
-      tooltip.style.left = `${parseFloat(c.getAttribute('cx')) / 800 * rect.width + 10}px`;
-      tooltip.style.top = `${parseFloat(c.getAttribute('cy')) / 350 * rect.height - 20}px`;
-    });
-    c.addEventListener('mouseleave', () => { tooltip.style.opacity = '0'; });
-  });
-}
-
-function updateIndicator(age) {
-  const line = document.getElementById("ageIndicator");
-  if (line) {
-    const x = getX(age);
-    line.setAttribute("x1", x);
-    line.setAttribute("x2", x);
-  }
-}
-
-// Stage Matcher
-function getStageInfo(age) {
-  let matchedIdx = 0;
-  if (age <= 2) matchedIdx = 0;
-  else if (age <= 9) matchedIdx = 1;
-  else if (age <= 19) matchedIdx = 2;
-  else if (age <= 35) matchedIdx = 3;
-  else if (age <= 55) matchedIdx = 4;
-  else if (age <= 75) matchedIdx = 5;
-  else matchedIdx = 6;
-
-  const st = data.stages[matchedIdx];
-  const nextMap = [
-    "5.9岁 (灰质总体积达峰/感觉关键期关闭)",
-    "10-12岁 (青春期双系统解偶联/突触修剪剧增)",
-    "28.7岁 (白质髓鞘化达峰/前额叶完全成熟)",
-    "40岁 (白质微结构FA转折/全脑容积轻度递减)",
-    "60岁 (海马加速萎缩/脑室指数膨胀拐点)",
-    "75岁+ (血脑屏障渗透加剧/微血管病理累积)",
-    "终末期 (功能代偿维护)"
-  ];
-  const focusMap = [
-    "突触过度生成保护、防止缺氧性损伤、丰富环境感知刺激",
-    "感觉弱视窗口关闭防范、多模态认知与精细动作回路优化",
-    "成瘾毒性物质隔绝、冲动控制与情绪脑系统失衡调节",
-    "长程神经传导束巩固、有氧耐力与高阶专业认知储备",
-    "血压血糖严控、白质微血管硬化阻断、规律深睡眠保证",
-    "认知功能衰退监测、防跌倒抗外伤、早期MCI筛查识别",
-    "生活自理反射维持、日常照护安全、减轻慢性神经炎症"
-  ];
-
-  return {
-    stage: st,
-    index: matchedIdx,
-    next: nextMap[matchedIdx],
-    focus: focusMap[matchedIdx]
-  };
-}
-
-// Render Timeline Cards
-function renderTimeline(curIdx) {
-  const container = document.getElementById("timelineContainer");
-  container.innerHTML = data.stages.map((st, i) => `
-    <div class="stage-card ${i === curIdx ? 'current' : ''}" id="stage-card-${i}">
-      <div class="stage-header">
-        <span>${st.range}</span>
-        <span style="font-size:0.8rem; font-weight:normal; color:#64748b;">${i === curIdx ? '● 当前区间' : ''}</span>
-      </div>
-      <div class="stage-meta">
-        <p><strong>核心机制：</strong>${st.mechanism}</p>
-        <p><strong>性别异态：</strong><span style="color:var(--male);">[男]</span> ${st.male} | <span style="color:var(--female);">[女]</span> ${st.female}</p>
-        <p><strong>可塑与可逆性：</strong>${st.reversibility}</p>
-      </div>
-    </div>
-  `).join('');
-}
-
-function updateUI() {
-  const age = parseInt(ageRange.value, 10);
-  ageVal.textContent = `${age} 岁`;
-  updateIndicator(age);
-
-  const info = getStageInfo(age);
-  document.getElementById("summaryStage").textContent = info.stage.range;
-  document.getElementById("summaryNext").textContent = info.next;
-  document.getElementById("summaryFocus").textContent = info.focus;
-
-  renderTimeline(info.index);
-}
-
-// Events
-ageRange.addEventListener("input", updateUI);
-
-document.querySelectorAll(".gender-btns button").forEach(btn => {
-  btn.addEventListener("click", () => {
-    document.querySelectorAll(".gender-btns button").forEach(b => b.classList.remove("active"));
-    btn.classList.add("active");
-    currentGender = btn.getAttribute("data-g");
-    renderChart();
-    updateUI();
-  });
-});
-
-// Init
-renderChart();
-updateUI();
-</script>
-</body>
-</html>
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>大脑结构发育</title><style>
+:root{--paper:#f7f2e9;--ink:#26221d;--muted:#6f675c;--line:#ddd2c2;--accent:#b5542d;--accent2:#3f6d5a}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font-family:-apple-system,'PingFang SC','Microsoft YaHei',sans-serif;line-height:1.75}
+main{max-width:920px;margin:0 auto;padding:28px 20px 64px}
+h1,h2,h3{font-family:Georgia,'Songti SC','SimSun',serif;line-height:1.3}
+h1{font-size:34px;margin:6px 0 8px}h2{font-size:23px;margin:42px 0 6px;border-top:2px solid var(--ink);padding-top:18px}
+.lead{font-size:17px;color:#3d372f}.kicker{color:var(--accent);font-weight:700;letter-spacing:.12em;font-size:13px}
+.guide{display:flex;gap:8px;flex-wrap:wrap;margin:16px 0}.guide span{border:1px solid var(--line);padding:3px 10px;border-radius:999px;font-size:13px;color:var(--muted);background:#fffdf8}
+figure{margin:18px 0;background:#fffdf8;border:1px solid var(--line);padding:14px}
+.hot{cursor:pointer}.hot circle{fill:var(--accent);stroke:#fff;stroke-width:2}.hot text{fill:#fff;font-weight:700;font-size:13px}.hot.active circle{fill:var(--accent2)}
+#hotpanel{border-left:4px solid var(--accent);padding:10px 14px;background:#fbf7ee;min-height:64px}
+.toggle{display:flex;gap:8px;margin:14px 0}.toggle button{border:1px solid var(--ink);background:transparent;padding:6px 14px;border-radius:999px;cursor:pointer;font-size:14px}.toggle button.on{background:var(--ink);color:#fff}
+.stage{display:grid;grid-template-columns:130px 1fr;gap:16px;padding:16px 0;border-bottom:1px solid var(--line)}
+.stage-age{font-family:Georgia,serif;font-weight:700;color:var(--accent)}
+.duo{display:grid;grid-template-columns:1fr 1fr;gap:12px}.sex{background:#fffdf8;border:1px solid var(--line);padding:10px 12px}.sex h4{margin:0 0 4px;font-size:14px}.sex.m h4{color:var(--accent2)}.sex.f h4{color:var(--accent)}
+.rev{color:var(--muted);font-size:14px}
+details{border:1px solid var(--line);background:#fffdf8;margin:10px 0;padding:10px 14px}summary{cursor:pointer;font-weight:700}.tag{color:var(--accent);font-size:13px;margin-right:8px}
+.win{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.win div{border-top:3px solid var(--accent);background:#fffdf8;padding:10px 12px}.win div:nth-child(2){border-top-color:var(--accent2)}
+.src{display:block;color:var(--muted);font-size:13px}
+@media(max-width:640px){.stage{grid-template-columns:1fr}.duo,.win{grid-template-columns:1fr}h1{font-size:27px}}
+</style></head><body><main>
+<p class="kicker">人体全生命周期图谱 · T04</p><h1>大脑结构发育</h1>
+<p class="lead">这一页只讲大脑的结构：它怎样先大量“搭线”、再修剪优化、最后在老年缓慢萎缩。智力表现是下一批维度，这里先看硬件。</p>
+<div class="guide"><span>1 先看机制图</span><span>2 再顺着年龄往下读</span><span>3 最后看专题与证据</span></div>
+<h2>一、核心机制</h2><p>大脑发育的顺序是先感觉运动、再连接整合、最后负责自控的前额叶。这也解释了为什么青春期容易冲动：奖赏系统先成熟，自控系统还在施工。点图上的编号，看每一步。</p>
+<figure><svg viewBox="0 0 640 240" width="100%" role="img" aria-label="核心机制图"><rect x="30" y="110" width="130" height="56" fill="#fffdf8" stroke="#26221d"/><text x="95" y="136" text-anchor="middle" font-size="14">突触过度生成</text><text x="95" y="156" text-anchor="middle" font-size="11" fill="#6f675c">先多搭线</text><line x1="160" y1="138" x2="185" y2="138" stroke="#26221d" stroke-width="2"/><polygon points="183,132 183,144 191,138" fill="#26221d"/><rect x="185" y="110" width="130" height="56" fill="#fffdf8" stroke="#26221d"/><text x="250" y="136" text-anchor="middle" font-size="14">修剪与髓鞘化</text><text x="250" y="156" text-anchor="middle" font-size="11" fill="#6f675c">留下常用线路</text><line x1="315" y1="138" x2="340" y2="138" stroke="#26221d" stroke-width="2"/><polygon points="338,132 338,144 346,138" fill="#26221d"/><rect x="340" y="110" width="130" height="56" fill="#fffdf8" stroke="#26221d"/><text x="405" y="136" text-anchor="middle" font-size="14">网络成熟</text><text x="405" y="156" text-anchor="middle" font-size="11" fill="#6f675c">前额叶最后完工</text><line x1="470" y1="138" x2="495" y2="138" stroke="#26221d" stroke-width="2"/><polygon points="493,132 493,144 501,138" fill="#26221d"/><rect x="495" y="110" width="130" height="56" fill="#fffdf8" stroke="#26221d"/><text x="560" y="136" text-anchor="middle" font-size="14">老年萎缩</text><text x="560" y="156" text-anchor="middle" font-size="11" fill="#6f675c">体积缓慢减小</text><g class="hot" data-k="d1"><circle cx="160" cy="104" r="12"/><text x="160" y="109" text-anchor="middle">1</text></g><g class="hot" data-k="d2"><circle cx="315" cy="104" r="12"/><text x="315" y="109" text-anchor="middle">2</text></g><g class="hot" data-k="d3"><circle cx="470" cy="104" r="12"/><text x="470" y="109" text-anchor="middle">3</text></g><g class="hot" data-k="d4"><circle cx="625" cy="104" r="12"/><text x="625" y="109" text-anchor="middle">4</text></g><g class="hot" data-k="d5"><circle cx="560" cy="196" r="12"/><text x="560" y="201" text-anchor="middle">5</text></g><text x="560" y="224" text-anchor="middle" font-size="12" fill="#6f675c">转折点</text></svg>
+<div id="hotpanel"><b>点编号看说明。</b> 从 1 开始。</div></figure>
+<p>下图把大脑结构成熟度画成 0–100 分的相对曲线（定性相对趋势）。白质连接的成熟要持续到三四十岁。</p>
+<figure><svg viewBox="0 0 640 220" width="100%" role="img" aria-label="相对曲线"><line x1="40" y1="190" x2="600" y2="190" stroke="#26221d"/><line x1="40" y1="30" x2="40" y2="190" stroke="#26221d"/><polyline points="40.0,161.2 51.8,110.0 69.5,79.6 93.1,60.4 110.7,49.2 128.4,41.2 152.0,34.8 187.4,30.0 246.3,36.4 305.3,47.6 364.2,60.4 423.2,78.0 482.1,100.4 541.1,126.0 600.0,150.0" fill="none" stroke="#3f6d5a" stroke-width="2.5"/><polyline points="40.0,159.6 51.8,106.8 69.5,74.8 93.1,57.2 110.7,46.0 128.4,38.0 152.0,33.2 187.4,31.6 246.3,38.0 305.3,49.2 364.2,62.0 423.2,79.6 482.1,103.6 541.1,129.2 600.0,151.6" fill="none" stroke="#b5542d" stroke-width="2.5"/><text x="560" y="60" font-size="13" fill="#3f6d5a">男性</text><text x="560" y="160" font-size="13" fill="#b5542d">女性</text><text x="40" y="212" font-size="12">0岁</text><text x="570" y="212" font-size="12">95岁</text></svg></figure>
+<h2>二、顺着一生往下读</h2><p>下面按年龄顺序排列。想只看一边，可以切换；默认男女并排。</p>
+<div class="toggle"><button class="on" data-v="both">男女并排</button><button data-v="m">只看男性</button><button data-v="f">只看女性</button></div>
+<article class="stage"><div class="stage-age">0-2岁</div><div class="stage-body"><p>神经元之间快速建立连接，神经胶质细胞大量增殖。负责视觉、听觉等基础感官的皮层发育最早，皮层厚度在2岁左右达到最高点。</p><div class="duo"><div class="sex m"><h4>男性</h4><p>脑容量通常比女性大8%-10%左右，但微观神经结构的成熟速度比女性稍晚0.2到0.5年。</p></div><div class="sex f"><h4>女性</h4><p>神经连接与语言相关脑区的成熟速度略早于男性，皮层厚度达峰时间更早。</p></div></div><p class="rev">可逆性：脑组织耐受机械损伤的能力较弱，但由于突触处于爆发生成阶段，未受损脑区具备很强的代偿与功能重组能力。</p></div></article><article class="stage"><div class="stage-age">3-9岁</div><div class="stage-body"><p>全脑皮质灰质体积在6岁左右达到最高点。随后大脑通过修剪多余的突触连接，逐步提高神经信号的传递效率。</p><div class="duo"><div class="sex m"><h4>男性</h4><p>脑容量整体偏大，皮质灰质体积达峰时间略晚，中位数约在6.2岁。</p></div><div class="sex f"><h4>女性</h4><p>皮质灰质体积达峰时间较早，中位数约在5.5岁，高级认知与语言功能区的连接优化较早展开。</p></div></div><p class="rev">可逆性：可塑性依然较高。虽然基础感官通路的连接格局已基本定型，但逻辑思考、语言理解与动作协调仍处于受环境刺激塑造的窗口期。</p></div></article><article class="stage"><div class="stage-age">10-19岁</div><div class="stage-body"><p>灰质因持续的突触修剪而体积变小，白质则因神经纤维包裹髓鞘而持续增多，神经信号传递速度加快。负责情绪反应的边缘系统成熟较早，而负责理性控制的前额叶仍在发育中。</p><div class="duo"><div class="sex m"><h4>男性</h4><p>受雄性激素影响，杏仁核等情绪相关脑区体积增长较明显，白质微结构完全成熟的时间略晚于女性。</p></div><div class="sex f"><h4>女性</h4><p>受雌激素与孕激素调节，神经网络修剪和白质髓鞘成熟进程早于男性。</p></div></div><p class="rev">可逆性：可塑性逐步降低。被修剪掉的冗余突触不会再生。若在此期间遭遇长期重度缺眠或神经毒素，会对回路建立造成长期不良影响。</p></div></article><article class="stage"><div class="stage-age">20-35岁</div><div class="stage-body"><p>负责理性决策、规划与冲动控制的前额叶皮层完成髓鞘化，深部白质传导纤维发育成熟，全脑信息整合效率达到最高点。</p><div class="duo"><div class="sex m"><h4>男性</h4><p>白质体积与神经传导微结构在29-30岁左右达到峰值。</p></div><div class="sex f"><h4>女性</h4><p>白质微结构发育在27-28岁左右达峰。若经历妊娠，大脑心智化网络会经历适应性灰质修剪，这种微结构改变可持续数年。</p></div></div><p class="rev">可逆性：基础解剖结构基本定型。神经回路不再发生大范围改变，主要依赖局部突触强度的动态调整进行学习与功能代偿。</p></div></article><article class="stage"><div class="stage-age">36-55岁</div><div class="stage-body"><p>全脑结构进入缓慢减退阶段。微细髓鞘更新速度减慢并发生退变，全脑体积以每年约0.4%-0.5%的速度萎缩，脑室代偿性轻微扩大。</p><div class="duo"><div class="sex m"><h4>男性</h4><p>额叶和颞叶皮层的萎缩速度略快，微血管硬化等因素易累及局部脑白质。</p></div><div class="sex f"><h4>女性</h4><p>进入绝经期后，雌激素的神经保护机制减弱，局部脑代谢与灰质结构的稳定性出现阶段性变化。</p></div></div><p class="rev">可逆性：结构萎缩属于生理性退化，不可逆转。通过规律有氧运动与认知活动可增加脑储备，减缓功能下降速度。</p></div></article><article class="stage"><div class="stage-age">56-75岁</div><div class="stage-body"><p>脑萎缩速度加快。负责近期记忆的海马体以及前额叶皮层萎缩显著，脑微血管硬化导致脑实质供血减少，白质纤维完整性受损，信号传导延迟增加。</p><div class="duo"><div class="sex m"><h4>男性</h4><p>脑实质萎缩与侧脑室扩张表现更明显，常伴随较高比例的白质缺血性微病灶。</p></div><div class="sex f"><h4>女性</h4><p>绝经后丧失雌激素保护，海马体等记忆相关脑区的退缩速率在这一阶段呈加速趋势。</p></div></div><p class="rev">可逆性：结构退变为不可逆过程。干预核心在于控制高血压与糖尿病等血管风险因素，维持残存神经元供血并延缓衰退。</p></div></article><article class="stage"><div class="stage-age">76-95+岁</div><div class="stage-body"><p>全脑实质广泛萎缩，侧脑室与蛛网膜下腔进一步代偿性扩张。神经胶质细胞介导的慢性低度炎症持续存在，突触大量丢失，类淋巴系统清理代谢废物效率明显下降。</p><div class="duo"><div class="sex m"><h4>男性</h4><p>脑实质与颅骨间隙增大，颅脑外伤后发生硬膜下血肿的风险显著升高。</p></div><div class="sex f"><h4>女性</h4><p>神经退行性疾病（如阿尔茨海默病）的发病风险与病理改变进一步加重，海马体等核心脑区退变显著。</p></div></div><p class="rev">可逆性：病理与生理退化完全不可逆。干预目标以控制伴随症状、延缓认知减退进程、维持基本日常自理能力为主。</p></div></article>
+<h2>三、专题：容易误解的几件事</h2><details><summary><span class="tag">[空间时序规律]</span>大脑发育与退化的时序特征：后进先出</summary><p>大脑发育遵循从后到前的顺序，负责基础感觉与运动的后方脑区最先成熟，负责高级逻辑与冲动控制的前额叶最后完成髓鞘化。在衰老过程中，最后成熟的前额叶区域也往往最早出现萎缩和髓鞘退化，导致高级认知能力通常比基础感觉功能更早出现减退。</p></details><details><summary><span class="tag">[神经环路模型]</span>青春期发育步调的异步性</summary><p>青春期的大脑存在功能区发育的时间差：掌控情绪、冲动和奖赏反应的边缘系统在激素作用下发育成熟较早，而负责理性判断、抑制冲动的前额叶皮层仍在进行髓鞘化与突触修剪。这种控制网络与奖赏网络的异步成熟，构成了青少年容易冲动和追求刺激的解剖学基础。</p></details><details><summary><span class="tag">[生理可塑特例]</span>妊娠期大脑的神经适应性重塑</summary><p>妊娠期间女性体内激素水平剧烈变化，诱发心智化网络和默认网络出现特异性灰质体积缩减。这种生理性结构重组是对神经元连接的精简和优化，旨在增强母亲对婴儿面部表情与哭声等社交线索的感知能力，这种变化可在产后维持数年。</p></details><details><summary><span class="tag">[退行病理鉴别]</span>生理性衰老与阿尔茨海默病的萎缩差异</summary><p>健康老年人的海马体呈现缓慢的生理性萎缩，年丢失率通常在0.8%-1.2%之间。而从轻度认知障碍发展为阿尔茨海默病时，局部神经元与突触出现病理性丢失，海马体积年萎缩率会上升至2.5%-6.5%。临床上通过高精度MRI测量海马萎缩速率，可作为区分正常衰老与病理性病变的重要参考指标。</p></details>
+<h2>四、哪些能干预，哪些不能</h2>
+<div class="win"><div><h3>基本定型</h3><p>初级视觉与听觉皮层的关键发育窗口在学龄前基本关闭；脑实质宏观结构在2岁后基本定型；神经元因缺血或变性坏死后无法通过分裂再生填补缺损。</p></div><div><h3>干预回报高</h3><p>0-3岁是感知觉与运动协调神经网络搭建的关键期；10-18岁是前额叶逻辑思维与抑制控制能力强化的窗口期；20-30岁是通过规律运动与认知训练巩固白质微结构完整度的重要阶段。</p></div><div><h3>只能延缓</h3><p>40岁以后全脑体积和髓鞘完整度出现的退行性变化无法彻底逆转。严格控制血压与血糖、保障深度睡眠以促进脑内代谢废物清除、坚持有氧运动是延缓脑结构萎缩的有效途径。</p></div></div>
+<p>T01神经内分泌轴（激素驱动发育与重塑）| T08脑代谢与线粒体动力学（能量决定脑发育效率）| T12睡眠与类淋巴代谢（深睡是大脑垃圾清运的最佳时机）| T16神经免疫与小胶质细胞（免疫系统不仅防病，也参与日常的大脑连接修剪）</p>
+<h2>五、证据清单</h2><details><summary>逐条核查结果与来源（点击展开）</summary><ul><li><b>T04-C01</b> [VERIFIED] 皮层厚度达峰年龄极早，呈现倒U型变化轨迹，生后早期即完成最迅猛的皮层扩张与折叠。：1.7-2.1岁<span class="src">Bethlehem et al., 2022, Nature, PMID: 35388223</span></li><li><b>T04-C02</b> [VERIFIED] 全脑皮质灰质总体积在儿童中期达到全生命周期峰值，随后因生理性突触修剪呈现不可逆单调下降。：5.9岁（中位数）<span class="src">Bethlehem et al., 2022, Nature, PMID: 35388223</span></li><li><b>T04-C03</b> [VERIFIED] 全脑白质总体积及深部投射传导束髓鞘成熟达峰年龄显著晚于灰质，支撑高级认知整合能力。：28.7岁（中位数）<span class="src">Bethlehem et al., 2022, Nature, PMID: 35388223</span></li><li><b>T04-C04</b> [VERIFIED] 侧脑室体积在童年早期达到相对容积最低点，60岁后呈指数级加速膨胀，成为脑实质萎缩的核心替代指标。：2.3岁达容积低谷；60岁后年复合增长率达1.8%-2.5%<span class="src">Bethlehem et al., 2022, Nature, PMID: 35388223; Jack et al., 2005, Neurology, PMID: 16186523</span></li><li><b>T04-C05</b> [VERIFIED] 初级视觉与感觉皮层突触密度呈爆发性过量生成，生后数月达到成人的150%，其后迅速修剪稳定。：8-12个月突触密度达峰（约成人1.5倍），11岁前修剪至成人基线<span class="src">Huttenlocher &amp; de Courten, 1987, Neuropsychologia, PMID: 3670652; Bourgeois &amp; Rakic, 1993, J Neurosci, PMID: 8426229</span></li><li><b>T04-C06</b> [VERIFIED] 背外侧前额叶皮层（dlPFC）的突触过度生成达峰较晚，突触修剪过程横跨整个青春期直至青年初期。：突触过度生成达峰约3.5-5岁，消除修剪持续至22-25岁<span class="src">Petanjek et al., 2011, PNAS, PMID: 21788513; Huttenlocher, 1979, Brain Res, PMID: 447471</span></li><li><b>T04-C07</b> [VERIFIED] 前额叶联合皮层内轴突内侧微细髓鞘化及少突胶质细胞增殖可持续延长至成年后数十年。：组织学与MRI-T1w/T2w证实微细髓鞘化持续至35-42岁<span class="src">Bartzokis et al., 2010, Neurobiol Aging, PMID: 18455269; Grydeland et al., 2013, J Neurosci, PMID: 24068821</span></li><li><b>T04-C08</b> [VERIFIED] 健康老化个体在60岁后海马体体积出现生理性加速萎缩，主因齿状回颗粒细胞发生减少与树突萎缩。：60岁后年均体积萎缩0.8%-1.2%/年<span class="src">Raz et al., 2005, Cereb Cortex, PMID: 15345549; Fraser et al., 2015, Neuroimage, PMID: 25680519</span></li><li><b>T04-C09</b> [VERIFIED] 轻度认知障碍（MCI）转化为临床阿尔茨海默病（AD）阶段，海马体积丢失率呈2至5倍病理性激增。：MCI阶段年萎缩2.5%-3.5%/年；确诊AD阶段达4.0%-6.5%/年<span class="src">Barnes et al., 2009, Neurobiol Aging, PMID: 18353503; Henneman et al., 2009, Brain, PMID: 19675323</span></li><li><b>T04-C10</b> [VERIFIED] 初孕女性在妊娠期间经历广泛对称的灰质体积缩减，该重塑特异性集中于心智化网络，具有高度神经适应性意义。：心智化与默认网络GMV减少4.5%-7.0%，变化至少维持至产后2-6年<span class="src">Hoekzema et al., 2017, Nat Neurosci, PMID: 27991897; Martínez-García et al., 2021, Sci Adv, PMID: 34936442</span></li><li><b>T04-C11</b> [VERIFIED] 新生儿脑体积约为成年终体积的25%，出生后第一年体积翻倍，神经纤维与胶质细胞呈指数暴增。：1岁达到成人脑体积的70-75%，2岁达到80-85%<span class="src">Pfefferbaum et al., 1994, Arch Neurol, PMID: 8067923; Knickmeyer et al., 2008, J Neurosci, PMID: 18971476</span></li><li><b>T04-C12</b> [VERIFIED] 胼胝体与上纵束的各向异性分数（FA）达峰年龄晚于下层投射纤维，标志高级联合网络长程传导效率最后成熟。：胼胝体压部及额顶联合白质FA达峰区间为26-32岁<span class="src">Lebel et al., 2012, Neuroimage, PMID: 22305988; Westlye et al., 2010, Cereb Cortex, PMID: 20080998</span></li><li><b>T04-C13</b> [VERIFIED] 40岁以后全脑体积开始出现线性递减，伴随白质微结构FA下降与轴向扩散系数（MD）升高。：40-70岁全脑体积平均损失0.4%-0.5%/年；70岁后加速至&gt;1.0%/年<span class="src">Hedman et al., 2012, Hum Brain Mapp, PMID: 21391264; Fjell et al., 2009, J Neurosci, PMID: 19955386</span></li></ul></details>
+</main><script>
+const HOT={"d1": ["突触过度生成", "婴幼儿期大脑先大量建立连接，数量远超成年需要，为学习留足材料。"], "d2": ["修剪与髓鞘化", "用得多的线路保留并裹上髓鞘传得更快，用得少的被修剪掉，效率因此上升。"], "d3": ["网络成熟", "负责计划和自控的前额叶成熟最晚，要到二十多岁才基本完工。"], "d4": ["老年萎缩", "60 岁后大脑体积缓慢减小，海马等区域更明显；健康老化的速度明显慢于阿尔茨海默病。"], "d5": ["怀孕期重塑", "怀孕期间母亲大脑灰质会出现可测量的重塑，产后多数逐渐恢复，细节仍在研究中。"]};
+document.querySelectorAll('.hot').forEach(g=>g.addEventListener('click',()=>{document.querySelectorAll('.hot').forEach(x=>x.classList.remove('active'));g.classList.add('active');const h=HOT[g.dataset.k];document.getElementById('hotpanel').innerHTML='<b>'+h[0]+'。</b> '+h[1];}));
+document.querySelectorAll('.toggle button').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('.toggle button').forEach(x=>x.classList.remove('on'));b.classList.add('on');document.querySelectorAll('.sex.m').forEach(e=>e.style.display=b.dataset.v==='f'?'none':'');document.querySelectorAll('.sex.f').forEach(e=>e.style.display=b.dataset.v==='m'?'none':'');}));
+</script></body></html>
