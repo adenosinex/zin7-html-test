@@ -24,47 +24,66 @@ details{border:1px solid var(--line);background:#fffdf8;margin:10px 0;padding:10
 .lever{border-top:3px solid var(--accent2);background:#fffdf8;padding:12px 14px;margin:10px 0}
 .num{font-family:Georgia,serif;font-size:22px;color:var(--accent);font-weight:700}
 @media(max-width:640px){.signal{grid-template-columns:1fr}}
+
+.signal{display:grid;grid-template-columns:130px 1fr;gap:14px;padding:14px 0;border-bottom:1px solid var(--line)}
+.signal b{color:var(--accent)}
+.lever{border-top:3px solid var(--accent2);background:#fffdf8;padding:12px 14px;margin:10px 0}
+.num{font-family:Georgia,serif;font-size:20px;color:var(--accent);font-weight:700}
+.insight{background:#fbf7ee;border-left:4px solid var(--accent);padding:10px 14px;margin:10px 0}
+@media(max-width:640px){.signal{grid-template-columns:1fr}}
 </style></head><body><main>
 <p class="kicker">人体全生命周期图谱 · T02</p><h1>性发育与生殖周期</h1>
-<p class="lead">这一页不讲抽象激素曲线，只讲三件事：你能亲眼看到的变化、哪些变化值得去看医生、哪些因素你能自己改变。</p>
+<p class="lead">这一页只讲三件事：你能亲眼看到的变化、哪些变化值得去看医生、哪些因素你能自己改变。先提醒一句：你看到的信号，往往不是起点，而是中后期的结果。</p>
 <div class="guide"><span>1 看得见的变化</span><span>2 正常还是该就医</span><span>3 能改变的杠杆</span></div>
 
-<h2>一、看得见的变化：按年龄对号入座</h2>
-<div class="signal"><b>0–2 岁</b><p>男婴半岁前、女婴两岁前，体内激素会短暂起伏（迷你青春期）。外观上通常看不出什么，不需要干预，这是身体在“试运行”。</p></div>
-<div class="signal"><b>8–14 岁</b><p>女孩先出现乳房发育，男孩先出现睾丸增大。随后身高猛涨：女孩长得最快的那一年通常在初潮之前，男孩的猛长期比女孩晚约两年。变声、胡须、体毛都属于这一阶段的可见信号。</p></div>
-<div class="signal"><b>20–35 岁</b><p>生育能力的高峰期。女性卵子数量和质量在这个阶段最好；男性精子质量也处于高位。这个阶段最值得做的事是别透支：睡够、少烟酒、保持体重。</p></div>
-<div class="signal"><b>36–55 岁</b><p>女性月经开始变得不规律，潮热、盗汗、睡不好是绝经前后的常见感受，中位年龄约 <span class="num">51 岁</span>。男性没有突然的断崖：睾酮从三四十岁起每年约降 <span class="num">1%</span>，十年大约少一成，感受通常是精力、性欲和肌肉慢慢不如从前。</p></div>
-<div class="signal"><b>56 岁以后</b><p>女性绝经后雌激素低位运行，骨头变脆、心血管风险上升是更值得关注的实际问题。男性睾酮继续缓慢下降，游离睾酮降得更快（每年约 2%–3%），但多数人不需要治疗，先看症状再谈化验。</p></div>
+<h2>一、看得见的变化：信号有先后，别认错起点</h2>
+<div class="signal"><b>0–2 岁</b><p>男婴半岁前、女婴两岁前激素会短暂起伏（迷你青春期）。这是出生后大脑的“刹车”还没踩牢时的一次试运行，外观通常看不出什么，不需要干预。</p></div>
+<div class="signal"><b>3–7 岁</b><p>六七岁出现轻微体味、几根阴毛或腋毛，多半是肾上腺启动，不等于卵巢或睾丸启动了青春期。真正决定是不是性早熟的，是乳房发芽和睾丸增大——这是家长最常误判的点。</p></div>
+<div class="signal"><b>8–14 岁</b><p>女孩的起点是乳房发芽（中位约 10 岁），身高长得最快的那一年在初潮之前；<b>初潮到来意味着身高冲刺基本结束，之后通常只剩几厘米。</b>男孩的起点是睾丸增大（≥4 mL，中位约 11 岁），极其隐蔽；变声、胡须、首次遗精（Spermarche，中位约 14 岁）都是中后期信号，等变声才发现发育早晚，往往已经晚了。</p></div>
+<div class="signal"><b>15–19 岁</b><p>青春后期：女孩月经周期逐渐规律，骨量在这一阶段冲刺到接近峰值；男孩肌肉和骨骼继续增厚。这一阶段的营养和运动，决定成年后的骨骼“本金”。</p></div>
+<div class="signal"><b>20–35 岁</b><p>生育高峰期。女性卵泡库不是匀速消耗的：约 <span class="num">37.5 岁</span>后下降斜率明显变陡，这正是医学上把 35 岁作为生育评估分水岭的原因——不是 35 岁生日当天突然变化，而是拐点临近。</p></div>
+<div class="signal"><b>36–45 岁</b><p>男性化验总睾酮看着正常、却明显乏力的常见原因：肝脏分泌的结合蛋白 SHBG 随年龄升高，把能用的睾酮“锁”住了。真正起作用的游离睾酮每年约降 <span class="num">1.6%–2.2%</span>，比总睾酮（0.8%–1.6%）快得多。</p></div>
+<div class="signal"><b>45–55 岁</b><p>女性进入绝经过渡：月经不规律、潮热、盗汗、睡不好，中位绝经年龄约 <span class="num">51 岁</span>。男性没有断崖，只有缓慢下坡。</p></div>
+<div class="signal"><b>56 岁以后</b><p>女性雌激素低位运行后，骨头变脆、心血管风险上升是更实际的关注点；男性先看症状再谈化验，多数人不需要治疗。</p></div>
+<div class="insight"><b>一个支线：怀孕与哺乳。</b>怀孕时 hCG 和雌孕激素大幅升高；哺乳期催乳素升高会暂时给排卵“踩刹车”，所以哺乳期常有一段时间不来月经，这是生殖周期为了哺育后代主动让路。</div>
 
 <h2>二、正常还是该就医</h2>
-<p>下面是一般性参考，不能代替诊断。出现这些情况，建议去医院评估，而不是自己猜：</p>
-<div class="signal"><b>太早</b><p>女孩 8 岁前、男孩 9 岁前出现青春期迹象（乳房发育、睾丸增大），属于性早熟的评估范围。</p></div>
-<div class="signal"><b>太晚</b><p>女孩 13 岁、男孩 14 岁仍无任何青春期迹象，属于青春期延迟的评估范围。</p></div>
-<div class="signal"><b>成年期</b><p>备孕一年未孕、月经长期紊乱、性欲持续明显下降并伴随乏力或情绪低落，都值得做一次正规检查，先排除可治疗的原因。</p></div>
+<p>一般性参考，不能代替诊断。以下情况建议去医院评估：</p>
+<div class="signal"><b>太早</b><p>女孩 8 岁前、男孩 9 岁前出现乳房发育或睾丸增大，属于性早熟评估范围。</p></div>
+<div class="signal"><b>太晚</b><p>女孩 13 岁无乳房发育、<b>满 15 岁仍无初潮</b>（哪怕乳房已发育），或男孩 14 岁睾丸仍未增大，都应排查。</p></div>
+<div class="signal"><b>备孕</b><p>35 岁以下备孕一年未孕建议评估；<b>女性满 35 岁，备孕半年未孕就建议启动评估</b>，不要等满一年。</p></div>
+<div class="signal"><b>中老年红旗</b><p><b>40 岁前停经</b>不是“早点省事”，可能是早发性卵巢功能不全，需要评估激素保护骨骼与心血管。<b>绝经后再次阴道出血，无论量多小，都必须就医排查子宫内膜病变。</b></p></div>
+<div class="insight"><b>化验避坑：</b>男性查睾酮要在清晨空腹抽血，通常还要复测确认。睾酮有昼夜节律，下午抽血往往偏低，单凭一次下午的低值就下“雄激素缺乏”的结论是常见误区。</div>
 
 <h2>三、能改变的杠杆</h2>
-<div class="lever"><h3>睡眠</h3><p>连续睡眠不足会压低男性睾酮，睡不好还会放大更年期的潮热和情绪波动。先把睡眠补回来，是成本最低的一步。</p></div>
-<div class="lever"><h3>运动与肌肉</h3><p>规律的力量训练能帮助维持肌肉和骨骼，对中年后精力下降的感受改善最直接。目标是长期坚持，而不是短期猛练。</p></div>
-<div class="lever"><h3>体重</h3><p>肥胖会降低精子质量，也会加重更年期潮热。减重对生育和代谢都有实际收益。</p></div>
-<div class="lever"><h3>烟酒</h3><p>吸烟与精子浓度下降有关；过量饮酒同时伤睡眠和激素。备孕期戒烟限酒是证据最明确的动作之一。</p></div>
-<div class="lever"><h3>别乱补</h3><p>睾酮、雌激素类药物不是保健品。没有明确诊断和化验依据时自行补充，风险大于收益。</p></div>
+<div class="lever"><h3>体重：两个方向都伤</h3><p>多余脂肪会把雄激素转化为雌激素，这是肥胖男性睾酮偏低、精子变差的重要原因。反过来，过度节食、低体脂和过量运动会让身体判定处于“饥荒状态”，主动关停排卵（功能性下丘脑性闭经），还连带骨量提前流失。</p></div>
+<div class="lever"><h3>高温与 3 个月周期</h3><p>睾丸温度需要低于核心体温。频繁桑拿、泡温泉、长期久坐或一次高烧，对精子的打击会影响未来 2–3 个月的精液质量，因为生精周期约 74 天。备孕期避开持续高温，是带时间延迟的真杠杆。</p></div>
+<div class="lever"><h3>睡眠与烟酒</h3><p>连续睡眠不足会压低睾酮、放大更年期潮热；吸烟与精子浓度下降有关。先补睡眠、戒烟限酒，是成本最低的动作。</p></div>
+<div class="lever"><h3>别乱补，但也别一刀切</h3><p>男性自行注射或口服外源性睾酮，会骗过大脑让睾丸停产，直接导致生精停摆甚至无精不育——备孕和健身人群尤其要知道。女性则要区分“乱补”和正规绝经激素治疗：症状严重或早绝经者，在绝经 10 年内、60 岁前的窗口期规范使用，获益通常大于风险，应去妇科内分泌评估，而不是一律拒绝。</p></div>
 
-<h2>四、为什么会这样（机制简图）</h2>
-<p>背后的机制一句话：大脑发信号，睾丸或卵巢响应，激素再反馈给大脑。点编号看每一步。</p>
+<h2>四、为什么会这样：一根线串起全页</h2>
+<p>整套系统只有三个部件，点编号看它们如何解释上面的所有现象。</p>
 <figure><svg viewBox="0 0 640 240" width="100%" role="img" aria-label="机制简图">
-<rect x="250" y="14" width="140" height="42" fill="#fffdf8" stroke="#26221d"/><text x="320" y="41" text-anchor="middle" font-size="14">大脑信号</text>
-<rect x="120" y="104" width="150" height="42" fill="#fffdf8" stroke="#3f6d5a"/><text x="195" y="131" text-anchor="middle" font-size="14">睾丸</text>
-<rect x="370" y="104" width="150" height="42" fill="#fffdf8" stroke="#b5542d"/><text x="445" y="131" text-anchor="middle" font-size="14">卵巢</text>
-<rect x="230" y="182" width="180" height="42" fill="#fffdf8" stroke="#26221d"/><text x="320" y="209" text-anchor="middle" font-size="14">激素影响全身</text>
-<g class="hot" data-k="brain"><circle cx="392" cy="20" r="12"/><text x="392" y="25" text-anchor="middle">1</text></g>
-<g class="hot" data-k="gonad"><circle cx="272" cy="110" r="12"/><text x="272" y="115" text-anchor="middle">2</text></g>
-<g class="hot" data-k="hormone"><circle cx="412" cy="188" r="12"/><text x="412" y="193" text-anchor="middle">3</text></g>
+<rect x="250" y="14" width="140" height="42" fill="#fffdf8" stroke="#26221d"/><text x="320" y="41" text-anchor="middle" font-size="14">脉冲开关</text>
+<rect x="120" y="104" width="150" height="42" fill="#fffdf8" stroke="#b5542d"/><text x="195" y="131" text-anchor="middle" font-size="14">卵巢：库存制</text>
+<rect x="370" y="104" width="150" height="42" fill="#fffdf8" stroke="#3f6d5a"/><text x="445" y="131" text-anchor="middle" font-size="14">睾丸：流水线</text>
+<rect x="230" y="182" width="180" height="42" fill="#fffdf8" stroke="#26221d"/><text x="320" y="209" text-anchor="middle" font-size="14">负反馈</text>
+<g class="hot" data-k="pulse"><circle cx="392" cy="20" r="12"/><text x="392" y="25" text-anchor="middle">1</text></g>
+<g class="hot" data-k="factory"><circle cx="272" cy="110" r="12"/><text x="272" y="115" text-anchor="middle">2</text></g>
+<g class="hot" data-k="feedback"><circle cx="412" cy="188" r="12"/><text x="412" y="193" text-anchor="middle">3</text></g>
 </svg><div id="hotpanel"><b>点编号看说明。</b></div></figure>
 
 <h2>五、证据清单</h2>
-<details><summary>核查数值与来源（点击展开）</summary><ul><li><b>T02-C01</b> [[VERIFIED]] 新生儿脱离母体胎盘高浓度雌二醇负反馈后经历迷你青春期（Mini-puberty），男婴血清睾酮在1-3个月达峰值且于6个月前回落至静默期，女婴FSH与E2高水平脉冲波动持续至1-2岁：男婴总睾酮峰值达1-12 nmol/L（1-3月龄，6月龄前降至基线&lt;0.5 nmol/L）；女婴FSH/E2高水平脉动持续12-24个月<span class="src">Kuiri-Hänninen et al., Endocr Rev, 2014; PMID: 28628972</span></li><li><b>T02-C02</b> [[VERIFIED]] 胎儿性分化依赖孕早期雄激素脉冲与抗苗勒管激素（AMH），SRY基因驱动睾丸支持细胞于孕7周分泌AMH，间质细胞于孕8-14周在hCG刺激下分泌睾酮：孕8-14周胎儿睾酮峰值达8-12 nmol/L，驱动中肾管分化及外生殖器男性化形成<span class="src">Rey et al., Semin Reprod Med, 2012; Hughes et al., 2006</span></li><li><b>T02-C03</b> [[VERIFIED]] 肾上腺机能初现（Adrenarche）与性腺机能初现（Gonadarche）在发生机制上解耦独立，前者表现为肾上腺皮质网状带CYB5A/SULT2A1激活致DHEA-S激增：肾上腺初现发生于6-8岁（血清DHEA-S&gt;1.0 μmol/L诱导阴毛/腋毛萌出与体味改变）；性腺初现发生于9-11岁（弓状核GnRH脉冲重新激活）<span class="src">Auchus et al., 2004; PMID: 34250379</span></li><li><b>T02-C04</b> [[VERIFIED]] 青春期真性启动的生物学金标准：女童以Tanner B2（乳腺出芽）为临床起点，男童以Tanner G2（双侧Prader计睾丸容积≥4 mL）为客观形态学起点：女童B2启动中位年龄为9.8-10.2岁；男童G2睾丸容积≥4 mL启动中位年龄为10.5-11.5岁<span class="src">PMID: 41921546; PMID: 12388944; PMID: 34250379</span></li><li><b>T02-C05</b> [[VERIFIED]] 女性生长突增峰值（PHV）严格先于月经初潮，初潮通常发生在生长速度减速阶段及Tanner B4期，为雌激素对内膜突破性撤退机制：女性PHV中位年龄11.5-12.0岁（峰速8-9 cm/年），初潮中位年龄为12.5-12.8岁，初潮时间严格滞后PHV约0.8-1.5年<span class="src">Marshall &amp; Tanner, Arch Dis Child, 1969; Biro et al., 2006</span></li><li><b>T02-C06</b> [[VERIFIED]] 男性遗精（Oligarche）多出现在生长突增峰值（PHV）重叠期及Tanner G3-G4期，标志睾丸生精小管成熟精子发生通路完成功能闭环：首次遗精中位年龄为13.5-14.5岁，对应睾丸容积达10-15 mL及PHV峰速阶段（10-12 cm/年）<span class="src">Nielsen et al., 1986; Kulin et al., 1989</span></li><li><b>T02-C07</b> [[VERIFIED]] 女性原始卵泡库不可逆加速递减，胎儿期20周达700万极值，出生时跌至100-200万，青春期初剩30-40万，37.5岁后闭锁动力学斜率突增：37.5岁卵泡临界数量约为25000个（闭锁速率加快约2倍），绝经时卵泡库耗竭跌破临界阈值&lt;1000个<span class="src">Faddy &amp; Gosden, 1996; Wallace &amp; Kelsey, PLoS ONE, 2010</span></li><li><b>T02-C08</b> [[VERIFIED]] 女性自然绝经中位年龄为51.4岁，依据STRAW+10分期体系，围绝经期向绝经后过渡标志着卵巢原始卵泡池不可逆耗竭与排卵永久性终止：绝经中位年龄51.4岁（95% CI: 45-55岁），血清FSH&gt;25-40 IU/L伴AMH&lt;0.01 ng/mL且闭经持续≥12个月为最终绝经（Stage 0）标志<span class="src">STRAW+10 Collaborative Group, 2012; PMID: 41106025; PMID: 41156491</span></li><li><b>T02-C09</b> [[CORRECTED]] 男性睾酮在35-40岁后呈平缓进行性衰退，肝脏SHBG年均递增导致游离睾酮（FT）下降速率显著高于总睾酮（TT）：TT年均下降0.8%-1.6%，SHBG年均上升1.2%-1.4%，具有生物活性的游离睾酮（FT）年均下降1.6%-2.2%<span class="src">MMAS longitudinal study, Feldman et al., 2002; PMID: 27178254; PMID: 36038500</span></li><li><b>T02-C10</b> [[VERIFIED]] 迟发性性腺功能减退（LOH）诊断必须同时结合典型临床症候群与清晨空腹静脉血清睾酮生化切点：血清总睾酮&lt;8.0-12.1 nmol/L（或计算游离睾酮cFT&lt;220-240 pmol/L）为生化确认阈值<span class="src">Endocrine Society Clinical Practice Guideline, Bhasin et al., 2018; PMID: 17171213</span></li><li><b>T02-C11</b> [[VERIFIED]] 中枢性性早熟（CPP）定义为下丘脑GnRH脉冲发生器过早解禁激活，造成第二性征提前暴露及骨龄严重提前闭合：女童在8.0岁前出现Tanner B2（乳芽萌出），或男童在9.0岁前出现双侧睾丸增大（容积≥4 mL）<span class="src">Carel et al., Pediatrics, 2009; 中华医学会儿科学分会内分泌学组CPP指南</span></li><li><b>T02-C12</b> [[VERIFIED]] 体质性青春期发育延迟（CDGP）呈现生殖轴重激活延迟与骨龄落后，需依据年龄截断值进行排查以排除器质性低促性腺激素性性腺功能减退：女童满13岁无乳房发育或满15岁尚无初潮；男童满14岁双侧睾丸容积仍&lt;4 mL（未达G2），伴骨龄落后2-3年<span class="src">Sedlmeyer &amp; Palmert, Endocr Rev, 2002; Wei &amp; Crowne, 2016</span></li><li><b>T02-C13</b> [[VERIFIED]] 妊娠早期合胞体滋养层分泌hCG以挽救妊娠黄体，哺乳期高催乳素（PRL）通过抑制KNDy神经元吻素释放产生生理性下丘脑闭经：hCG在孕8-10周达峰值（50000-100000 IU/L）；哺乳期血清PRL维持&gt;50-100 ng/mL时下丘脑GnRH/LH脉冲被强力抑制阻断排卵<span class="src">McNeilly, Hum Reprod Update, 2001; Knobil and Neill&#x27;s Physiology of Reproduction, 2015</span></li></ul></details>
-<details><summary>干预杠杆的文献线索（点击展开）</summary><ul><li>sleep：Effects of Sleep Deprivation on Acute Skeletal Muscle Recovery after Exercise.（Medicine and science in sports and exercise 2020，PMID 31469710）</li><li>sleep：Sleep deprivation lowers reactive aggression and testosterone in men.（Biological psychology 2013，PMID 23046906）</li><li>sleep：The association of testosterone, sleep, and sexual function in men and women.（Brain research 2011，PMID 21890115）</li><li>menopause：Symptoms of menopause - global prevalence, physiology and implications.（Nature reviews. Endocrinology 2018，PMID 29393299）</li><li>menopause：Sleep disturbance and menopause.（Current opinion in obstetrics &amp; gynecology 2025，PMID 39820156）</li><li>menopause：Perimenopause: From Research to Practice.（Journal of women&#x27;s health (2002) 2016，PMID 26653408）</li><li>puberty：Precocious Puberty.（ 2025，PMID 31335033）</li><li>puberty：Magnetic resonance imaging-based adenohypophyseal volume for diagnosing hypothalamic-pituitary-gonadal axis activation in pre- and at-puberty children.（Quantitative imaging in medicine and surgery 2026，PMID 41669417）</li><li>puberty：Treatment of central precocious puberty by subcutaneous injections of leuprorelin 3-month depot (11.25 mg).（The Journal of clinical endocrinology and metabolism 2002，PMID 12213857）</li></ul></details>
+<details><summary>核查数值与来源（点击展开）</summary><ul><li><b>T02-C01</b> [[VERIFIED]] 新生儿脱离母体胎盘高浓度雌二醇负反馈后经历迷你青春期（Mini-puberty），男婴血清睾酮在1-3个月达峰值且于6个月前回落至静默期，女婴FSH与E2高水平脉冲波动持续至1-2岁：男婴总睾酮峰值达1-12 nmol/L（1-3月龄，6月龄前降至基线&lt;0.5 nmol/L）；女婴FSH/E2高水平脉动持续12-24个月<span class="src">Kuiri-Hänninen et al., Endocr Rev, 2014; PMID: 28628972</span></li><li><b>T02-C02</b> [[VERIFIED]] 胎儿性分化依赖孕早期雄激素脉冲与抗苗勒管激素（AMH），SRY基因驱动睾丸支持细胞于孕7周分泌AMH，间质细胞于孕8-14周在hCG刺激下分泌睾酮：孕8-14周胎儿睾酮峰值达8-12 nmol/L，驱动中肾管分化及外生殖器男性化形成<span class="src">Rey et al., Semin Reprod Med, 2012; Hughes et al., 2006</span></li><li><b>T02-C03</b> [[VERIFIED]] 肾上腺机能初现（Adrenarche）与性腺机能初现（Gonadarche）在发生机制上解耦独立，前者表现为肾上腺皮质网状带CYB5A/SULT2A1激活致DHEA-S激增：肾上腺初现发生于6-8岁（血清DHEA-S&gt;1.0 μmol/L诱导阴毛/腋毛萌出与体味改变）；性腺初现发生于9-11岁（弓状核GnRH脉冲重新激活）<span class="src">Auchus et al., 2004; PMID: 34250379</span></li><li><b>T02-C04</b> [[VERIFIED]] 青春期真性启动的生物学金标准：女童以Tanner B2（乳腺出芽）为临床起点，男童以Tanner G2（双侧Prader计睾丸容积≥4 mL）为客观形态学起点：女童B2启动中位年龄为9.8-10.2岁；男童G2睾丸容积≥4 mL启动中位年龄为10.5-11.5岁<span class="src">Marshall &amp; Tanner, Arch Dis Child 1969/1970; PMID: 12388944; PMID: 34250379</span></li><li><b>T02-C05</b> [[VERIFIED]] 女性生长突增峰值（PHV）严格先于月经初潮，初潮通常发生在生长速度减速阶段及Tanner B4期，为雌激素对内膜突破性撤退机制：女性PHV中位年龄11.5-12.0岁（峰速8-9 cm/年），初潮中位年龄为12.5-12.8岁，初潮时间严格滞后PHV约0.8-1.5年<span class="src">Marshall &amp; Tanner, Arch Dis Child, 1969; Biro et al., 2006</span></li><li><b>T02-C06</b> [[VERIFIED]] 男性遗精（Spermarche）多出现在生长突增峰值（PHV）重叠期及Tanner G3-G4期，标志睾丸生精小管成熟精子发生通路完成功能闭环：首次遗精中位年龄为13.5-14.5岁，对应睾丸容积达10-15 mL及PHV峰速阶段（10-12 cm/年）<span class="src">Nielsen et al., 1986; Kulin et al., 1989</span></li><li><b>T02-C07</b> [[VERIFIED]] 女性原始卵泡库不可逆加速递减，胎儿期20周达700万极值，出生时跌至100-200万，青春期初剩30-40万，37.5岁后闭锁动力学斜率突增：37.5岁卵泡临界数量约为25000个（闭锁速率加快约2倍），绝经时卵泡库耗竭跌破临界阈值&lt;1000个<span class="src">Faddy &amp; Gosden, 1996; Wallace &amp; Kelsey, PLoS ONE, 2010</span></li><li><b>T02-C08</b> [[VERIFIED]] 女性自然绝经中位年龄为51.4岁，依据STRAW+10分期体系，围绝经期向绝经后过渡标志着卵巢原始卵泡池不可逆耗竭与排卵永久性终止：绝经中位年龄51.4岁（95% CI: 45-55岁），血清FSH&gt;25-40 IU/L伴AMH&lt;0.01 ng/mL且闭经持续≥12个月为最终绝经（Stage 0）标志<span class="src">STRAW+10 Collaborative Group, 2012; PMID: 41156491</span></li><li><b>T02-C09</b> [[CORRECTED]] 男性睾酮在35-40岁后呈平缓进行性衰退，肝脏SHBG年均递增导致游离睾酮（FT）下降速率显著高于总睾酮（TT）：TT年均下降0.8%-1.6%，SHBG年均上升1.2%-1.4%，具有生物活性的游离睾酮（FT）年均下降1.6%-2.2%<span class="src">MMAS longitudinal study, Feldman et al., 2002; PMID: 27178254; PMID: 36038500</span></li><li><b>T02-C10</b> [[VERIFIED]] 迟发性性腺功能减退（LOH）诊断必须同时结合典型临床症候群与清晨空腹静脉血清睾酮生化切点：血清总睾酮&lt;8.0-12.1 nmol/L（或计算游离睾酮cFT&lt;220-240 pmol/L）为生化确认阈值<span class="src">Endocrine Society Clinical Practice Guideline, Bhasin et al., 2018; PMID: 17171213</span></li><li><b>T02-C11</b> [[VERIFIED]] 中枢性性早熟（CPP）定义为下丘脑GnRH脉冲发生器过早解禁激活，造成第二性征提前暴露及骨龄严重提前闭合：女童在8.0岁前出现Tanner B2（乳芽萌出），或男童在9.0岁前出现双侧睾丸增大（容积≥4 mL）<span class="src">Carel et al., Pediatrics, 2009; 中华医学会儿科学分会内分泌学组CPP指南</span></li><li><b>T02-C12</b> [[VERIFIED]] 体质性青春期发育延迟（CDGP）呈现生殖轴重激活延迟与骨龄落后，需依据年龄截断值进行排查以排除器质性低促性腺激素性性腺功能减退：女童满13岁无乳房发育或满15岁尚无初潮；男童满14岁双侧睾丸容积仍&lt;4 mL（未达G2），伴骨龄落后2-3年<span class="src">Sedlmeyer &amp; Palmert, Endocr Rev, 2002; Wei &amp; Crowne, 2016</span></li><li><b>T02-C13</b> [[VERIFIED]] 妊娠早期合胞体滋养层分泌hCG以挽救妊娠黄体，哺乳期高催乳素（PRL）通过抑制KNDy神经元吻素释放产生生理性下丘脑闭经：hCG在孕8-10周达峰值（50000-100000 IU/L）；哺乳期血清PRL维持&gt;50-100 ng/mL时下丘脑GnRH/LH脉冲被强力抑制阻断排卵<span class="src">McNeilly, Hum Reprod Update, 2001; Knobil and Neill&#x27;s Physiology of Reproduction, 2015</span></li></ul></details>
+<details><summary>红旗与杠杆的文献线索（点击展开）</summary><ul>
+<li>早发性卵巢功能不全：PMID 30586774；34508691</li>
+<li>绝经后出血评估：PMID 32233689；39186069</li>
+<li>功能性下丘脑性闭经：PMID 28658709；38062345</li>
+<li>高温与精子质量：PMID 35454222；32947064</li>
+<li>外源性睾酮与生精抑制：PMID 34884539；39442683</li>
+<li>绝经激素治疗窗口：PMID 36780393；37856860</li>
+</ul></details>
 </main><script>
-const HOT={brain:['大脑信号','下丘脑和垂体发出启动信号，青春期时明显增强。'],gonad:['性腺响应','睾丸造精子并生产睾酮；卵巢让卵泡发育并生产雌激素。'],hormone:['激素影响全身','激素随血液传到全身，推动身高、肌肉、骨骼和情绪变化，并反馈调节大脑。']};
+const HOT={pulse:['脉冲开关','大脑不是一直开着，而是按脉冲发信号。童年期大脑主动踩着中枢刹车；0–2 岁迷你青春期是刹车短暂没踩牢；青春期启动就是松开刹车、重启脉冲。'],factory:['库存 vs 流水线','卵巢是不可再生库存制：出生定总量，37 岁后加速见底，用完即绝经。睾丸是持续流水线制：终身运转，只是效率缓慢下坡。这解释了为什么女性有绝经断崖、男性没有。'],feedback:['负反馈','激素够了就通知大脑减产。乱打睾酮会让大脑误以为产量充足而关停睾丸，精子归零；绝经后卵泡没了、发不回“够了”的信号，大脑只能拼命喊话，引发潮热等紊乱。']};
 document.querySelectorAll('.hot').forEach(g=>g.addEventListener('click',()=>{document.querySelectorAll('.hot').forEach(x=>x.classList.remove('active'));g.classList.add('active');const h=HOT[g.dataset.k];document.getElementById('hotpanel').innerHTML='<b>'+h[0]+'。</b> '+h[1];}));
 </script></body></html>
