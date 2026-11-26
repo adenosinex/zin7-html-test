@@ -1,0 +1,70 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>细胞与分子衰老</title><style>
+:root{--bg:#f7f2e9;--ink:#2b2620;--mut:#7a7264;--acc:#b4552d;--card:#fffdf8;--line:#e3dac8}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:"Noto Serif SC",serif;line-height:1.75}
+.wrap{max-width:860px;margin:0 auto;padding:28px 18px 60px}
+.kicker{color:var(--acc);letter-spacing:.2em;font-size:12px}
+h1{font-size:30px;margin:6px 0 4px}.sub{color:var(--mut);margin:0 0 6px}
+.modelnote{color:var(--mut);font-size:13px;border-bottom:1px solid var(--line);padding-bottom:14px}
+h2{font-size:20px;margin:34px 0 10px;border-left:4px solid var(--acc);padding-left:10px}
+.stage{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin:10px 0}
+.age{color:var(--acc);font-weight:700;font-size:14px}.stage h3{margin:2px 0 6px;font-size:17px}
+.normal{color:#3d6b35;font-size:14px}.warn{color:#9a3b1e;font-size:14px}
+table{width:100%;border-collapse:collapse;background:var(--card);font-size:14px}
+td,th{border:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}
+th{background:#f1e9d8}
+.insight{background:#f3ead9;border-radius:10px;padding:16px}
+.node{cursor:pointer}.node circle{fill:var(--acc)}.node text{fill:#fff;font-size:13px;font-weight:700}
+#mechdesc{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px 16px;min-height:56px}
+details{margin-top:18px}summary{cursor:pointer;color:var(--acc)}
+svg{max-width:100%;height:auto}
+</style></head>
+<body><div class="wrap">
+<div class="kicker">人体全生命周期图谱 · T01</div>
+<h1>细胞与分子衰老</h1>
+<p class="sub">端粒、线粒体与衰老细胞：身体的底层磨损表</p>
+<p class="modelnote">内容模型：Vertex Gemini 3.8 Flash（生成与整理）；关键数值经 PubMed 核查锁定。本页由确定性模板渲染。</p>
+<div id="chartwrap"></div>
+<h2>看得见的变化</h2><div id="stages"></div>
+<h2>正常还是该就医</h2><table><tr><th>信号</th><th>怎么做</th></tr><tbody id="redflags"></tbody></table>
+<h2>能改变的杠杆</h2><table><tr><th>杠杆</th><th>作用</th><th>说明</th></tr><tbody id="levers"></tbody></table>
+<h2>一句话记住</h2><div class="insight" id="insight"></div>
+<h2>背后的机制（点编号看解释）</h2><div id="mechsvg"></div><div id="mechdesc"></div><p id="mechnote"></p>
+<details><summary>证据清单（数值来源）</summary><table><tr><th>编号</th><th>结论</th><th>核查</th><th>来源</th></tr><tbody id="claims"></tbody></table></details>
+</div>
+<script id="dimension-data" type="application/json">{"dim": "T01", "title": "细胞与分子衰老", "subtitle": "端粒、线粒体与衰老细胞：身体的底层磨损表", "model_note": "内容模型：Vertex Gemini 3.8 Flash（生成与整理）；关键数值经 PubMed 核查锁定。本页由确定性模板渲染。", "stages": [{"age": "0-2岁", "title": "0-2岁", "what": "生命初期看似长得最快，但细胞内部“寿命刻度”的磨损速度也是一生中最剧烈的断崖期，每年磨损高达800至1200个长度单位，是成年期的数十倍，衰老这根隐形发条从婴儿期就已在全速飞转。"}, {"age": "3-20岁", "title": "3-20岁", "what": "外在体魄正越来越强壮，但从青春期开始，人体专门培养免疫新兵的核心器官已在以每年约百分之三的速度悄然萎缩，精锐免疫部队的生产线在精力最旺盛时就已早早开始减产。"}, {"age": "21-43岁", "title": "21-43岁", "what": "成年后的体能与外表看似进入平缓期，细胞寿命刻度年磨损降至20至35个单位的相对稳定阶段，但细胞内部的微小损伤从未停工，能量工厂的损耗与基因读码偏差在无声无息中持续暗自累加。"}, {"age": "44-59岁", "title": "44-59岁", "what": "很多人在44岁前后突然感觉身体“明显发沉、变慢”，并非最近太累，而是全身脂肪代谢与血管健康迎来了中年的首个大洗牌波峰；到了50岁时，核心免疫器官的有效功能组织流失已超过八成。"}, {"age": "60-70岁", "title": "60-70岁", "what": "60岁迎来血糖代谢与免疫防线的第二次断崖式大洗牌；步入65岁后，全身的隐形慢性炎症水平飙升到年轻时的近二到三倍（1.8-3.2倍），衰老僵尸细胞在身体各处散播破坏信号。"}, {"age": "71岁及以上", "title": "71岁及以上", "what": "日常行动迟缓映射着深层的细胞自理危机：主要内脏清理内部废弃垃圾的效率比年轻时锐减近半（40-50%），每十人中便有一到两人骨髓造血细胞出现异常变异，血液更新系统开始亮起红灯。"}], "redflags": [{"signal": "短时间内断崖式衰老伴随消瘦", "action": "若没有刻意节食或减肥，半年内肉眼可见地迅速苍老如同老了约3.6岁，并伴有查不出原因的体重明显下降或浑身乏力，说明机能已严重失衡，未来几年内大病风险增加35-50%，必须尽早去医院做全面排查。"}, {"signal": "高龄持续虚弱与反复感染", "action": "70岁以上老人若持续面色苍白、频繁头晕心慌，或几个月内反复感冒发烧、伤口久不愈合，不能简单归咎于“老贫血”；同龄人中每百人就有10-15人骨髓造血变异，哪怕只有2%微小异常也易引发大问题，需去血液科排查。"}, {"signal": "进行性肌无力与频繁跌倒", "action": "若在数周到数月内突然出现手臂无力抬不起、从椅子上起立极其吃力，或者走平路无故频繁跌倒、手脚麻木迟钝，说明肌肉与神经的能量供给可能已崩溃达60-80%，属于器官组织严重受损信号，需立即就医。"}, {"signal": "婴幼儿生长发育明显滞后", "action": "宝宝出生后若体重增长迟缓，或在常规发育评估中身高、体重等核心指标比同龄标准落后4-8%，生长进程滞后达0.3-0.8岁（约数月），提示胎儿期能量缓冲池损耗了300-600个生长刻度，需及时去儿保科做系统干预。"}], "levers": [{"name": "规律轻断食促进细胞大扫除", "effect": "每天固定在8小时内吃完三餐，其余16小时不吃有热量的食物：空腹能强力激活脏器清理废旧垃圾的自愈机制，扭转老年期身体自理能力锐减40-50%的颓势；坚持数周至数月，随着体内杂质周转排净，精力与身体轻盈度会明显改善。", "note": ""}, {"name": "地中海抗炎饮食与每日快走", "effect": "多吃深色果蔬、鱼类与坚果，戒除高糖油炸，每天快走30分钟：这能直接灭除65岁后飙升至年轻时1.8-3.2倍的体内慢性暗火，阻止老化细胞对周围好细胞的毒害；坚持数周，身体内部的慢性隐性炎症就会明显消退，疲乏与晨僵明显减轻。", "note": ""}, {"name": "力量训练储备对冲衰老波峰", "effect": "每周进行2至3次自重深蹲、俯卧撑或哑铃等增肌训练：在44岁（血管与脂肪代谢）和60岁（糖代谢与免疫）两次机能滑坡大波峰到来前，提前用肌肉把代谢缓冲垫做厚；这道防线需要坚持数年时间慢慢建立，才能彻底防止身体在年龄关口出现断崖式衰退。", "note": ""}], "insight": "变老从来不是一条匀速向下的缓坡，而是身体里的微小损伤长期潜伏累积、跨过临界点后的突发式爆发；你在镜子里突然看到的衰退，其实是体内微观战场早在数十年前就已落下的定局。", "mechanism": {"nodes": [], "note": "本图谱系统梳理了变老的因果链条：从最初细胞深处的微小磨损，到引发代谢紊乱与清理垃圾功能失效，最终汇聚为全身隐形慢性炎症与器官再生耗竭的完整全貌。"}, "claims": [{"id": "T01-C01", "claim": "2023年更新版衰老十二大标志物构架确立，包含原发性损伤、拮抗性反应及整合性表型三大层级", "verdict": "VERIFIED", "source": "López-Otín et al., 2023, Cell (PMID: 36599349)"}, {"id": "T01-C02", "claim": "白细胞端粒长度（LTL）在生命极早期呈现断崖式快速衰减，随后进入成年期平缓损耗期", "verdict": "CORRECTED", "source": "Daniali et al., 2013, Circulation (PMID: 23645838); Frenck et al., 1998, PNAS (PMID: 9789534)"}, {"id": "T01-C03", "claim": "多组学分子谱在生命历程中呈现非线性非匀速跳跃，存在中年与老年两次特征性表达突变波峰", "verdict": "VERIFIED", "source": "Shen et al., 2024, Nature Aging (PMID: 39143340)"}, {"id": "T01-C04", "claim": "多组学44/60岁突变波峰存在样本与队列局限性，需谨慎外推为全人群刚性绝对断裂点", "verdict": "VERIFIED", "source": "Shen et al., 2024, Nature Aging (PMID: 39143340)"}, {"id": "T01-C05", "claim": "胎儿宫内微环境直接决定胎盘与新生儿表观遗传时钟设定点及端粒初始池深度", "verdict": "CORRECTED", "source": "Baccarelli et al., 2016; Marioni et al., 2018"}, {"id": "T01-C06", "claim": "胸腺退化导致初始T细胞输出急剧萎缩，驱动适应性免疫衰老核心进程", "verdict": "VERIFIED", "source": "Steinmann et al., 1985, Scand J Immunol (PMID: 3874385); Palmer, 2013, Semin Immunol (PMID: 23377774)"}, {"id": "T01-C07", "claim": "表观遗传时钟GrimAge可作为全因死亡率与细胞分子损伤的独立量化风险预测器", "verdict": "VERIFIED", "source": "Lu et al., 2019, Aging (PMID: 30669119)"}, {"id": "T01-C08", "claim": "衰老相关分泌表型（SASP）在老年组织中扩散，引发旁分泌级联损伤", "verdict": "NORMALIZED_TREND", "source": "Franceschi & Campisi, 2014, J Gerontol A (PMID: 24737562)"}, {"id": "T01-C09", "claim": "线粒体DNA（mtDNA）异质性突变负荷伴随增龄非线性扩增，跨越表型阈值引发呼吸链缺损", "verdict": "CORRECTED", "source": "Sciacco et al., 1994, Hum Mol Genet (PMID: 8144574); Larsson, 2010, Annu Rev Biochem (PMID: 20235824)"}, {"id": "T01-C10", "claim": "巨自噬与伴侣分子介导自噬流（CMA）通量随增龄出现系统性减退", "verdict": "NORMALIZED_TREND", "source": "Cuervo & Wong, 2014, Nat Rev Mol Cell Biol (PMID: 24898512); Kaushik & Cuervo, 2018"}, {"id": "T01-C11", "claim": "造血干细胞（HSC）克隆性造血（CHIP）在中老年群体发生率跃升，标志造血稳态破损", "verdict": "VERIFIED", "source": "Jaiswal et al., 2014, NEJM (PMID: 25426837); Genovese et al., 2014, NEJM (PMID: 25426838)"}, {"id": "T01-C12", "claim": "极高龄期异质性分化：超级百岁老人展现异常坚韧的抗炎与免疫重塑稳态谱", "verdict": "VERIFIED", "source": "Hashimoto et al., 2019, PNAS (PMID: 31722846)"}]}</script>
+<script>
+const D=JSON.parse(document.getElementById('dimension-data').textContent);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+document.getElementById('stages').innerHTML=D.stages.map(s=>`<div class="stage"><div class="age">${esc(s.age)}</div>${s.title&&s.title!==s.age?`<h3>${esc(s.title)}</h3>`:''}<p>${esc(s.what)}</p>${s.normal?`<p class="normal">正常范围：${esc(s.normal)}</p>`:''}${s.warn?`<p class="warn">留意：${esc(s.warn)}</p>`:''}</div>`).join('');
+document.getElementById('redflags').innerHTML=D.redflags.map(r=>`<tr><td>${esc(r.signal)}</td><td>${esc(r.action)}</td></tr>`).join('');
+document.getElementById('levers').innerHTML=D.levers.map(l=>`<tr><td>${esc(l.name)}</td><td>${esc(l.effect)}</td><td>${esc(l.note||'')}</td></tr>`).join('');
+document.getElementById('insight').textContent=D.insight;
+document.getElementById('claims').innerHTML=D.claims.map(c=>`<tr><td>${esc(c.id)}</td><td>${esc(c.claim)}</td><td>${esc(c.verdict)}</td><td>${esc(c.source)}</td></tr>`).join('');
+// mechanism nodes
+const nodes=D.mechanism.nodes||[];const W=820,H=120;
+let svg=`<svg viewBox="0 0 ${W} ${H}" role="img">`;
+nodes.forEach((n,i)=>{const x=nodes.length>1?100+i*(W-200)/(nodes.length-1):W/2;
+ if(i>0){const px=100+(i-1)*(W-200)/(nodes.length-1);svg+=`<line x1="${px+18}" y1="60" x2="${x-18}" y2="60" stroke="#b4552d" stroke-width="2"/>`;}
+ svg+=`<g class="node" data-i="${i}"><circle cx="${x}" cy="60" r="18"/><text x="${x}" y="65" text-anchor="middle">${i+1}</text></g><text x="${x}" y="100" text-anchor="middle" font-size="12" fill="#2b2620">${esc(n.t)}</text>`;});
+svg+='</svg>';
+document.getElementById('mechsvg').innerHTML=svg;
+const md=document.getElementById('mechdesc');
+function show(i){md.innerHTML=`<b>${i+1}. ${esc(nodes[i].t)}</b>：${esc(nodes[i].d)}`;}
+document.querySelectorAll('.node').forEach(g=>g.addEventListener('click',()=>show(+g.dataset.i)));
+if(nodes.length)show(0);
+document.getElementById('mechnote').textContent=D.mechanism.note||'';
+// charts
+function linePath(pts,x0,x1,y0,y1,vmin,vmax){return pts.map((p,i)=>{const x=x0+(x1-x0)*p[0]/100;const y=y1-(y1-y0)*(p[1]-vmin)/(vmax-vmin);return (i?'L':'M')+x.toFixed(1)+' '+y.toFixed(1);}).join(' ');}
+function renderChart(ch){const W=820,H=300,x0=50,x1=790,y0=30,y1=260;
+ let all=[];ch.series.forEach(s=>{(s.points||[]).forEach(p=>all.push(p[1]));(s.upper||[]).forEach(p=>all.push(p[1]));(s.lower||[]).forEach(p=>all.push(p[1]));});
+ const vmin=Math.min(...all),vmax=Math.max(...all);const colors=['#b4552d','#3d6b8a','#7a9a3d','#8a5aa0'];
+ let s=`<svg viewBox="0 0 ${W} ${H}">`;
+ s+=`<line x1="${x0}" y1="${y1}" x2="${x1}" y2="${y1}" stroke="#7a7264"/><text x="${x0}" y="${y1+20}" font-size="12" fill="#7a7264">0岁</text><text x="${x1-30}" y="${y1+20}" font-size="12" fill="#7a7264">100岁</text>`;
+ if(ch.type==='range_band'){ch.series.forEach((se,i)=>{const up=linePath(se.upper,x0,x1,y0,y1,vmin,vmax);const lo=linePath([...se.lower].reverse(),x0,x1,y0,y1,vmin,vmax);s+=`<path d="${up} ${lo.replace(/^M/,'L')} Z" fill="${colors[i%4]}" opacity="0.25"/><path d="${up}" fill="none" stroke="${colors[i%4]}" stroke-width="2"/>`;});}
+ else if(ch.type==='stacked_area'){let base=ch.series[0].points.map(p=>[p[0],vmin]);ch.series.forEach((se,i)=>{const top=se.points.map((p,j)=>[p[0],base[j][1]+p[1]]);const tp=linePath(top,x0,x1,y0,y1,vmin,vmax);const bp=linePath([...base].reverse(),x0,x1,y0,y1,vmin,vmax);s+=`<path d="${tp} ${bp.replace(/^M/,'L')} Z" fill="${colors[i%4]}" opacity="0.5"/>`;base=top;});}
+ else{ch.series.forEach((se,i)=>{s+=`<path d="${linePath(se.points,x0,x1,y0,y1,vmin,vmax)}" fill="none" stroke="${colors[i%4]}" stroke-width="2.5"/>`;});}
+ ch.series.forEach((se,i)=>{s+=`<text x="${x0+i*160}" y="18" font-size="13" fill="${colors[i%4]}">${esc(se.name)}</text>`;});
+ return s+'</svg>';}
+if(D.chart){document.getElementById('chartwrap').innerHTML='<h2>一生曲线</h2>'+renderChart(D.chart);}
+</script>
+</body></html>

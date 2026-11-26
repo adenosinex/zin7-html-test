@@ -1,0 +1,888 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>中国各省市经济数据交互图谱</title>
+<style>
+  :root {
+    --bg-primary: #f4f6f9;
+    --bg-card: #ffffff;
+    --bg-card-hover: #fcfdfe;
+    --text-primary: #1e293b;
+    --text-secondary: #64748b;
+    --text-muted: #94a3b8;
+    --border-color: #e2e8f0;
+    --accent: #2563eb;
+    --accent-light: #eff6ff;
+
+    /* 经济梯队色系 (浅色模式) */
+    --tier-1: #1e3a8a; /* >=10万亿 极深蓝 */
+    --tier-2: #2563eb; /* 5-10万亿 亮蓝 */
+    --tier-3: #0284c7; /* 3-5万亿 天青 */
+    --tier-4: #38bdf8; /* 1.5-3万亿 浅蓝 */
+    --tier-5: #bae6fd; /* <1.5万亿 极浅蓝 */
+    --tier-text-light: #ffffff;
+    --tier-text-dark: #0f172a;
+    
+    --shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.06), 0 2px 6px -1px rgba(0, 0, 0, 0.04);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg-primary: #0b0f19;
+      --bg-card: #131b2e;
+      --bg-card-hover: #1e293b;
+      --text-primary: #f8fafc;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      --border-color: #243048;
+      --accent: #3b82f6;
+      --accent-light: #1e293b;
+
+      /* 经济梯队色系 (深色模式) */
+      --tier-1: #3b82f6; 
+      --tier-2: #0284c7; 
+      --tier-3: #0369a1; 
+      --tier-4: #075985; 
+      --tier-5: #164e63; 
+      --tier-text-light: #ffffff;
+      --tier-text-dark: #e2e8f0;
+
+      --shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.4);
+    }
+  }
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    padding: 20px 12px;
+    line-height: 1.5;
+    transition: background-color 0.3s, color 0.3s;
+  }
+
+  .container {
+    max-width: 1280px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  /* 头部区域 */
+  header {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: var(--shadow);
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .header-titles h1 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .header-titles h1 .tag {
+    font-size: 0.75rem;
+    background: var(--accent);
+    color: #fff;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-weight: 500;
+  }
+
+  .header-titles p {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    margin-top: 4px;
+  }
+
+  .quick-stats {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+
+  .quick-stat-item {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .quick-stat-item .num {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--accent);
+  }
+
+  .quick-stat-item .label {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+  }
+
+  /* 控制栏与图例 */
+  .control-bar {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 14px;
+    padding: 16px 20px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    box-shadow: var(--shadow);
+  }
+
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 16px;
+    font-size: 0.8125rem;
+  }
+
+  .legend-title {
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-right: 4px;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    user-select: none;
+    padding: 4px 8px;
+    border-radius: 6px;
+    border: 1px solid transparent;
+    transition: all 0.2s;
+  }
+
+  .legend-item:hover {
+    background: var(--accent-light);
+  }
+
+  .legend-item.active {
+    border-color: var(--accent);
+    background: var(--accent-light);
+  }
+
+  .legend-color {
+    width: 14px;
+    height: 14px;
+    border-radius: 3px;
+  }
+
+  .region-filters {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  .filter-btn {
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .filter-btn:hover, .filter-btn.active {
+    background: var(--accent);
+    color: #fff;
+    border-color: var(--accent);
+  }
+
+  /* 主工作区：地图与详情 */
+  .main-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1.35fr) minmax(320px, 0.95fr);
+    gap: 20px;
+  }
+
+  @media (max-width: 992px) {
+    .main-layout {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  /* 地图容器 */
+  .map-wrapper {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: var(--shadow);
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow-x: auto;
+  }
+
+  .map-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+
+  .map-header h2 {
+    font-size: 1.1rem;
+    font-weight: 600;
+  }
+
+  .map-tip {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+  }
+
+  /* 地理拓扑网格系统 */
+  .topo-grid {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(36px, 1fr));
+    gap: 6px;
+    width: 100%;
+    min-width: 480px;
+    aspect-ratio: 1.25 / 1;
+    margin: 0 auto;
+    padding-bottom: 10px;
+  }
+
+  .node {
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    position: relative;
+    transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s, opacity 0.2s;
+    user-select: none;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    padding: 2px;
+  }
+
+  .node:hover {
+    transform: translateY(-3px) scale(1.04);
+    z-index: 10;
+    box-shadow: 0 8px 16px rgba(0,0,0,0.18);
+  }
+
+  .node.selected {
+    outline: 2.5px solid #ef4444;
+    outline-offset: 2px;
+    transform: translateY(-2px) scale(1.03);
+    z-index: 9;
+  }
+
+  .node.dimmed {
+    opacity: 0.2;
+    filter: grayscale(80%);
+  }
+
+  .node-name {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    line-height: 1.1;
+  }
+
+  .node-val {
+    font-size: 0.65rem;
+    opacity: 0.85;
+    margin-top: 2px;
+  }
+
+  /* 颜色层级类 */
+  .color-tier-1 { background-color: var(--tier-1); color: var(--tier-text-light); }
+  .color-tier-2 { background-color: var(--tier-2); color: var(--tier-text-light); }
+  .color-tier-3 { background-color: var(--tier-3); color: var(--tier-text-light); }
+  .color-tier-4 { background-color: var(--tier-4); color: var(--tier-text-light); }
+  .color-tier-5 { background-color: var(--tier-5); color: var(--tier-text-dark); }
+
+  /* 详情卡片容器 */
+  .info-panel {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: var(--shadow);
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+  }
+
+  .panel-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    min-height: 280px;
+    text-align: center;
+    color: var(--text-secondary);
+  }
+
+  .panel-placeholder svg {
+    width: 48px;
+    height: 48px;
+    stroke: var(--text-muted);
+    margin-bottom: 12px;
+  }
+
+  .detail-content {
+    display: none;
+    animation: fadeIn 0.25s ease-out;
+  }
+
+  .detail-content.active {
+    display: block;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .detail-header {
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 16px;
+    margin-bottom: 16px;
+  }
+
+  .detail-title-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+  }
+
+  .detail-name {
+    font-size: 1.5rem;
+    font-weight: 700;
+  }
+
+  .detail-badge {
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+  }
+
+  .detail-desc {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    margin-top: 6px;
+  }
+
+  .stat-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .stat-card {
+    background: var(--bg-primary);
+    border-radius: 10px;
+    padding: 12px;
+    border: 1px solid var(--border-color);
+  }
+
+  .stat-card .sc-label {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+  }
+
+  .stat-card .sc-value {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-top: 2px;
+  }
+
+  .section-label {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .section-label::before {
+    content: "";
+    display: inline-block;
+    width: 3px;
+    height: 12px;
+    background: var(--accent);
+    border-radius: 2px;
+  }
+
+  .pillars-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 18px;
+  }
+
+  .pillar-tag {
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+    font-size: 0.75rem;
+    padding: 4px 10px;
+    border-radius: 6px;
+  }
+
+  .summary-text {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    background: var(--bg-primary);
+    padding: 12px;
+    border-radius: 10px;
+    border-left: 3px solid var(--accent);
+  }
+
+  /* 底部排行榜与说明 */
+  .footer-rankings {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    padding: 20px 24px;
+    box-shadow: var(--shadow);
+  }
+
+  .footer-rankings h3 {
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin-bottom: 12px;
+  }
+
+  .rankings-scroller {
+    display: flex;
+    gap: 12px;
+    overflow-x: auto;
+    padding-bottom: 8px;
+  }
+
+  .ranking-chip {
+    flex-shrink: 0;
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    padding: 8px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.8125rem;
+    transition: border-color 0.2s;
+  }
+
+  .ranking-chip:hover {
+    border-color: var(--accent);
+  }
+
+  .rank-idx {
+    font-weight: 700;
+    color: var(--text-muted);
+  }
+  .rank-chip-top {
+    color: #f59e0b;
+  }
+
+  .disclaimer {
+    text-align: center;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-top: 8px;
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <!-- 头部汇总 -->
+  <header>
+    <div class="header-titles">
+      <h1>
+        中国省级经济体格总览图
+        <span class="tag">交互图谱</span>
+      </h1>
+      <p>探索各省、直辖市、自治区及特别行政区经济体量、主导支柱产业与发展梯队</p>
+    </div>
+    <div class="quick-stats">
+      <div class="quick-stat-item">
+        <span class="num">126万亿+</span>
+        <span class="label">全国GDP总量（估算）</span>
+      </div>
+      <div class="quick-stat-item">
+        <span class="num">2个</span>
+        <span class="label">10万亿级体量省份</span>
+      </div>
+      <div class="quick-stat-item">
+        <span class="num">34个</span>
+        <span class="label">统计行政单元</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- 筛选与图例栏 -->
+  <div class="control-bar">
+    <div class="legend">
+      <span class="legend-title">经济体量梯队:</span>
+      <div class="legend-item" data-tier="1" onclick="toggleTierFilter(1)">
+        <span class="legend-color" style="background: var(--tier-1);"></span>
+        <span>≥10万亿元 (超强)</span>
+      </div>
+      <div class="legend-item" data-tier="2" onclick="toggleTierFilter(2)">
+        <span class="legend-color" style="background: var(--tier-2);"></span>
+        <span>5~10万亿元 (第一梯队)</span>
+      </div>
+      <div class="legend-item" data-tier="3" onclick="toggleTierFilter(3)">
+        <span class="legend-color" style="background: var(--tier-3);"></span>
+        <span>3~5万亿元 (第二梯队)</span>
+      </div>
+      <div class="legend-item" data-tier="4" onclick="toggleTierFilter(4)">
+        <span class="legend-color" style="background: var(--tier-4);"></span>
+        <span>1.5~3万亿元 (加速发展)</span>
+      </div>
+      <div class="legend-item" data-tier="5" onclick="toggleTierFilter(5)">
+        <span class="legend-color" style="background: var(--tier-5);"></span>
+        <span>&lt;1.5万亿元 (特色培育)</span>
+      </div>
+    </div>
+
+    <div class="region-filters">
+      <button class="filter-btn active" onclick="filterByMacroRegion('all')">全国视图</button>
+      <button class="filter-btn" onclick="filterByMacroRegion('长三角')">长三角</button>
+      <button class="filter-btn" onclick="filterByMacroRegion('大湾区')">粤港澳</button>
+      <button class="filter-btn" onclick="filterByMacroRegion('京津冀')">京津冀</button>
+      <button class="filter-btn" onclick="filterByMacroRegion('成渝')">成渝双城</button>
+    </div>
+  </div>
+
+  <!-- 主交互区域 -->
+  <main class="main-layout">
+    <!-- 地图网格 -->
+    <div class="map-wrapper">
+      <div class="map-header">
+        <h2>拓扑地理分布图</h2>
+        <span class="map-tip">💡 点击省份查看经济画像与详细指标</span>
+      </div>
+      <div class="topo-grid" id="topoGrid"></div>
+    </div>
+
+    <!-- 侧边详情展板 -->
+    <div class="info-panel" id="infoPanel">
+      <div class="panel-placeholder" id="panelPlaceholder">
+        <svg fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
+          <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
+        </svg>
+        <p>在左侧拓扑地图中选择省市<br>查看该地区详细经济画像与支柱产业</p>
+      </div>
+
+      <div class="detail-content" id="detailContent">
+        <div class="detail-header">
+          <div class="detail-title-row">
+            <h2 class="detail-name" id="pName">--</h2>
+            <span class="detail-badge" id="pTierBadge">--</span>
+          </div>
+          <div class="detail-desc" id="pMacroRegion">区域定位：--</div>
+        </div>
+
+        <div class="stat-grid">
+          <div class="stat-card">
+            <div class="sc-label">GDP生产总值 (约计)</div>
+            <div class="sc-value" id="pGdp">--</div>
+          </div>
+          <div class="stat-card">
+            <div class="sc-label">全国经济体量排名</div>
+            <div class="sc-value" id="pRank">--</div>
+          </div>
+          <div class="stat-card">
+            <div class="sc-label">人均 GDP (预估)</div>
+            <div class="sc-value" id="pGdpPerCap">--</div>
+          </div>
+          <div class="stat-card">
+            <div class="sc-label">产业主引擎特点</div>
+            <div class="sc-value" id="pGrowthFocus" style="font-size: 1rem;">--</div>
+          </div>
+        </div>
+
+        <div class="section-label">优势主导产业与核心支柱</div>
+        <div class="pillars-list" id="pPillars"></div>
+
+        <div class="section-label">经济发展简况</div>
+        <p class="summary-text" id="pSummary">--</p>
+      </div>
+    </div>
+  </main>
+
+  <!-- 底部GDP梯队速览列表 -->
+  <section class="footer-rankings">
+    <h3>全国 GDP 领先地区速览（点击直接定位）</h3>
+    <div class="rankings-scroller" id="rankingsScroller"></div>
+  </section>
+
+  <p class="disclaimer">数据说明：基于国家统计局及公开年鉴综合梳理，部分数额为最新公开年度大致测算，香港、澳门、台湾为按汇率与公开经贸资料参考核算。</p>
+</div>
+
+<script>
+// 省级经济数据库 (包含网格坐标 Grid Row/Col, GDP估算值，梯度Tier，战略重点等)
+// col: 1-12, row: 1-8
+const provincesData = [
+  // Row 1
+  { id: 'HLJ', name: '黑龙江', short: '黑', row: 1, col: 11, gdp: 1.58, tier: 4, rank: 25, region: '东北', macro: '东北振兴', capGdp: '约5.0万元', focus: '现代农业/重工业', pillars: ['绿色农业', '重型装备', '石油石化', '冰雪经济'], desc: '国家重要商品粮基地与能源原材料工业基地，当前正全力拓展对俄经贸与寒地冰雪文旅消费新动能。' },
+
+  // Row 2
+  { id: 'XJ', name: '新疆', short: '新', row: 2, col: 2, gdp: 1.91, tier: 4, rank: 23, region: '西北', macro: '丝绸之路核心区', capGdp: '约7.3万元', focus: '能源矿产/粮棉基地', pillars: ['油气生产加工', '煤炭煤化工', '优质棉花果蔬', '新能源及输变电'], desc: '我国向西开放的桥头堡，拥有极为丰沛的传统能源与光伏风电绿电禀赋，八大特色产业集群成效显著。' },
+  { id: 'NMG', name: '内蒙古', short: '蒙', row: 2, col: 6, gdp: 2.46, tier: 4, rank: 21, region: '华北', macro: '北部生态屏障', capGdp: '约10.2万元', focus: '国家粮仓/算力绿电', pillars: ['现代农牧业', '煤电稀土', '新能源装备', '大数据存储'], desc: '我国重要的能源与战略资源基地，稀土产量与绿色电力装机位居全国前列，算力底座加速崛起。' },
+  { id: 'JL', name: '吉林', short: '吉', row: 2, col: 11, gdp: 1.35, tier: 5, rank: 26, region: '东北', macro: '东北振兴', capGdp: '约5.7万元', focus: '汽车制造/现代农业', pillars: ['一汽整车及零部件', '粮食精深加工', '碳纤维新材料', '医药健康'], desc: '新中国汽车工业的摇篮，拥有强大的装备制造与农业底蕴，风光制氢与化工转型带来崭新发展契机。' },
+
+  // Row 3
+  { id: 'GS', name: '甘肃', short: '甘', row: 3, col: 3, gdp: 1.18, tier: 5, rank: 27, region: '西北', macro: '西北陆港', capGdp: '约4.7万元', focus: '有色金属/新能源', pillars: ['风光电新能源', '石油化工', '有色冶金', '中药材种加'], desc: '河西走廊风光资源富集，全国千万千瓦级新能源基地，也是连接欧亚大陆桥的关键交通与物流咽喉。' },
+  { id: 'NX', name: '宁夏', short: '宁', row: 3, col: 5, gdp: 0.53, tier: 5, rank: 29, region: '西北', macro: '黄河流域保护', capGdp: '约7.3万元', focus: '新材料/精细化工', pillars: ['现代煤化工', '新型储能与光伏', '高端葡萄酒', '枸杞与特色农业'], desc: '精细化发展的典范，建设现代煤化工示范区与全国一体化算力枢纽节点，葡萄酒享誉海内外。' },
+  { id: 'SX_N', name: '山西', short: '晋', row: 3, col: 7, gdp: 2.56, tier: 4, rank: 20, region: '华北', macro: '中部崛起', capGdp: '约7.3万元', focus: '能源革命/特钢智造', pillars: ['煤炭清洁高效利用', '煤层气与新能源', '特种不锈钢', '特色文旅'], desc: '全国能源革命综合改革试点，煤炭保供中流砥柱，并积极培育半导体新材料与先进制造业集群。' },
+  { id: 'HEB', name: '河北', short: '冀', row: 3, col: 8, gdp: 4.39, tier: 3, rank: 12, region: '华北', macro: '京津冀', capGdp: '约5.9万元', focus: '高端钢铁/承接疏解', pillars: ['高品质钢铁', '高端装备制造', '现代商贸物流', '生物医药'], desc: '京津冀协同发展的重要支撑，雄安新区建设日新月异，唐山港、黄骅港吞吐量稳居世界前列。' },
+  { id: 'BJ', name: '北京', short: '京', row: 3, col: 9, gdp: 4.37, tier: 3, rank: 13, region: '华北', macro: '京津冀', capGdp: '约20.0万元', focus: '科技创新/金融科技', pillars: ['金融科技与总部', '软件与信息服务', '新一代人工智能', '创新医药器械'], desc: '全国政治、文化、国际交往与科技创新中心，服务业占比超八成，高精尖技术研发与独角兽企业高度集聚。' },
+  { id: 'LN', name: '辽宁', short: '辽', row: 3, col: 11, gdp: 3.02, tier: 3, rank: 16, region: '东北', macro: '东北振兴', capGdp: '约7.2万元', focus: '重装智造/石化一体', pillars: ['工业母机与高端装备', '石化精细化', '航空船舶制造', '汽车整车'], desc: '东北综合经济实力首位，大连与沈阳双核驱动，全面推进老工业基地数字化、智能化绿色重塑。' },
+
+  // Row 4
+  { id: 'QH', name: '青海', short: '青', row: 4, col: 3, gdp: 0.38, tier: 5, rank: 30, region: '西北', macro: '西部大开发', capGdp: '约6.4万元', focus: '清洁能源/盐湖化工', pillars: ['盐湖钾锂资源', '光伏锂电全链条', '生态畜牧业', '三江源绿色文旅'], desc: '国家清洁能源示范省，柴达木盆地盐湖资源富集，是全国重要的锂动力电池与光伏材料源头基地。' },
+  { id: 'SX_S', name: '陕西', short: '陕', row: 4, col: 5, gdp: 3.37, tier: 3, rank: 14, region: '西北', macro: '西部大开发', capGdp: '约8.5万元', focus: '硬科技/航空航天/汽车', pillars: ['半导体与集成电路', '新能源汽车整车', '航空航天装备', '能源化工转化'], desc: '科教资源极强，西安成为新能源汽车与硬科技重镇，隆基光伏、比亚迪乘用车在此构建全球关键产能。' },
+  { id: 'HEN', name: '河南', short: '豫', row: 4, col: 7, gdp: 5.91, tier: 2, rank: 6, region: '华中', macro: '中部崛起', capGdp: '约6.0万元', focus: '装备制造/食品工业', pillars: ['现代农产品与食品加工', '智能传感器与电子', '新能源客车', '超硬材料（人造金刚石）'], desc: '人口大省与交通枢纽大省，米字型高铁四通八达，郑州航空港与先进制造构筑强大内需枢纽。' },
+  { id: 'SD', name: '山东', short: '鲁', row: 4, col: 8, gdp: 9.20, tier: 2, rank: 3, region: '华东', macro: '黄河经济带', capGdp: '约9.0万元', focus: '门类齐全工业/海洋经济', pillars: ['高端化工', '装备制造', '海洋工程与船舶', '现代高效农业'], desc: '全国第三经济大省，工业门类极为齐全完整，济南青岛核心带动，新旧动能转换取得重大突破。' },
+  { id: 'TJ', name: '天津', short: '津', row: 4, col: 9, gdp: 1.67, tier: 4, rank: 24, region: '华北', macro: '京津冀', capGdp: '约12.2万元', focus: '北方国际航运/信创产业', pillars: ['航空航天与总装', '信息安全与信创', '绿色石化', '港口物流与金融租赁'], desc: '北方重要综合性工商业城市和港口，滨海新区信创产业链条完整，空客总装线示范效应显著。' },
+
+  // Row 5
+  { id: 'XZ', name: '西藏', short: '藏', row: 5, col: 2, gdp: 0.24, tier: 5, rank: 31, region: '西南', macro: '西部大开发', capGdp: '约6.5万元', focus: '绿色清洁能源/高原特色', pillars: ['清洁水电与光伏', '高原农牧与天然饮用水', '藏医药', '全域高端旅游'], desc: '经济增长率长期位于全国前列，雅鲁藏布江下游清洁水电与西藏特有天然纯净矿产迎来全面规划。' },
+  { id: 'SC', name: '四川', short: '川', row: 5, col: 4, gdp: 6.01, tier: 2, rank: 5, region: '西南', macro: '成渝', capGdp: '约7.2万元', focus: '电子信息/装备制造/动力电池', pillars: ['成渝集成电路与软件', '动力电池与锂电产业链', '优质白酒与轻工', '水风光多能互补'], desc: '西部经济压舱石，成渝双城经济圈极核，宜宾动力电池之都与成都高新区汇集全球高科技产业。' },
+  { id: 'CQ', name: '重庆', short: '渝', row: 5, col: 5, gdp: 3.01, tier: 3, rank: 17, region: '西南', macro: '成渝', capGdp: '约9.4万元', focus: '智能网联新能源汽车/笔记本', pillars: ['新能源网联汽车', '笔记本电脑智能终端', '新材料', '内陆西部陆海新通道'], desc: '内陆开放高地与工业重镇，全球重要的笔电制造基地，赛力斯、长安等新能源智能汽车势头强劲。' },
+  { id: 'HUB', name: '湖北', short: '鄂', row: 5, col: 6, gdp: 5.58, tier: 2, rank: 7, region: '华中', macro: '长江经济带', capGdp: '约9.5万元', focus: '光电子信息/汽车制造', pillars: ['光谷光通信与激光', '新能源与智能网联汽车', '生命健康', '高端装备与化工'], desc: '“九省通衢”的中部重地，光谷在光纤光缆、存储芯片打破国际垄断，武汉科技与产业辐射全省。' },
+  { id: 'AH', name: '安徽', short: '皖', row: 5, col: 7, gdp: 4.70, tier: 3, rank: 11, region: '华东', macro: '长三角', capGdp: '约7.7万元', focus: '新兴产业/量子科技/汽车', pillars: ['新能源汽车整车', '新型显示器件', '量子信息科研转化', '先进光伏储能'], desc: '融入长三角一体化典范，被称为“最敢投风投的省份”，蔚来、比亚迪、大众安徽构建首位汽车产业。' },
+  { id: 'JS', name: '江苏', short: '苏', row: 5, col: 8, gdp: 12.82, tier: 1, rank: 2, region: '华东', macro: '长三角', capGdp: '约15.0万元', focus: '万亿实体经济/制造业集群', pillars: ['软件与集成电路', '纳米新材料', '生物医药与医疗器械', '高端工程机械'], desc: '“苏大强”十三太保均入百强市，实体经济规模全国最大，拥有数量最多的国家级先进制造业集群。' },
+  { id: 'SH', name: '上海', short: '沪', row: 5, col: 9, gdp: 4.72, tier: 3, rank: 10, region: '华东', macro: '长三角', capGdp: '约19.0万元', focus: '国际金融/高端先导制造业', pillars: ['集成电路先导制造', '人工智能核心产业', '高端生物医药', '国际金融与跨国总部'], desc: '我国最大经济中心城市，GDP位居全球城市前列，金融要素市场齐备，张江科创与临港制造交相辉映。' },
+
+  // Row 6
+  { id: 'YN', name: '云南', short: '滇', row: 6, col: 3, gdp: 3.00, tier: 3, rank: 18, region: '西南', macro: '面向南亚辐射中心', capGdp: '约6.4万元', focus: '绿色铝硅/现代花卉旅游', pillars: ['绿色铝硅新材料', '烟草与高原特色农业', '水能与绿电消纳', '全域生态旅游与茶业'], desc: '绿色能源可开发量领先，凭借充沛水电承接绿色铝硅转移，中老铁路畅通对接东南亚大市场。' },
+  { id: 'GZ', name: '贵州', short: '黔', row: 6, col: 4, gdp: 2.09, tier: 4, rank: 22, region: '西南', macro: '西部大开发', capGdp: '约5.4万元', focus: '数字经济/新能源电池/酱酒', pillars: ['大数据中心基地', '优质酱香白酒', '新能源电池材料', '优质磷化工'], desc: '“中国机房”全国首个国家大数据综合试验区，苹果、华为在此建仓，宁德时代加码磷系动力电池材料。' },
+  { id: 'HUN', name: '湖南', short: '湘', row: 6, col: 6, gdp: 5.00, tier: 2, rank: 9, region: '华中', macro: '长江中游城市群', capGdp: '约7.6万元', focus: '工程机械/轨道交通/文化', pillars: ['重型工程机械', '先进轨道交通设备', '电子信息及北斗', '音视频文创传媒'], desc: '“工程机械之都”，三一、中联重科世界知名；株洲电力机车全球领跑，文创娱乐IP极具爆发力。' },
+  { id: 'JX', name: '江西', short: '赣', row: 6, col: 7, gdp: 3.22, tier: 3, rank: 15, region: '华东', macro: '中部崛起', capGdp: '约7.1万元', focus: '有色金属/航空/新能源锂电', pillars: ['铜钨稀土有色采冶', '锂电与储能全链', '航空及直升机制造', 'VR虚拟现实'], desc: '宜春依托锂云母跃升为亚洲锂都，江铜等资源底蕴深厚，承接粤闽浙制造转移成效显著。' },
+  { id: 'ZJ', name: '浙江', short: '浙', row: 6, col: 8, gdp: 8.25, tier: 2, rank: 4, region: '华东', macro: '长三角', capGdp: '约12.5万元', focus: '民营经济/平台电商/智能制造', pillars: ['数字经济与电子商务', '高端精细化工', '智能汽车及部件', '现代纺织与小商品'], desc: '共同富裕示范区，民营经济最具活力热土，以阿里巴巴、海康威视、吉利为代表，数字赋能全产业。' },
+
+  // Row 7
+  { id: 'GX', name: '广西', short: '桂', row: 7, col: 5, gdp: 2.72, tier: 4, rank: 19, region: '华南', macro: '面向东盟开放门户', capGdp: '约5.4万元', focus: '沿海临港工业/汽车机械', pillars: ['东盟跨境物流与商贸', '汽车整车(柳汽微车)', '钢铁与有色冶金', '糖蔗特色农业'], desc: '北部湾战略支点，西部陆海新通道海铁联运枢纽，面向东盟的最便捷出海口，平陆运河全速开工。' },
+  { id: 'GD', name: '广东', short: '粤', row: 7, col: 7, gdp: 13.57, tier: 1, rank: 1, region: '华南', macro: '大湾区', capGdp: '约10.7万元', focus: '世界级制造业/外贸第一省', pillars: ['新一代电子信息', '智能家电制造', '新能源汽车及电池', '现代金融服务'], desc: '连续35年稳居全国经济第一大省，广深佛莞协同共振，外贸进出口与高新技术企业数量全国遥遥领先。' },
+  { id: 'FJ', name: '福建', short: '闽', row: 7, col: 8, gdp: 5.43, tier: 2, rank: 8, region: '华东', macro: '两岸融合示范区', capGdp: '约12.9万元', focus: '民营制造/海洋经济/电池', pillars: ['动力电池与新能源(宁德时代)', '运动鞋服纺织', '电子信息面板', '不锈钢与轻工'], desc: '人均GDP居全国各省前列，晋江经验催生众多国潮巨头，宁德时代成为全球动力电池领航旗舰。' },
+  { id: 'TW', name: '台湾', short: '台', row: 7, col: 9, gdp: 5.30, tier: 2, rank: 8, region: '华东', macro: '两岸协同', capGdp: '约22.5万元', focus: '半导体芯片/电子代工', pillars: ['晶圆代工与先进制程', '集成电路封装测试', '精密光学与电子', '石化与机械制造'], desc: '半导体制造在全球产业链占据咽喉核心地位，台积电等晶圆代工实力雄厚，信息技术产业链完备。' },
+
+  // Row 8
+  { id: 'HN', name: '海南', short: '琼', row: 8, col: 5, gdp: 0.75, tier: 5, rank: 28, region: '华南', macro: '海南自贸港', capGdp: '约7.2万元', focus: '免税消费/文旅航天/现代服务', pillars: ['离岛免税与高端消费', '文昌商业航天', '深海深蓝科创', '热带特色高效农业'], desc: '全岛封关运作加紧推进，实施“零关税、低税率、简税制”，吸引全球高端消费与总部产业落地。' },
+  { id: 'HK', name: '香港', short: '港', row: 8, col: 7, gdp: 2.80, tier: 4, rank: 20, region: '华南', macro: '大湾区', capGdp: '约38.0万元', focus: '国际金融/贸易航运中心', pillars: ['国际资产管理与金融', '专业法律与商业服务', '国际航运物流', '中西文创与旅游'], desc: '国际金融中心地位坚韧巩固，背靠祖国、联通世界，“北部都会区”全力打造国际创新科技新平台。' },
+  { id: 'MO', name: '澳门', short: '澳', row: 8, col: 6, gdp: 0.35, tier: 5, rank: 32, region: '华南', macro: '大湾区', capGdp: '约51.0万元', focus: '综合旅游休闲/多元适度', pillars: ['综合文旅与会展', '中医药大健康', '现代金融服务', '高新技术与葡语平台'], desc: '横琴粤澳深度合作区加快融合，“1+4”适度多元发展策略纵深推进，世界旅游休闲中心品质卓越。' }
+];
+
+let activeSelectedId = null;
+let activeTierFilter = null;
+let activeMacroFilter = 'all';
+
+// DOM 元素引用
+const topoGrid = document.getElementById('topoGrid');
+const panelPlaceholder = document.getElementById('panelPlaceholder');
+const detailContent = document.getElementById('detailContent');
+const rankingsScroller = document.getElementById('rankingsScroller');
+
+// 初始化渲染
+function init() {
+  renderGrid();
+  renderRankings();
+  
+  // 默认选中领先大省 - 广东
+  selectProvince('GD');
+}
+
+// 渲染拓扑地图网格
+function renderGrid() {
+  topoGrid.innerHTML = '';
+  provincesData.forEach(p => {
+    const node = document.createElement('div');
+    node.className = `node color-tier-${p.tier}`;
+    node.id = `node-${p.id}`;
+    node.style.gridRow = p.row;
+    node.style.gridColumn = p.col;
+    
+    node.innerHTML = `
+      <span class="node-name">${p.short}</span>
+      <span class="node-val">${p.gdp}万亿</span>
+    `;
+
+    node.title = `${p.name} (GDP: ${p.gdp}万亿元)`;
+
+    node.addEventListener('click', () => {
+      selectProvince(p.id);
+    });
+
+    topoGrid.appendChild(node);
+  });
+}
+
+// 选中特定省份
+function selectProvince(id) {
+  const p = provincesData.find(item => item.id === id);
+  if (!p) return;
+
+  // 样式高亮处理
+  document.querySelectorAll('.node').forEach(el => el.classList.remove('selected'));
+  const currentEl = document.getElementById(`node-${id}`);
+  if (currentEl) currentEl.classList.add('selected');
+
+  activeSelectedId = id;
+
+  // 更新详情面板
+  panelPlaceholder.style.display = 'none';
+  detailContent.classList.add('active');
+
+  document.getElementById('pName').textContent = p.name;
+  const tierBadge = document.getElementById('pTierBadge');
+  tierBadge.className = `detail-badge color-tier-${p.tier}`;
+  
+  const tierLabelMap = {
+    1: '超十万亿级',
+    2: '5~10万亿强省',
+    3: '3~5万亿中坚',
+    4: '1.5~3万亿蓄力',
+    5: '特色增长潜能'
+  };
+  tierBadge.textContent = tierLabelMap[p.tier];
+
+  document.getElementById('pMacroRegion').textContent = `行政区属：${p.region}地区 · 战略版图：${p.macro}`;
+  document.getElementById('pGdp').textContent = `${p.gdp} 万亿元`;
+  document.getElementById('pRank').textContent = `第 ${p.rank} 位`;
+  document.getElementById('pGdpPerCap').textContent = p.capGdp;
+  document.getElementById('pGrowthFocus').textContent = p.focus;
+
+  // 产业标签
+  const pillarsContainer = document.getElementById('pPillars');
+  pillarsContainer.innerHTML = '';
+  p.pillars.forEach(pil => {
+    const tag = document.createElement('span');
+    tag.className = 'pillar-tag';
+    tag.textContent = pil;
+    pillarsContainer.appendChild(tag);
+  });
+
+  document.getElementById('pSummary').textContent = p.desc;
+}
+
+// 梯队图例点击筛选
+function toggleTierFilter(tier) {
+  const legendItems = document.querySelectorAll('.legend-item');
+  if (activeTierFilter === tier) {
+    // 取消梯队筛选
+    activeTierFilter = null;
+    legendItems.forEach(item => item.classList.remove('active'));
+    applyVisualFilters();
+  } else {
+    activeTierFilter = tier;
+    legendItems.forEach(item => {
+      item.classList.toggle('active', item.dataset.tier === String(tier));
+    });
+    applyVisualFilters();
+  }
+}
+
+// 宏观经济圈筛选
+function filterByMacroRegion(macroKey) {
+  activeMacroFilter = macroKey;
+  
+  // 更新按钮高亮
+  document.querySelectorAll('.filter-btn').forEach(btn => {
+    const text = btn.textContent;
+    if (macroKey === 'all' && text.includes('全国')) btn.classList.add('active');
+    else if (macroKey !== 'all' && text.includes(macroKey)) btn.classList.add('active');
+    else btn.classList.remove('active');
+  });
+
+  applyVisualFilters();
+}
+
+// 统合计算并给不匹配的节点添加 dimmed 半透明样式
+function applyVisualFilters() {
+  provincesData.forEach(p => {
+    const node = document.getElementById(`node-${p.id}`);
+    if (!node) return;
+
+    let matchTier = true;
+    if (activeTierFilter !== null) {
+      matchTier = p.tier === activeTierFilter;
+    }
+
+    let matchMacro = true;
+    if (activeMacroFilter !== 'all') {
+      matchMacro = p.macro.includes(activeMacroFilter) || 
+                   (activeMacroFilter === '长三角' && ['上海', '江苏', '浙江', '安徽'].includes(p.name)) ||
+                   (activeMacroFilter === '大湾区' && ['广东', '香港', '澳门'].includes(p.name)) ||
+                   (activeMacroFilter === '京津冀' && ['北京', '天津', '河北'].includes(p.name)) ||
+                   (activeMacroFilter === '成渝' && ['四川', '重庆'].includes(p.name));
+    }
+
+    if (matchTier && matchMacro) {
+      node.classList.remove('dimmed');
+    } else {
+      node.classList.add('dimmed');
+    }
+  });
+}
+
+// 渲染横向排行榜
+function renderRankings() {
+  const sorted = [...provincesData].sort((a, b) => b.gdp - a.gdp).slice(0, 15);
+  rankingsScroller.innerHTML = '';
+
+  sorted.forEach((p, idx) => {
+    const chip = document.createElement('div');
+    chip.className = 'ranking-chip';
+    chip.innerHTML = `
+      <span class="rank-idx ${idx < 3 ? 'rank-chip-top' : ''}">#${idx + 1}</span>
+      <strong>${p.name}</strong>
+      <span style="color:var(--text-secondary);">${p.gdp}万亿</span>
+    `;
+    chip.addEventListener('click', () => {
+      selectProvince(p.id);
+      const node = document.getElementById(`node-${p.id}`);
+      if (node) {
+        node.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+      }
+    });
+    rankingsScroller.appendChild(chip);
+  });
+}
+
+window.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>
