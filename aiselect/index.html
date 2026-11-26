@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta name="apphub-project" content="aiselect">
+<meta name="apphub-api-base" content="/web/aigen">
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI 订阅决策图谱：成品档位、垂直壁垒与死亡清单</title>
+  <link rel="stylesheet" href="https://ai.shoc.zin7.de/static/vendor/pico.min.css">
+  <style>
+    :root {
+      --pico-font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      --bg-canvas: #f8fafc;
+      --card-bg: #ffffff;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --brand-teal: #0f766e;
+      --brand-teal-light: #f0fdfa;
+      --brand-teal-border: #ccfbf1;
+      --alert-red: #991b1b;
+      --alert-bg: #fef2f2;
+      --alert-border: #fecaca;
+      --line-edge: #e2e8f0;
+      --pico-border-radius: 6px;
+    }
+
+    body {
+      background-color: var(--bg-canvas);
+      color: var(--text-main);
+      padding: 1.5rem 1rem 4rem;
+      max-width: 1040px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+
+    header.doc-header {
+      border-bottom: 2px solid var(--text-main);
+      padding-bottom: 1.25rem;
+      margin-bottom: 2rem;
+    }
+
+    .doc-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-top: 0.5rem;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    }
+
+    .doc-meta span {
+      background: #edf2f7;
+      padding: 0.15rem 0.5rem;
+      border-radius: 4px;
+    }
+
+    h1 {
+      font-size: 1.85rem;
+      margin-bottom: 0.25rem;
+      letter-spacing: -0.02em;
+    }
+
+    h2 {
+      font-size: 1.35rem;
+      margin-top: 2.25rem;
+      margin-bottom: 1rem;
+      border-left: 4px solid var(--brand-teal);
+      padding-left: 0.75rem;
+    }
+
+    p.lead {
+      font-size: 1.05rem;
+      color: #334155;
+      margin-bottom: 1.5rem;
+    }
+
+    /* 交互图解容器 */
+    .diagram-panel {
+      background: var(--card-bg);
+      border: 1px solid var(--line-edge);
+      border-radius: 8px;
+      padding: 1.25rem;
+      margin-bottom: 2rem;
+    }
+
+    .svg-wrapper {
+      width: 100%;
+      overflow-x: auto;
+      margin-bottom: 1rem;
+    }
+
+    svg.topology-map {
+      display: block;
+      width: 100%;
+      min-width: 680px;
+      height: auto;
+      user-select: none;
+    }
+
+    .svg-node {
+      cursor: pointer;
+      transition: transform 0.15s ease, opacity 0.15s ease;
+    }
+
+    .svg-node:hover {
+      opacity: 0.85;
+    }
+
+    .svg-node.is-active circle,
+    .svg-node.is-active rect {
+      stroke: var(--brand-teal) !important;
+      stroke-width: 3px !important;
+    }
+
+    /* 架构剖析结果卡片 */
+    .node-detail-card {
+      background: var(--brand-teal-light);
+      border: 1px solid var(--brand-teal-border);
+      border-radius: 6px;
+      padding: 1rem 1.25rem;
+      min-height: 120px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .node-detail-card h4 {
+      margin: 0 0 0.35rem;
+      font-size: 1.1rem;
+      color: var(--brand-teal);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .node-detail-card p {
+      margin: 0;
+      font-size: 0.95rem;
+      color: #1e293b;
+    }
+
+    /* 方案配置选择器 (Tab/Filter) */
+    .plan-selector {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 0.75rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .plan-btn {
+      min-height: 48px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      border: 1px solid var(--line-edge);
+      background: var(--card-bg);
+      color: var(--text-main);
+      cursor: pointer;
+      border-radius: 6px;
+      padding: 0.5rem 0.75rem;
+      text-align: left;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      transition: all 0.2s ease;
+    }
+
+    .plan-btn small {
+      font-weight: normal;
+      color: var(--text-muted);
+      font-size: 0.8rem;
+    }
+
+    .plan-btn.active {
+      background: var(--text-main);
+      color: #ffffff;
+      border-color: var(--text-main);
+    }
+
+    .plan-btn.active small {
+      color: #94a3b8;
+    }
+
+    .plan-result {
+      background: var(--card-bg);
+      border: 1px solid var(--line-edge);
+      border-radius: 6px;
+      padding: 1.25rem;
+      margin-bottom: 2rem;
+    }
+
+    .badge-tag {
+      display: inline-block;
+      padding: 0.15rem 0.5rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+      border-radius: 4px;
+      margin-right: 0.35rem;
+    }
+
+    .tag-danger {
+      background: var(--alert-bg);
+      color: var(--alert-red);
+      border: 1px solid var(--alert-border);
+    }
+
+    .tag-safe {
+      background: var(--brand-teal-light);
+      color: var(--brand-teal);
+      border: 1px solid var(--brand-teal-border);
+    }
+
+    .tag-neutral {
+      background: #f1f5f9;
+      color: #475569;
+    }
+
+    /* 表格容器 */
+    .table-container {
+      overflow-x: auto;
+      background: var(--card-bg);
+      border: 1px solid var(--line-edge);
+      border-radius: 6px;
+      margin-bottom: 2rem;
+    }
+
+    table {
+      margin: 0;
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+    }
+
+    th {
+      background: #f8fafc;
+      color: var(--text-main);
+      font-weight: 600;
+      white-space: nowrap;
+      border-bottom: 2px solid var(--line-edge);
+      padding: 0.75rem 1rem;
+    }
+
+    td {
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid var(--line-edge);
+      vertical-align: top;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    /* 过滤器按钮群 */
+    .filter-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .filter-btn {
+      min-height: 44px;
+      padding: 0 1rem;
+      font-size: 0.875rem;
+      border: 1px solid var(--line-edge);
+      background: var(--card-bg);
+      color: var(--text-main);
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .filter-btn.active {
+      background: var(--brand-teal);
+      color: #ffffff;
+      border-color: var(--brand-teal);
+    }
+
+    /* 警示与原则卡片 */
+    .callout-box {
+      border-left: 4px solid var(--text-main);
+      background: #f1f5f9;
+      padding: 1rem 1.25rem;
+      margin: 1.5rem 0;
+      border-radius: 0 6px 6px 0;
+    }
+
+    .callout-box strong {
+      color: var(--text-main);
+    }
+
+    /* 移动端适配 */
+    @media (max-width: 768px) {
+      body {
+        padding: 1rem 0.75rem 3rem;
+      }
+      h1 {
+        font-size: 1.45rem;
+      }
+      h2 {
+        font-size: 1.2rem;
+      }
+      .plan-selector {
+        grid-template-columns: 1fr;
+      }
+      .filter-group {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+      }
+      .filter-btn {
+        width: 100%;
+        text-align: center;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="doc-header">
+    <h1>AI 订阅决策图谱：成品档位、垂直壁垒与死亡清单</h1>
+    <div class="doc-meta">
+      <span>文档ID: note_1795442892677</span>
+      <span>核对日期: 2026-11-23</span>
+      <span>状态: 个人决策基准</span>
+    </div>
+  </header>
+
+  <p class="lead">
+    本页补全通用助手之外的实况版图：<strong>国内 C 端会员实测、垂直行业成品对标与死掉的独立品类</strong>。核心判断法则：<strong>买平台，不买单品；买数据与服务闭环，不为通用模型溢价买单。</strong>
+  </p>
+
+  <!-- 机制图解：吞噬拓扑架构 -->
+  <h2>一、生态吞噬机制与壁垒分布图</h2>
+  <div class="diagram-panel">
+    <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.75rem;">
+      交互指引：点击下方拓扑图中的任意色块节点，查看其生态位机理与替代风险。
+    </div>
+    <div class="svg-wrapper">
+      <svg class="topology-map" viewBox="0 0 760 360" xmlns="http://www.w3.org/2000/svg">
+        <!-- 底色背景分界线 -->
+        <rect x="10" y="10" width="740" height="340" rx="8" fill="#fcfdfe" stroke="#e2e8f0" stroke-width="1"/>
+
+        <!-- 区域 1: 独立品类吞噬区 (已死/将死) -->
+        <g id="zone-dead">
+          <rect x="30" y="30" width="210" height="300" rx="6" fill="#fef2f2" stroke="#fecaca" stroke-dasharray="4 4"/>
+          <text x="45" y="55" fill="#991b1b" font-weight="700" font-size="12">坍缩消亡区（独立单品被吞噬）</text>
+          
+          <g class="svg-node" data-id="atlas" transform="translate(45, 75)">
+            <rect width="180" height="52" rx="4" fill="#ffffff" stroke="#f87171" stroke-width="1.5"/>
+            <text x="12" y="24" font-size="13" font-weight="bold" fill="#7f1d1d">Atlas 浏览器</text>
+            <text x="12" y="42" font-size="11" fill="#b91c1c">8月关停 ➔ 并入桌面 Chromium</text>
+          </g>
+
+          <g class="svg-node" data-id="sora" transform="translate(45, 140)">
+            <rect width="180" height="52" rx="4" fill="#ffffff" stroke="#f87171" stroke-width="1.5"/>
+            <text x="12" y="24" font-size="13" font-weight="bold" fill="#7f1d1d">Sora App / API</text>
+            <text x="12" y="42" font-size="11" fill="#b91c1c">OpenAI 已关停并全面出局</text>
+          </g>
+
+          <g class="svg-node" data-id="wenxin" transform="translate(45, 205)">
+            <rect width="180" height="52" rx="4" fill="#ffffff" stroke="#f87171" stroke-width="1.5"/>
+            <text x="12" y="24" font-size="13" font-weight="bold" fill="#7f1d1d">文心一言独立入口</text>
+            <text x="12" y="42" font-size="11" fill="#b91c1c">单品废弃 ➔ 迁移主站免费</text>
+          </g>
+
+          <g class="svg-node" data-id="jules" transform="translate(45, 270)">
+            <rect width="180" height="45" rx="4" fill="#ffffff" stroke="#f87171" stroke-width="1.5"/>
+            <text x="12" y="22" font-size="12" font-weight="bold" fill="#7f1d1d">Jules 独立代码流</text>
+            <text x="12" y="38" font-size="10" fill="#b91c1c">年终终止 ➔ 桌面Agent集成</text>
+          </g>
+        </g>
+
+        <!-- 吞噬向量箭头 -->
+        <g stroke="#94a3b8" stroke-width="1.5" fill="none" stroke-dasharray="3 3">
+          <path d="M 240 100 L 280 140" marker-end="url(#arrow)" />
+          <path d="M 240 165 L 280 180" />
+          <path d="M 240 230 L 280 200" />
+        </g>
+
+        <!-- 区域 2: 中心超级底座 -->
+        <g id="zone-center">
+          <rect x="280" y="30" width="200" height="300" rx="6" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.5"/>
+          <text x="295" y="55" fill="#334155" font-weight="700" font-size="12">超级客户端（全能平台）</text>
+
+          <g class="svg-node" data-id="chatgpt" transform="translate(295, 80)">
+            <rect width="170" height="65" rx="4" fill="#ffffff" stroke="#0284c7" stroke-width="1.5"/>
+            <text x="12" y="24" font-size="13" font-weight="bold" fill="#0369a1">ChatGPT Plus ($20)</text>
+            <text x="12" y="42" font-size="11" fill="#475569">吸纳浏览器、Work Agent</text>
+            <text x="12" y="56" font-size="10" fill="#0284c7">免费档无限 GPT-6 文本</text>
+          </g>
+
+          <g class="svg-node" data-id="claude" transform="translate(295, 160)">
+            <rect width="170" height="65" rx="4" fill="#ffffff" stroke="#d97706" stroke-width="1.5"/>
+            <text x="12" y="24" font-size="13" font-weight="bold" fill="#b45309">Claude Pro ($17)</text>
+            <text x="12" y="42" font-size="11" fill="#475569">全量含 Cowork 文件Agent</text>
+            <text x="12" y="56" font-size="10" fill="#b45309">核心编程与深度推理阵地</text>
+          </g>
+
+          <g class="svg-node" data-id="domestic_agent" transform="translate(295, 240)">
+            <rect width="170" height="75" rx="4" fill="#ffffff" stroke="#64748b" stroke-width="1.5"/>
+            <text x="12" y="24" font-size="13" font-weight="bold" fill="#1e293b">国产办公底座</text>
+            <text x="12" y="42" font-size="11" fill="#475569">灵犀 (¥48) / 搭子 Pro</text>
+            <text x="12" y="58" font-size="10" fill="#64748b">钉钉 ¥19 个人档 / 飞书排外</text>
+          </g>
+        </g>
+
+        <!-- 抵御护城河连线 -->
+        <g stroke="#0d9488" stroke-width="2" fill="none">
+          <line x1="480" y1="110" x2="520" y2="90" />
+          <line x1="480" y1="180" x2="520" y2="170" />
+          <line x1="480" y1="260" x2="520" y2="250" />
+        </g>
+
+        <!-- 区域 3: 垂直闭环壁垒区 (真优选) -->
+        <g id="zone-vertical">
+          <rect x="520" y="30" width="210" height="300" rx="6" fill="#f0fdfa" stroke="#99f6e4" stroke-width="1.5"/>
+          <text x="535" y="55" fill="#0f766e" font-weight="700" font-size="12">高壁垒垂直护城河（闭环优选）</text>
+
+          <g class="svg-node" data-id="afu" transform="translate(535, 75)">
+            <rect width="180" height="52" rx="4" fill="#ffffff" stroke="#14b8a6" stroke-width="1.5"/>
+            <text x="12" y="22" font-size="13" font-weight="bold" fill="#0f766e">蚂蚁阿福 (医疗健康)</text>
+            <text x="12" y="40" font-size="11" fill="#115e59">AI+健康档案上下文 (免费)</text>
+          </g>
+
+          <g class="svg-node" data-id="kling" transform="translate(535, 138)">
+            <rect width="180" height="52" rx="4" fill="#ffffff" stroke="#14b8a6" stroke-width="1.5"/>
+            <text x="12" y="22" font-size="13" font-weight="bold" fill="#0f766e">可灵 视频 (影视4K)</text>
+            <text x="12" y="40" font-size="11" fill="#115e59">铂金¥266 / 单条不到¥2</text>
+          </g>
+
+          <g class="svg-node" data-id="suno" transform="translate(535, 201)">
+            <rect width="180" height="52" rx="4" fill="#ffffff" stroke="#14b8a6" stroke-width="1.5"/>
+            <text x="12" y="22" font-size="13" font-weight="bold" fill="#0f766e">Suno 音乐 (商用发行)</text>
+            <text x="12" y="40" font-size="11" fill="#115e59">Pro $8 / 版权法律链清晰</text>
+          </g>
+
+          <g class="svg-node" data-id="mita" transform="translate(535, 264)">
+            <rect width="180" height="52" rx="4" fill="#ffffff" stroke="#14b8a6" stroke-width="1.5"/>
+            <text x="12" y="22" font-size="13" font-weight="bold" fill="#0f766e">秘塔 搜索 (无广告研究)</text>
+            <text x="12" y="40" font-size="11" fill="#115e59">¥450/年 / 中文文献深度</text>
+          </g>
+        </g>
+      </svg>
+    </div>
+
+    <!-- 联动详解面板 -->
+    <div id="node-detail" class="node-detail-card">
+      <h4 id="detail-title">点击上方节点查看机理解析</h4>
+      <p id="detail-desc">生态吞噬规矩：单一功能的独立工具正在被平台吸纳；只有拥有“私有上下文壁垒（阿福）”、“版权合法授权（Suno）”或“极致算力产出比（可灵）”的单品才值得保留独立订阅预算。</p>
+    </div>
+  </div>
+
+  <!-- 组合方案决策计算器 -->
+  <h2>二、普通人的终极组合阶梯</h2>
+  <div class="plan-selector">
+    <button class="plan-btn active" data-plan="zero">
+      0 元白嫖方案
+      <small>覆盖 90% 个人常规需求</small>
+    </button>
+    <button class="plan-btn" data-plan="single">
+      一份钱方案
+      <small>四选一：按核心生产力身份</small>
+    </button>
+    <button class="plan-btn" data-plan="double">
+      两份钱方案
+      <small>严禁双通用：通用 + 绝对垂直</small>
+    </button>
+    <button class="plan-btn" data-plan="signal">
+      升级触发硬信号
+      <small>满足什么条件才掏钱包？</small>
+    </button>
+  </div>
+
+  <div id="plan-display" class="plan-result">
+    <!-- 内容通过 JS 动态切换 -->
+  </div>
+
+  <!-- 垂直对标与 C 端避坑表 -->
+  <h2>三、垂直品类对标与会员套娃排查</h2>
+  <div class="filter-group">
+    <button class="filter-btn active" data-filter="all">全部展示</button>
+    <button class="filter-btn" data-filter="office">办公 Agent</button>
+    <button class="filter-btn" data-filter="video">视频生成</button>
+    <button class="filter-btn" data-filter="music">音乐音频</button>
+    <button class="filter-btn" data-filter="health">健康医疗</button>
+    <button class="filter-btn" data-filter="trap">会员套娃/雷区</button>
+  </div>
+
+  <div class="table-container">
+    <table id="matrix-table">
+      <thead>
+        <tr>
+          <th>品类/产品</th>
+          <th>付费档实况与定价</th>
+          <th>生态位定性与判决</th>
+          <th>避坑防雷要点</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- 办公 Agent -->
+        <tr data-cat="office">
+          <td><strong>Claude Cowork / ChatGPT Work</strong></td>
+          <td>Pro $17 / Plus $20（内置全含）</td>
+          <td><span class="badge-tag tag-safe">真优选</span> 文件级、个人桌面级任务首选</td>
+          <td>无需单独购买第三方工作流包装工具，大厂直接在主订阅内置。</td>
+        </tr>
+        <tr data-cat="office trap">
+          <td><strong>WPS 灵犀 / 套娃体系</strong></td>
+          <td>标准~¥48、进阶¥128、旗舰¥398</td>
+          <td><span class="badge-tag tag-danger">套娃警惕</span> 纯中文公文/表格/PPT适配较好</td>
+          <td><strong>WPS 大会员（~¥248/年）不含灵犀！</strong>大会员、WPS AI、灵犀、WorkBuddy 四套计费并行。</td>
+        </tr>
+        <tr data-cat="office trap">
+          <td><strong>百度搭子 DuMate</strong></td>
+          <td>免费版 / Pro $11.99 / Max 首月¥99.9 次月¥189</td>
+          <td><span class="badge-tag tag-neutral">可随机</span> 百度真正付费桌面办公主力</td>
+          <td>曾搞 1分钱会员促销千件仅百人约；<strong>促销力度与产品力成反比</strong>，切忌直接按年包。</td>
+        </tr>
+        <tr data-cat="office">
+          <td><strong>钉钉 365 个人版</strong></td>
+          <td>¥19/月（连续包月尝鲜 ¥15）</td>
+          <td><span class="badge-tag tag-safe">轻量性价比</span> 含个人 AI 助理/搜索</td>
+          <td>个人最便宜办公 AI，比自建省心；企业级 AI 另算。</td>
+        </tr>
+        <tr data-cat="office trap">
+          <td><strong>飞书 AI</strong></td>
+          <td>基础版 ¥9900/年，企业版 ¥9.9万/年</td>
+          <td><span class="badge-tag tag-danger">个人直接排除</span> 纯 B 端企业采购体系</td>
+          <td>不面向个人散户，切勿误入咨询付费。</td>
+        </tr>
+
+        <!-- 视频生成 -->
+        <tr data-cat="video">
+          <td><strong>可灵 Kling</strong></td>
+          <td>黄金¥66、铂金¥266、钻石¥666</td>
+          <td><span class="badge-tag tag-safe">真优选</span> 专业影视/4K输出</td>
+          <td>铂金 3000 灵感值月产约 150 条 5秒视频，折算单条成本不到 ¥2。</td>
+        </tr>
+        <tr data-cat="video">
+          <td><strong>豆包 Seedance 2.0 / 即梦</strong></td>
+          <td>豆包免费；即梦送积分 / ¥1 体验</td>
+          <td><span class="badge-tag tag-safe">短视频走量</span> 普通宣发与自媒体首选</td>
+          <td>即梦年内多次调价缩水；警惕淘宝代充等灰产账号封禁风险。</td>
+        </tr>
+        <tr data-cat="video trap">
+          <td><strong>海螺 AI</strong></td>
+          <td>基础年卡约¥499，至臻版 ¥10788/年</td>
+          <td><span class="badge-tag tag-danger">定价失衡</span> 视频垂直单品</td>
+          <td>万元年卡曾引全网争议，单品极易在模型代际更迭时贬值。</td>
+        </tr>
+        <tr data-cat="video trap">
+          <td><strong>OpenAI Sora</strong></td>
+          <td>App 4月关停、API 9月关停</td>
+          <td><span class="badge-tag tag-danger">已死亡品类</span> 完全退出</td>
+          <td>现在 ChatGPT 内无独立视频生成能力，Disney 亦已撤资。</td>
+        </tr>
+
+        <!-- 音乐音频 -->
+        <tr data-cat="music">
+          <td><strong>Suno</strong></td>
+          <td>Pro $8/月，Premier $24/月</td>
+          <td><span class="badge-tag tag-safe">真优选</span> 商用发行、流媒体上架</td>
+          <td>有完整的商用版权链路，版权归属明确，商业项目不可替代。</td>
+        </tr>
+        <tr data-cat="music">
+          <td><strong>海绵音乐 / 腾讯启明星</strong></td>
+          <td>海绵免费；腾讯¥10/500分（日送188）</td>
+          <td><span class="badge-tag tag-neutral">自娱玩具</span> 抖音生态直连、短视频配乐</td>
+          <td>免费额度完全够用，不需要为自娱自乐单独开长期订阅。</td>
+        </tr>
+
+        <!-- 健康医疗 -->
+        <tr data-cat="health">
+          <td><strong>蚂蚁阿福 (原 AQ)</strong></td>
+          <td>完全免费（覆盖月活3000万+）</td>
+          <td><span class="badge-tag tag-safe">真·本地闭环</span> 中文就医、慢病管理与报告解读</td>
+          <td>通用助手不具备的本地医院与健康档案上下文联动闭环。</td>
+        </tr>
+        <tr data-cat="health">
+          <td><strong>ChatGPT Health / Claude Science</strong></td>
+          <td>主套餐包含，无额外费用</td>
+          <td><span class="badge-tag tag-neutral">可随机</span> 英文健康检索与英文科研</td>
+          <td>缺乏国内医院、医保与本地药品数据库支撑，只做文献参考。</td>
+        </tr>
+
+        <!-- 搜索与基础设施 -->
+        <tr data-cat="trap">
+          <td><strong>智谱清言</strong></td>
+          <td>有会员协议，但非重点</td>
+          <td><span class="badge-tag tag-neutral">额度批发商</span> 86.5% 收入来自 API 开放平台</td>
+          <td>清言仅为展示橱窗，调用不稳定，勿作为主力个人订阅。</td>
+        </tr>
+        <tr data-cat="trap">
+          <td><strong>独立 AI 浏览器 (Atlas等)</strong></td>
+          <td>Atlas 8月停运，Comet 免费</td>
+          <td><span class="badge-tag tag-danger">已证伪品类</span> 流量被超级端内置吃掉</td>
+          <td>独立 AI 浏览器作为付费软件已被证伪，切勿为此类概念单独花钱。</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 总结底线原则 -->
+  <div class="callout-box">
+    <strong>2027 订阅判决收官总结：</strong><br>
+    通用助手买一家就够了，买两个通用助手是最典型的浪费。垂直场景买“数据/版权/服务闭环”而不是买模型名字。免费档永远是默认选项，<strong>付费是给额度不足买的单，不是给“更聪明”买的单。</strong>
+  </div>
+
+  <script>
+    // 拓扑节点数据映射
+    const nodeDetails = {
+      atlas: {
+        title: "Atlas 独立浏览器 ➔ 宣告关停并入客户端",
+        desc: "8月9日正式停运，核心能力并入 ChatGPT 桌面内置 Chromium。独立 AI 浏览器的代理流量只有免费竞品的一半不到，独立付费模式完全证伪，不可再为独立浏览器类目付费。"
+      },
+      sora: {
+        title: "Sora 独立应用与 API ➔ OpenAI 撤出独立视频",
+        desc: "Sora App 与 API 先后关停，迪士尼退出合作，ChatGPT 内部无可用视频生成。视频赛道演变为 Google（Veo/Flow）与国内三强（可灵/即梦/海螺）对垒，独立视频单品抗风险能力脆弱。"
+      },
+      wenxin: {
+        title: "文心一言入口 ➔ 全面迁移合并并免费",
+        desc: "文心一言独立入口关闭，全面归拢至百度文心主站并免费开放。国内大厂开始抛弃松散的多域名赛马，收敛入口为全免费大流量池，切忌通过第三方倒买所谓文心会员。"
+      },
+      jules: {
+        title: "Jules 编程流 ➔ 独立代码工具终结",
+        desc: "作为早期单一形态的 Code Agent，单一接口无法抵御桌面超级 App（如 Claude Cowork/Antigravity）的直接向下覆盖，已被超级终端吞并淘汰。"
+      },
+      chatgpt: {
+        title: "ChatGPT Plus ($20) ➔ 全能基准平台",
+        desc: "内置完整的 Work Agent、内置深度搜索以及 Chromium 桌面代理。免费版已覆盖无限基础文本；仅在全职办公自动化与高频连续调用时才值得支出这 $20。"
+      },
+      claude: {
+        title: "Claude Pro ($17) ➔ 编程吃饭与深度逻辑优选",
+        desc: "自带 Cowork 桌面文件级任务权限，推理长文本一致性最高，是研发人员首选订阅。拥有极高生态位，买它之后严禁再买第二个外网通用大模型。"
+      },
+      domestic_agent: {
+        title: "国产办公 Agent (灵犀/搭子/钉钉) ➔ 适配本土格式",
+        desc: "如果工作重心是红头公文、本地财务表格与中文 PPT，国外模型无法胜任。灵犀 ¥48 或搭子 Pro 可解决中文排版痛点，但需提防 WPS 体系内的四重套娃收费。"
+      },
+      afu: {
+        title: "蚂蚁阿福 ➔ 无法被模型替代的本地健康闭环",
+        desc: "完全免费，具备 3000 万+ 月活。其不可替代性来自“个人终身健康档案 + 本地医院挂号/就医指引”，通用大模型即使算力再强也拿不到此类政企民生闭环数据。"
+      },
+      kling: {
+        title: "可灵 Kling ➔ 极致算力产出比的视频基地",
+        desc: "专业影视/4K走量的主力。铂金档 ¥266 折算单条 5 秒视频低于 ¥2，在性价比与运动幅度上构筑起对高价欧美单品的绝对防御墙。"
+      },
+      suno: {
+        title: "Suno 音乐 ➔ 商用发行与版权确权堡垒",
+        desc: "Pro 档仅 $8/月。其护城河不在于音质好坏，而在于直接提供可商用、可发行到 Spotify/Apple Music 的清晰版权链路。玩具级免费产品无法替代它。"
+      },
+      mita: {
+        title: "秘塔学术搜索 ➔ 中文深度无广告研究",
+        desc: "¥450/年。月活超 6000 万，直连中文学术文献与专题工作流。若已订购 ChatGPT/Claude，自带 Deep Research 可覆盖 80%，无需单买；纯中文专业学者除外。"
+      }
+    };
+
+    // 绑定 SVG 节点点击交互
+    const nodes = document.querySelectorAll('.svg-node');
+    const detailTitle = document.getElementById('detail-title');
+    const detailDesc = document.getElementById('detail-desc');
+
+    nodes.forEach(node => {
+      node.addEventListener('click', () => {
+        nodes.forEach(n => n.classList.remove('is-active'));
+        node.classList.add('is-active');
+        const id = node.getAttribute('data-id');
+        if (nodeDetails[id]) {
+          detailTitle.textContent = nodeDetails[id].title;
+          detailDesc.textContent = nodeDetails[id].desc;
+        }
+      });
+    });
+
+    // 组合方案数据切换
+    const planData = {
+      zero: {
+        badge: "零预算最优解",
+        title: "0 元方案：覆盖普通人 90% 场景",
+        items: [
+          "日常通用对话：豆包 / DeepSeek 网页端（完全满足基础写作、翻译、润色）",
+          "医疗健康闭环：蚂蚁阿福（免费查病、读体检报告、本地就医指南）",
+          "短视频配乐：海绵音乐（免费，抖音生态直通版权）",
+          "学术文献搜索：秘塔免费版 / 大厂内嵌 Deep Research",
+          "编程与辅助：Antigravity 免费档 + 各平台免费额度",
+          "短视频制作：豆包 Seedance 2.0 免费 或 即梦每日赠送 260 积分（每天约白嫖 2 条）"
+        ],
+        caution: "绝不轻信任何免费产品弹出的“1分钱体验会员”自动扣款套路。"
+      },
+      single: {
+        badge: "严格限额 1 笔",
+        title: "一份钱方案：按生产力身份四选一（严禁盲目多开）",
+        items: [
+          "代码/研发吃饭：Claude Pro ($17) —— 单兵开发逻辑与 Cowork 唯一解",
+          "谷歌/工作全家桶重度用户：Google AI Pro ($19.99) —— 整合 Drive/Docs/Veo 额度",
+          "桌面综合办公 Agent：ChatGPT Plus ($20) —— 全能中枢、插件与桌面代理",
+          "纯中文体制内/企事业单位公文办公：WPS 灵犀 ¥48 档 或 百度搭子 Pro（务必先按月试用）"
+        ],
+        caution: "选定一家后，立刻关停其他通用类助手的付费，绝不为同质化智商买两份单。"
+      },
+      double: {
+        badge: "最高预算上限",
+        title: "两份钱方案：1个通用底座 + 1个绝对垂直壁垒",
+        items: [
+          "典型组合 A (视频创作者)：ChatGPT Plus ($20) + 可灵铂金会员 (¥266/月)",
+          "典型组合 B (深度学术研究员)：Claude Pro ($17) + 秘塔深度研究年卡 (¥450/年)",
+          "典型组合 C (独立音乐人)：ChatGPT Plus ($20) + Suno Pro ($8/月)",
+          "反面教材（极度浪费）：ChatGPT Plus + Claude Pro（两家通用大底座重叠度超 85%）"
+        ],
+        caution: "如果第二份钱买的不是版权、不是算力走量、不是政企闭环，那就是无效智商税。"
+      },
+      signal: {
+        badge: "升级闸门",
+        title: "何时才允许掏钱？必须命中以下任一“硬信号”",
+        items: [
+          "信号一：连续两周触顶免费档高阶模型额度，且已实际阻塞工作交付时间。",
+          "信号二：免费档高峰期频繁排队，导致每小时直接经济损失大于订阅单价。",
+          "信号三：有明确的外部商业合同需要商用版权确权书（如 Suno 商业发行、可灵去水印商用）。",
+          "未命中上述信号？：请立刻退回【0元方案】，继续享受厂商贴钱打架带来的免费红利。"
+        ],
+        caution: "模型版本号升级（如“GPT-X 发布”）不是掏钱理由，额度瓶颈才是。"
+      }
+    };
+
+    function renderPlan(key) {
+      const p = planData[key];
+      const display = document.getElementById('plan-display');
+      let html = `<div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:0.75rem;">
+                    <span class="badge-tag tag-safe">${p.badge}</span>
+                    <h3 style="margin:0; font-size:1.15rem;">${p.title}</h3>
+                  </div>
+                  <ul style="padding-left:1.25rem; margin-bottom:1rem; font-size:0.925rem;">`;
+      p.items.forEach(item => {
+        html += `<li style="margin-bottom:0.35rem;">${item}</li>`;
+      });
+      html += `</ul>
+               <div style="font-size:0.85rem; color:#b91c1c; background:#fef2f2; padding:0.5rem 0.75rem; border-radius:4px;">
+                 <strong>防损底线：</strong>${p.caution}
+               </div>`;
+      display.innerHTML = html;
+    }
+
+    const planBtns = document.querySelectorAll('.plan-btn');
+    planBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        planBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        renderPlan(btn.getAttribute('data-plan'));
+      });
+    });
+
+    // 初始化方案显示
+    renderPlan('zero');
+
+    // 表格筛选过滤器
+    const filterBtns = document.querySelectorAll('.filter-btn');
+    const tableRows = document.querySelectorAll('#matrix-table tbody tr');
+
+    filterBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        filterBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const filter = btn.getAttribute('data-filter');
+
+        tableRows.forEach(row => {
+          const cats = row.getAttribute('data-cat') || '';
+          if (filter === 'all' || cats.includes(filter)) {
+            row.style.display = '';
+          } else {
+            row.style.display = 'none';
+          }
+        });
+      });
+    });
+  </script>
+</body>
+</html>
