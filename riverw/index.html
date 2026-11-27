@@ -1,0 +1,1082 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta name="apphub-project" content="riverw">
+<meta name="apphub-api-base" content="/web/aigen">
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>巫山水域遥感地理与高程流向视界</title>
+  <link rel="stylesheet" href="https://ai.shoc.zin7.de/static/vendor/pico.min.css">
+  <script src="https://ai.shoc.zin7.de/static/vendor/chart.umd.min.js"></script>
+  <style>
+    :root {
+      --satellite-dark: #070d14;
+      --satellite-surface: #0f1c29;
+      --satellite-accent: #00d2ff;
+      --satellite-glow: rgba(0, 210, 255, 0.25);
+      --radar-grid: rgba(0, 210, 255, 0.08);
+      --text-bright: #e6f6ff;
+      --text-dim: #8ba2b5;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: var(--satellite-dark);
+      color: var(--text-bright);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    /* 卫星遥感背景层 */
+    .space-background {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: -1;
+      pointer-events: none;
+      background: 
+        radial-gradient(circle at 75% 20%, rgba(16, 42, 66, 0.8) 0%, transparent 60%),
+        radial-gradient(circle at 20% 80%, rgba(8, 60, 78, 0.4) 0%, transparent 50%),
+        linear-gradient(135deg, #04080e 0%, #0a1724 50%, #06111a 100%);
+    }
+
+    .satellite-grid {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background-image: 
+        linear-gradient(var(--radar-grid) 1px, transparent 1px),
+        linear-gradient(90deg, var(--radar-grid) 1px, transparent 1px);
+      background-size: 40px 40px;
+      z-index: -1;
+      pointer-events: none;
+    }
+
+    /* 顶部导航与遥感标头 */
+    .hud-header {
+      background: rgba(10, 23, 36, 0.85);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid rgba(0, 210, 255, 0.3);
+      padding: 0.8rem 1.2rem;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+    }
+
+    .hud-header-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+    }
+
+    .radar-pulse {
+      width: 14px;
+      height: 14px;
+      background: #00ff88;
+      border-radius: 50%;
+      box-shadow: 0 0 10px #00ff88;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(0.95); opacity: 0.8; }
+      50% { transform: scale(1.3); opacity: 0.3; }
+      100% { transform: scale(0.95); opacity: 0.8; }
+    }
+
+    .telemetry {
+      font-family: monospace;
+      font-size: 0.85rem;
+      color: var(--satellite-accent);
+      background: rgba(0, 210, 255, 0.08);
+      padding: 0.3rem 0.6rem;
+      border: 1px dashed rgba(0, 210, 255, 0.4);
+      border-radius: 4px;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 1.5rem auto;
+      padding: 0 1rem 3rem 1rem;
+    }
+
+    /* 卫星模拟视窗 Canvas */
+    .satellite-viewport-card {
+      background: rgba(13, 26, 40, 0.9);
+      border: 1px solid rgba(0, 210, 255, 0.35);
+      border-radius: 12px;
+      padding: 1rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .viewport-controls {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.75rem;
+      gap: 0.5rem;
+    }
+
+    .mode-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.85rem;
+      color: #00e5ff;
+      border: 1px solid #00e5ff;
+      padding: 0.2rem 0.6rem;
+      border-radius: 20px;
+      background: rgba(0, 229, 255, 0.1);
+    }
+
+    .canvas-container {
+      position: relative;
+      width: 100%;
+      border-radius: 8px;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      background: #071520;
+    }
+
+    canvas#waterMap {
+      display: block;
+      width: 100%;
+      height: 420px;
+      cursor: crosshair;
+    }
+
+    .map-overlay-scanline {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(0, 210, 255, 0.05) 50%, rgba(255,255,255,0));
+      animation: scan 4s linear infinite;
+      pointer-events: none;
+    }
+
+    @keyframes scan {
+      0% { transform: translateY(-100%); }
+      100% { transform: translateY(100%); }
+    }
+
+    .waterway-legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.8rem;
+      margin-top: 0.8rem;
+      font-size: 0.8rem;
+      color: var(--text-dim);
+      align-items: center;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .legend-color {
+      width: 14px;
+      height: 6px;
+      border-radius: 2px;
+    }
+
+    /* 水系信息卡片网格 */
+    .waters-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 1.25rem;
+      margin-bottom: 2.5rem;
+    }
+
+    .water-card {
+      background: rgba(15, 28, 41, 0.85);
+      border: 1px solid rgba(0, 210, 255, 0.2);
+      border-radius: 10px;
+      padding: 1.25rem;
+      transition: all 0.25s ease;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      cursor: pointer;
+    }
+
+    .water-card:hover, .water-card.active {
+      transform: translateY(-3px);
+      border-color: var(--satellite-accent);
+      box-shadow: 0 8px 24px var(--satellite-glow);
+      background: rgba(18, 36, 54, 0.95);
+    }
+
+    .water-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 0.75rem;
+    }
+
+    .water-card h4 {
+      margin: 0;
+      color: #38d39f;
+      font-size: 1.2rem;
+    }
+
+    .elevation-tag {
+      font-family: monospace;
+      font-size: 0.75rem;
+      color: #ffd166;
+      background: rgba(255, 209, 102, 0.12);
+      padding: 2px 6px;
+      border: 1px solid rgba(255, 209, 102, 0.35);
+      border-radius: 4px;
+    }
+
+    .flow-tag {
+      font-size: 0.75rem;
+      color: #00e5ff;
+      background: rgba(0, 229, 255, 0.12);
+      padding: 2px 6px;
+      border-radius: 4px;
+      display: inline-block;
+      margin-top: 4px;
+    }
+
+    .water-card p {
+      color: #c0d3e2;
+      font-size: 0.92rem;
+      line-height: 1.5;
+      margin-bottom: 1rem;
+    }
+
+    .water-meta {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.5rem;
+      padding: 0.6rem 0;
+      border-top: 1px dashed rgba(255, 255, 255, 0.1);
+      font-size: 0.82rem;
+      color: var(--text-dim);
+    }
+
+    .water-meta span strong {
+      color: var(--text-bright);
+    }
+
+    /* 表格与图表区块 */
+    .section-card {
+      background: rgba(15, 28, 41, 0.85);
+      border: 1px solid rgba(0, 210, 255, 0.2);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .section-title {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      margin-top: 0;
+      margin-bottom: 1.2rem;
+      font-size: 1.3rem;
+      color: #00e5ff;
+      border-left: 4px solid #00d2ff;
+      padding-left: 0.6rem;
+    }
+
+    .table-container {
+      overflow-x: auto;
+      border: 1px solid rgba(0, 210, 255, 0.15);
+      border-radius: 6px;
+    }
+
+    table {
+      margin: 0;
+      width: 100%;
+      font-size: 0.9rem;
+      white-space: nowrap;
+    }
+
+    th {
+      background: rgba(0, 210, 255, 0.12);
+      color: #38d39f;
+      border-bottom: 1px solid rgba(0, 210, 255, 0.3);
+      padding: 0.75rem 1rem;
+    }
+
+    td {
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      color: #d8e5ef;
+    }
+
+    tr:hover td {
+      background: rgba(0, 210, 255, 0.05);
+    }
+
+    /* 按钮与交互控件 */
+    .btn-satellite {
+      min-height: 44px;
+      padding: 0 1.2rem;
+      font-size: 0.95rem;
+      background: rgba(0, 210, 255, 0.15);
+      color: #00e5ff;
+      border: 1px solid #00d2ff;
+      border-radius: 6px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      transition: all 0.2s;
+    }
+
+    .btn-satellite:hover {
+      background: rgba(0, 210, 255, 0.3);
+      box-shadow: 0 0 12px rgba(0, 210, 255, 0.5);
+    }
+
+    .status-pill {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 500;
+    }
+    .status-good { background: rgba(0, 255, 136, 0.15); color: #00ff88; border: 1px solid rgba(0, 255, 136, 0.3); }
+
+    /* 移动端友好适配 */
+    @media (max-width: 768px) {
+      .hud-header-content {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .waters-grid {
+        grid-template-columns: 1fr;
+      }
+      canvas#waterMap {
+        height: 320px;
+      }
+      .section-card {
+        padding: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 卫星深空与遥感网格背景 -->
+  <div class="space-background"></div>
+  <div class="satellite-grid"></div>
+
+  <!-- HUD 顶部状态栏 -->
+  <header class="hud-header">
+    <div class="hud-header-content">
+      <div class="brand">
+        <div class="radar-pulse"></div>
+        <div>
+          <strong style="color:#fff; font-size:1.1rem; letter-spacing: 0.5px;">巫山水系卫星遥感高程与流向监测台</strong>
+          <div style="font-size:0.75rem; color:var(--text-dim);">DEM & HYDRODYNAMIC VECTOR MONITORING</div>
+        </div>
+      </div>
+      <div class="telemetry">
+        <span>● 目标坐标: 重庆·巫山 (109°52′E, 31°04′N)</span> | 
+        <span id="scanStatus">动态水力梯度监测中</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+
+    <!-- 卫星地图俯瞰视窗模拟器 -->
+    <div class="satellite-viewport-card">
+      <div class="viewport-controls">
+        <div class="mode-badge">
+          <span>📡 卫星遥感高程分层渲染 + 动态径流粒子流向图层</span>
+        </div>
+        <button type="button" class="btn-satellite" id="resetMapBtn">
+          <span>重置视界热点</span>
+        </button>
+      </div>
+
+      <div class="canvas-container">
+        <canvas id="waterMap"></canvas>
+        <div class="map-overlay-scanline"></div>
+      </div>
+
+      <div class="waterway-legend">
+        <div class="legend-item"><div class="legend-color" style="background:#00d2ff;"></div> 长江巫峡干流 (自西向东 ➔)</div>
+        <div class="legend-item"><div class="legend-color" style="background:#2cd99b;"></div> 大宁河水系 (自北向南 ⬇)</div>
+        <div class="legend-item"><div class="legend-color" style="background:#ffaa00;"></div> 马渡河小小三峡 (东北向西南 ↙)</div>
+        <div class="legend-item"><div class="legend-color" style="background:#00e5ff;"></div> 神女溪 (东南向西北 ↖)</div>
+        <div class="legend-item"><div class="legend-color" style="background:#b388ff;"></div> 抱龙河 (南向北 ⬆)</div>
+        <div class="legend-item" style="margin-left: auto; color:#ffd166;">
+          ⚡ 图中流动粒子与箭头直观指示流向与海拔高度落差
+        </div>
+      </div>
+    </div>
+
+    <!-- 巫山水系详情网格 -->
+    <h3 class="section-title">核心峡江水系流向与高程解译</h3>
+    <div class="waters-grid" id="watersList">
+      
+      <!-- 长江巫峡段 -->
+      <article class="water-card" data-water="yangtze">
+        <div>
+          <div class="water-card-header">
+            <h4>长江·巫峡干流</h4>
+            <span class="elevation-tag">高程: 145~175m</span>
+          </div>
+          <div class="flow-tag">流向：自西向东 (流向宜昌/入海口)</div>
+          <p>
+            巫山水网总汇。长江切穿巫山山脉，形成幽深壮丽的巫峡。受三峡大坝回水顶托，平时保持145~175米高峡平湖水位，水势由西向东平稳浩荡东去。
+          </p>
+        </div>
+        <div class="water-meta">
+          <span>源头/汇入高程: <strong>金沙江 ➔ 175m坝前</strong></span>
+          <span>相对落差: <strong>低水力坡降 (平湖蓄水)</strong></span>
+          <span>汇流角色: <strong>三峡主干受水动脉</strong></span>
+          <span>水质标准: <strong>优良 II类</strong></span>
+        </div>
+      </article>
+
+      <!-- 大宁河 -->
+      <article class="water-card" data-water="daning">
+        <div>
+          <div class="water-card-header">
+            <h4>大宁河水系 (小三峡)</h4>
+            <span class="elevation-tag">高程: 1200m ➔ 175m</span>
+          </div>
+          <div class="flow-tag">流向：自北向南 (汇入长江巫峡口)</div>
+          <p>
+            源于大巴山南麓高海拔林区（海拔超千米），由北往南一路奔涌下切，穿过滴翠峡、巴雾峡、龙门峡，最终在巫山县城巫峡口处倾泻注入长江。
+          </p>
+        </div>
+        <div class="water-meta">
+          <span>河道总长: <strong>约162公里</strong></span>
+          <span>海拔总落差: <strong>约 1025 米</strong></span>
+          <span>水流动力: <strong>上游湍急 / 下游宽深回水</strong></span>
+          <span>生态水质: <strong>极优 I~II类</strong></span>
+        </div>
+      </article>
+
+      <!-- 马渡河 / 小小三峡 -->
+      <article class="water-card" data-water="xiaoxiao">
+        <div>
+          <div class="water-card-header">
+            <h4>马渡河 (小小三峡)</h4>
+            <span class="elevation-tag">高程: 980m ➔ 182m</span>
+          </div>
+          <div class="flow-tag">流向：自东北向西南 (汇入大宁河滴翠峡)</div>
+          <p>
+            位于巫山东北部高耸喀斯特绝壁间，发源于高海拔山溪，由东北向西南深切峡谷而下，两岸峭壁如削，水流清冽冲刷卵石滩，在滴翠峡东岸注入大宁河。
+          </p>
+        </div>
+        <div class="water-meta">
+          <span>峡段全长: <strong>约15公里</strong></span>
+          <span>海拔总落差: <strong>约 798 米</strong></span>
+          <span>流态特征: <strong>水浅而急、跌水浅滩相间</strong></span>
+          <span>体验: <strong>柳叶轻舟逆流顺流寻幽</strong></span>
+        </div>
+      </article>
+
+      <!-- 神女溪 -->
+      <article class="water-card" data-water="shennuxi">
+        <div>
+          <div class="water-card-header">
+            <h4>神女溪水域</h4>
+            <span class="elevation-tag">高程: 850m ➔ 175m</span>
+          </div>
+          <div class="flow-tag">流向：自东南向西北 (注入巫峡神女峰对岸)</div>
+          <p>
+            发源于巫山县南部官渡高山深壑，自东南向西北一路劈山切谷，穿越净坛峰、神女峰麓幽谷，汇入长江巫峡。蓄水后下游十余公里为幽深翡翠平湖。
+          </p>
+        </div>
+        <div class="water-meta">
+          <span>峡谷形态: <strong>高落差深V型绝壁峡谷</strong></span>
+          <span>海拔总落差: <strong>约 675 米</strong></span>
+          <span>景观节点: <strong>上升峰、神女峰倒影</strong></span>
+          <span>水体色泽: <strong>墨蓝清澈</strong></span>
+        </div>
+      </article>
+
+      <!-- 抱龙河 -->
+      <article class="water-card" data-water="baolong">
+        <div>
+          <div class="water-card-header">
+            <h4>抱龙河水系</h4>
+            <span class="elevation-tag">高程: 1150m ➔ 175m</span>
+          </div>
+          <div class="flow-tag">流向：自南向北 (汇入长江巫峡抱龙角)</div>
+          <p>
+            发源于鄂西建始与巫山交界的高海拔群山，自南向北穿行于巫峡南部崇山峻岭间，流经抱龙镇注入长江，是高山森林径流汇入峡江的典型清泉支流。
+          </p>
+        </div>
+        <div class="water-meta">
+          <span>汇入高程: <strong>175米三峡库面</strong></span>
+          <span>海拔总落差: <strong>约 975 米</strong></span>
+          <span>水土保持: <strong>茂密天然阔叶混交林</strong></span>
+          <span>水质标准: <strong>优良 II类</strong></span>
+        </div>
+      </article>
+
+      <!-- 笃坪河 / 官渡河水系 -->
+      <article class="water-card" data-water="guandu">
+        <div>
+          <div class="water-card-header">
+            <h4>官渡河 / 九溪暗河</h4>
+            <span class="elevation-tag">高程: 1380m ➔ 210m</span>
+          </div>
+          <div class="flow-tag">流向：西南向东北 (经地下溶洞与溪沟汇集)</div>
+          <p>
+            巫山南部高海拔喀斯特台地水网，源头地势高峻，水流穿越溶洞、石林地表地下一体流动，经官渡峡谷梯级降落，滋润整个江南丘陵腹地。
+          </p>
+        </div>
+        <div class="water-meta">
+          <span>地貌体系: <strong>岩溶漏斗、地下伏流与峡谷</strong></span>
+          <span>海拔总落差: <strong>约 1170 米 (落差极显著)</strong></span>
+          <span>农业生态: <strong>巫山南部梯田核心水源</strong></span>
+          <span>水源类型: <strong>高山溶洞泉与地表流</strong></span>
+        </div>
+      </article>
+
+    </div>
+
+    <!-- 卫星水文探测监测指标表 -->
+    <div class="section-card">
+      <h3 class="section-title">主要水域源汇海拔高程及水力坡降参数</h3>
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>水体名称</th>
+              <th>源头/最高点海拔</th>
+              <th>汇入终端海拔</th>
+              <th>绝对海拔总落差</th>
+              <th>主要流向矢量</th>
+              <th>水力坡降特征</th>
+              <th>水质监测</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>长江巫峡干流</strong></td>
+              <td>175.0 m (库区上游)</td>
+              <td>145.0~175.0 m</td>
+              <td>约 0~30 米 (受控)</td>
+              <td>西 ➔ 东 (东流出三峡)</td>
+              <td>库区深缓水体，水面宽广</td>
+              <td><span class="status-pill status-good">II类 优良</span></td>
+            </tr>
+            <tr>
+              <td><strong>大宁河 (小三峡)</strong></td>
+              <td>约 1200 米</td>
+              <td>175.0 米 (巫峡口)</td>
+              <td><strong>1025 米</strong></td>
+              <td>北 ➔ 南 (纵贯注入长江)</td>
+              <td>上游峡谷湍急，下游回水静深</td>
+              <td><span class="status-pill status-good">I~II类 极优</span></td>
+            </tr>
+            <tr>
+              <td><strong>马渡河 (小小三峡)</strong></td>
+              <td>约 980 米</td>
+              <td>182.0 米 (大宁河畔)</td>
+              <td><strong>798 米</strong></td>
+              <td>东北 ➔ 西南 (汇入大宁河)</td>
+              <td>河谷狭窄，跌水滩多流急</td>
+              <td><span class="status-pill status-good">I类 原生级</span></td>
+            </tr>
+            <tr>
+              <td><strong>神女溪</strong></td>
+              <td>约 850 米</td>
+              <td>175.0 米 (巫峡南岸)</td>
+              <td><strong>675 米</strong></td>
+              <td>东南 ➔ 西北 (汇入长江)</td>
+              <td>深切V型谷，落差高度集中在源头</td>
+              <td><span class="status-pill status-good">I~II类 极优</span></td>
+            </tr>
+            <tr>
+              <td><strong>抱龙河</strong></td>
+              <td>约 1150 米</td>
+              <td>175.0 米 (抱龙角)</td>
+              <td><strong>975 米</strong></td>
+              <td>南 ➔ 北 (汇入长江)</td>
+              <td>山区山洪响应快，森林汇水</td>
+              <td><span class="status-pill status-good">II类 优良</span></td>
+            </tr>
+            <tr>
+              <td><strong>官渡河 / 九溪水系</strong></td>
+              <td>约 1380 米</td>
+              <td>210.0 米 (峡江盆地)</td>
+              <td><strong>1170 米</strong></td>
+              <td>西南 ➔ 东北 (暗河跌水)</td>
+              <td>梯级喀斯特落差极显著</td>
+              <td><span class="status-pill status-good">II类 清洁</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 水位季节周期与水体径流变化图表 -->
+    <div class="section-card">
+      <h3 class="section-title">巫山核心水系海拔高度横向对比与剖面示意</h3>
+      <div style="position: relative; width: 100%; height: 320px;">
+        <canvas id="elevationChart"></canvas>
+      </div>
+    </div>
+
+  </main>
+
+  <script>
+    // 初始化遥感模拟地图交互 + 粒子流向流动引擎 + 高程等高地形渲染
+    (function initSatelliteCanvas() {
+      const canvas = document.getElementById('waterMap');
+      const ctx = canvas.getContext('2d');
+      const statusLabel = document.getElementById('scanStatus');
+      const resetBtn = document.getElementById('resetMapBtn');
+
+      let width = 0, height = 0;
+
+      // 水系重要地理点与高程标注
+      const points = [
+        { id: 'yangtze', name: '长江巫峡干流', elevation: '175m', xRatio: 0.52, yRatio: 0.65, color: '#00d2ff', size: 9, flow: '东流 ➔' },
+        { id: 'daning', name: '大宁河·小三峡', elevation: '1200m ➔ 175m', xRatio: 0.38, yRatio: 0.36, color: '#2cd99b', size: 8, flow: '南流 ⬇' },
+        { id: 'xiaoxiao', name: '马渡河·小小三峡', elevation: '980m ➔ 182m', xRatio: 0.44, yRatio: 0.22, color: '#ffaa00', size: 6, flow: '西南流 ↙' },
+        { id: 'shennuxi', name: '神女溪', elevation: '850m ➔ 175m', xRatio: 0.72, yRatio: 0.58, color: '#00e5ff', size: 7, flow: '西北流 ↖' },
+        { id: 'baolong', name: '抱龙河', elevation: '1150m ➔ 175m', xRatio: 0.85, yRatio: 0.78, color: '#b388ff', size: 6, flow: '北流 ⬆' }
+      ];
+
+      // 定义流向几何线段：长江干流与各大支流，供动态流向粒子与箭头绘制
+      // 每条流向路径定义从上游（高海拔）指向下游（低海拔长江）
+      const flowPaths = [
+        // 1. 长江干流：自西向东 (西侧 175m -> 东侧 175m/下游)
+        {
+          id: 'yangtze',
+          color: '#00d2ff',
+          name: '长江干流',
+          points: [
+            { x: 0.05, y: 0.78 },
+            { x: 0.22, y: 0.74 },
+            { x: 0.36, y: 0.62 },
+            { x: 0.50, y: 0.64 },
+            { x: 0.68, y: 0.66 },
+            { x: 0.82, y: 0.57 },
+            { x: 0.96, y: 0.60 }
+          ],
+          width: 14,
+          speed: 0.0018
+        },
+        // 2. 大宁河：自北(大巴山 1200m)向南(长江汇合口 175m)
+        {
+          id: 'daning',
+          color: '#2cd99b',
+          name: '大宁河',
+          points: [
+            { x: 0.32, y: 0.06 },
+            { x: 0.42, y: 0.18 },
+            { x: 0.35, y: 0.33 },
+            { x: 0.40, y: 0.48 },
+            { x: 0.36, y: 0.63 }
+          ],
+          width: 6,
+          speed: 0.0022
+        },
+        // 3. 小小三峡/马渡河：自东北(980m)向西南(汇入大宁河 182m)
+        {
+          id: 'xiaoxiao',
+          color: '#ffaa00',
+          name: '马渡河',
+          points: [
+            { x: 0.55, y: 0.12 },
+            { x: 0.47, y: 0.20 },
+            { x: 0.39, y: 0.26 }
+          ],
+          width: 4,
+          speed: 0.0028
+        },
+        // 4. 神女溪：自东南高山(850m)向西北(注入巫峡 175m)
+        {
+          id: 'shennuxi',
+          color: '#00e5ff',
+          name: '神女溪',
+          points: [
+            { x: 0.74, y: 0.88 },
+            { x: 0.75, y: 0.76 },
+            { x: 0.70, y: 0.68 },
+            { x: 0.68, y: 0.64 }
+          ],
+          width: 4,
+          speed: 0.0025
+        },
+        // 5. 抱龙河：自南高山(1150m)向北(注入巫峡 175m)
+        {
+          id: 'baolong',
+          color: '#b388ff',
+          name: '抱龙河',
+          points: [
+            { x: 0.88, y: 0.95 },
+            { x: 0.84, y: 0.86 },
+            { x: 0.85, y: 0.74 },
+            { x: 0.82, y: 0.62 }
+          ],
+          width: 4,
+          speed: 0.0022
+        }
+      ];
+
+      // 粒子流对象池
+      const particles = [];
+      const PARTICLE_COUNT = 70;
+      for (let i = 0; i < PARTICLE_COUNT; i++) {
+        particles.push({
+          pathIdx: i % flowPaths.length,
+          t: Math.random(), // 0 ~ 1 进度
+          speed: 0.0015 + Math.random() * 0.002
+        });
+      }
+
+      let selectedPoint = null;
+      let animFrameId = null;
+
+      function resize() {
+        width = canvas.parentElement.clientWidth;
+        height = canvas.parentElement.clientHeight;
+        canvas.width = width;
+        canvas.height = height;
+      }
+
+      // 获取多段折线上的点坐标与切线角度
+      function getPathPointAndAngle(pts, t) {
+        if (pts.length < 2) return { x: 0, y: 0, angle: 0 };
+        const totalSegments = pts.length - 1;
+        const scaledT = t * totalSegments;
+        const segIndex = Math.min(Math.floor(scaledT), totalSegments - 1);
+        const segT = scaledT - segIndex;
+
+        const p1 = pts[segIndex];
+        const p2 = pts[segIndex + 1];
+
+        const x1 = p1.x * width, y1 = p1.y * height;
+        const x2 = p2.x * width, y2 = p2.y * height;
+
+        const x = x1 + (x2 - x1) * segT;
+        const y = y1 + (y2 - y1) * segT;
+        const angle = Math.atan2(y2 - y1, x2 - x1);
+
+        return { x, y, angle };
+      }
+
+      // 绘制流向指示箭头
+      function drawArrowhead(ctx, x, y, angle, size, color) {
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.rotate(angle);
+        ctx.fillStyle = color;
+        ctx.beginPath();
+        ctx.moveTo(size * 1.2, 0);
+        ctx.lineTo(-size, -size * 0.7);
+        ctx.lineTo(-size * 0.5, 0);
+        ctx.lineTo(-size, size * 0.7);
+        ctx.closePath();
+        ctx.fill();
+        ctx.restore();
+      }
+
+      function render() {
+        ctx.clearRect(0, 0, width, height);
+
+        // 1. 模拟遥感高程渲染 (DEM 卫星假彩色：高山为深石褐青，江谷为低凹深黑)
+        const bgGrad = ctx.createRadialGradient(width * 0.45, height * 0.5, 20, width * 0.5, height * 0.5, width * 0.85);
+        bgGrad.addColorStop(0, '#0c2233');
+        bgGrad.addColorStop(0.45, '#071520');
+        bgGrad.addColorStop(1, '#02070c');
+        ctx.fillStyle = bgGrad;
+        ctx.fillRect(0, 0, width, height);
+
+        // 2. 绘制高程等高线纹理与高程值标注 (说明山体向峡谷汇聚)
+        const contourElevations = [
+          { r: 70, elev: '高程 200m 等高线 (谷底峡湾)' },
+          { r: 130, elev: '高程 500m 等高线' },
+          { r: 190, elev: '高程 800m 等高线 (悬崖峰丛)' },
+          { r: 260, elev: '高程 1200m 等高线 (分水岭高山)' }
+        ];
+
+        contourElevations.forEach((c, idx) => {
+          ctx.beginPath();
+          ctx.ellipse(width * 0.45, height * 0.52, c.r * (width / 500), c.r * 0.65 * (height / 350), -0.15, 0, Math.PI * 2);
+          ctx.strokeStyle = idx === 0 ? 'rgba(0, 210, 255, 0.25)' : 'rgba(35, 75, 100, 0.28)';
+          ctx.setLineDash([4, 6]);
+          ctx.lineWidth = 1;
+          ctx.stroke();
+          ctx.setLineDash([]);
+
+          // 标注等高线字样
+          ctx.fillStyle = 'rgba(139, 162, 181, 0.4)';
+          ctx.font = '10px monospace';
+          ctx.fillText(c.elev, width * 0.45 + c.r * (width / 500) * 0.4, height * 0.52 - c.r * 0.45 * (height / 350));
+        });
+
+        // 3. 绘制各水系河道基底线
+        flowPaths.forEach(path => {
+          ctx.beginPath();
+          const p0 = path.points[0];
+          ctx.moveTo(p0.x * width, p0.y * height);
+          for (let i = 1; i < path.points.length; i++) {
+            ctx.lineTo(path.points[i].x * width, path.points[i].y * height);
+          }
+
+          // 外发光层
+          ctx.strokeStyle = path.color;
+          ctx.globalAlpha = 0.25;
+          ctx.lineWidth = path.width + 6;
+          ctx.lineCap = 'round';
+          ctx.lineJoin = 'round';
+          ctx.stroke();
+
+          // 核心水体层
+          ctx.globalAlpha = 0.85;
+          ctx.lineWidth = path.width;
+          ctx.stroke();
+          ctx.globalAlpha = 1.0;
+
+          // 4. 在河道中间固定绘制固定流向矢量箭头
+          const arrowProgresses = [0.3, 0.68];
+          arrowProgresses.forEach(tVal => {
+            const pa = getPathPointAndAngle(path.points, tVal);
+            drawArrowhead(ctx, pa.x, pa.y, pa.angle, 7, '#ffffff');
+          });
+        });
+
+        // 5. 绘制动态流动粒子（动态直观体现流速与流向）
+        particles.forEach(p => {
+          p.t += p.speed;
+          if (p.t > 1) p.t = 0;
+
+          const curPath = flowPaths[p.pathIdx];
+          const pos = getPathPointAndAngle(curPath.points, p.t);
+
+          ctx.beginPath();
+          ctx.arc(pos.x, pos.y, 2.5, 0, Math.PI * 2);
+          ctx.fillStyle = '#ffffff';
+          ctx.shadowColor = curPath.color;
+          ctx.shadowBlur = 8;
+          ctx.fill();
+          ctx.shadowBlur = 0;
+        });
+
+        // 6. 绘制高程对比标注与热点地标点
+        points.forEach(p => {
+          const px = p.xRatio * width;
+          const py = p.yRatio * height;
+          const isSelected = selectedPoint && selectedPoint.id === p.id;
+
+          // 探测外光环
+          ctx.beginPath();
+          ctx.arc(px, py, isSelected ? p.size + 11 : p.size + 4, 0, Math.PI * 2);
+          ctx.fillStyle = isSelected ? 'rgba(0, 255, 136, 0.28)' : 'rgba(0, 210, 255, 0.15)';
+          ctx.fill();
+          ctx.strokeStyle = isSelected ? '#00ff88' : p.color;
+          ctx.lineWidth = 1.5;
+          ctx.stroke();
+
+          // 核心点
+          ctx.beginPath();
+          ctx.arc(px, py, p.size, 0, Math.PI * 2);
+          ctx.fillStyle = isSelected ? '#ffffff' : p.color;
+          ctx.fill();
+
+          // 文字注记：名称 + 海拔与流向标签
+          ctx.font = 'bold 12px sans-serif';
+          ctx.fillStyle = isSelected ? '#ffffff' : '#cce6f8';
+          ctx.fillText(p.name, px + 12, py - 3);
+
+          // 带有高程信息的标签条
+          ctx.font = '10px monospace';
+          ctx.fillStyle = '#ffd166';
+          ctx.fillText(`▲ ${p.elevation} (${p.flow})`, px + 12, py + 11);
+        });
+
+        // 绘制遥感标尺与高程说明
+        ctx.fillStyle = 'rgba(0, 210, 255, 0.5)';
+        ctx.font = '10px monospace';
+        ctx.fillText('N 31°15′00″ [大巴山脉北部分水岭 1200m+]', 10, 22);
+        ctx.fillText('N 31°00′00″ [长江巫峡蓄水面 175m]', 10, height - 12);
+        ctx.fillText('水流梯度: 由外围高山向中部巫峡谷底汇聚', width - 240, 22);
+        ctx.fillText('E 110°10′00″ [下游宜昌方向 ➔]', width - 170, height - 12);
+
+        animFrameId = requestAnimationFrame(render);
+      }
+
+      window.addEventListener('resize', () => {
+        resize();
+      });
+      resize();
+      render();
+
+      // 点击 Canvas 探测点
+      canvas.addEventListener('click', function(e) {
+        const rect = canvas.getBoundingClientRect();
+        const clickX = e.clientX - rect.left;
+        const clickY = e.clientY - rect.top;
+
+        let hit = null;
+        for (const p of points) {
+          const px = p.xRatio * width;
+          const py = p.yRatio * height;
+          const dist = Math.hypot(clickX - px, clickY - py);
+          if (dist < 26) {
+            hit = p;
+            break;
+          }
+        }
+
+        if (hit) {
+          selectedPoint = hit;
+          statusLabel.textContent = `锁定目标: ${hit.name} (海拔落差: ${hit.elevation} | 流向: ${hit.flow})`;
+          highlightCard(hit.id);
+        }
+      });
+
+      // 联动卡片高亮
+      function highlightCard(waterId) {
+        const cards = document.querySelectorAll('.water-card');
+        cards.forEach(c => {
+          c.classList.remove('active');
+          if (c.getAttribute('data-water') === waterId) {
+            c.classList.add('active');
+            c.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+        });
+      }
+
+      // 卡片点击反选定位
+      document.querySelectorAll('.water-card').forEach(card => {
+        card.addEventListener('click', function() {
+          const wid = this.getAttribute('data-water');
+          const found = points.find(p => p.id === wid);
+          if (found) {
+            selectedPoint = found;
+            statusLabel.textContent = `锁定目标: ${found.name} (海拔落差: ${found.elevation} | 流向: ${found.flow})`;
+            highlightCard(wid);
+          }
+        });
+      });
+
+      resetBtn.addEventListener('click', function() {
+        selectedPoint = null;
+        statusLabel.textContent = '动态水力梯度监测中';
+        document.querySelectorAll('.water-card').forEach(c => c.classList.remove('active'));
+      });
+
+    })();
+
+    // 初始化海拔高度纵向对比图表 (Chart.js)
+    (function initElevationChart() {
+      const ctx = document.getElementById('elevationChart');
+      if (!ctx) return;
+
+      new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: [
+            '官渡/九溪水系',
+            '大宁河 (小三峡)',
+            '抱龙河水系',
+            '马渡河 (小小三峡)',
+            '神女溪水域',
+            '长江·巫峡主航道'
+          ],
+          datasets: [
+            {
+              label: '源头/高山最高海拔 (m)',
+              data: [1380, 1200, 1150, 980, 850, 175],
+              backgroundColor: 'rgba(255, 170, 0, 0.75)',
+              borderColor: '#ffaa00',
+              borderWidth: 1,
+              borderRadius: 4
+            },
+            {
+              label: '汇流处水面海拔 (m)',
+              data: [210, 175, 175, 182, 175, 145],
+              backgroundColor: 'rgba(0, 210, 255, 0.75)',
+              borderColor: '#00d2ff',
+              borderWidth: 1,
+              borderRadius: 4
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              labels: {
+                color: '#cce6f8',
+                font: { size: 12 }
+              }
+            },
+            tooltip: {
+              backgroundColor: 'rgba(10, 23, 36, 0.95)',
+              titleColor: '#00d2ff',
+              borderColor: 'rgba(0, 210, 255, 0.4)',
+              borderWidth: 1,
+              callbacks: {
+                afterBody: function(context) {
+                  const idx = context[0].dataIndex;
+                  const drops = [1170, 1025, 975, 798, 675, 30];
+                  const flows = [
+                    '流向：西南 ➔ 东北 (暗河涌出入江)',
+                    '流向：北 ➔ 南 (下切注入长江巫峡)',
+                    '流向：南 ➔ 北 (森林径流汇入长江)',
+                    '流向：东北 ➔ 西南 (汇入大宁河滴翠峡)',
+                    '流向：东南 ➔ 西北 (神女峰下注入长江)',
+                    '流向：自西 ➔ 东 (贯穿巫山奔向宜昌)'
+                  ];
+                  return `落差幅度: ${drops[idx]} 米\n${flows[idx]}`;
+                }
+              }
+            }
+          },
+          scales: {
+            x: {
+              grid: { color: 'rgba(255, 255, 255, 0.05)' },
+              ticks: { color: '#8ba2b5', font: { size: 11 } }
+            },
+            y: {
+              title: { display: true, text: '海拔高度 (米)', color: '#00d2ff' },
+              grid: { color: 'rgba(255, 255, 255, 0.05)' },
+              ticks: { color: '#00d2ff' },
+              beginAtZero: true
+            }
+          }
+        }
+      });
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta name="apphub-project" content="aicard">
+<meta name="apphub-api-base" content="/web/aigen">
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>海外服务订阅安全指南与操作 SOP</title>
+  <link rel="stylesheet" href="https://ai.shoc.zin7.de/static/vendor/pico.min.css">
+  <style>
+    :root {
+      --pico-font-size: 15px;
+      --risk-high: #d93526;
+      --risk-mid: #e58e00;
+      --risk-low: #1095c1;
+      --risk-safe: #2f855a;
+    }
+    body {
+      padding-bottom: 3rem;
+      background-color: var(--pico-background-color);
+    }
+    header {
+      margin-bottom: 1.5rem;
+      padding-top: 1rem;
+      border-bottom: 1px solid var(--pico-muted-border-color);
+    }
+    .badge {
+      display: inline-block;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: bold;
+      color: #fff;
+      line-height: 1.2;
+    }
+    .badge-safe { background-color: var(--risk-safe); }
+    .badge-low { background-color: var(--risk-low); }
+    .badge-mid { background-color: var(--risk-mid); }
+    .badge-high { background-color: var(--risk-high); }
+    
+    .card-box {
+      border: 1px solid var(--pico-muted-border-color);
+      border-radius: 8px;
+      padding: 1rem;
+      margin-bottom: 1rem;
+      background: var(--pico-card-background-color);
+    }
+    .nav-tabs {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1.5rem;
+      overflow-x: auto;
+      padding-bottom: 4px;
+    }
+    .nav-tabs button {
+      min-height: 44px;
+      font-size: 14px;
+      padding: 0.5rem 1rem;
+      margin-bottom: 0;
+      white-space: nowrap;
+      flex: 1 0 auto;
+    }
+    .tab-content {
+      display: none;
+    }
+    .tab-content.active {
+      display: block;
+    }
+    .risk-rank-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+      padding: 0.75rem;
+      border-radius: 6px;
+      margin-bottom: 0.5rem;
+      background-color: var(--pico-card-sectionning-background-color);
+    }
+    .risk-num {
+      font-weight: 800;
+      font-size: 16px;
+      min-width: 24px;
+      height: 24px;
+      text-align: center;
+      line-height: 24px;
+    }
+    .checklist-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+      padding: 0.6rem 0;
+      border-bottom: 1px dashed var(--pico-muted-border-color);
+    }
+    .checklist-item input[type="checkbox"] {
+      width: 22px;
+      height: 22px;
+      margin-top: 2px;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    .calculator-res {
+      margin-top: 1rem;
+      padding: 1rem;
+      background-color: var(--pico-card-sectionning-background-color);
+      border-radius: 6px;
+    }
+    table {
+      margin-bottom: 0;
+    }
+    th, td {
+      white-space: nowrap;
+      font-size: 14px;
+    }
+    .text-sm {
+      font-size: 13px;
+      color: var(--pico-muted-color);
+    }
+    .highlight-lead {
+      font-weight: 600;
+      color: var(--pico-primary);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h3 style="margin-bottom: 0.25rem;">海外服务合规订阅与安全指引</h3>
+      <p class="text-sm" style="margin-bottom: 0.75rem;">个人小额消费姿态 · 风控隔离 · 最佳实践手册</p>
+      <div class="nav-tabs" role="tablist">
+        <button type="button" class="tab-btn" onclick="switchTab('risk')" id="btn-risk">1. 风险全景</button>
+        <button type="button" class="tab-btn secondary" onclick="switchTab('sop')" id="btn-sop">2. 执行 SOP</button>
+        <button type="button" class="tab-btn secondary" onclick="switchTab('network')" id="btn-network">3. 网络选型</button>
+        <button type="button" class="tab-btn secondary" onclick="switchTab('tool')" id="btn-tool">4. 自检清单</button>
+      </div>
+    </header>
+
+    <main>
+      <!-- Tab 1: 风险判定 -->
+      <section id="tab-risk" class="tab-content active">
+        <div class="card-box">
+          <h4 style="margin-bottom: 0.5rem;">稳定性判断：两层风险拆解</h4>
+          <p>核心原则：<strong>“出事概率低 + 即使出事损失小”</strong>，而非绝对安全。合规收紧是大势，但主要防范对象不是小额刚需消费者。</p>
+          
+          <article style="padding: 0.85rem; margin-bottom: 0.75rem;">
+            <strong>① 司法执法风险（优先级极低）</strong>
+            <p class="text-sm" style="margin-top: 0.25rem; margin-bottom: 0;">
+              境内监管核心打压平台方、地下钱庄、洗钱大额及经营性 P2P 获利行为。个人每月消费几十刀 USDT 订阅 ChatGPT，完全不在执法优先级中。2026 年政策重点在于规范机构端向境内引流。
+            </p>
+          </article>
+
+          <article style="padding: 0.85rem; margin-bottom: 0;">
+            <strong>② 平台合规封控（真正风险源）</strong>
+            <p class="text-sm" style="margin-top: 0.25rem; margin-bottom: 0;">
+              Bybit 等平台条款存在排除地区限制。但执行是被动、分层排序的：多账号、大额堆积、KYC 信息割裂、频繁换 IP 或可疑行为才会被盯上。<strong>信息一致、金额小、只消费不交易</strong>的账号处于雷达最边缘。
+            </p>
+          </article>
+        </div>
+
+        <div class="card-box">
+          <h4 style="margin-bottom: 0.75rem;">行为模式风险天梯</h4>
+          <div class="risk-rank-item">
+            <span class="risk-num" style="color: var(--risk-high);">1</span>
+            <div>
+              <strong>P2P 卖 U 收人民币</strong> <span class="badge badge-high">最高危</span>
+              <div class="text-sm">接收陌生对手方资金，最容易碰上脏钱导致国内银行卡被司法冻结。</div>
+            </div>
+          </div>
+          <div class="risk-rank-item">
+            <span class="risk-num" style="color: var(--risk-mid);">2</span>
+            <div>
+              <strong>P2P 买 U</strong> <span class="badge badge-mid">中等</span>
+              <div class="text-sm">资金单向流出，风险较低，但若对手方涉案过深仍有轻微链式波及排查可能。</div>
+            </div>
+          </div>
+          <div class="risk-rank-item">
+            <span class="risk-num" style="color: var(--risk-mid);">3</span>
+            <div>
+              <strong>交易所长期囤大额</strong> <span class="badge badge-mid">中等</span>
+              <div class="text-sm">面临平台政策突变、黑天鹅与合规风控抽查导致的本金冻结风险。</div>
+            </div>
+          </div>
+          <div class="risk-rank-item" style="border-left: 3px solid var(--risk-safe);">
+            <span class="risk-num" style="color: var(--risk-safe);">4</span>
+            <div>
+              <strong>小额纯消费（当前姿态）</strong> <span class="badge badge-safe">最低风险</span>
+              <div class="text-sm">买小额 → 快速划转 → 绑卡扣款 → 账户不留存资金。纯买家行为，最安全姿态。</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Tab 2: 最佳实践 SOP -->
+      <section id="tab-sop" class="tab-content">
+        <div class="card-box">
+          <h4 style="margin-bottom: 0.5rem;">5 步最佳实践落地 SOP</h4>
+          
+          <details open>
+            <summary class="highlight-lead">1. 账号唯一，三要素一致</summary>
+            <p class="text-sm">
+              一人仅保留一个实名号，严禁双开。<strong>注册 IP、居住地声明、虚拟卡地区保持一致</strong>（例如均为台湾地区）。严禁节点漂移至美国 IP（易收到限制警告邮件）。完成 KYC 后，避免频繁改密码或解绑 Google Authenticator（防止触发 24 小时提币风控锁）。
+            </p>
+          </details>
+
+          <details open>
+            <summary class="highlight-lead">2. 买 U 只买不卖，资金隔离</summary>
+            <p class="text-sm">
+              在欧易 P2P 充值，<strong>一次买够 3~5 个月用量</strong>（约 60~100 USDT），减少入金频次。筛选标准：商家成单量大、完成率 98%+，严禁贪便宜选低价单。<strong>使用一张不常用的银行卡专卡专用</strong>（切忌用主工资卡），绝对不要在 P2P 上把 U 换回法币。
+            </p>
+          </details>
+
+          <details open>
+            <summary class="highlight-lead">3. 阶梯划转，账户零积攒</summary>
+            <p class="text-sm">
+              初次或更换通道时，<strong>先转 10 USDT 做小额跑通测试</strong>，确认入账无误后再转大额。虚拟卡/钱包内仅存放 1~3 个月订阅款项，随用随扣，坚决不把交易所当储蓄罐。
+            </p>
+          </details>
+
+          <details open>
+            <summary class="highlight-lead">4. 刷卡消费环境规整</summary>
+            <p class="text-sm">
+              订阅 ChatGPT 时，账单地址建议填<strong>美国免税州（如 Oregon/Delaware）</strong>，代理节点与账单国家一致，<strong>严禁使用香港节点</strong>。使用浏览器无痕模式操作。如遇扣款被拒 2 次，立即停手，勿盲目重试，静候 24 小时再处理。
+            </p>
+          </details>
+
+          <details open>
+            <summary class="highlight-lead">5. 预留应急后手</summary>
+            <p class="text-sm">
+              万一遭遇平台冻结，配合客服补齐声明材料，资金通常可赎回，但流程耗时数周至数月。务必备齐第二支付备份（例如 Shopee ChatGPT 活动额度、备用支付卡），不要单点依赖。
+            </p>
+          </details>
+        </div>
+      </section>
+
+      <!-- Tab 3: 网络通道选型 -->
+      <section id="tab-network" class="tab-content">
+        <div class="card-box">
+          <h4 style="margin-bottom: 0.5rem;">提币链路全景对比</h4>
+          <p class="text-sm">为什么力荐 TRC20？核心在于<strong>“防呆纠错性”</strong>，避免因选错链导致资金永久丢失。</p>
+          
+          <div style="overflow-x:auto">
+            <table>
+              <thead>
+                <tr>
+                  <th>网络</th>
+                  <th>欧易提币费</th>
+                  <th>到账速度</th>
+                  <th>地址特征</th>
+                  <th>风控/失误风险</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>TRC20</strong> (首选推荐)</td>
+                  <td>~1.0 - 1.5 U</td>
+                  <td>1 - 3 分钟</td>
+                  <td><code>T</code> 开头</td>
+                  <td><span class="badge badge-safe">低</span> 地址天然排他，绝不可能选错链</td>
+                </tr>
+                <tr>
+                  <td><strong>Arbitrum One</strong> (低费备选)</td>
+                  <td>~0.1 - 0.3 U</td>
+                  <td>&lt; 1 分钟</td>
+                  <td><code>0x</code> 开头</td>
+                  <td><span class="badge badge-mid">中</span> 必须手动确认两端均为 Arbitrum</td>
+                </tr>
+                <tr>
+                  <td><strong>ERC20</strong></td>
+                  <td>~0.55 U+</td>
+                  <td>3 - 10 分钟</td>
+                  <td><code>0x</code> 开头</td>
+                  <td><span class="badge badge-mid">中</span> 慢，费率波动大，容易与 L2 混淆</td>
+                </tr>
+                <tr>
+                  <td><strong>BEP20 (BSC)</strong></td>
+                  <td>—</td>
+                  <td>—</td>
+                  <td><code>0x</code> 开头</td>
+                  <td><span class="badge badge-high">高</span> 欧易端不支持，不可选</td>
+                </tr>
+                <tr>
+                  <td><strong>Plasma (USDT0)</strong></td>
+                  <td>~0 U</td>
+                  <td>极快</td>
+                  <td>定制</td>
+                  <td><span class="badge badge-high">高</span> 新生态 USDT0 兼容度低，易锁死</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="text-sm" style="margin-top: 0.5rem;">* 费率随链上拥堵度微调，请以欧易/Bybit提币页实时确认显示为准。</p>
+        </div>
+
+        <div class="card-box">
+          <h4 style="margin-bottom: 0.5rem;">链路成本计算器</h4>
+          <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem;">
+            <div>
+              <label for="calc-amount">充值总额 (USDT)</label>
+              <input type="number" id="calc-amount" value="80" min="10" max="1000" oninput="calcNetFee()">
+            </div>
+            <div>
+              <label for="calc-months">预计订阅月数</label>
+              <input type="number" id="calc-months" value="4" min="1" max="12" oninput="calcNetFee()">
+            </div>
+          </div>
+          <div id="calc-result" class="calculator-res text-sm">
+            <!-- 动态计算结果 -->
+          </div>
+        </div>
+      </section>
+
+      <!-- Tab 4: 自检清单 -->
+      <section id="tab-tool" class="tab-content">
+        <div class="card-box">
+          <h4 style="margin-bottom: 0.25rem;">操作前防翻车自检清单</h4>
+          <p class="text-sm">在点击“确认提币”或“确认支付”前，请逐条对照排查：</p>
+
+          <div class="checklist-item">
+            <input type="checkbox" id="chk1" onchange="updateProgress()">
+            <label for="chk1"><strong>网络地址一致性</strong>：两端网络完全一致（若选 TRC20 确保首字母为 T；若选 Arbitrum 确保接收方也是 Arbitrum One）。</label>
+          </div>
+
+          <div class="checklist-item">
+            <input type="checkbox" id="chk2" onchange="updateProgress()">
+            <label for="chk2"><strong>小额探路测试</strong>：如果是新开卡或新通道，已先行测试转账 10 USDT 并确认到账。</label>
+          </div>
+
+          <div class="checklist-item">
+            <input type="checkbox" id="chk3" onchange="updateProgress()">
+            <label for="chk3"><strong>IP 环境隔离</strong>：未使用香港节点，未使用美国高危公有节点，网络与账单国家一致。</label>
+          </div>
+
+          <div class="checklist-item">
+            <input type="checkbox" id="chk4" onchange="updateProgress()">
+            <label for="chk4"><strong>浏览器无痕环境</strong>：清理缓存，使用隐私/无痕标签页发起 ChatGPT 扣费绑定。</label>
+          </div>
+
+          <div class="checklist-item">
+            <input type="checkbox" id="chk5" onchange="updateProgress()">
+            <label for="chk5"><strong>隔离账户原则</strong>：买 U 采用专卡，账户内仅保留 3~5 个月额度，余额未超标。</label>
+          </div>
+
+          <div style="margin-top: 1rem;">
+            <progress id="check-progress" value="0" max="5"></progress>
+            <p id="check-status" class="text-sm" style="text-align: center; margin-top: 0.25rem;">完成度: 0 / 5</p>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.add('secondary'));
+      
+      const targetContent = document.getElementById('tab-' + tabId);
+      const targetBtn = document.getElementById('btn-' + tabId);
+      if (targetContent) targetContent.classList.add('active');
+      if (targetBtn) targetBtn.classList.remove('secondary');
+    }
+
+    function calcNetFee() {
+      const amount = parseFloat(document.getElementById('calc-amount').value) || 0;
+      const months = parseInt(document.getElementById('calc-months').value) || 1;
+      
+      const trc20Fee = 1.3;
+      const arbFee = 0.2;
+
+      const trc20Ratio = amount > 0 ? ((trc20Fee / amount) * 100).toFixed(2) : 0;
+      const arbRatio = amount > 0 ? ((arbFee / amount) * 100).toFixed(2) : 0;
+      
+      const perMonthCostTrc = (trc20Fee / months).toFixed(2);
+      const perMonthCostArb = (arbFee / months).toFixed(2);
+
+      const resBox = document.getElementById('calc-result');
+      resBox.innerHTML = `
+        <strong>损耗比对分析：</strong><br>
+        • <strong>TRC20 方案</strong>：单次手续费 ≈ ${trc20Fee} U（占充值金额 <strong>${trc20Ratio}%</strong>，平摊每月仅 <strong>${perMonthCostTrc} U</strong>）。特点：地址天然防呆（T开头），最不易丢失资金。<br>
+        • <strong>Arbitrum One 方案</strong>：单次手续费 ≈ ${arbFee} U（占充值金额 <strong>${arbRatio}%</strong>，平摊每月约 <strong>${perMonthCostArb} U</strong>）。特点：费用极低，但务必核验转出转入均为 Arbitrum One。<br>
+        <span style="color: var(--risk-low); display:inline-block; margin-top:0.4rem;">
+          💡 <strong>决策建议</strong>：一次性充值 60~100 U 时，二者实际月均差价不到 ¥0.3，优先选择 <strong>TRC20</strong> 买平安；熟练老手且仔细核对网络时可选 <strong>Arbitrum One</strong>。
+        </span>
+      `;
+    }
+
+    function updateProgress() {
+      const total = 5;
+      let checkedCount = 0;
+      for (let i = 1; i <= total; i++) {
+        const chk = document.getElementById('chk' + i);
+        if (chk && chk.checked) checkedCount++;
+      }
+      const progressBar = document.getElementById('check-progress');
+      const statusText = document.getElementById('check-status');
+      progressBar.value = checkedCount;
+
+      if (checkedCount === total) {
+        statusText.innerHTML = `<span style="color: var(--risk-safe); font-weight:bold;">✓ 检查完毕，环境合规，可安全执行充提与订阅！</span>`;
+      } else {
+        statusText.innerHTML = `完成度: ${checkedCount} / ${total}（剩余 ${total - checkedCount} 项待确认）`;
+      }
+    }
+
+    // 初始化计算器
+    window.addEventListener('DOMContentLoaded', () => {
+      calcNetFee();
+    });
+  </script>
+</body>
+</html>

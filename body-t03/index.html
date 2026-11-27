@@ -1,0 +1,70 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>生长·甲状腺·应激轴</title><style>
+:root{--bg:#f7f2e9;--ink:#2b2620;--mut:#7a7264;--acc:#b4552d;--card:#fffdf8;--line:#e3dac8}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:"Noto Serif SC",serif;line-height:1.75}
+.wrap{max-width:860px;margin:0 auto;padding:28px 18px 60px}
+.kicker{color:var(--acc);letter-spacing:.2em;font-size:12px}
+h1{font-size:30px;margin:6px 0 4px}.sub{color:var(--mut);margin:0 0 6px}
+.modelnote{color:var(--mut);font-size:13px;border-bottom:1px solid var(--line);padding-bottom:14px}
+h2{font-size:20px;margin:34px 0 10px;border-left:4px solid var(--acc);padding-left:10px}
+.stage{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin:10px 0}
+.age{color:var(--acc);font-weight:700;font-size:14px}.stage h3{margin:2px 0 6px;font-size:17px}
+.normal{color:#3d6b35;font-size:14px}.warn{color:#9a3b1e;font-size:14px}
+table{width:100%;border-collapse:collapse;background:var(--card);font-size:14px}
+td,th{border:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}
+th{background:#f1e9d8}
+.insight{background:#f3ead9;border-radius:10px;padding:16px}
+.node{cursor:pointer}.node circle{fill:var(--acc)}.node text{fill:#fff;font-size:13px;font-weight:700}
+#mechdesc{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px 16px;min-height:56px}
+details{margin-top:18px}summary{cursor:pointer;color:var(--acc)}
+svg{max-width:100%;height:auto}
+</style></head>
+<body><div class="wrap">
+<div class="kicker">人体全生命周期图谱 · T03</div>
+<h1>生长·甲状腺·应激轴</h1>
+<p class="sub">身高、代谢与压力反应：三条互相牵制的内分泌轴</p>
+<p class="modelnote">内容模型：Vertex Gemini 3.8 Flash（生成与整理）；关键数值经 PubMed 核查锁定。本页由确定性模板渲染。</p>
+<div id="chartwrap"></div>
+<h2>看得见的变化</h2><div id="stages"></div>
+<h2>正常还是该就医</h2><table><tr><th>信号</th><th>怎么做</th></tr><tbody id="redflags"></tbody></table>
+<h2>能改变的杠杆</h2><table><tr><th>杠杆</th><th>作用</th><th>说明</th></tr><tbody id="levers"></tbody></table>
+<h2>一句话记住</h2><div class="insight" id="insight"></div>
+<h2>背后的机制（点编号看解释）</h2><div id="mechsvg"></div><div id="mechdesc"></div><p id="mechnote"></p>
+<details><summary>证据清单（数值来源）</summary><table><tr><th>编号</th><th>结论</th><th>核查</th><th>来源</th></tr><tbody id="claims"></tbody></table></details>
+</div>
+<script id="dimension-data" type="application/json">{"dim": "T03", "title": "生长·甲状腺·应激轴", "subtitle": "身高、代谢与压力反应：三条互相牵制的内分泌轴", "model_note": "内容模型：Vertex Gemini 3.8 Flash（生成与整理）；关键数值经 PubMed 核查锁定。本页由确定性模板渲染。", "stages": [{"age": "0-2岁", "title": "0-2岁", "what": "人生冲刺最猛的阶段。出生第1年身长暴增约25-26厘米，第2年增速直接腰斩至10-12厘米。你看得见的是换衣服的速度，看不见的是身体悄然完成动力换挡——生长驱动力正从母体营养和早期发育素，交接给大脑指挥的生长激素。"}, {"age": "3-9岁", "title": "3-9岁", "what": "进入波澜不惊的恒速期，身高以每年5.0-6.5厘米的匀速向前爬升。看似每年长势相似，其实生长激素与身体自带的建造团队正在骨骼内部按部就班地搭建生长支架，为下一场青春期突增储备骨质空间。"}, {"age": "10-18岁", "title": "10-18岁", "what": "青春期突增与终局封顶。女孩在9.5-10.5岁启动突增，11.5-12.5岁冲上每年长8.0-9.0厘米的峰值；男孩晚两年在11.5-12.5岁启动，13.5-14.5岁达峰并飙出每年9.5-10.5厘米的高峰。当你惊叹体型大变时，雌激素正暗中为骨骼打下终点标记：女孩在14-16岁、男孩在16-18岁骨骼生长板彻底闭合，终身身高定格。"}, {"age": "19-49岁", "title": "19-49岁", "what": "跨过30岁门槛，机体迎来生长激素的悄然退潮。身体总生长激素分泌量每十年少掉约一成半（14-15%），深度修护活力每十年衰减约一成。镜子里肌肉轮廓变松、熬夜后修复变慢，往往不是单纯的体力下滑，而是身体负责自我修复和建造的激素在静默离场。"}, {"age": "50-69岁", "title": "50-69岁", "what": "代谢引擎主动调小马力。65岁后，身体把储备动力转化为真正可用代谢活力的能力走低，高活性动力成分每十年滑落0.2-0.4个单位。你察觉到的食量减少却体重顽固、畏寒便秘，实则是身体为了减少细胞损耗，主动下调了全身的基础运转速度。"}, {"age": "70-85岁", "title": "70-85岁", "what": "压力节律被推平，修护能力出现断崖。70岁以上老人夜间本该降到最低的压力激素，反比年轻人高出两到五成（20%-50%），昼夜起伏变平约三成；80岁时负责抗损防衰的保护性激素只剩年轻峰值的一到两成（10%-20%），其与压力激素的比例自25岁顶峰累计跌去八成以上。老人的消瘦衰弱与肌肉瓦解，正是这场分解过度、修复归零的长年错位结果。"}], "redflags": [{"signal": "儿童生长期速率失速或早熟蹿个", "action": "3-9岁儿童连续一年身高增长低于5.0厘米（正常匀速应为每年5.0-6.5厘米）；或者女孩在9.5岁前、男孩在11.5岁前突然提前猛蹿个子并伴随第二性征出现。这属于发育停滞或性早熟导致骨骺可能提前封顶的危险信号，需立即就医排查。"}, {"signal": "骨骼闭合期盲目增高受损", "action": "女孩14-16岁、男孩16-18岁后，若连续1年以上身高完全没有任何变化，提示骨骼生长空间已彻底关闭。此时切忌盲目相信任何偏方或注射增高针，否则不仅无法多长一厘米，反而容易诱发水肿、血糖失衡等全身问题。"}, {"signal": "高龄老人过度提速引发心慌与跌倒", "action": "80岁以上的老人全身转速自然放慢。若老人近期在服用刺激代谢的药物期间，突然出现莫名心慌心悸、坐立不安、大量出汗或腿软跌倒骨折，极可能是机体被过度催动超负荷，需立刻去医院调整用药方案。"}, {"signal": "高龄期肌肉极速瓦解与衰弱", "action": "70-80岁老人，在没有刻意节食的情况下，半年内体重不知不觉下降5%以上，或者肉眼可见四肢肌肉迅速萎缩松垮、站立不稳、端碗走路上楼极度费力甚至反复跌倒，提示身体正处于严重的自身组织消耗状态，需及时前往老年科或内分泌科排查。"}], "levers": [{"name": "睡前空腹与黑暗助推夜间深度修护", "effect": "睡前2小时坚决不吃甜食、含糖饮料和宵夜，卧室彻底熄灯保持全黑。为什么有用：血糖升高会直接掐断夜间生长修复信号，黑暗则能引导深度睡眠，促成一天中最大的一波身体自愈冲刺。多久见效：坚持2-4周，青少年的生长动力更充分，成年人早起疲惫感明显减轻、精力恢复变快。", "note": ""}, {"name": "拒绝极端断碳水，保住代谢马力底线", "effect": "停止长期的极低碳水饮食或极度节食，每天三餐保证有一拳头粗细搭配的主食（如杂粮、薯类）。为什么有用：身体合成高活性代谢动力极度依赖充足的能量信号，一旦长期饥饿，身体会主动将基础转速降至冰点以保命，导致越减越怕冷、体重越顽固。多久见效：恢复适量健康主食后，数天至数周内体温回暖、排便通畅，代谢停滞得到扭转。", "note": ""}, {"name": "早晨晒太阳与夜晚避光，重建抗压节奏", "effect": "早晨起床30分钟内到户外接触自然阳光15-20分钟，夜间睡前1小时关闭刺眼大灯与手机蓝光。为什么有用：用清晨光线锚定生物钟，能把白天的活力激素拉上去、把深夜的压力水平压下来，防止高龄期夜间压力激素异常偏高20%-50%，从而保护肌肉免遭夜间持续分解。多久见效：坚持1-2个月，睡眠变沉变踏实，白天精气神明显提升，肌肉流失速度大幅放缓。", "note": ""}], "insight": "女孩成年后平均身高往往低于男孩，并非青春期突增时冲劲不足，而是促成女性发育成熟的雌激素更早达到高浓度，提前反手关死了骨骼继续延展的大门。", "mechanism": {"nodes": [], "note": "本页以身体的三大动力系统——负责生长与修补的系统、负责运转速度的代谢系统、负责应对消耗的抗压系统为核心，展现人体如何从年轻时的高速建造冲刺，逐步走向中老年代谢转速自然下调、消耗大于修补的退行历程。"}, "claims": [{"id": "T03-C01", "claim": "出生后第1年（婴儿期）经历全生命周期最快生长速率，主受营养及甲状腺素驱动，生长激素（GH）受体表达逐步上调接管。", "verdict": "[VERIFIED]", "source": "WHO Multicentre Growth Reference Study Group (2006), PMID: 16817758"}, {"id": "T03-C02", "claim": "儿童中期生长速率进入相对恒定的平稳平台期，由生长激素（GH）脉冲分泌与IGF-1轴主导线性骨骼延伸。", "verdict": "[VERIFIED]", "source": "Kelly A et al. (2014), PMID: 25084719; Tanner JM et al. (1966)"}, {"id": "T03-C03", "claim": "女性青春期身高突增（PHV）启动及达峰时间均系统性早于男性约2年。", "verdict": "[VERIFIED]", "source": "Marshall WA & Tanner JM (1969, 1970), PMID: 5386185, 4920632"}, {"id": "T03-C04", "claim": "青春期生长突增峰值速度（PHV）男性高于女性，形成成年终身高两性差异的核心来源。", "verdict": "[VERIFIED]", "source": "Rogol AD et al. (2000), PMID: 10996843; Tanner JM et al. (1976)"}, {"id": "T03-C05", "claim": "长骨骨骺闭合由局部芳香化生成的雌二醇（E2）浓度阈值触发软骨细胞耗竭并骨化，女性闭合早于男性。", "verdict": "[VERIFIED]", "source": "Smith EP et al. (1994), PMID: 8090165; Weise M et al. (2001), PMID: 11477174"}, {"id": "T03-C06", "claim": "成年后生长激素（GH）自发生理脉冲频率与峰值逐年衰减，引发躯体构成改变与骨骼肌同化减少（生长激素绝经 Somatopause）。", "verdict": "[VERIFIED]", "source": "Corpas E, Harman SM, Blackman MR (1993), PMID: 8462498"}, {"id": "T03-C07", "claim": "70-80岁健康老年个体血清循环IGF-1浓度较20-30岁青年峰值期出现极大幅度回落。", "verdict": "[VERIFIED]", "source": "Lamberts SW et al. (1997), PMID: 9334293; Vitale G et al. (2012), PMID: 22760635"}, {"id": "T03-C08", "claim": "肾上腺网状带分泌的脱氢表雄酮硫酸酯（DHEA-S）随年龄增加呈特征性断崖式衰退（肾上腺绝经 Adrenopause）。", "verdict": "[VERIFIED]", "source": "Orentreich N et al. (1984), PMID: 6469966; Maggio M et al. (2008), PMID: 18672097"}, {"id": "T03-C09", "claim": "下丘脑-垂体-肾上腺（HPA）轴基础昼夜节律振幅衰减，表现为早晨皮质醇觉醒反应（CAR）平缓与夜间低谷谷值异常上移。", "verdict": "[VERIFIED]", "source": "Van Cauter E et al. (1996), PMID: 8675683; Ferrari E et al. (2001), PMID: 11744094"}, {"id": "T03-C10", "claim": "甲状腺轴中枢反馈设定点随增龄发生重置，无自身抗体的健康高龄群体促甲状腺激素（TSH）分布曲线上限右移。", "verdict": "[VERIFIED]", "source": "Surks MI & Hollowell JG (NHANES III, 2007), PMID: 18000090"}, {"id": "T03-C11", "claim": "外周脱碘酶活性随增龄与虚弱状态下调，游离三碘甲状腺原氨酸（FT3）水平降低，游离甲状腺素（FT4）多维持稳定。", "verdict": "[VERIFIED]", "source": "Mariotti S et al. (1995); Corsonello A et al. (2010), PMID: 20603348"}, {"id": "T03-C12", "claim": "同化/异化比值（DHEA-S与皮质醇摩尔比）随增龄不可逆性倒置，诱发系统性肌少症、内脏脂肪重分布与海马神经元萎缩脆弱性增加。", "verdict": "[VERIFIED]", "source": "Phillips AC et al. (2010), PMID: 20452132; Ferrari E et al. (2001), PMID: 11744094"}]}</script>
+<script>
+const D=JSON.parse(document.getElementById('dimension-data').textContent);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+document.getElementById('stages').innerHTML=D.stages.map(s=>`<div class="stage"><div class="age">${esc(s.age)}</div>${s.title&&s.title!==s.age?`<h3>${esc(s.title)}</h3>`:''}<p>${esc(s.what)}</p>${s.normal?`<p class="normal">正常范围：${esc(s.normal)}</p>`:''}${s.warn?`<p class="warn">留意：${esc(s.warn)}</p>`:''}</div>`).join('');
+document.getElementById('redflags').innerHTML=D.redflags.map(r=>`<tr><td>${esc(r.signal)}</td><td>${esc(r.action)}</td></tr>`).join('');
+document.getElementById('levers').innerHTML=D.levers.map(l=>`<tr><td>${esc(l.name)}</td><td>${esc(l.effect)}</td><td>${esc(l.note||'')}</td></tr>`).join('');
+document.getElementById('insight').textContent=D.insight;
+document.getElementById('claims').innerHTML=D.claims.map(c=>`<tr><td>${esc(c.id)}</td><td>${esc(c.claim)}</td><td>${esc(c.verdict)}</td><td>${esc(c.source)}</td></tr>`).join('');
+// mechanism nodes
+const nodes=D.mechanism.nodes||[];const W=820,H=120;
+let svg=`<svg viewBox="0 0 ${W} ${H}" role="img">`;
+nodes.forEach((n,i)=>{const x=nodes.length>1?100+i*(W-200)/(nodes.length-1):W/2;
+ if(i>0){const px=100+(i-1)*(W-200)/(nodes.length-1);svg+=`<line x1="${px+18}" y1="60" x2="${x-18}" y2="60" stroke="#b4552d" stroke-width="2"/>`;}
+ svg+=`<g class="node" data-i="${i}"><circle cx="${x}" cy="60" r="18"/><text x="${x}" y="65" text-anchor="middle">${i+1}</text></g><text x="${x}" y="100" text-anchor="middle" font-size="12" fill="#2b2620">${esc(n.t)}</text>`;});
+svg+='</svg>';
+document.getElementById('mechsvg').innerHTML=svg;
+const md=document.getElementById('mechdesc');
+function show(i){md.innerHTML=`<b>${i+1}. ${esc(nodes[i].t)}</b>：${esc(nodes[i].d)}`;}
+document.querySelectorAll('.node').forEach(g=>g.addEventListener('click',()=>show(+g.dataset.i)));
+if(nodes.length)show(0);
+document.getElementById('mechnote').textContent=D.mechanism.note||'';
+// charts
+function linePath(pts,x0,x1,y0,y1,vmin,vmax){return pts.map((p,i)=>{const x=x0+(x1-x0)*p[0]/100;const y=y1-(y1-y0)*(p[1]-vmin)/(vmax-vmin);return (i?'L':'M')+x.toFixed(1)+' '+y.toFixed(1);}).join(' ');}
+function renderChart(ch){const W=820,H=300,x0=50,x1=790,y0=30,y1=260;
+ let all=[];ch.series.forEach(s=>{(s.points||[]).forEach(p=>all.push(p[1]));(s.upper||[]).forEach(p=>all.push(p[1]));(s.lower||[]).forEach(p=>all.push(p[1]));});
+ const vmin=Math.min(...all),vmax=Math.max(...all);const colors=['#b4552d','#3d6b8a','#7a9a3d','#8a5aa0'];
+ let s=`<svg viewBox="0 0 ${W} ${H}">`;
+ s+=`<line x1="${x0}" y1="${y1}" x2="${x1}" y2="${y1}" stroke="#7a7264"/><text x="${x0}" y="${y1+20}" font-size="12" fill="#7a7264">0岁</text><text x="${x1-30}" y="${y1+20}" font-size="12" fill="#7a7264">100岁</text>`;
+ if(ch.type==='range_band'){ch.series.forEach((se,i)=>{const up=linePath(se.upper,x0,x1,y0,y1,vmin,vmax);const lo=linePath([...se.lower].reverse(),x0,x1,y0,y1,vmin,vmax);s+=`<path d="${up} ${lo.replace(/^M/,'L')} Z" fill="${colors[i%4]}" opacity="0.25"/><path d="${up}" fill="none" stroke="${colors[i%4]}" stroke-width="2"/>`;});}
+ else if(ch.type==='stacked_area'){let base=ch.series[0].points.map(p=>[p[0],vmin]);ch.series.forEach((se,i)=>{const top=se.points.map((p,j)=>[p[0],base[j][1]+p[1]]);const tp=linePath(top,x0,x1,y0,y1,vmin,vmax);const bp=linePath([...base].reverse(),x0,x1,y0,y1,vmin,vmax);s+=`<path d="${tp} ${bp.replace(/^M/,'L')} Z" fill="${colors[i%4]}" opacity="0.5"/>`;base=top;});}
+ else{ch.series.forEach((se,i)=>{s+=`<path d="${linePath(se.points,x0,x1,y0,y1,vmin,vmax)}" fill="none" stroke="${colors[i%4]}" stroke-width="2.5"/>`;});}
+ ch.series.forEach((se,i)=>{s+=`<text x="${x0+i*160}" y="18" font-size="13" fill="${colors[i%4]}">${esc(se.name)}</text>`;});
+ return s+'</svg>';}
+if(D.chart){document.getElementById('chartwrap').innerHTML='<h2>一生曲线</h2>'+renderChart(D.chart);}
+</script>
+</body></html>

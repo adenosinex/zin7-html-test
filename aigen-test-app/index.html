@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta name="apphub-project" content="aigen-test-app">
+<meta name="apphub-api-base" content="/web/aigen">
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>个人记账本</title>
+  <link rel="stylesheet" href="https://ai.shoc.zin7.de/static/vendor/pico.min.css">
+  <script src="https://ai.shoc.zin7.de/static/vendor/chart.umd.min.js"></script>
+  <script src="https://ai.shoc.zin7.de/static/apphub-db.js"></script>
+  <style>
+    :root {
+      --primary-color: #2e7d32;
+      --card-radius: 8px;
+    }
+    body {
+      background-color: #f8fafc;
+      padding-bottom: 3rem;
+    }
+    .header-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      border-bottom: 1px solid #e2e8f0;
+      padding-bottom: 1rem;
+    }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    .stat-card {
+      background: white;
+      padding: 1.25rem;
+      border-radius: var(--card-radius);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+      border-left: 4px solid var(--primary-color);
+      margin: 0;
+    }
+    .stat-card h4 {
+      margin: 0;
+      font-size: 0.875rem;
+      color: #64748b;
+      font-weight: 500;
+    }
+    .stat-card .value {
+      font-size: 1.75rem;
+      font-weight: bold;
+      color: #1e293b;
+      margin-top: 0.5rem;
+    }
+    .chart-container {
+      background: white;
+      padding: 1.25rem;
+      border-radius: var(--card-radius);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+      margin-bottom: 1.5rem;
+      position: relative;
+      height: 280px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .chart-box {
+      position: relative;
+      width: 100%;
+      max-width: 480px;
+      height: 220px;
+    }
+    .data-table-container {
+      background: white;
+      padding: 1.25rem;
+      border-radius: var(--card-radius);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    }
+    .filter-bar {
+      display: grid;
+      grid-template-columns: 2fr 1fr auto;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+    }
+    .category-badge {
+      display: inline-block;
+      padding: 0.2rem 0.5rem;
+      font-size: 0.75rem;
+      border-radius: 4px;
+      background: #e2e8f0;
+      color: #334155;
+    }
+    .badge-餐饮美食 { background: #fee2e2; color: #991b1b; }
+    .badge-交通出行 { background: #e0f2fe; color: #075985; }
+    .badge-日常购物 { background: #fef3c7; color: #92400e; }
+    .badge-休闲娱乐 { background: #f3e8ff; color: #6b21a8; }
+    .badge-居家生活 { background: #dcfce7; color: #166534; }
+    .badge-其他支出 { background: #f1f5f9; color: #475569; }
+    .table-actions {
+      display: flex;
+      gap: 0.5rem;
+    }
+    .table-actions button {
+      padding: 0.25rem 0.5rem;
+      font-size: 0.8rem;
+      margin-bottom: 0;
+    }
+    .amount-col {
+      font-weight: 600;
+      color: #dc2626;
+      text-align: right;
+    }
+    dialog article {
+      max-width: 500px;
+    }
+  </style>
+</head>
+<body>
+  <main class="container">
+    <div class="header-bar">
+      <div>
+        <h2 style="margin-bottom: 0.2rem;">记账本</h2>
+        <small style="color: #64748b;">清晰记录每一笔支出</small>
+      </div>
+      <div>
+        <button id="btnOpenAddModal" class="contrast" style="margin-bottom: 0;">+ 记一笔</button>
+      </div>
+    </div>
+
+    <!-- 统计信息 -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <h4>本月总支出</h4>
+        <div class="value" id="statMonthTotal">¥ 0.00</div>
+      </div>
+      <div class="stat-card" style="border-left-color: #2563eb;">
+        <h4>今日支出</h4>
+        <div class="value" id="statTodayTotal">¥ 0.00</div>
+      </div>
+      <div class="stat-card" style="border-left-color: #f59e0b;">
+        <h4>累计总笔数</h4>
+        <div class="value" id="statRecordCount">0 笔</div>
+      </div>
+    </div>
+
+    <!-- 图表展示 -->
+    <div class="chart-container" id="chartCard">
+      <h4 style="align-self: flex-start; margin: 0 0 0.5rem 0; font-size: 1rem; color: #475569;">支出类别统计</h4>
+      <div class="chart-box">
+        <canvas id="categoryChart"></canvas>
+      </div>
+    </div>
+
+    <!-- 筛选和记录列表 -->
+    <div class="data-table-container">
+      <div class="filter-bar">
+        <input type="search" id="filterKeyword" placeholder="搜索标题或备注..." style="margin-bottom: 0;">
+        <select id="filterCategory" style="margin-bottom: 0;">
+          <option value="">全部支出分类</option>
+          <option value="餐饮美食">餐饮美食</option>
+          <option value="交通出行">交通出行</option>
+          <option value="日常购物">日常购物</option>
+          <option value="休闲娱乐">休闲娱乐</option>
+          <option value="居家生活">居家生活</option>
+          <option value="其他支出">其他支出</option>
+        </select>
+        <button id="btnResetFilter" class="secondary outline" style="margin-bottom: 0;">重置</button>
+      </div>
+
+      <figure>
+        <table style="min-width: 560px;">
+          <thead>
+            <tr>
+              <th scope="col" style="width: 15%;">日期</th>
+              <th scope="col" style="width: 15%;">分类</th>
+              <th scope="col" style="width: 25%;">支出标题</th>
+              <th scope="col" style="width: 15%; text-align: right;">金额</th>
+              <th scope="col" style="width: 18%;">备注</th>
+              <th scope="col" style="width: 12%; text-align: center;">操作</th>
+            </tr>
+          </thead>
+          <tbody id="expenseTableBody">
+            <tr>
+              <td colspan="6" style="text-align: center; color: #94a3b8;">加载中...</td>
+            </tr>
+          </tbody>
+        </table>
+      </figure>
+
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1rem;">
+        <small id="paginationInfo" style="color: #64748b;">显示 0 条</small>
+        <div style="display: flex; gap: 0.5rem;">
+          <button id="btnPrevPage" class="outline secondary" style="padding: 0.2rem 0.6rem; margin: 0;" disabled>上一页</button>
+          <button id="btnNextPage" class="outline secondary" style="padding: 0.2rem 0.6rem; margin: 0;" disabled>下一页</button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- 记账录入/编辑模态框 -->
+  <dialog id="expenseModal">
+    <article>
+      <header>
+        <button aria-label="Close" rel="prev" id="btnCloseModal"></button>
+        <h4 id="modalTitle" style="margin: 0;">记录支出</h4>
+      </header>
+      <form id="expenseForm">
+        <input type="hidden" id="fieldId">
+        <label for="fieldTitle">
+          支出标题 <span style="color: #dc2626;">*</span>
+          <input type="text" id="fieldTitle" required placeholder="如：肯德基午餐、地铁充值">
+        </label>
+        <div class="grid">
+          <label for="fieldAmount">
+            金额 (元) <span style="color: #dc2626;">*</span>
+            <input type="number" id="fieldAmount" step="0.01" min="0.01" required placeholder="0.00">
+          </label>
+          <label for="fieldCategory">
+            分类 <span style="color: #dc2626;">*</span>
+            <select id="fieldCategory" required>
+              <option value="" disabled selected>选择分类</option>
+              <option value="餐饮美食">餐饮美食</option>
+              <option value="交通出行">交通出行</option>
+              <option value="日常购物">日常购物</option>
+              <option value="休闲娱乐">休闲娱乐</option>
+              <option value="居家生活">居家生活</option>
+              <option value="其他支出">其他支出</option>
+            </select>
+          </label>
+        </div>
+        <label for="fieldDate">
+          日期 <span style="color: #dc2626;">*</span>
+          <input type="date" id="fieldDate" required>
+        </label>
+        <label for="fieldRemark">
+          备注说明
+          <textarea id="fieldRemark" rows="2" placeholder="可选输入附加细节..."></textarea>
+        </label>
+        <footer style="display: flex; justify-content: flex-end; gap: 0.5rem; margin-top: 1rem;">
+          <button type="button" class="secondary" id="btnCancelModal" style="margin: 0;">取消</button>
+          <button type="submit" id="btnSubmitForm" style="margin: 0;">保存</button>
+        </footer>
+      </form>
+    </article>
+  </dialog>
+
+  <script>
+    const TABLE_NAME = 'expenses';
+    let currentPage = 1;
+    const pageSize = 10;
+    let totalPages = 1;
+    let chartInstance = null;
+
+    // DOM 元素
+    const modal = document.getElementById('expenseModal');
+    const expenseForm = document.getElementById('expenseForm');
+    const modalTitle = document.getElementById('modalTitle');
+    const tableBody = document.getElementById('expenseTableBody');
+    const paginationInfo = document.getElementById('paginationInfo');
+    const btnPrevPage = document.getElementById('btnPrevPage');
+    const btnNextPage = document.getElementById('btnNextPage');
+    const filterKeyword = document.getElementById('filterKeyword');
+    const filterCategory = document.getElementById('filterCategory');
+
+    // 格式化金额
+    function formatCurrency(num) {
+      return '¥ ' + (Number(num) || 0).toLocaleString('zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    // 获取今天日期字符串 (YYYY-MM-DD)
+    function getTodayString() {
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = String(now.getMonth() + 1).padStart(2, '0');
+      const day = String(now.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    }
+
+    // 模态框控制
+    function openModal(item = null) {
+      expenseForm.reset();
+      if (item) {
+        modalTitle.textContent = '编辑支出';
+        document.getElementById('fieldId').value = item.id;
+        document.getElementById('fieldTitle').value = item.title;
+        document.getElementById('fieldAmount').value = item.amount;
+        document.getElementById('fieldCategory').value = item.category;
+        document.getElementById('fieldDate').value = item.expense_date;
+        document.getElementById('fieldRemark').value = item.remark || '';
+      } else {
+        modalTitle.textContent = '记录支出';
+        document.getElementById('fieldId').value = '';
+        document.getElementById('fieldDate').value = getTodayString();
+      }
+      modal.setAttribute('open', 'true');
+    }
+
+    function closeModal() {
+      modal.removeAttribute('open');
+      expenseForm.reset();
+    }
+
+    // 加载数据与渲染列表
+    async function loadExpenses() {
+      try {
+        const filters = [];
+        const keyword = filterKeyword.value.trim();
+        const category = filterCategory.value;
+
+        if (keyword) {
+          filters.push({ field: 'title', op: 'like', value: keyword });
+        }
+        if (category) {
+          filters.push({ field: 'category', op: '=', value: category });
+        }
+
+        const res = await AppDB.list(TABLE_NAME, {
+          filter: filters.length > 0 ? filters : undefined,
+          sort: [{ field: 'expense_date', dir: 'DESC' }],
+          page: currentPage,
+          perPage: pageSize
+        });
+
+        renderTable(res.items);
+        totalPages = res.totalPages || 1;
+        paginationInfo.textContent = `第 ${res.page} / ${totalPages} 页 (共 ${res.totalItems} 条)`;
+        btnPrevPage.disabled = currentPage <= 1;
+        btnNextPage.disabled = currentPage >= totalPages;
+
+        updateStatsAndChart();
+      } catch (err) {
+        console.error('加载支出数据失败:', err);
+        tableBody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: red;">加载数据失败，请重试</td></tr>`;
+      }
+    }
+
+    // 渲染表格行
+    function renderTable(items) {
+      if (!items || items.length === 0) {
+        tableBody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: #94a3b8; padding: 2rem;">暂无支出记录</td></tr>`;
+        return;
+      }
+
+      tableBody.innerHTML = items.map(item => `
+        <tr>
+          <td>${escapeHtml(String(item.expense_date || '').slice(0, 10))}</td>
+          <td><span class="category-badge badge-${escapeHtml(item.category)}">${escapeHtml(item.category)}</span></td>
+          <td><strong>${escapeHtml(item.title)}</strong></td>
+          <td class="amount-col">-${Number(item.amount).toFixed(2)}</td>
+          <td style="color: #64748b; font-size: 0.875rem;">${escapeHtml(item.remark || '-')}</td>
+          <td>
+            <div class="table-actions">
+              <button class="outline" onclick="handleEdit('${item.id}')">编辑</button>
+              <button class="outline secondary" onclick="handleDelete('${item.id}', this)">删除</button>
+            </div>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    // 统计计算与图表绘制
+    async function updateStatsAndChart() {
+      try {
+        // 获取近期的记录计算全量统计（此处取前200条进行聚合分析）
+        const statsRes = await AppDB.list(TABLE_NAME, {
+          sort: [{ field: 'expense_date', dir: 'DESC' }],
+          page: 1,
+          perPage: 200
+        });
+
+        const allItems = statsRes.items || [];
+        const todayStr = getTodayString();
+        const currentMonthPrefix = todayStr.substring(0, 7);
+
+        let totalMonth = 0;
+        let totalToday = 0;
+        const categoryMap = {
+          "餐饮美食": 0,
+          "交通出行": 0,
+          "日常购物": 0,
+          "休闲娱乐": 0,
+          "居家生活": 0,
+          "其他支出": 0
+        };
+
+        allItems.forEach(item => {
+          const amt = Number(item.amount) || 0;
+          if (item.expense_date && item.expense_date.startsWith(todayStr)) {
+            totalToday += amt;
+          }
+          if (item.expense_date && item.expense_date.startsWith(currentMonthPrefix)) {
+            totalMonth += amt;
+          }
+          if (categoryMap[item.category] !== undefined) {
+            categoryMap[item.category] += amt;
+          } else {
+            categoryMap["其他支出"] += amt;
+          }
+        });
+
+        document.getElementById('statMonthTotal').textContent = formatCurrency(totalMonth);
+        document.getElementById('statTodayTotal').textContent = formatCurrency(totalToday);
+        document.getElementById('statRecordCount').textContent = `${statsRes.totalItems} 笔`;
+
+        renderChart(categoryMap);
+      } catch (err) {
+        console.error('统计计算失败:', err);
+      }
+    }
+
+    function renderChart(categoryMap) {
+      const labels = Object.keys(categoryMap);
+      const data = Object.values(categoryMap);
+      const totalAmount = data.reduce((a, b) => a + b, 0);
+
+      const ctx = document.getElementById('categoryChart');
+      if (!ctx) return;
+
+      if (chartInstance) {
+        chartInstance.destroy();
+      }
+
+      if (totalAmount === 0) {
+        chartInstance = new Chart(ctx, {
+          type: 'doughnut',
+          data: {
+            labels: ['暂无数据'],
+            datasets: [{
+              data: [1],
+              backgroundColor: ['#e2e8f0']
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { position: 'right' },
+              tooltip: { enabled: false }
+            }
+          }
+        });
+        return;
+      }
+
+      chartInstance = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: labels,
+          datasets: [{
+            data: data,
+            backgroundColor: [
+              '#ef4444',
+              '#0ea5e9',
+              '#f59e0b',
+              '#a855f7',
+              '#10b981',
+              '#64748b'
+            ],
+            hoverOffset: 4
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'right',
+              labels: {
+                boxWidth: 12,
+                font: { size: 12 }
+              }
+            }
+          }
+        }
+      });
+    }
+
+    // 工具函数：HTML转义
+    function escapeHtml(str) {
+      if (str === null || str === undefined) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    // 全局动作绑定
+    window.handleEdit = async function(id) {
+      try {
+        const res = await AppDB.list(TABLE_NAME, {
+          filter: [{ field: 'id', op: '=', value: id }],
+          page: 1,
+          perPage: 1
+        });
+        if (res.items && res.items.length > 0) {
+          openModal(res.items[0]);
+        }
+      } catch (err) {
+        alert('获取记录失败: ' + err.message);
+      }
+    };
+
+    window.handleDelete = async function(id, btn) {
+      // 两步确认：第一次点击变“确认删除”，3 秒内再点才真正删除（不依赖原生 confirm 对话框）。
+      if (!btn || btn.dataset.armed !== '1') {
+        if (btn) {
+          btn.dataset.armed = '1';
+          btn.textContent = '确认删除？';
+          setTimeout(function() {
+            btn.dataset.armed = '';
+            btn.textContent = '删除';
+          }, 3000);
+        }
+        return;
+      }
+      btn.dataset.armed = '';
+      btn.textContent = '删除';
+      try {
+        await AppDB.remove(TABLE_NAME, id);
+        loadExpenses();
+      } catch (err) {
+        alert('删除失败: ' + err.message);
+      }
+    };
+
+    // 表单提交（新增/更新）
+    expenseForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const id = document.getElementById('fieldId').value;
+      const title = document.getElementById('fieldTitle').value.trim();
+      const amountVal = parseFloat(document.getElementById('fieldAmount').value);
+      const category = document.getElementById('fieldCategory').value;
+      const expense_date = document.getElementById('fieldDate').value;
+      const remark = document.getElementById('fieldRemark').value.trim();
+
+      if (!title || isNaN(amountVal) || !category || !expense_date) {
+        alert('请完整填写必填字段');
+        return;
+      }
+
+      const payload = {
+        title,
+        amount: Number(amountVal),
+        category,
+        expense_date,
+        remark: remark || ''
+      };
+
+      try {
+        if (id) {
+          await AppDB.update(TABLE_NAME, id, payload);
+        } else {
+          await AppDB.create(TABLE_NAME, payload);
+        }
+        closeModal();
+        loadExpenses();
+      } catch (err) {
+        alert('保存失败: ' + err.message);
+      }
+    });
+
+    // 事件绑定
+    document.getElementById('btnOpenAddModal').addEventListener('click', () => openModal());
+    document.getElementById('btnCloseModal').addEventListener('click', closeModal);
+    document.getElementById('btnCancelModal').addEventListener('click', closeModal);
+
+    // 搜索防抖
+    let searchTimeout = null;
+    filterKeyword.addEventListener('input', () => {
+      clearTimeout(searchTimeout);
+      searchTimeout = setTimeout(() => {
+        currentPage = 1;
+        loadExpenses();
+      }, 300);
+    });
+
+    filterCategory.addEventListener('change', () => {
+      currentPage = 1;
+      loadExpenses();
+    });
+
+    document.getElementById('btnResetFilter').addEventListener('click', () => {
+      filterKeyword.value = '';
+      filterCategory.value = '';
+      currentPage = 1;
+      loadExpenses();
+    });
+
+    btnPrevPage.addEventListener('click', () => {
+      if (currentPage > 1) {
+        currentPage--;
+        loadExpenses();
+      }
+    });
+
+    btnNextPage.addEventListener('click', () => {
+      if (currentPage < totalPages) {
+        currentPage++;
+        loadExpenses();
+      }
+    });
+
+    // 初始化
+    loadExpenses();
+  </script>
+</body>
+</html>

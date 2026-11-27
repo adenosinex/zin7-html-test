@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta name="apphub-project" content="aigen-test-v3">
+<meta name="apphub-api-base" content="https://ai.shoc.zin7.de/web/aigen">
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>经典番茄炒蛋 - 家常菜谱</title>
+  <link rel="stylesheet" href="https://ai.shoc.zin7.de/static/vendor/pico.min.css">
+  <style>
+    :root {
+      --primary: #d93829;
+      --primary-hover: #b8281b;
+      --primary-focus: rgba(217, 56, 41, 0.2);
+    }
+    header {
+      margin-bottom: 2rem;
+      border-bottom: 1px solid var(--pico-muted-border-color);
+      padding-bottom: 1.5rem;
+    }
+    .badge-bar {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+      margin-top: 0.75rem;
+    }
+    .badge {
+      display: inline-block;
+      padding: 0.25rem 0.65rem;
+      font-size: 0.85rem;
+      border-radius: 2rem;
+      background: var(--pico-card-background-color);
+      border: 1px solid var(--pico-muted-border-color);
+    }
+    .step-list {
+      list-style: none;
+      padding-left: 0;
+      margin: 1rem 0;
+    }
+    .step-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+      padding: 1rem;
+      margin-bottom: 0.75rem;
+      border-radius: var(--pico-border-radius);
+      border: 1px solid var(--pico-muted-border-color);
+      background-color: var(--pico-card-background-color);
+      cursor: pointer;
+      user-select: none;
+      transition: all 0.2s ease;
+    }
+    .step-item:hover {
+      border-color: var(--pico-primary);
+      transform: translateY(-1px);
+    }
+    .step-checkbox {
+      margin-top: 0.25rem;
+      flex-shrink: 0;
+      cursor: pointer;
+      width: 1.25rem;
+      height: 1.25rem;
+    }
+    .step-content {
+      flex: 1;
+    }
+    .step-item.completed {
+      background-color: rgba(0, 0, 0, 0.03);
+      border-color: var(--pico-muted-border-color);
+      opacity: 0.7;
+    }
+    [data-theme="dark"] .step-item.completed {
+      background-color: rgba(255, 255, 255, 0.04);
+    }
+    .step-item.completed .step-title {
+      text-decoration: line-through;
+      color: var(--pico-muted-color);
+    }
+    .step-item.completed .step-desc {
+      text-decoration: line-through;
+      color: var(--pico-muted-color);
+    }
+    .step-badge {
+      font-weight: 700;
+      margin-right: 0.5rem;
+      color: var(--pico-primary);
+    }
+    .progress-wrapper {
+      margin-bottom: 1.5rem;
+      background: var(--pico-card-background-color);
+      padding: 1rem;
+      border-radius: var(--pico-border-radius);
+      border: 1px solid var(--pico-muted-border-color);
+    }
+    .progress-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.5rem;
+      font-size: 0.95rem;
+    }
+    .tip-box {
+      border-left: 4px solid #f39c12;
+      background-color: var(--pico-card-background-color);
+      padding: 1rem 1.25rem;
+      border-radius: 0 var(--pico-border-radius) var(--pico-border-radius) 0;
+      margin-bottom: 1rem;
+    }
+    .tip-title {
+      font-weight: bold;
+      color: #d35400;
+      margin-bottom: 0.25rem;
+    }
+    .reset-btn {
+      padding: 0.2rem 0.6rem;
+      font-size: 0.8rem;
+      width: auto;
+      margin: 0;
+    }
+    .ingredient-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 0.75rem;
+      margin-bottom: 1.5rem;
+    }
+    .ingredient-card {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.6rem 0.85rem;
+      border-radius: var(--pico-border-radius);
+      border: 1px solid var(--pico-muted-border-color);
+      background: var(--pico-card-background-color);
+      font-size: 0.95rem;
+    }
+    .ingredient-amount {
+      color: var(--pico-muted-color);
+      font-weight: 500;
+    }
+  </style>
+</head>
+<body>
+  <main class="container">
+    <header>
+      <h1>🍳 经典家常番茄炒蛋</h1>
+      <p>酸甜多汁、鸡蛋滑嫩软润，人人必学的下饭第一神菜。</p>
+      <div class="badge-bar">
+        <span class="badge">⏱️ 耗时：10 分钟</span>
+        <span class="badge">🔥 难度：零基础</span>
+        <span class="badge">🍚 份量：2 人份</span>
+        <span class="badge">🌶️ 口味：咸甜酸爽</span>
+      </div>
+    </header>
+
+    <section>
+      <h2>🧺 所需食材</h2>
+      <div class="ingredient-grid">
+        <div class="ingredient-card">
+          <span>🥚 鸡蛋</span>
+          <span class="ingredient-amount">3~4 个</span>
+        </div>
+        <div class="ingredient-card">
+          <span>🍅 熟透番茄</span>
+          <span class="ingredient-amount">2 个 (约350g)</span>
+        </div>
+        <div class="ingredient-card">
+          <span>🌱 小葱</span>
+          <span class="ingredient-amount">2 根 (分葱白与葱花)</span>
+        </div>
+        <div class="ingredient-card">
+          <span>🧂 食盐</span>
+          <span class="ingredient-amount">1 茶匙 (约3g)</span>
+        </div>
+        <div class="ingredient-card">
+          <span>🍬 白糖</span>
+          <span class="ingredient-amount">1 茶匙 (约5g 中和酸味)</span>
+        </div>
+        <div class="ingredient-card">
+          <span>🍶 食用油</span>
+          <span class="ingredient-amount">适量 (约2汤匙)</span>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>👨‍🍳 烹饪步骤</h2>
+      <div class="progress-wrapper">
+        <div class="progress-meta">
+          <span>烹饪进度：<strong id="progress-text">0 / 6 已完成</strong></span>
+          <button id="reset-steps" class="outline secondary reset-btn" type="button">重置打勾</button>
+        </div>
+        <progress id="cooking-progress" value="0" max="6"></progress>
+      </div>
+
+      <ul class="step-list" id="steps-container">
+        <li class="step-item" data-step="0">
+          <input type="checkbox" class="step-checkbox" tabindex="-1">
+          <div class="step-content">
+            <div class="step-title"><span class="step-badge">步骤 1</span>处理番茄</div>
+            <div class="step-desc">番茄顶部划十字，用开水烫20秒去皮（也可不去皮），去蒂后切成适口的滚刀块，保留汁水。</div>
+          </div>
+        </li>
+        <li class="step-item" data-step="1">
+          <input type="checkbox" class="step-checkbox" tabindex="-1">
+          <div class="step-content">
+            <div class="step-title"><span class="step-badge">步骤 2</span>调制蛋液</div>
+            <div class="step-desc">鸡蛋打入碗中，加入半茶匙盐、1小勺温水（使鸡蛋更嫩滑），用筷子彻底搅打均匀至出现细密泡沫。</div>
+          </div>
+        </li>
+        <li class="step-item" data-step="2">
+          <input type="checkbox" class="step-checkbox" tabindex="-1">
+          <div class="step-content">
+            <div class="step-title"><span class="step-badge">步骤 3</span>滑炒鸡蛋</div>
+            <div class="step-desc">热锅倒油（油量略多一点），油温7成热时倒入蛋液。待底部稍凝固，快速用锅铲向中间推炒，定型至8成熟微嫩状态，立刻盛出备用。</div>
+          </div>
+        </li>
+        <li class="step-item" data-step="3">
+          <input type="checkbox" class="step-checkbox" tabindex="-1">
+          <div class="step-content">
+            <div class="step-title"><span class="step-badge">步骤 4</span>炒出番茄浓汁</div>
+            <div class="step-desc">锅内留底油，下葱白段爆香，倒入番茄块大火翻炒。加入1茶匙白糖和剩余半茶匙盐，用锅铲轻压番茄块，翻炒出浓郁红汁。</div>
+          </div>
+        </li>
+        <li class="step-item" data-step="4">
+          <input type="checkbox" class="step-checkbox" tabindex="-1">
+          <div class="step-content">
+            <div class="step-title"><span class="step-badge">步骤 5</span>合炒入味</div>
+            <div class="step-desc">倒入炒好的嫩鸡蛋块，转中大火快速翻炒半分钟，让鸡蛋块充分吸裹饱满的番茄红汁。</div>
+          </div>
+        </li>
+        <li class="step-item" data-step="5">
+          <input type="checkbox" class="step-checkbox" tabindex="-1">
+          <div class="step-content">
+            <div class="step-title"><span class="step-badge">步骤 6</span>撒葱出锅</div>
+            <div class="step-desc">关火，撒入翠绿葱花提香点缀，即可装盘上桌，拌饭绝配！</div>
+          </div>
+        </li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>💡 核心烹饪要点</h2>
+      <div class="tip-box">
+        <div class="tip-title">1. 鸡蛋嫩滑不发干的秘诀</div>
+        <div>打蛋时加入一小勺（约5ml）清水或料酒；炒蛋油温要够，入锅快速推炒，8分熟尚有流动感时即盛出，余温会继续加热，不可炒老。</div>
+      </div>
+      <div class="tip-box">
+        <div class="tip-title">2. 番茄快速出沙出汁</div>
+        <div>务必挑选熟透红软的自然熟番茄；炒番茄时先加糖和盐，渗透压会让番茄更快析出大量沙软酸甜的汤汁。</div>
+      </div>
+      <div class="tip-box">
+        <div class="tip-title">3. 酸甜平衡的关键</div>
+        <div>番茄天然酸度较高，加入白糖不仅是提鲜，更为了中和尖锐的果酸，让口感醇厚柔和，老少皆宜。</div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    (function() {
+      const STORAGE_KEY = 'recipe_tomato_egg_steps';
+      const stepsContainer = document.getElementById('steps-container');
+      const stepItems = stepsContainer.querySelectorAll('.step-item');
+      const progressBar = document.getElementById('cooking-progress');
+      const progressText = document.getElementById('progress-text');
+      const resetBtn = document.getElementById('reset-steps');
+      const totalSteps = stepItems.length;
+
+      // 读取保存的状态
+      function getSavedState() {
+        try {
+          const data = localStorage.getItem(STORAGE_KEY);
+          return data ? JSON.parse(data) : {};
+        } catch (e) {
+          return {};
+        }
+      }
+
+      // 保存状态
+      function saveState(state) {
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        } catch (e) {}
+      }
+
+      // 更新进度条和文字
+      function updateProgress() {
+        let completedCount = 0;
+        stepItems.forEach(item => {
+          if (item.classList.contains('completed')) {
+            completedCount++;
+          }
+        });
+        progressBar.value = completedCount;
+        progressText.textContent = `${completedCount} / ${totalSteps} 已完成`;
+        if (completedCount === totalSteps) {
+          progressText.innerHTML = `<span style="color: #2ecc71;">🎉 大功告成！趁热开饭吧！</span>`;
+        }
+      }
+
+      // 应用状态渲染界面
+      function applyState() {
+        const state = getSavedState();
+        stepItems.forEach(item => {
+          const stepIndex = item.getAttribute('data-step');
+          const isDone = Boolean(state[stepIndex]);
+          const checkbox = item.querySelector('.step-checkbox');
+          
+          checkbox.checked = isDone;
+          if (isDone) {
+            item.classList.add('completed');
+          } else {
+            item.classList.remove('completed');
+          }
+        });
+        updateProgress();
+      }
+
+      // 点击步骤切换状态（点击整行或点击checkbox均可）
+      stepsContainer.addEventListener('click', (e) => {
+        const item = e.target.closest('.step-item');
+        if (!item) return;
+
+        const checkbox = item.querySelector('.step-checkbox');
+        const stepIndex = item.getAttribute('data-step');
+        const state = getSavedState();
+
+        // 如果点击的不是复选框本身，手动翻转复选框
+        if (e.target !== checkbox) {
+          checkbox.checked = !checkbox.checked;
+        }
+
+        if (checkbox.checked) {
+          item.classList.add('completed');
+          state[stepIndex] = true;
+        } else {
+          item.classList.remove('completed');
+          delete state[stepIndex];
+        }
+
+        saveState(state);
+        updateProgress();
+      });
+
+      // 重置所有步骤
+      resetBtn.addEventListener('click', () => {
+        try {
+          localStorage.removeItem(STORAGE_KEY);
+        } catch (e) {}
+        stepItems.forEach(item => {
+          item.classList.remove('completed');
+          item.querySelector('.step-checkbox').checked = false;
+        });
+        updateProgress();
+      });
+
+      // 初始化渲染
+      applyState();
+    })();
+  </script>
+</body>
+</html>
