@@ -55,7 +55,7 @@
   </div>
   <section class="mt-8 border-t pt-6">
     <h2 class="text-lg font-bold mb-2">客户端 hashscan.py — 用法</h2>
-    <p class="text-sm text-gray-600 mb-3">直接运行客户端就进扫描，一共两步：<b>步骤 1</b> 输入要扫描的目录路径；<b>步骤 2</b> 选项目（列出已有项目，输入序号选用，上次用过的直接按 Enter）。然后扫描上传，重复文件（和库重复 + 本批内重复）列出清单、输入 y 确认后移到目标文件夹的子文件夹 duplicates。扫描时显示进度条。自体去重：同一批里内容相同的文件也算重复，只保留第一个。头部大小等额外配置只在首次运行时问一次，存进配置文件，以后直接用；不喜欢就删除配置文件重新设置。项目列表在后台预取，输入路径时不卡顿；结束后停在完成提示、按 Enter 再退出，双击运行窗口不会一闪而过。</p>
+    <p class="text-sm text-gray-600 mb-3">直接运行客户端就进扫描，一共两步：<b>步骤 1</b> 输入要扫描的目录路径；<b>步骤 2</b> 选项目（列出已有项目，输入序号选用，上次用过的直接按 Enter）。然后扫描上传，重复文件（和库重复 + 本批内重复）列出清单、直接回车即移到目标文件夹的子文件夹 duplicates（输入 n 取消）。扫描时显示进度条。自体去重：同一批里内容相同的文件也算重复，只保留第一个。头部大小等额外配置只在首次运行时问一次，存进配置文件，以后直接用；不喜欢就删除配置文件重新设置。项目列表在后台预取，输入路径时不卡顿；结束后停在完成提示、按 Enter 再退出，双击运行窗口不会一闪而过。</p>
     <p class="text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded p-3 mb-3">只算文件头部 hash：默认只取每个文件开头 1MB 算 SHA-256（小于 1MB 取全部），速度快，但头部相同、后面不同的两个文件会被误判为重复——模式 2 移动前请看清确认清单。头部大小可用 --head-size 改（单位 MB）。</p>
     <h3 class="font-semibold text-sm mb-1">1. 下载客户端</h3>
     <p class="text-sm mb-3"><a href="hashscan.py" download class="text-blue-600 underline">下载 hashscan.py</a>（Python 3，只用标准库），在你的电脑上用 python hashscan.py 运行。</p>
@@ -69,7 +69,7 @@ python hashscan.py list
 python hashscan.py stats 照片库
 python hashscan.py delete 旧照片库</pre>
     <p class="text-sm text-gray-600 mb-3">离线用法：点项目卡上的「下载数据集」，把下载的 hashscan-项目名.json 和 hashscan.py 放同一目录，直接运行脚本就自动离线（不连网、不要令牌）；新增 hash 会写成 hashscan-项目名-new-时间.json，回到本页「离线添加」上传即可。</p>
-    <p class="text-sm text-gray-500 mt-2">命令行给了参数的直接用，不再追问。重复文件夹默认是目标文件夹的子文件夹 duplicates，不再追问（可用 --dup-dir 改）。移动前会列出清单、输入 y 才移动；输入其他任意键取消移动（hash 已上传，文件没动）。列出/统计/删除项目用命令行：hashscan.py list、stats、delete。</p>
+    <p class="text-sm text-gray-500 mt-2">命令行给了参数的直接用，不再追问。重复文件夹默认是目标文件夹的子文件夹 duplicates，不再追问（可用 --dup-dir 改）。移动前会列出清单、直接回车即移动；输入 n 取消移动（hash 已记录，文件没动）。列出/统计/删除项目用命令行：hashscan.py list、stats、delete。</p>
   </section>
 </div>
 <script>

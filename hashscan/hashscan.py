@@ -832,9 +832,10 @@ def _cmd_scan(args):
 
     if dups:
         print()
-        confirm = _ask("确认移动以上 %d 个重复文件到 %s 吗？输入 y 确认，其他任意键取消：" % (
-            len(dups), dup_abs))
-        if not confirm or confirm.lower() != "y":
+        confirm = _ask("移动以上 %d 个重复文件到 %s？直接回车移动，输入 n 取消：" % (
+            len(dups), dup_abs), default="y")
+        # 默认回车即移动：记录已添加，不移走的话下次扫描会全部再次报重复、没法二次筛选
+        if confirm is None or confirm.strip().lower() in ("n", "no"):
             print("已取消移动（hash 已记录，文件没动）。")
             return 0
         moved = 0
