@@ -323,19 +323,26 @@ def _pick_project(cfg, prefetch=None):
     if prefetch is not None:
         if not prefetch["done"].is_set():
             print("正在加载项目列表…")
-        prefetch["done"].wait()
-        data, rc = prefetch["data"], prefetch["rc"]
-        if data is None:
-            # 后台没取到，主线程再试一次（这次带提示）
-            data, rc = _api("GET", "/records/hash_projects",
-                            {"perPage": 200, "sort": "name",
-                             "fields": "id,name,file_count,total_size,updated_at"})
+        # 等待有界：网络慢时不无限期卡住输入阶段，超时就走手动输入
+        prefetch["done"].wait(timeout=20)
+        if not prefetch["done"].is_set():
+            print("项目列表加载超时（网络慢），可直接输入项目名继续。")
+            data, rc = None, 1
+        else:
+            data, rc = prefetch["data"], prefetch["rc"]
+            if data is None:
+                # 后台没取到，主线程再试一次（这次带提示）
+                data, rc = _api("GET", "/records/hash_projects",
+                                {"perPage": 200, "sort": "name",
+                                 "fields": "id,name,file_count,total_size,updated_at"})
     else:
         data, rc = _api("GET", "/records/hash_projects",
                         {"perPage": 200, "sort": "name",
                          "fields": "id,name,file_count,total_size,updated_at"})
     if data is None:
-        return None
+        # 列表取不到不等于不能继续：手动输入项目名（已有项目同名即对照该库）
+        name = _ask("输入项目名（已有项目同名即对照该库，直接回车取消）：")
+        return name or None
     items = data.get("items") or []
     last = (cfg or {}).get("last_project") or ""
     if items:
