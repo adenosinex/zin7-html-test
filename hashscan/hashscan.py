@@ -61,12 +61,17 @@ import os
 import shutil
 import sys
 import threading
+import time
 import urllib.error
 import urllib.parse
 import urllib.request
 from datetime import datetime
 
-BASE_URL = "https://app.shoc.zin7.de/web/lightapi/hashscan"
+BASE_URLS = [
+    "https://app.shoc.zin7.de/web/lightapi/hashscan",
+    "https://debi4.zin7.de/web/lightapi/hashscan",
+]
+BASE_URL = BASE_URLS[0]  # 运行时由 _pick_fastest_base 选定（谁快连谁）
 TOKEN_FILE = os.path.expanduser("~/.config/hashscan/token")
 CHUNK = 1024 * 1024
 DEFAULT_HEAD_MB = 1.0
@@ -88,19 +93,64 @@ def _extract_token(text):
     return text
 
 
-def _validate_token(tok):
-    """拿这个 token 实际请求一次 lightapi，拿到 JSON 数据（含 items）才算有效。
-    只看 200 不行：无效 token 会被重定向到登录页（也是 200，但返回 HTML）。"""
-    url = BASE_URL + "/records/hash_projects?perPage=1&token=" + urllib.parse.quote(tok)
+
+def _probe_base(base, tok, timeout=8):
+    """探一条线路：请求项目列表第一条，拿到含 items 的 JSON 才算通。"""
+    url = base + "/records/hash_projects?perPage=1&token=" + urllib.parse.quote(tok)
     try:
         req = urllib.request.Request(url, method="GET")
-        with urllib.request.urlopen(req, timeout=15) as resp:
+        with urllib.request.urlopen(req, timeout=timeout) as resp:
             if resp.status != 200:
                 return False
             data = json.loads(resp.read().decode("utf-8"))
             return isinstance(data, dict) and "items" in data
     except Exception:
         return False
+
+
+def _pick_fastest_base(tok):
+    """两条线路（shoc 直连 / debi 转发）并行探活，先通的胜出；
+    都不通则保持 shoc（后续请求会给出具体错误）。探活本身出错不影响启动。"""
+    global BASE_URL
+    try:
+        return _pick_fastest_base_inner(tok)
+    except Exception:
+        return BASE_URL
+
+
+def _pick_fastest_base_inner(tok):
+    global BASE_URL
+    results = {}
+
+    def probe(base):
+        results[base] = _probe_base(base, tok)
+
+    threads = [threading.Thread(target=probe, args=(b,), daemon=True)
+               for b in BASE_URLS]
+    for t in threads:
+        t.start()
+    deadline = time.time() + 10
+    while time.time() < deadline:
+        for b in BASE_URLS:
+            if results.get(b):
+                BASE_URL = b
+                return b
+        if len(results) == len(BASE_URLS):
+            break
+        time.sleep(0.05)
+    for b in BASE_URLS:
+        if results.get(b):
+            BASE_URL = b
+            return b
+    return BASE_URL
+
+def _validate_token(tok):
+    """拿这个 token 实际请求一次 lightapi，拿到 JSON 数据（含 items）才算有效。
+    只看 200 不行：无效 token 会被重定向到登录页（也是 200，但返回 HTML）。"""
+    for base in BASE_URLS:
+        if _probe_base(base, tok, timeout=15):
+            return True
+    return False
 
 
 def _save_token(tok):
@@ -279,13 +329,22 @@ def _api(method, path, params=None, body=None, tok=None, quiet=False):
     try:
         with urllib.request.urlopen(req, timeout=60) as resp:
             return json.loads(resp.read().decode("utf-8")), 0
-    except urllib.error.HTTPError as e:
-        detail = e.read().decode("utf-8", errors="ignore")[:300]
-        if not quiet:
-            print("请求失败：HTTP %s %s" % (e.code, detail))
-        return None, 1
     except Exception as e:
-        if not quiet:
+        # 当前线路不通就换另一条（shoc 直连 / debi 转发）再试一次
+        other = BASE_URLS[1] if BASE_URL == BASE_URLS[0] else BASE_URLS[0]
+        try:
+            url2 = other + path + (("?" + urllib.parse.urlencode(qs)) if qs else "")
+            req2 = urllib.request.Request(url2, data=data, headers=headers, method=method)
+            with urllib.request.urlopen(req2, timeout=60) as resp:
+                globals()["BASE_URL"] = other
+                return json.loads(resp.read().decode("utf-8")), 0
+        except Exception:
+            pass
+        if isinstance(e, urllib.error.HTTPError):
+            detail = e.read().decode("utf-8", errors="ignore")[:300]
+            if not quiet:
+                print("请求失败：HTTP %s %s" % (e.code, detail))
+        elif not quiet:
             print("请求失败：%s" % e)
         return None, 1
 
@@ -304,8 +363,10 @@ def _get_project(name):
 
 
 def _fetch_projects_bg(tok, holder):
-    """后台预取项目列表：只在子线程里跑网络请求，失败也不打印（不打扰主线程正在输入的用户）。"""
+    """后台预取项目列表：只在子线程里跑网络请求，失败也不打印（不打扰主线程正在输入的用户）。
+    线路选择（shoc 直连 / debi 转发谁快连谁）也在这里完成，主线程输入不受影响。"""
     try:
+        _pick_fastest_base(tok)
         data, rc = _api("GET", "/records/hash_projects",
                         {"perPage": 200, "sort": "name",
                          "fields": "id,name,file_count,total_size,updated_at"},
@@ -343,6 +404,7 @@ def _pick_project(cfg, prefetch=None):
         # 列表取不到不等于不能继续：手动输入项目名（已有项目同名即对照该库）
         name = _ask("输入项目名（已有项目同名即对照该库，直接回车取消）：")
         return name or None
+    print("（线路：%s）" % ("shoc 直连" if BASE_URL == BASE_URLS[0] else "debi 转发"))
     items = data.get("items") or []
     last = (cfg or {}).get("last_project") or ""
     if items:
@@ -386,6 +448,77 @@ def _parse_hashes(record):
             if isinstance(it, dict) and it.get("hash"):
                 out[it["hash"]] = it
     return out
+
+
+
+# ---------- 离线模式：本地数据集 ----------
+# 网页可下载项目数据集（hashscan-<项目>.json）；把数据集和脚本放同一目录，
+# 脚本自动进入离线模式：不连网、不需要令牌，对照数据集找重复，
+# 新增 hash 写成 hashscan-<项目>-new-<时间>.json，用户再到网页上传添加。
+
+def _dataset_dirs():
+    dirs = []
+    try:
+        dirs.append(os.path.dirname(os.path.abspath(__file__)))
+    except NameError:
+        pass
+    cwd = os.getcwd()
+    if cwd not in dirs:
+        dirs.append(cwd)
+    return dirs
+
+
+def _find_datasets():
+    found = []
+    seen = set()
+    for d in _dataset_dirs():
+        try:
+            names = sorted(os.listdir(d))
+        except OSError:
+            continue
+        for name in names:
+            if not (name.startswith("hashscan-") and name.endswith(".json")):
+                continue
+            if "-new-" in name:
+                continue
+            path = os.path.join(d, name)
+            if path in seen:
+                continue
+            seen.add(path)
+            try:
+                with open(path, "r", encoding="utf-8") as f:
+                    data = json.load(f)
+            except Exception:
+                continue
+            if isinstance(data, dict) and data.get("format") == "hashscan-dataset" \
+                    and data.get("project") and isinstance(data.get("entries"), list):
+                found.append((path, data))
+    return found
+
+
+def _dataset_stored(data):
+    out = {}
+    for it in data.get("entries") or []:
+        if isinstance(it, dict) and it.get("hash"):
+            out[it["hash"]] = it
+    return out
+
+
+def _write_new_entries(project, new_entries):
+    ts = datetime.now().strftime("%Y%m%d-%H%M%S")
+    safe = "".join(c if (c.isalnum() or c in "-_") else "_" for c in project)
+    out_dir = _dataset_dirs()[0]
+    path = os.path.join(out_dir, "hashscan-%s-new-%s.json" % (safe, ts))
+    payload = {
+        "format": "hashscan-new",
+        "version": 1,
+        "project": project,
+        "created_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "entries": new_entries,
+    }
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump(payload, f, ensure_ascii=False, indent=1)
+    return path
 
 
 def _fmt_size(n):
@@ -468,14 +601,38 @@ def _cmd_scan(args):
     if positional:
         root = positional[0]
 
+    # --- 离线模式：同目录有数据集就自动离线（不连网、不要令牌）---
+    offline_data = None
+    if not project:
+        datasets = _find_datasets()
+        if len(datasets) == 1:
+            offline_data = datasets[0][1]
+            project = offline_data.get("project")
+            print("离线模式：使用同目录数据集 %s（项目 %s，%d 条）。" % (
+                os.path.basename(datasets[0][0]), project,
+                len(offline_data.get("entries") or [])), flush=True)
+        elif len(datasets) > 1:
+            print("同目录有多个数据集，选一个（输入序号，直接回车走在线模式）：")
+            for i, (path, data) in enumerate(datasets, 1):
+                print("  %d. %s（项目 %s，%d 条）" % (
+                    i, os.path.basename(path), data.get("project"),
+                    len(data.get("entries") or [])))
+            choice = _ask("选数据集序号：")
+            if choice and choice.strip().isdigit():
+                idx = int(choice.strip()) - 1
+                if 0 <= idx < len(datasets):
+                    offline_data = datasets[idx][1]
+                    project = offline_data.get("project")
+
     # --- 项目列表后台预取：令牌先在主线程解析好（首次运行会问一次），
     # 再起子线程取项目列表；用户输路径、答配置问题的时间里，列表已经在后台取，
     # 到步骤 2/2 一般直接就能选，不用在输入完路径后干等网络。命令行已给 --project 的不用预取。---
     prefetch = None
-    if not project:
+    if offline_data is None and not project:
         tok = _token()
         if not tok:
             return _need_token()
+        # 线路选择放进后台预取线程：输入阶段不被网络阻塞（双击脚本铁律）
         prefetch = {"done": threading.Event(), "data": None, "rc": 1}
         threading.Thread(target=_fetch_projects_bg, args=(tok, prefetch), daemon=True).start()
 
@@ -529,15 +686,19 @@ def _cmd_scan(args):
         head_bytes = 1024
     dup_abs = os.path.abspath(dup_dir) if dup_dir else None
 
-    proj, rc = _get_project(project)
-    if proj is None and rc != 0:
-        return rc
-    if proj is None:
-        print("项目 %s 不存在，新建空项目。" % project)
-        proj, rc = _create_project(project)
-        if proj is None:
+    if offline_data is not None:
+        proj = None
+        stored = _dataset_stored(offline_data)
+    else:
+        proj, rc = _get_project(project)
+        if proj is None and rc != 0:
             return rc
-    stored = _parse_hashes(proj)
+        if proj is None:
+            print("项目 %s 不存在，新建空项目。" % project)
+            proj, rc = _create_project(project)
+            if proj is None:
+                return rc
+        stored = _parse_hashes(proj)
 
     # 头部大小一致性提醒：不同头部大小算出的 hash 不可比
     stored_heads = set()
@@ -630,7 +791,14 @@ def _cmd_scan(args):
     new_entries = [v for k, v in merged.items() if k not in stored]
     merged_count = len(merged)
     merged_total = sum(int(v.get("size") or 0) for v in merged.values())
-    if new_entries:
+    if offline_data is not None:
+        if new_entries:
+            out_path = _write_new_entries(project, new_entries)
+            print("离线模式：%d 条新 hash 已写入 %s" % (len(new_entries), out_path))
+            print("到网页 https://app.shoc.zin7.de/site/hashscan/ 上传这个文件即可添加进项目。")
+        else:
+            print("离线模式：没有新 hash，不生成文件。")
+    elif new_entries:
         resp, rc = _api("PATCH", "/records/hash_projects/" + proj["id"],
                         body={"add_hashes": new_entries,
                               "updated_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S")})
@@ -667,7 +835,7 @@ def _cmd_scan(args):
         confirm = _ask("确认移动以上 %d 个重复文件到 %s 吗？输入 y 确认，其他任意键取消：" % (
             len(dups), dup_abs))
         if not confirm or confirm.lower() != "y":
-            print("已取消移动（hash 已上传，文件没动）。")
+            print("已取消移动（hash 已记录，文件没动）。")
             return 0
         moved = 0
         failed = 0
@@ -715,6 +883,9 @@ def _cmd_delete(args):
 
 
 def _cmd_list():
+    tok = _token()
+    if tok:
+        _pick_fastest_base(tok)
     data, rc = _api("GET", "/records/hash_projects",
                     {"perPage": 200, "sort": "name",
                      "fields": "id,name,file_count,total_size,updated_at"})
@@ -759,6 +930,7 @@ def _cmd_stats(args):
 
 
 def main(argv):
+    print("hashscan 启动中…", flush=True)
     args = argv[1:]
     if not args:
         return _cmd_scan([])
