@@ -1274,12 +1274,27 @@
             }
 
             function refreshFromServer() {
-                // 打开/刷新:直取服务端.取到就显示并覆盖缓存;
-                // 失败则读缓存兜底并明确标出.
-                setStatus('loading');
+                // 缓存优先:先用本地缓存渲染(不空白等待),后台拉取服务端更新;
+                // 拉取期间不阻塞操作,用户已改动则不覆盖本地未保存内容.
                 hideAuthBanner();
-                _emptyHint = '';
+                var cached0 = loadCache();
+                if (cached0 && cached0.length > 0) {
+                    data = cached0.slice();
+                    _dataSource = 'cache';
+                    setStatus('cache');
+                } else {
+                    data = [];
+                    _dataSource = 'cache';
+                    setStatus('loading');
+                }
+                renderFilters();
+                render();
+                updateStorage();
                 return fetchServer().then(function(r) {
+                    if (_unsaved || _saveInFlight) {
+                        setStatus('cache');
+                        return true;
+                    }
                     if (r.ok && !r.empty) {
                         data = r.data.slice();
                         _dataSource = 'server';
@@ -1288,33 +1303,17 @@
                         hideAuthBanner();
                         setStatus('synced');
                     } else if (r.ok && r.empty) {
-                        var cached = loadCache();
-                        if (cached && cached.length > 0) {
-                            data = cached;
-                            _dataSource = 'cache';
-                            setStatus('cache');
-                        } else {
+                        if (!(cached0 && cached0.length > 0)) {
                             data = [];
                             _dataSource = 'server';
                             setStatus('synced');
                         }
                     } else {
-                        var cached2 = loadCache();
-                        if (cached2 && cached2.length > 0) {
-                            data = cached2;
-                            _dataSource = 'cache';
-                            if (r.reason === 'login') markAuthFailed();
-                            else setStatus('cache');
-                        } else {
-                            data = [];
-                            _dataSource = 'cache';
-                            if (r.reason === 'login') {
-                                markAuthFailed();
-                                _emptyHint = '未登录 — 请先登录以查看云端数据';
-                            } else {
-                                setStatus('cache');
-                                _emptyHint = '无法连接服务端，且无本地缓存';
-                            }
+                        if (r.reason === 'login') markAuthFailed();
+                        else if (cached0 && cached0.length > 0) setStatus('cache');
+                        else {
+                            setStatus('cache');
+                            _emptyHint = '无法连接服务端，且无本地缓存';
                         }
                     }
                     renderFilters();
