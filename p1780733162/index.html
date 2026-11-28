@@ -315,6 +315,54 @@
         .sync-status.offline {
             color: var(--danger);
         }
+        .sync-status.login {
+            color: var(--danger);
+        }
+        .sync-status.saving,
+        .sync-status.loading {
+            color: var(--accent);
+            animation: pulse 1.2s ease-in-out infinite;
+        }
+        .sync-status.cache {
+            color: #e8a13a;
+        }
+        .sync-status.failed {
+            color: var(--danger);
+            cursor: pointer;
+            text-decoration: underline;
+        }
+        #lastSync {
+            font-size: 12px;
+            opacity: 0.75;
+        }
+        #btnRefresh {
+            padding: 2px 8px;
+        }
+        .save-banner {
+            display: none;
+            margin: 12px 0;
+            padding: 10px 12px;
+            border: 1px solid var(--danger);
+            border-radius: 8px;
+            color: var(--danger);
+            font-size: 14px;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .auth-banner {
+            display: none;
+            margin: 12px 0;
+            padding: 10px 12px;
+            border: 1px solid var(--danger);
+            border-radius: 8px;
+            color: var(--danger);
+            font-size: 14px;
+        }
+        .auth-banner a {
+            color: inherit;
+            font-weight: 600;
+        }
 
         @keyframes pulse {
             0%,
@@ -835,7 +883,7 @@
         <div class="header">
             <div>
                 <h1>Prompt <em>Vault</em></h1>
-                <div class="subtitle">Online · Auto Sync · CSV Import</div>
+                <div class="subtitle">云端直取 · 离线读缓存 · CSV 导入</div>
             </div>
             <div class="header-actions">
                 <button class="btn" id="btnExport">↓ Export CSV</button>
@@ -856,11 +904,15 @@
         <div class="stats-bar">
             <span id="statsText">0 prompts</span>
             <span id="storageInfo">
-                <span class="sync-status syncing" id="syncStatus">☁️ Syncing...</span>
+                <button class="btn btn-sm" id="btnRefresh" type="button" title="重新从云端取最新数据">↻ 刷新</button>
+                <span class="sync-status syncing" id="syncStatus">☁️ 正在取云端数据…</span>
+                <span id="lastSync"></span>
                 <span id="localSize">0 KB</span>
             </span>
         </div>
 
+        <div id="saveBanner" class="save-banner">⚠️ 有更改未同步到云端（服务端未保存成功）<button class="btn btn-sm" id="btnRetrySave" type="button">重试保存</button><button class="btn btn-sm btn-ghost" id="btnDiscardSave" type="button">放弃更改</button></div>
+        <div id="authBanner" class="auth-banner">未登录，无法读取云端数据，<a id="authLoginLink" href="/login">去登录</a></div>
         <div class="prompt-grid" id="promptGrid"></div>
     </div>
 
@@ -943,32 +995,108 @@
             var confirmCb = null;
             var isSaving = false;
 
-            // ---- 云端同步状态 ----
-            var _syncTimer = null;
-            var _syncInProgress = false;
-            var _pendingSync = false;
-            var _skipNextSync = false;
-            var SYNC_DEBOUNCE_MS = 400;
+            // ---- 直取云端 + 缓存兜底 ----
+            // 服务端是唯一真相.每次打开直接 GET 最新数据并显示,
+            // 顺手覆盖本地缓存.只有直取失败时才读缓存,并明确标出是缓存.
+            // 写操作直接 POST 服务端,成功后刷新缓存;失败时明确提示,
+            // 不悄悄写本地假装成功.没有同步层,没有合并,没有后台同步.
+            var CACHE_KEY = KEY;               // 本地缓存:上一次成功取到的服务端数据
+            var LAST_SYNC_KEY = 'prompt_vault_last_sync';
+            var _saveTimer = null;             // 写节流(连续保存合并为一次 POST)
+            var _saveInFlight = false;         // 正在 POST
+            var _saveQueued = false;           // POST 进行中时又有新保存
+            var _savePromise = null;
+            var _unsaved = false;              // 有未同步到服务端的更改
+            var _dataSource = 'server';        // 'server' | 'cache'
+            var _lastSyncAt = 0;               // 上次成功同步的时间戳
+            var _authFailed = false;
+            var _emptyHint = '';               // 数据为空时替代默认提示
 
-            function setSyncStatus(status) {
-                var el = document.getElementById('syncStatus');
-                if (!el) return;
-                el.className = 'sync-status ' + status;
-                switch (status) {
-                    case 'synced':
-                        el.textContent = '☁️ Synced';
-                        break;
-                    case 'syncing':
-                        el.textContent = '☁️ Syncing...';
-                        break;
-                    case 'offline':
-                        el.textContent = '⚠️ Offline';
-                        break;
-                    default:
-                        el.textContent = '☁️ ' + status;
-                }
+            function getUrlToken() {
+                try {
+                    var m = location.search.match(/(?:^|[?&])token=([^&]+)/);
+                    return m ? decodeURIComponent(m[1]) : '';
+                } catch (e) { return ''; }
+            }
+            var _urlToken = getUrlToken();
+            function cloudUrl() {
+                if (!_urlToken) return CLOUD_URL;
+                return CLOUD_URL + (CLOUD_URL.indexOf('?') >= 0 ? '&' : '?') + 'token=' + encodeURIComponent(_urlToken);
             }
 
+            function fmtTime(ts) {
+                if (!ts) return '—';
+                var d = new Date(ts);
+                var pad = function(n) { return n < 10 ? '0' + n : '' + n; };
+                return pad(d.getHours()) + ':' + pad(d.getMinutes());
+            }
+
+            function setStatus(state) {
+                var el = document.getElementById('syncStatus');
+                if (!el) return;
+                el.className = 'sync-status ' + state;
+                var last = _lastSyncAt ? fmtTime(_lastSyncAt) : '—';
+                switch (state) {
+                    case 'loading': el.textContent = '☁️ 正在取云端数据…'; break;
+                    case 'synced': el.textContent = '☁️ 已同步 ' + last; break;
+                    case 'saving': el.textContent = '☁️ 保存中…'; break;
+                    case 'cache': el.textContent = '⚠️ 离线缓存 · 上次同步 ' + last; break;
+                    case 'failed': el.textContent = '⚠️ 保存失败 · 点此重试'; break;
+                    case 'login': el.textContent = '🔒 未登录'; break;
+                    default: el.textContent = '☁️ ' + state;
+                }
+                var ls = document.getElementById('lastSync');
+                if (ls) ls.textContent = '上次同步 ' + last;
+                updateSaveBanner();
+            }
+
+            function markAuthFailed() {
+                _authFailed = true;
+                var banner = document.getElementById('authBanner');
+                if (banner) {
+                    banner.style.display = 'block';
+                    var link = document.getElementById('authLoginLink');
+                    if (link) link.href = '/login?next=' + encodeURIComponent(location.pathname + location.search);
+                }
+                setStatus('login');
+            }
+
+            function hideAuthBanner() {
+                _authFailed = false;
+                var banner = document.getElementById('authBanner');
+                if (banner) banner.style.display = 'none';
+            }
+
+            function updateSaveBanner() {
+                var b = document.getElementById('saveBanner');
+                if (!b) return;
+                b.style.display = _unsaved ? 'flex' : 'none';
+            }
+
+            function loadLastSyncAt() {
+                try { _lastSyncAt = parseInt(localStorage.getItem(LAST_SYNC_KEY) || '0', 10) || 0; } catch (e) { _lastSyncAt = 0; }
+            }
+
+            function loadCache() {
+                try {
+                    var r = localStorage.getItem(CACHE_KEY);
+                    if (!r) return null;
+                    var parsed = JSON.parse(r);
+                    if (!Array.isArray(parsed)) return null;
+                    return parsed.filter(function(item) {
+                        return item && typeof item === 'object' && typeof item.id === 'string' && typeof item.title === 'string';
+                    });
+                } catch (e) { return null; }
+            }
+
+            function saveCache(arr) {
+                try {
+                    localStorage.setItem(CACHE_KEY, JSON.stringify(arr));
+                    _lastSyncAt = Date.now();
+                    try { localStorage.setItem(LAST_SYNC_KEY, String(_lastSyncAt)); } catch (e) {}
+                    return true;
+                } catch (e) { return false; }
+            }
             // ---- 工具函数 ----
             function $(id) { return document.getElementById(id); }
 
@@ -1021,184 +1149,186 @@
                 confirmCb = null;
             }
 
-            // ---- 存储操作 ----
+            // ---- 存储操作:直写服务端,缓存只作兜底 ----
             function load() {
-                try {
-                    var r = localStorage.getItem(KEY);
-                    if (!r) { data = []; return; }
-                    var parsed = JSON.parse(r);
-                    if (Array.isArray(parsed)) {
-                        data = parsed;
-                    } else {
-                        data = [];
-                        if (typeof parsed === 'object' && parsed !== null) {
-                            var values = Object.values(parsed);
-                            if (values.length && Array.isArray(values[0])) { data = values[0]; }
-                        }
-                    }
-                } catch (e) {
-                    console.warn('Prompt Vault: 数据加载失败，已重置。', e);
-                    data = [];
-                    try { localStorage.removeItem(KEY); } catch (ex) {}
-                }
-                data = data.filter(function(item) {
-                    return item && typeof item === 'object' && typeof item.id === 'string' && typeof item
-                        .title === 'string';
-                });
-            }
-
-            function saveLocal() {
-                try {
-                    var json = JSON.stringify(data);
-                    localStorage.setItem(KEY, json);
-                    updateStorage();
-                    return true;
-                } catch (e) {
-                    console.error('Prompt Vault: 保存失败。', e);
-                    toast('Save failed! Storage may be full.', false);
-                    return false;
-                }
-            }
-
-            function save() {
-                var ok = saveLocal();
-                if (ok && !_skipNextSync) {
-                    scheduleCloudSync();
-                }
-                if (_skipNextSync) {
-                    _skipNextSync = false;
-                }
-                return ok;
+                // 读缓存进内存(仅用于兜底展示)
+                var cached = loadCache();
+                data = cached ? cached.slice() : [];
+                _dataSource = 'cache';
+                return data;
             }
 
             function updateStorage() {
                 try {
-                    var raw = localStorage.getItem(KEY) || '';
-                    var kb = (new Blob([raw]).size / 1024).toFixed(1);
+                    var kb = (new Blob([JSON.stringify(data)]).size / 1024).toFixed(1);
                     var sizeEl = document.getElementById('localSize');
-                    if (sizeEl) sizeEl.textContent = 'Local: ' + kb + ' KB';
+                    if (sizeEl) sizeEl.textContent = (_dataSource === 'cache' ? '缓存: ' : '云端: ') + kb + ' KB';
                 } catch (e) {
                     var sizeEl = document.getElementById('localSize');
-                    if (sizeEl) sizeEl.textContent = 'Local: ? KB';
+                    if (sizeEl) sizeEl.textContent = '';
                 }
             }
 
-            // ---- 云端同步 ----
-            function scheduleCloudSync() {
-                _pendingSync = true;
-                if (_syncTimer) clearTimeout(_syncTimer);
-                _syncTimer = setTimeout(function() {
-                    _syncTimer = null;
-                    executeCloudSync();
-                }, SYNC_DEBOUNCE_MS);
+            // ---- 直取 / 直写 ----
+            function fetchWithTimeout(url, options, ms) {
+                if (window.AbortController) {
+                    var ctrl = new AbortController();
+                    var t = setTimeout(function() { try { ctrl.abort(); } catch (e) {} }, ms || 10000);
+                    options = options || {};
+                    options.signal = ctrl.signal;
+                    return fetch(url, options).then(function(res) { clearTimeout(t); return res; },
+                        function(err) { clearTimeout(t); throw err; });
+                }
+                return fetch(url, options);
             }
 
-            function executeCloudSync() {
-                if (_syncInProgress) {
-                    scheduleCloudSync();
-                    return;
-                }
-                _syncInProgress = true;
-                _pendingSync = false;
-                setSyncStatus('syncing');
+            function isAuthRedirect(res) {
+                return res.redirected || (res.url && res.url.indexOf('/login') !== -1);
+            }
 
-                var payload = JSON.stringify({ payload: data });
-                fetch(CLOUD_URL, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: payload
-                    })
+            function fetchServer() {
+                // 直接取数:GET 最新服务端数据
+                return fetchWithTimeout(cloudUrl(), { method: 'GET' }, 10000)
                     .then(function(res) {
+                        if (isAuthRedirect(res)) { var e = new Error('AUTH'); e.code = 'AUTH'; throw e; }
+                        if (res.status === 404) { var e2 = new Error('EMPTY'); e2.code = 'EMPTY'; throw e2; }
+                        if (!res.ok) { var e3 = new Error('HTTP ' + res.status); e3.code = 'HTTP'; throw e3; }
+                        return res.json();
+                    })
+                    .then(function(payload) {
+                        if (!Array.isArray(payload)) { var e = new Error('BAD'); e.code = 'BAD'; throw e; }
+                        return { ok: true, data: payload };
+                    })
+                    .catch(function(err) {
+                        if (err && err.code === 'AUTH') return { ok: false, reason: 'login' };
+                        if (err && err.code === 'EMPTY') return { ok: true, data: [], empty: true };
+                        return { ok: false, reason: 'offline' };
+                    });
+            }
+
+            function pushServer(arr) {
+                return fetchWithTimeout(cloudUrl(), {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ payload: arr })
+                }, 15000)
+                    .then(function(res) {
+                        if (isAuthRedirect(res)) { var e = new Error('AUTH'); e.code = 'AUTH'; throw e; }
                         if (!res.ok) throw new Error('HTTP ' + res.status);
                         return res.json();
                     })
                     .then(function(res) {
-                        if (res && res.status === 'success') {
-                            setSyncStatus('synced');
-                        } else {
-                            throw new Error('Unexpected response');
-                        }
+                        if (res && res.status === 'success') return { ok: true };
+                        throw new Error('Unexpected response');
                     })
                     .catch(function(err) {
-                        console.warn('Prompt Vault: 云端同步失败。', err);
-                        setSyncStatus('offline');
-                        _pendingSync = true;
-                    })
-                    .finally(function() {
-                        _syncInProgress = false;
-                        if (_pendingSync && !_syncTimer) {
-                            _syncTimer = setTimeout(function() {
-                                _syncTimer = null;
-                                executeCloudSync();
-                            }, SYNC_DEBOUNCE_MS * 2);
-                        }
+                        if (err && err.code === 'AUTH') return { ok: false, reason: 'login' };
+                        return { ok: false, reason: 'offline' };
                     });
             }
 
-            function loadFromCloud() {
-                setSyncStatus('syncing');
-                return fetch(CLOUD_URL)
-                    .then(function(res) {
-                        if (!res.ok) throw new Error('No cloud data (HTTP ' + res.status + ')');
-                        return res.json();
-                    })
-                    .then(function(cloudData) {
-                        if (Array.isArray(cloudData) && cloudData.length > 0) {
-                            return cloudData;
-                        }
-                        throw new Error('Empty or invalid cloud data');
-                    })
-                    .catch(function(err) {
-                        console.warn('Prompt Vault: 云端加载失败，使用本地数据。', err.message);
-                        return null;
-                    });
-            }
-
-            function mergeData(localArr, cloudArr) {
-                if (!cloudArr || !Array.isArray(cloudArr) || cloudArr.length === 0) {
-                    return localArr.slice();
-                }
-                var map = {};
-                var i;
-
-                for (i = 0; i < localArr.length; i++) {
-                    var item = localArr[i];
-                    if (item && item.id) {
-                        map[item.id] = item;
+            function doPush() {
+                _saveInFlight = true;
+                setStatus('saving');
+                var snapshot = data.slice();
+                _savePromise = pushServer(snapshot).then(function(r) {
+                    _saveInFlight = false;
+                    if (r.ok) {
+                        _unsaved = false;
+                        saveCache(snapshot);
+                        hideAuthBanner();
+                        setStatus('synced');
+                        if (_saveQueued) { _saveQueued = false; return doPush(); }
+                        return true;
                     }
-                }
+                    _unsaved = true;
+                    _saveQueued = false;
+                    if (r.reason === 'login') markAuthFailed();
+                    else setStatus('failed');
+                    updateSaveBanner();
+                    return false;
+                });
+                return _savePromise;
+            }
 
-                for (i = 0; i < cloudArr.length; i++) {
-                    var cItem = cloudArr[i];
-                    if (!cItem || !cItem.id) continue;
-                    if (!map[cItem.id]) {
-                        map[cItem.id] = cItem;
+            function save() {
+                // 直写服务端:POST 当前内存数据.成功后刷新缓存;
+                // 失败时明确提示,不写缓存,不假装成功.
+                updateStorage();
+                if (_saveInFlight) { _saveQueued = true; return _savePromise || Promise.resolve(false); }
+                if (_saveTimer) clearTimeout(_saveTimer);
+                _savePromise = new Promise(function(resolve) {
+                    _saveTimer = setTimeout(function() {
+                        _saveTimer = null;
+                        resolve(doPush());
+                    }, 300);
+                });
+                return _savePromise;
+            }
+
+            function retrySave() {
+                if (_saveInFlight) return _savePromise || Promise.resolve(false);
+                if (_saveTimer) { clearTimeout(_saveTimer); _saveTimer = null; }
+                hideAuthBanner();
+                return doPush();
+            }
+
+            function refreshFromServer() {
+                // 缓存优先:先用本地缓存渲染(不空白等待),后台拉取服务端更新;
+                // 拉取期间不阻塞操作,用户已改动则不覆盖本地未保存内容.
+                hideAuthBanner();
+                var cached0 = loadCache();
+                if (cached0 && cached0.length > 0) {
+                    data = cached0.slice();
+                    _dataSource = 'cache';
+                    setStatus('cache');
+                } else {
+                    data = [];
+                    _dataSource = 'cache';
+                    setStatus('loading');
+                }
+                renderFilters();
+                render();
+                updateStorage();
+                return fetchServer().then(function(r) {
+                    if (_unsaved || _saveInFlight) {
+                        setStatus('cache');
+                        return true;
+                    }
+                    if (r.ok && !r.empty) {
+                        data = r.data.slice();
+                        _dataSource = 'server';
+                        _unsaved = false;
+                        saveCache(data);
+                        hideAuthBanner();
+                        setStatus('synced');
+                    } else if (r.ok && r.empty) {
+                        if (!(cached0 && cached0.length > 0)) {
+                            data = [];
+                            _dataSource = 'server';
+                            setStatus('synced');
+                        }
                     } else {
-                        var localUpdated = map[cItem.id].updatedAt || map[cItem.id].createdAt || 0;
-                        var cloudUpdated = cItem.updatedAt || cItem.createdAt || 0;
-                        if (cloudUpdated > localUpdated) {
-                            map[cItem.id] = cItem;
+                        if (r.reason === 'login') markAuthFailed();
+                        else if (cached0 && cached0.length > 0) setStatus('cache');
+                        else {
+                            setStatus('cache');
+                            _emptyHint = '无法连接服务端，且无本地缓存';
                         }
                     }
-                }
-
-                var merged = [];
-                var keys = Object.keys(map);
-                for (i = 0; i < keys.length; i++) {
-                    merged.push(map[keys[i]]);
-                }
-                return merged;
+                    renderFilters();
+                    render();
+                    updateStorage();
+                    return true;
+                });
             }
 
-            function syncNow() {
-                if (_syncTimer) {
-                    clearTimeout(_syncTimer);
-                    _syncTimer = null;
-                }
-                _pendingSync = false;
-                executeCloudSync();
+            function discardUnsaved() {
+                // 放弃未保存的更改:重新直取服务端(失败则读缓存)
+                _unsaved = false;
+                updateSaveBanner();
+                return refreshFromServer();
             }
-
             // ---- 分类 ----
             function getCats() {
                 var s = {};
@@ -1251,7 +1381,7 @@
                     $('promptGrid').innerHTML =
                         '<div class="empty-state">' +
                         '<div class="empty-icon">◇</div>' +
-                        '<p>' + (data.length === 0 ? 'No prompts yet — click "+ New" or import CSV' :
+                        '<p>' + (data.length === 0 ? (_emptyHint || 'No prompts yet — click "+ New" or import CSV') :
                             'No matching prompts') + '</p>' +
                         '</div>';
                     return;
@@ -1355,18 +1485,21 @@
                         data.push({ id: uid(), title: title, category: cat, content: content, notes: notes,
                             createdAt: now, updatedAt: now });
                     }
-                    toast('Prompt updated ✓');
                 } else {
                     data.push({ id: uid(), title: title, category: cat, content: content, notes: notes, createdAt: now,
                         updatedAt: now });
-                    toast('Prompt saved ✓');
                 }
 
                 if (!Array.isArray(data)) data = [];
-                if (save()) { renderFilters();
-                    render();
-                    closeEdit(); }
+                renderFilters();
+                render();
+                closeEdit();
                 isSaving = false;
+                var _wasEdit = !!id;
+                save().then(function(ok) {
+                    if (ok) toast(_wasEdit ? 'Prompt updated ✓' : 'Prompt saved ✓');
+                    else toast('保存失败，未同步到云端', false);
+                });
             }
 
             function openDetail(id) {
@@ -1430,15 +1563,12 @@
                 var name = target ? (target.title || 'Untitled') : 'this prompt';
                 showConfirm('Delete "' + name + '" permanently?', function() {
                     data = data.filter(function(p) { return p.id !== id; });
-                    if (save()) {
-                        renderFilters();
-                        render();
-                        toast('Deleted ✓');
-                    } else {
-                        load();
-                        renderFilters();
-                        render();
-                    }
+                    renderFilters();
+                    render();
+                    save().then(function(ok) {
+                        if (ok) toast('Deleted ✓');
+                        else toast('删除未同步到云端', false);
+                    });
                 });
             }
 
@@ -1547,9 +1677,12 @@
                             n++;
                         }
                         if (n === 0) { toast('No valid prompts found in CSV', false); return; }
-                        if (save()) { renderFilters();
-                            render();
-                            toast('Imported ' + n + ' prompts ✓'); }
+                        renderFilters();
+                        render();
+                        save().then(function(ok) {
+                            if (ok) toast('Imported ' + n + ' prompts ✓');
+                            else toast('导入已应用，但未同步到云端', false);
+                        });
                     } catch (err) { toast('Parse error: ' + err.message, false); }
                 };
                 reader.onerror = function() { toast('Failed to read file', false); };
@@ -1568,6 +1701,14 @@
                 $('csvFile').addEventListener('change', importCSV);
 
                 $('searchInput').addEventListener('input', render);
+
+                $('btnRefresh').addEventListener('click', function(e) { e.preventDefault();
+                    if (_unsaved) { showConfirm('有未保存的更改，刷新将丢弃它们，继续吗？', function() { _unsaved = false; updateSaveBanner(); refreshFromServer(); }); return; }
+                    refreshFromServer(); });
+                $('syncStatus').addEventListener('click', function() { if (_unsaved) retrySave(); });
+                $('btnRetrySave').addEventListener('click', function(e) { e.preventDefault(); retrySave(); });
+                $('btnDiscardSave').addEventListener('click', function(e) { e.preventDefault();
+                    showConfirm('放弃未保存的更改？将重新从服务端取数。', function() { discardUnsaved(); }); });
 
                 $('filterGroup').addEventListener('click', function(e) {
                     var tag = e.target.closest('.filter-tag');
@@ -1684,149 +1825,22 @@
                     }
                 });
 
-                window.addEventListener('beforeunload', function() {
-                    if (_pendingSync && !_syncInProgress) {
-                        if (_syncTimer) {
-                            clearTimeout(_syncTimer);
-                            _syncTimer = null;
-                        }
-                        _pendingSync = false;
-                        var payload = JSON.stringify({ payload: data });
-                        if (navigator.sendBeacon) {
-                            var blob = new Blob([payload], { type: 'application/json' });
-                            navigator.sendBeacon(CLOUD_URL, blob);
-                        } else {
-                            try {
-                                fetch(CLOUD_URL, {
-                                    method: 'POST',
-                                    headers: { 'Content-Type': 'application/json' },
-                                    body: payload,
-                                    keepalive: true
-                                });
-                            } catch (ex) {}
-                        }
+            window.addEventListener('beforeunload', function() {
+                if (_saveTimer) { clearTimeout(_saveTimer); _saveTimer = null; }
+                if (_unsaved || _saveInFlight || _saveQueued) {
+                    var payload = JSON.stringify({ payload: data });
+                    if (navigator.sendBeacon) {
+                        var blob = new Blob([payload], { type: 'application/json' });
+                        try { navigator.sendBeacon(cloudUrl(), blob); } catch (ex) {}
                     }
-                });
+                }
+            });
             }
 
-            // ---- 初始化 ----
+            // ---- 初始化:打开即直取服务端 ----
             function init() {
-                load();
-                if (!Array.isArray(data)) data = [];
-                var initialDataLen = data.length;
-                renderFilters();
-                render();
-                updateStorage();
-
-                loadFromCloud().then(function(cloudData) {
-                    if (cloudData && Array.isArray(cloudData) && cloudData.length > 0) {
-                        var merged = mergeData(data, cloudData);
-                        var changed = false;
-                        if (merged.length !== data.length) {
-                            changed = true;
-                        } else {
-                            for (var i = 0; i < merged.length; i++) {
-                                var mItem = merged[i];
-                                var found = false;
-                                for (var j = 0; j < data.length; j++) {
-                                    if (data[j].id === mItem.id) {
-                                        if ((mItem.updatedAt || mItem.createdAt || 0) !== (data[j].updatedAt || data[j]
-                                                .createdAt || 0)) {
-                                            changed = true;
-                                        }
-                                        found = true;
-                                        break;
-                                    }
-                                }
-                                if (!found) { changed = true; break; }
-                                if (changed) break;
-                            }
-                        }
-                        if (changed) {
-                            data = merged;
-                            _skipNextSync = true;
-                            saveLocal();
-                            renderFilters();
-                            render();
-                            setSyncStatus('synced');
-                        } else {
-                            setSyncStatus('synced');
-                        }
-                    } else {
-                        if (initialDataLen === 0) {
-                            var now = Date.now();
-                            data = [{
-                                id: uid(),
-                                title: '翻译助手',
-                                category: 'Translation',
-                                content: 'You are a professional translator. Translate the following text from {source_lang} to {target_lang}. Maintain the original tone and style. Only output the translation.',
-                                notes: '适用于 GPT-4, Claude',
-                                createdAt: now - 259200000,
-                                updatedAt: now - 259200000
-                            }, {
-                                id: uid(),
-                                title: 'Code Review',
-                                category: 'Code',
-                                content: 'Review the following code for potential bugs, performance issues, and best practices. Provide specific suggestions with code examples.\n\n1. Logic errors\n2. Security vulnerabilities\n3. Performance optimization\n4. Code readability\n\nCode:\n```\n{code}\n```',
-                                notes: '支持主流编程语言',
-                                createdAt: now - 172800000,
-                                updatedAt: now - 172800000
-                            }, {
-                                id: uid(),
-                                title: '周报生成器',
-                                category: 'Writing',
-                                content: '根据以下工作记录，生成一份简洁专业的周报。\n\n## 本周完成\n- 关键成果\n\n## 进行中\n- 当前进度\n\n## 下周计划\n- 优先事项\n\n工作记录：\n{notes}',
-                                notes: '每周五下午使用',
-                                createdAt: now - 86400000,
-                                updatedAt: now - 86400000
-                            }];
-                            saveLocal();
-                            renderFilters();
-                            render();
-                            scheduleCloudSync();
-                            setSyncStatus('synced');
-                        } else {
-                            setSyncStatus('synced');
-                            if (initialDataLen > 0) {
-                                scheduleCloudSync();
-                            }
-                        }
-                    }
-                }).catch(function() {
-                    if (initialDataLen === 0) {
-                        var now2 = Date.now();
-                        data = [{
-                            id: uid(),
-                            title: '翻译助手',
-                            category: 'Translation',
-                            content: 'You are a professional translator. Translate the following text from {source_lang} to {target_lang}. Maintain the original tone and style. Only output the translation.',
-                            notes: '适用于 GPT-4, Claude',
-                            createdAt: now2 - 259200000,
-                            updatedAt: now2 - 259200000
-                        }, {
-                            id: uid(),
-                            title: 'Code Review',
-                            category: 'Code',
-                            content: 'Review the following code for potential bugs, performance issues, and best practices. Provide specific suggestions with code examples.\n\n1. Logic errors\n2. Security vulnerabilities\n3. Performance optimization\n4. Code readability\n\nCode:\n```\n{code}\n```',
-                            notes: '支持主流编程语言',
-                            createdAt: now2 - 172800000,
-                            updatedAt: now2 - 172800000
-                        }, {
-                            id: uid(),
-                            title: '周报生成器',
-                            category: 'Writing',
-                            content: '根据以下工作记录，生成一份简洁专业的周报。\n\n## 本周完成\n- 关键成果\n\n## 进行中\n- 当前进度\n\n## 下周计划\n- 优先事项\n\n工作记录：\n{notes}',
-                            notes: '每周五下午使用',
-                            createdAt: now2 - 86400000,
-                            updatedAt: now2 - 86400000
-                        }];
-                        saveLocal();
-                        renderFilters();
-                        render();
-                    }
-                    setSyncStatus('offline');
-                });
-
+                loadLastSyncAt();
+                refreshFromServer();
                 bindEvents();
             }
 
@@ -1834,24 +1848,24 @@
 
             window._promptVault = {
                 data: data,
-                reload: function() { load();
-                    renderFilters();
-                    render(); },
+                reload: function() { refreshFromServer(); },
                 reset: function() {
                     showConfirm('Reset ALL data? This cannot be undone!', function() {
                         data = [];
-                        save();
                         renderFilters();
                         render();
-                        toast('All data cleared');
+                        save().then(function(ok) {
+                            toast(ok ? 'All data cleared' : '清空未同步到云端', ok);
+                        });
                     });
                 },
                 getData: function() { return data; },
+                getDataSource: function() { return _dataSource; },
                 getStorageSize: function() {
-                    try { var raw = localStorage.getItem(KEY) || ''; return (new Blob([raw]).size / 1024).toFixed(
-                            1) + ' KB'; } catch (e) { return '? KB'; }
+                    try { return (new Blob([JSON.stringify(data)]).size / 1024).toFixed(1) + ' KB'; } catch (e) { return '? KB'; }
                 },
-                syncNow: syncNow,
+                syncNow: function() { return refreshFromServer(); },
+                retrySave: retrySave,
                 getSyncStatus: function() {
                     var el = document.getElementById('syncStatus');
                     return el ? el.textContent : 'unknown';

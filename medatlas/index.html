@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MedAtlas 医学图谱</title>
+<script>window.API_BASE = '/web/lightapi/medatlas';</script>
+<style>
+:root { --primary:#007aff; --bg:#f2f2f7; --card:#fff; --text:#1c1c1e; --muted:#8e8e93; --border:#e5e5ea; --badge:#eef2ff; }
+@media (prefers-color-scheme: dark) {
+  :root { --bg:#1c1c1e; --card:#2c2c2e; --text:#f2f2f7; --muted:#98989d; --border:#38383a; --badge:#2c3a5e; }
+}
+* { box-sizing:border-box; }
+body { font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,"PingFang SC","Microsoft YaHei",sans-serif; margin:0; padding:14px; background:var(--bg); color:var(--text); }
+.container { max-width:760px; margin:0 auto; }
+h1 { font-size:22px; margin:4px 0 6px; }
+.stats { color:var(--muted); font-size:13px; margin-bottom:12px; }
+#authBanner { display:none; margin-bottom:12px; padding:10px 14px; border-radius:8px; border:1px solid #f5c2c0; background:#feebeb; color:#c81e1e; font-size:14px; }
+#authBanner a { color:#c81e1e; font-weight:700; }
+.filters { display:flex; gap:8px; margin-bottom:12px; flex-wrap:wrap; }
+.filters input { flex:1; min-width:160px; padding:10px 12px; border:1px solid var(--border); border-radius:8px; font-size:15px; background:var(--card); color:var(--text); outline:none; }
+.filters select { padding:10px 8px; border:1px solid var(--border); border-radius:8px; font-size:14px; background:var(--card); color:var(--text); }
+.filters button { padding:10px 16px; border:none; border-radius:8px; background:var(--primary); color:#fff; font-size:15px; font-weight:600; cursor:pointer; }
+.filters button.ghost { background:var(--card); color:var(--text); border:1px solid var(--border); }
+.toolbar { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; color:var(--muted); font-size:13px; }
+.card { background:var(--card); border-radius:12px; padding:14px 16px; margin-bottom:10px; box-shadow:0 2px 4px rgba(0,0,0,.04); cursor:pointer; }
+.card .t { font-size:16px; font-weight:600; margin:2px 0; }
+.card .sum { color:var(--muted); font-size:13px; line-height:1.6; }
+.card .meta { font-size:12px; color:var(--muted); margin-top:6px; }
+.badge { display:inline-block; font-size:12px; padding:2px 8px; border-radius:20px; background:var(--badge); color:var(--primary); margin-right:6px; }
+.tag { display:inline-block; font-size:12px; padding:2px 8px; border-radius:20px; background:var(--bg); color:var(--muted); margin:2px 4px 2px 0; border:1px solid var(--border); }
+.pager { display:flex; justify-content:center; align-items:center; gap:12px; margin:16px 0; }
+.pager button { padding:8px 16px; border:1px solid var(--border); border-radius:8px; background:var(--card); color:var(--text); font-size:14px; cursor:pointer; }
+.pager button:disabled { opacity:.4; cursor:default; }
+#detail { display:none; }
+#detail h2 { font-size:20px; margin:6px 0; }
+#detail .meta { color:var(--muted); font-size:13px; margin-bottom:10px; }
+.body { white-space:pre-wrap; word-break:break-word; font-size:15px; line-height:1.8; background:var(--card); border-radius:12px; padding:16px; margin:12px 0; }
+.sec { background:var(--card); border-radius:12px; padding:14px 16px; margin:12px 0; }
+.sec h3 { margin:0 0 8px; font-size:15px; }
+.sec .kv { font-size:14px; line-height:1.7; }
+.sec .kv b { color:var(--primary); }
+.rel { padding:8px 0; border-bottom:1px solid var(--border); font-size:14px; }
+.rel:last-child { border-bottom:none; }
+.rel a { color:var(--primary); text-decoration:none; cursor:pointer; font-weight:600; }
+.rel .note { color:var(--muted); font-size:13px; }
+.src { font-size:14px; padding:6px 0; border-bottom:1px solid var(--border); }
+.src:last-child { border-bottom:none; }
+.src a { color:var(--primary); text-decoration:none; }
+.back { margin-bottom:10px; padding:8px 14px; border:1px solid var(--border); border-radius:8px; background:var(--card); color:var(--text); font-size:14px; cursor:pointer; }
+.empty { text-align:center; color:var(--muted); padding:30px 0; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>MedAtlas 医学图谱</h1>
+  <div id="authBanner">未登录，无法读取云端数据，<a href="/login">去登录</a></div>
+  <div class="stats" id="stats">加载中…</div>
+  <div id="listView">
+    <div class="filters">
+      <input id="q" placeholder="搜索标题 / 摘要 / 正文" autocomplete="off">
+      <select id="cat">
+        <option value="">全部分类</option>
+        <option>人体结构与生理</option>
+        <option>医学基础</option>
+        <option>医学检查与指标</option>
+        <option>疾病与病理</option>
+        <option>症状与鉴别思路</option>
+        <option>药理与药物</option>
+      </select>
+      <select id="typ">
+        <option value="">全部类型</option>
+        <option value="concept">概念</option>
+        <option value="disease">疾病</option>
+        <option value="drug">药物</option>
+        <option value="exam">检查</option>
+        <option value="symptom">症状</option>
+        <option value="system">系统</option>
+      </select>
+      <button id="searchBtn">搜索</button>
+      <button class="ghost" id="clearBtn">清除</button>
+    </div>
+    <div class="toolbar"><span id="count"></span></div>
+    <div id="list"></div>
+    <div class="pager">
+      <button id="prevBtn">上一页</button>
+      <span id="pageInfo"></span>
+      <button id="nextBtn">下一页</button>
+    </div>
+  </div>
+  <div id="detail"></div>
+</div>
+<script>
+(function () {
+  var API = window.API_BASE;
+  var LIST_FIELDS = "id,orig_id,type,category,title,summary,tags,status,difficulty";
+  var PER_PAGE = 30;
+  var state = { q: "", cat: "", typ: "", page: 1, totalPages: 1, totalItems: 0 };
+  function esc(s) {
+    return String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  }
+  function isLoginRedirect(res) { return res && res.url && res.url.indexOf("/login") !== -1; }
+  function showAuth() { document.getElementById("authBanner").style.display = "block"; }
+  function escFilter(s) { return String(s).replace(/\\/g, "\\\\").replace(/"/g, '\\"'); }
+  function buildFilter() {
+    var parts = [];
+    if (state.cat) parts.push('category="' + escFilter(state.cat) + '"');
+    if (state.typ) parts.push('type="' + escFilter(state.typ) + '"');
+    if (state.q) {
+      var q = escFilter(state.q);
+      parts.push('(title ~ "' + q + '" || summary ~ "' + q + '" || body ~ "' + q + '")');
+    }
+    return parts.join(" && ");
+  }
+  function loadStats() {
+    var jobs = [
+      fetch(API + "/records/med_nodes?perPage=1").then(function (r) { return r.json(); }).then(function (d) { return d.totalItems || 0; }),
+      fetch(API + "/records/med_relations?perPage=1").then(function (r) { return r.json(); }).then(function (d) { return d.totalItems || 0; }),
+      fetch(API + "/records/med_sources?perPage=1").then(function (r) { return r.json(); }).then(function (d) { return d.totalItems || 0; })
+    ];
+    Promise.all(jobs).then(function (vals) {
+      document.getElementById("stats").textContent = vals[0] + " 个节点 · " + vals[1] + " 条关系 · " + vals[2] + " 个来源";
+    }).catch(function () {
+      document.getElementById("stats").textContent = "";
+    });
+  }
+  function loadList() {
+    var params = "perPage=" + PER_PAGE + "&page=" + state.page + "&sort=title&fields=" + encodeURIComponent(LIST_FIELDS);
+    var f = buildFilter();
+    if (f) params += "&filter=" + encodeURIComponent(f);
+    fetch(API + "/records/med_nodes?" + params).then(function (res) {
+      if (isLoginRedirect(res)) { showAuth(); throw new Error("未登录"); }
+      return res.json();
+    }).then(function (d) {
+      state.totalItems = d.totalItems || 0;
+      state.totalPages = d.totalPages || 1;
+      document.getElementById("count").textContent = "共 " + state.totalItems + " 个节点";
+      document.getElementById("pageInfo").textContent = "第 " + state.page + " / " + state.totalPages + " 页";
+      document.getElementById("prevBtn").disabled = state.page <= 1;
+      document.getElementById("nextBtn").disabled = state.page >= state.totalPages;
+      var html = "";
+      (d.items || []).forEach(function (n) {
+        var tags = (n.tags || []).map(function (t) { return '<span class="tag">' + esc(t) + "</span>"; }).join("");
+        var sum = (n.summary || "").trim();
+        if (sum.length > 120) sum = sum.slice(0, 120) + "…";
+        html += '<div class="card" data-id="' + esc(n.id) + '">'
+          + '<div><span class="badge">' + esc(n.category || "") + "</span>"
+          + '<span class="badge">' + esc(n.type || "") + "</span></div>"
+          + '<div class="t">' + esc(n.title) + "</div>"
+          + (sum ? '<div class="sum">' + esc(sum) + "</div>" : "")
+          + (tags ? '<div class="meta">' + tags + "</div>" : "")
+          + "</div>";
+      });
+      if (!html) html = '<div class="empty">没有命中。</div>';
+      document.getElementById("list").innerHTML = html;
+      document.querySelectorAll("#list .card").forEach(function (el) {
+        el.addEventListener("click", function () { showDetail(el.getAttribute("data-id")); });
+      });
+    }).catch(function (e) {
+      if (String(e && e.message) !== "未登录") document.getElementById("list").innerHTML = '<div class="empty">加载失败，请刷新重试。</div>';
+    });
+  }
+  function showDetail(id) {
+    fetch(API + "/records/med_nodes/" + encodeURIComponent(id) + "?expand=sources").then(function (res) {
+      if (isLoginRedirect(res)) { showAuth(); throw new Error("未登录"); }
+      return res.json();
+    }).then(function (n) {
+      var tags = (n.tags || []).map(function (t) { return '<span class="tag">' + esc(t) + "</span>"; }).join("");
+      var aliases = (n.aliases || []).join("、");
+      var fieldsHtml = "";
+      var fields = n.fields || {};
+      Object.keys(fields).forEach(function (k) {
+        fieldsHtml += "<div><b>" + esc(k) + "：</b>" + esc(String(fields[k])) + "</div>";
+      });
+      var srcs = (n.expand && n.expand.sources) || [];
+      var srcHtml = srcs.map(function (s) {
+        var t = esc(s.title || "");
+        if (s.url) t = '<a href="' + esc(s.url) + '" target="_blank" rel="noopener">' + t + "</a>";
+        return '<div class="src">' + t + (s.publisher ? " · " + esc(s.publisher) : "") + "</div>";
+      }).join("");
+      var html = '<button class="back" id="backBtn">← 返回列表</button>'
+        + "<h2>" + esc(n.title) + "</h2>"
+        + '<div class="meta"><span class="badge">' + esc(n.category || "") + "</span>"
+        + '<span class="badge">' + esc(n.type || "") + "</span>"
+        + '<span class="badge">' + esc(n.status || "") + "</span></div>"
+        + (aliases ? '<div class="meta">别名：' + esc(aliases) + "</div>" : "")
+        + (tags ? '<div class="meta">' + tags + "</div>" : "")
+        + (n.summary ? '<div class="sec"><h3>摘要</h3><div class="kv">' + esc(n.summary) + "</div></div>" : "")
+        + (n.body ? '<div class="body">' + esc(n.body) + "</div>" : "")
+        + (fieldsHtml ? '<div class="sec"><h3>要点</h3><div class="kv">' + fieldsHtml + "</div></div>" : "")
+        + '<div class="sec"><h3>关联</h3><div id="rels">加载中…</div></div>'
+        + (srcHtml ? '<div class="sec"><h3>来源</h3>' + srcHtml + "</div>" : "");
+      document.getElementById("listView").style.display = "none";
+      var det = document.getElementById("detail");
+      det.style.display = "block";
+      det.innerHTML = html;
+      document.getElementById("backBtn").addEventListener("click", function () {
+        det.style.display = "none";
+        document.getElementById("listView").style.display = "block";
+      });
+      window.scrollTo(0, 0);
+      var rf = '(source="' + n.id + '" || target="' + n.id + '")';
+      fetch(API + "/records/med_relations?perPage=100&filter=" + encodeURIComponent(rf) + "&expand=source,target").then(function (res) {
+        return res.json();
+      }).then(function (d) {
+        var items = d.items || [];
+        if (!items.length) {
+          document.getElementById("rels").textContent = "暂无关联。";
+          return;
+        }
+        var rh = "";
+        items.forEach(function (rel) {
+          var other = null, dir = "";
+          if (rel.expand && rel.expand.source && rel.expand.source.id === n.id) {
+            other = rel.expand.target; dir = "→";
+          } else {
+            other = rel.expand && rel.expand.source; dir = "←";
+          }
+          if (!other) return;
+          rh += '<div class="rel"><a data-nid="' + esc(other.id) + '">' + esc(other.title) + "</a>"
+            + ' <span class="note">' + dir + " " + esc(rel.rel_type || "") + (rel.note ? " · " + esc(rel.note) : "") + "</span></div>";
+        });
+        document.getElementById("rels").innerHTML = rh || "暂无关联。";
+        document.querySelectorAll("#rels a[data-nid]").forEach(function (a) {
+          a.addEventListener("click", function () { showDetail(a.getAttribute("data-nid")); });
+        });
+      }).catch(function () {
+        var el = document.getElementById("rels");
+        if (el) el.textContent = "关联加载失败。";
+      });
+    }).catch(function () {});
+  }
+  document.getElementById("searchBtn").addEventListener("click", function () {
+    state.q = document.getElementById("q").value.trim();
+    state.cat = document.getElementById("cat").value;
+    state.typ = document.getElementById("typ").value;
+    state.page = 1; loadList();
+  });
+  document.getElementById("q").addEventListener("keydown", function (e) {
+    if (e.key === "Enter") {
+      state.q = e.target.value.trim();
+      state.cat = document.getElementById("cat").value;
+      state.typ = document.getElementById("typ").value;
+      state.page = 1; loadList();
+    }
+  });
+  document.getElementById("clearBtn").addEventListener("click", function () {
+    document.getElementById("q").value = "";
+    document.getElementById("cat").value = "";
+    document.getElementById("typ").value = "";
+    state.q = ""; state.cat = ""; state.typ = ""; state.page = 1; loadList();
+  });
+  document.getElementById("prevBtn").addEventListener("click", function () {
+    if (state.page > 1) { state.page--; loadList(); }
+  });
+  document.getElementById("nextBtn").addEventListener("click", function () {
+    if (state.page < state.totalPages) { state.page++; loadList(); }
+  });
+  loadStats();
+  loadList();
+})();
+</script>
+</body>
+</html>

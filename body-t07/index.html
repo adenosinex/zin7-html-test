@@ -1,0 +1,70 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>骨密度与关节软骨</title><style>
+:root{--bg:#f7f2e9;--ink:#2b2620;--mut:#7a7264;--acc:#b4552d;--card:#fffdf8;--line:#e3dac8}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:"Noto Serif SC",serif;line-height:1.75}
+.wrap{max-width:860px;margin:0 auto;padding:28px 18px 60px}
+.kicker{color:var(--acc);letter-spacing:.2em;font-size:12px}
+h1{font-size:30px;margin:6px 0 4px}.sub{color:var(--mut);margin:0 0 6px}
+.modelnote{color:var(--mut);font-size:13px;border-bottom:1px solid var(--line);padding-bottom:14px}
+h2{font-size:20px;margin:34px 0 10px;border-left:4px solid var(--acc);padding-left:10px}
+.stage{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin:10px 0}
+.age{color:var(--acc);font-weight:700;font-size:14px}.stage h3{margin:2px 0 6px;font-size:17px}
+.normal{color:#3d6b35;font-size:14px}.warn{color:#9a3b1e;font-size:14px}
+table{width:100%;border-collapse:collapse;background:var(--card);font-size:14px}
+td,th{border:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}
+th{background:#f1e9d8}
+.insight{background:#f3ead9;border-radius:10px;padding:16px}
+.node{cursor:pointer}.node circle{fill:var(--acc)}.node text{fill:#fff;font-size:13px;font-weight:700}
+#mechdesc{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px 16px;min-height:56px}
+details{margin-top:18px}summary{cursor:pointer;color:var(--acc)}
+svg{max-width:100%;height:auto}
+</style></head>
+<body><div class="wrap">
+<div class="kicker">人体全生命周期图谱 · T07</div>
+<h1>骨密度与关节软骨</h1>
+<p class="sub">骨头与关节：承重结构的磨损账</p>
+<p class="modelnote">内容稿件：用户提供的第 2 批 MD 稿件；数值经来源核查锁定；结构化：Vertex Gemini 3.8 Flash；本页由确定性模板渲染。</p>
+<div id="chartwrap"></div>
+<h2>看得见的变化</h2><div id="stages"></div>
+<h2>正常还是该就医</h2><table><tr><th>信号</th><th>怎么做</th></tr><tbody id="redflags"></tbody></table>
+<h2>能改变的杠杆</h2><table><tr><th>杠杆</th><th>作用</th><th>说明</th></tr><tbody id="levers"></tbody></table>
+<h2>一句话记住</h2><div class="insight" id="insight"></div>
+<h2>背后的机制（点编号看解释）</h2><div id="mechsvg"></div><div id="mechdesc"></div><p id="mechnote"></p>
+<details><summary>证据清单（数值来源）</summary><table><tr><th>编号</th><th>结论</th><th>核查</th><th>来源</th></tr><tbody id="claims"></tbody></table></details>
+</div>
+<script id="dimension-data" type="application/json">{"stages": [{"age": "10–20 岁", "title": "青春期骨量银行", "what": "男孩骨累积峰值速率约在 14.1 岁（14.1 ± 0.95 岁），骨外膜扩张显著，骨干直径与截面积比同龄女孩大 4%–6%；女孩骨累积峰值速率约在 12.5 岁（12.5 ± 0.90 岁，早于男孩约 1.5 年），雌激素促进骨内膜矿化但横截面积较小。青春期累积成人骨量的 25%–40%，围绕峰值速率的 4 年窗口累积约 39%，峰值后 4 年完成约 95% 构建，平时无特殊体感。", "normal": "围绕峰值速率的 4 年窗口累积成人骨量的约 39%，青春期共累积 25%–40%", "warn": "过度节食、极端低体脂或长期闭经（相对能量不足 RED-S），剥夺成骨窗口造成难以追平的骨量赤字"}, {"age": "25–40 岁", "title": "峰值锁定平台", "what": "男女均在 25–30 岁锁定峰值骨量（PBM）。男性锁定更高的峰值骨量，30–50 岁骨密度相对稳定；女性绝经前在雌激素保护下骨转换处于低稳态，妊娠与哺乳期有短暂可逆性骨钙动员。通常处于无自觉症状的平稳期。", "normal": "DXA 骨密度 T 值 ≥ -1.0（25–30 岁锁定一生最高峰值骨量）", "warn": "缺乏负重运动或营养不良导致峰值骨量储备不足（环境、运动与营养决定峰值骨量的 20%–40%）"}, {"age": "48–60 岁", "title": "绝经断崖分叉期", "what": "男性睾酮缓慢回落，骨密度以平缓斜率缓慢下降，无断崖式拐点；女性在末次月经前 1–2 年即启动加速流失，腰椎年均流失 1.8%–2.3%/年（末次月经后 2 年局部峰值达 3.3%/年），髋部 1.0%–1.4%/年，5–10 年累计流失达 10%–20%。骨流失本身无痛感（静默杀手），但低体重女性流失速度较高体重快 35%–55%。（中国女性自然绝经平均约 49.5 岁（欧美约 51 岁）。）", "normal": "DXA 骨密度 T 值 ≥ -1.0 为正常；-2.5 < T < -1.0 为骨量减少", "warn": "发生脆性骨折（如椎体压缩、桡骨远端骨折）；负重关节机械性疼痛、晨僵（<30 分钟）、上下楼打软腿"}, {"age": "65–80+ 岁", "title": "老年协同退化期", "what": "男性全股骨平均 T 值多在 75 岁前后才跨入骨量减少区间（约 -1.39），但男性髋部骨折后 1 年死亡率高于女性；女性绝经 10 年后流失率回落至约 1.1%/年，但前期亏空巨大导致椎体与髋部骨折高发。男女均易与肌肉流失叠加形成肌少-骨质疏松症（中国 ≥80 岁患病率男 10.4% / 女 15.1%）。", "normal": "DXA 骨密度 T 值 > -2.5（若 T ≤ -2.5 即达到骨质疏松诊断标准）", "warn": "轻微外力即跌倒骨折、明显身高缩短或驼背；行动迟缓与打软腿"}], "redflags": [{"signal": "DXA 骨密度检查 T 值 ≤ -2.5 且合并 ≥ 1 处脆性骨折（如髋部或椎体压缩性骨折）", "action": "诊断为重度骨质疏松，存在极高再骨折风险，属于临床优先管理人群，需立即就医启动规范抗骨质疏松药物治疗与防跌倒专项管理"}, {"signal": "DXA 骨密度检查 T 值 ≤ -2.5（未合并骨折）", "action": "诊断为骨质疏松，提示骨微结构破坏与骨脆性显著升高，需就医启动规范抗骨质疏松药物治疗、补钙/维生素 D 及防跌倒干预"}, {"signal": "DXA 骨密度检查 T 值处于 -2.5 < T < -1.0（骨量减少区间）", "action": "进入关键预警区（多数脆性骨折发生在此区间），需结合 FRAX 工具评估 10 年骨折风险，维持负重抗阻运动并确保钙与维生素 D 摄入"}, {"signal": "负重关节（膝、髋、手）出现机械性疼痛、晨僵（通常 <30 分钟）、上下楼打软腿与活动受限", "action": "提示骨关节炎软骨磨损，需避免反复高冲击磕碰，开展低冲击关节周围肌力强化（如股四头肌训练、游泳、骑行），超重者需减重"}, {"signal": "身高较年轻时下降 ≥ 4 cm", "action": "提示椎体压缩可能，查骨密度（DXA）"}, {"signal": "靠墙站立时后脑勺不能贴墙", "action": "提示胸椎后凸加重，查骨密度并练背伸肌群"}, {"signal": "OSTA 指数（体重 − 年龄）× 0.2 为负值", "action": "仅作粗筛，负值提示骨质疏松风险升高，去做 DXA 确认"}], "levers": [{"name": "青春期冲击跳跃运动与骨量银行存款", "effect": "在 25–30 岁峰值锁定前多积累 10% 峰值骨量，可显著推迟晚年跌破骨质疏松骨折阈值的时间；青春期 4 年窗口即可累积成人约 39% 骨量", "note": "选择篮球、跳绳、体操、跑步等跳跃负重运动，配合充足钙、维生素 D 与蛋白质摄入；严禁过度节食、极端低体脂以防闭经（RED-S）"}, {"name": "高机械应变负重抗阻运动", "effect": "提供成骨所需的力学形变信号，刺激骨小梁重建，延缓骨质疏松进程", "note": "适合骨量正常及骨质疏松预防人群，需配合维持充足钙与维生素 D 摄入"}, {"name": "低冲击关节周围肌力强化", "effect": "强化关节周围肌肉力量（如股四头肌），减轻关节负重软骨机械磨损与打软腿症状", "note": "适合骨关节炎人群，推荐游泳、骑行与肌力训练，避免反复高冲击磕碰，超重肥胖者需减轻关节负荷"}], "insight": "骨骼是早年一次性存款、晚年终身提款的银行；女性绝经期面临断崖流失，年轻时多存10%，年老时晚亏十余年。", "mechanism": {"nodes": [{"t": "骨量积累", "d": "全身骨矿物质含量的累积速率在青春期达到顶峰（女孩约 12.5 ± 0.90 岁、男孩约 14.1 ± 0.95 岁），围绕峰值速率的 4 年窗口内可累积成人全身骨量的约 39%，峰值后 4 年完成约 95% 的成人骨量构建。"}, {"t": "骨峰值", "d": "青春期累积成人骨量的 25%–40%，且骨骼的机械适应能力（Mechanostat 阈值）在青春期前与青春期早期最为敏感。"}, {"t": "骨丢失", "d": "男性全股骨平均 T 值多在 75 岁前后才跨入骨量减少区间（约 -1.39）。"}, {"t": "骨折风险", "d": "骨关节炎的核心病变靶点包括关节透明软骨退变磨损、软骨下骨硬化、滑膜低度炎症与骨赘形成。"}], "note": "骨骼全生命周期呈现早年蓄积、晚年提款的不对称结构，女性绝经期内分泌突变直接打破破骨与成骨平衡，驱动骨量断崖流失与微结构崩解。"}, "claims": [{"id": "T07-C01", "claim": "全身骨矿物质含量的累积速率在青春期达到顶峰（女孩约 12.5 ± 0.90 岁、男孩约 14.1 ± 0.95 岁），围绕峰值速率的 4 年窗口内可累积成人全身骨量的约 39%，峰值后 4 年完成约 95% 的成人骨量构建。", "verdict": "VERIFIED", "source": "PMC4791473"}, {"id": "T07-C02", "claim": "青春期男孩骨外膜扩张显著，骨干直径与截面积比同龄女性大 4%–6%；峰值骨量高低由 60%–80% 遗传加 20%–40% 环境/运动/营养共同决定。", "verdict": "VERIFIED", "source": "PMC4791473"}, {"id": "T07-C03", "claim": "青春期累积成人骨量的 25%–40%，且骨骼的机械适应能力（Mechanostat 阈值）在青春期前与青春期早期最为敏感。", "verdict": "VERIFIED", "source": "PMC7250943"}, {"id": "T07-C04", "claim": "女性在围绝经晚期至绝经后 5–10 年间因雌激素断崖式撤退，短短 5–10 年即可流失高达 10%–20% 的全身或中轴骨量。", "verdict": "VERIFIED", "source": "PMC5643776"}, {"id": "T07-C05", "claim": "女性骨加速流失在末次月经前约 2 年（FSH 攀升至 34–56 IU/L）即启动，晚围绝经至绝经早期腰椎年均流失 1.8%–2.3%/年（末次月经后 2 年局部峰值达 3.3%/年），髋部 1.0%–1.4%/年，低体重女性流失速度较高体重组快 35%–55%，绝经 10 年后回落至约 1.1%/年。", "verdict": "VERIFIED", "source": "PMC3920744"}, {"id": "T07-C06", "claim": "男性全股骨平均 T 值多在 75 岁前后才跨入骨量减少区间（约 -1.39）。", "verdict": "VERIFIED", "source": "PMC9619280"}, {"id": "T07-C07", "claim": "中国 ≥80 岁人群中，肌少-骨质疏松症（Osteosarcopenia）患病率男性为 10.4%、女性为 15.1%。", "verdict": "VERIFIED", "source": "PMC10329310"}, {"id": "T07-C08", "claim": "流行病学显示，多数实际发生的脆性骨折人群落在 -2.5 < T < -1.0 的骨量减少区间。", "verdict": "VERIFIED", "source": "PMC2827823"}, {"id": "T07-C09", "claim": "WHO 骨质疏松 DXA 诊断标准定义骨量正常为 T ≥ -1.0，骨量减少为 -2.5 < T < -1.0，骨质疏松为 T ≤ -2.5，重度骨质疏松为 T ≤ -2.5 且合并 ≥ 1 处脆性骨折。", "verdict": "VERIFIED", "source": "NBK499878"}, {"id": "T07-C10", "claim": "骨关节炎的核心病变靶点包括关节透明软骨退变磨损、软骨下骨硬化、滑膜低度炎症与骨赘形成。", "verdict": "VERIFIED", "source": "PMC2920876"}], "dim": "T07", "title": "骨密度与关节软骨", "subtitle": "骨头与关节：承重结构的磨损账", "model_note": "内容稿件：用户提供的第 2 批 MD 稿件；数值经来源核查锁定；结构化：Vertex Gemini 3.8 Flash；本页由确定性模板渲染。"}</script>
+<script>
+const D=JSON.parse(document.getElementById('dimension-data').textContent);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+document.getElementById('stages').innerHTML=D.stages.map(s=>`<div class="stage"><div class="age">${esc(s.age)}</div>${s.title&&s.title!==s.age?`<h3>${esc(s.title)}</h3>`:''}<p>${esc(s.what)}</p>${s.normal?`<p class="normal">正常范围：${esc(s.normal)}</p>`:''}${s.warn?`<p class="warn">留意：${esc(s.warn)}</p>`:''}</div>`).join('');
+document.getElementById('redflags').innerHTML=D.redflags.map(r=>`<tr><td>${esc(r.signal)}</td><td>${esc(r.action)}</td></tr>`).join('');
+document.getElementById('levers').innerHTML=D.levers.map(l=>`<tr><td>${esc(l.name)}</td><td>${esc(l.effect)}</td><td>${esc(l.note||'')}</td></tr>`).join('');
+document.getElementById('insight').textContent=D.insight;
+document.getElementById('claims').innerHTML=D.claims.map(c=>`<tr><td>${esc(c.id)}</td><td>${esc(c.claim)}</td><td>${esc(c.verdict)}</td><td>${esc(c.source)}</td></tr>`).join('');
+// mechanism nodes
+const nodes=D.mechanism.nodes||[];const W=820,H=120;
+let svg=`<svg viewBox="0 0 ${W} ${H}" role="img">`;
+nodes.forEach((n,i)=>{const x=nodes.length>1?100+i*(W-200)/(nodes.length-1):W/2;
+ if(i>0){const px=100+(i-1)*(W-200)/(nodes.length-1);svg+=`<line x1="${px+18}" y1="60" x2="${x-18}" y2="60" stroke="#b4552d" stroke-width="2"/>`;}
+ svg+=`<g class="node" data-i="${i}"><circle cx="${x}" cy="60" r="18"/><text x="${x}" y="65" text-anchor="middle">${i+1}</text></g><text x="${x}" y="100" text-anchor="middle" font-size="12" fill="#2b2620">${esc(n.t)}</text>`;});
+svg+='</svg>';
+document.getElementById('mechsvg').innerHTML=svg;
+const md=document.getElementById('mechdesc');
+function show(i){md.innerHTML=`<b>${i+1}. ${esc(nodes[i].t)}</b>：${esc(nodes[i].d)}`;}
+document.querySelectorAll('.node').forEach(g=>g.addEventListener('click',()=>show(+g.dataset.i)));
+if(nodes.length)show(0);
+document.getElementById('mechnote').textContent=D.mechanism.note||'';
+// charts
+function linePath(pts,x0,x1,y0,y1,vmin,vmax){return pts.map((p,i)=>{const x=x0+(x1-x0)*p[0]/100;const y=y1-(y1-y0)*(p[1]-vmin)/(vmax-vmin);return (i?'L':'M')+x.toFixed(1)+' '+y.toFixed(1);}).join(' ');}
+function renderChart(ch){const W=820,H=300,x0=50,x1=790,y0=30,y1=260;
+ let all=[];ch.series.forEach(s=>{(s.points||[]).forEach(p=>all.push(p[1]));(s.upper||[]).forEach(p=>all.push(p[1]));(s.lower||[]).forEach(p=>all.push(p[1]));});
+ const vmin=Math.min(...all),vmax=Math.max(...all);const colors=['#b4552d','#3d6b8a','#7a9a3d','#8a5aa0'];
+ let s=`<svg viewBox="0 0 ${W} ${H}">`;
+ s+=`<line x1="${x0}" y1="${y1}" x2="${x1}" y2="${y1}" stroke="#7a7264"/><text x="${x0}" y="${y1+20}" font-size="12" fill="#7a7264">0岁</text><text x="${x1-30}" y="${y1+20}" font-size="12" fill="#7a7264">100岁</text>`;
+ if(ch.type==='range_band'){ch.series.forEach((se,i)=>{const up=linePath(se.upper,x0,x1,y0,y1,vmin,vmax);const lo=linePath([...se.lower].reverse(),x0,x1,y0,y1,vmin,vmax);s+=`<path d="${up} ${lo.replace(/^M/,'L')} Z" fill="${colors[i%4]}" opacity="0.25"/><path d="${up}" fill="none" stroke="${colors[i%4]}" stroke-width="2"/>`;});}
+ else if(ch.type==='stacked_area'){let base=ch.series[0].points.map(p=>[p[0],vmin]);ch.series.forEach((se,i)=>{const top=se.points.map((p,j)=>[p[0],base[j][1]+p[1]]);const tp=linePath(top,x0,x1,y0,y1,vmin,vmax);const bp=linePath([...base].reverse(),x0,x1,y0,y1,vmin,vmax);s+=`<path d="${tp} ${bp.replace(/^M/,'L')} Z" fill="${colors[i%4]}" opacity="0.5"/>`;base=top;});}
+ else{ch.series.forEach((se,i)=>{s+=`<path d="${linePath(se.points,x0,x1,y0,y1,vmin,vmax)}" fill="none" stroke="${colors[i%4]}" stroke-width="2.5"/>`;});}
+ ch.series.forEach((se,i)=>{s+=`<text x="${x0+i*160}" y="18" font-size="13" fill="${colors[i%4]}">${esc(se.name)}</text>`;});
+ return s+'</svg>';}
+if(D.chart){document.getElementById('chartwrap').innerHTML='<h2>一生曲线</h2>'+renderChart(D.chart);}
+</script>
+</body></html>
